@@ -13,9 +13,13 @@ var browserify = require('browserify');
 gulp.task('sass', function() {
     gulp.src('./src/client/sass/client.scss')
         .pipe(plumber())
+        .pipe(sass({
+            includePaths: [
+                './node_modules/sass-material-colors/sass/'
+            ]
+        }))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(sourcemaps.write('./'))
-        .pipe(sass())
         .pipe(gulp.dest('./public/css'));
 });
 

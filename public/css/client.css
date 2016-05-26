@@ -1,0 +1,48 @@
+/**
+ * Retrieves a color value from the $material-colors Sass map
+ * Inspired by https://github.com/nilskaspersson/Google-Material-UI-Color-Palette/
+ *
+ * @function
+ * @param {string} color-name             - quoted, lower-case, dasherized color
+ *                                          name (e.g. 'pink', 'amber')
+ * @param {string} [color-variant='500']  - quoted, lowercase color variant (e.g.
+ *                                          '200', 'a100')
+ */
+.btn-transparent {
+  border: 0px;
+  background-color: transparent; }
+
+.issue-editor {
+  border: 1px solid #bdbdbd; }
+  .issue-editor.editing .header button span.fa-close {
+    display: inline; }
+  .issue-editor.editing .header button span.fa-edit {
+    display: none; }
+  .issue-editor.editing .meta, .issue-editor.editing .body, .issue-editor.editing .operations {
+    display: block; }
+  .issue-editor .header {
+    background-color: #424242;
+    color: #eeeeee;
+    padding: 5px 5px 5px 10px; }
+    .issue-editor .header button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0px; }
+      .issue-editor .header button h4, .issue-editor .header button span {
+        line-height: 30px; }
+      .issue-editor .header button h4 {
+        margin: 0px; }
+      .issue-editor .header button span {
+        float: right; }
+        .issue-editor .header button span.fa-close {
+          display: none; }
+        .issue-editor .header button span.fa-edit {
+          display: inline; }
+  .issue-editor .meta, .issue-editor .body, .issue-editor .operations {
+    display: none;
+    padding: 5px 10px; }
+  .issue-editor .meta {
+    background-color: #e0e0e0; }
+
+/*# sourceMappingURL=client.css.map */

@@ -1,0 +1,65 @@
+.issue-editor {
+    border: 1px solid material-color('grey', '400');
+
+    &.editing {
+        .header {
+            button {
+                span {
+                    &.fa-close {
+                        display: inline;
+                    }
+                    
+                    &.fa-edit {
+                        display: none;
+                    }
+                }
+            }
+        }
+
+        .meta, .body, .operations {
+            display: block;
+        }
+    }
+
+    .header {
+        background-color: material-color('grey', '800');
+        color: material-color('grey', '200');
+        padding: 5px 5px 5px 10px;
+
+        button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0px;
+
+            h4, span {
+                line-height: 30px;
+            }
+
+            h4 {
+                margin: 0px;
+            }
+
+            span {
+                float: right;
+                
+                &.fa-close {
+                    display: none;
+                }
+                
+                &.fa-edit {
+                    display: inline;
+                }
+            }
+        }
+    }
+
+    .meta, .body, .operations {
+        display: none;
+        padding: 5px 10px;
+    }
+
+    .meta {
+        background-color: material-color('grey', '300');
+    }
+}

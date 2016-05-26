@@ -13,11 +13,9 @@ var browserify = require('browserify');
 gulp.task('sass', function() {
     gulp.src('./src/client/sass/client.scss')
         .pipe(plumber())
-        .pipe(sass({
-            includePaths: [
-                './node_modules/sass-material-colors/sass/'
-            ]
-        }))
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(sourcemaps.write('./'))
+        .pipe(sass())
         .pipe(gulp.dest('./public/css'));
 });
 
@@ -34,11 +32,11 @@ gulp.task('js', function() {
         .pipe(plumber())
         .pipe(source('client.js'))
         .pipe(buffer())
+        .pipe(babel({
+            presets: [ 'es2015' ]
+        }))
         .pipe(sourcemaps.init({loadMaps: true}))
-            .pipe(babel({
-                presets: [ 'es2015' ]
-            }))
-        .pipe(sourcemaps.write('./'))
+        .pipe(sourcemaps.write('./public/js/maps/'))
         .pipe(gulp.dest('./public/js/'));
 });
 

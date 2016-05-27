@@ -9,13 +9,30 @@ let IssueEditor = require('./views/IssueEditor');
 
 // Temp
 window.settings = {
-    priorities: {
-        trivial: 5,
-        minor: 4,
-        major: 3,
-        critical: 2,
-        blocker: 1
-    }
+    priorities: [
+        'blocker',
+        'critical',
+        'major',
+        'minor',
+        'trivial'
+    ],
+    types: [
+        'task',
+        'bug',
+        'enhancement',
+        'question'
+    ],
+    versions: [
+        '0.1.1',
+        '0.1.2',
+        '0.1.3'
+    ],
+    contributors: [
+        {
+            name: 'dude',
+            icon: 'https://www.iconexperience.com/_img/o_collection_png/green_dark_grey/512x512/plain/businessperson.png'
+        }            
+    ]
 };
 
 Router.route('/scrum/', () => {
@@ -24,7 +41,16 @@ Router.route('/scrum/', () => {
             model: {
                 title: 'New issue',
                 description: 'This is a serious issue',
-                priority: 3            
+                priority: 3,
+                type: 1,
+                assignee: 0,
+                version: 0,
+                comments: [
+                    {
+                        contributor: 0,
+                        text: 'And this is a serious comment'
+                    }
+                ]
             }
         }).$element
     );

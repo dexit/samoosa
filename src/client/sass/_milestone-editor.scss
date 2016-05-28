@@ -1,0 +1,68 @@
+.milestone-editor {
+    &.collapsed {
+        >.header {
+            .fa-chevron-down {
+                display: none;
+            }
+            
+            .fa-chevron-right {
+                display: inline-block;
+            }
+        }
+
+        .columns {
+            display: none;
+        }
+    }
+    
+    >.header {
+        border-bottom: 1px solid material-color('grey', '400');
+
+        .fa-chevron-down {
+            display: inline-block;
+        }
+        
+        .fa-chevron-right {
+            display: none;
+        }
+        
+        button {
+            padding: 0px;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+    }
+
+    .columns {
+        display: flex;
+
+        .column {
+            flex-grow: 1;
+            flex-basis: 0;
+            border-right: 1px solid material-color('grey', '400');
+            border-bottom: 1px solid material-color('grey', '400');
+            padding: 15px;
+
+            &:last-child {
+                border-right: 0px;
+            }
+
+            >.header {
+                margin-bottom: 15px;
+
+                h4 {
+                    margin: 0px;
+                }
+            }
+        }
+    }
+}
+
+.scrum-container {
+    &.list {
+        .columns {
+            display: block;
+        }
+    }
+}

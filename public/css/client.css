@@ -23,7 +23,7 @@
   .issue-editor .header {
     background-color: #424242;
     color: #eeeeee;
-    padding: 5px 10px; }
+    padding: 10px 15px; }
     .issue-editor .header button {
       display: block;
       width: 100%;
@@ -41,12 +41,60 @@
           display: inline; }
   .issue-editor .meta, .issue-editor .body, .issue-editor .operations, .issue-editor .comments {
     display: none;
-    padding: 5px 10px; }
+    padding: 10px 15px; }
   .issue-editor .meta, .issue-editor .comments {
     background-color: #e0e0e0; }
   .issue-editor .comments .comment {
-    padding: 5px 10px;
-    border-radius: 5px;
-    background-color: #f5f5f5; }
+    display: flex; }
+    .issue-editor .comments .comment .collaborator {
+      width: 80px;
+      padding-right: 15px;
+      flex-shrink: 0; }
+      .issue-editor .comments .comment .collaborator img {
+        max-width: 100%; }
+    .issue-editor .comments .comment .text {
+      flex-grow: 1;
+      padding: 5px 10px;
+      border-radius: 5px;
+      background-color: #f5f5f5; }
+
+.milestone-editor.collapsed > .header .fa-chevron-down {
+  display: none; }
+
+.milestone-editor.collapsed > .header .fa-chevron-right {
+  display: inline-block; }
+
+.milestone-editor.collapsed .columns {
+  display: none; }
+
+.milestone-editor > .header {
+  border-bottom: 1px solid #bdbdbd; }
+  .milestone-editor > .header .fa-chevron-down {
+    display: inline-block; }
+  .milestone-editor > .header .fa-chevron-right {
+    display: none; }
+  .milestone-editor > .header button {
+    padding: 0px;
+    display: block;
+    width: 100%;
+    text-align: left; }
+
+.milestone-editor .columns {
+  display: flex; }
+  .milestone-editor .columns .column {
+    flex-grow: 1;
+    flex-basis: 0;
+    border-right: 1px solid #bdbdbd;
+    border-bottom: 1px solid #bdbdbd;
+    padding: 15px; }
+    .milestone-editor .columns .column:last-child {
+      border-right: 0px; }
+    .milestone-editor .columns .column > .header {
+      margin-bottom: 15px; }
+      .milestone-editor .columns .column > .header h4 {
+        margin: 0px; }
+
+.scrum-container.list .columns {
+  display: block; }
 
 /*# sourceMappingURL=client.css.map */

@@ -48,6 +48,7 @@ gulp.task('js', function() {
  * Watch native code
  */
 gulp.task('watch', function() {
+    gulp.watch('./plugins/**/*.js', [ 'js' ]);
     gulp.watch('./src/client/js/**/*.js', [ 'js' ]);
     gulp.watch('./src/client/sass/**/*.scss', [ 'sass' ]);
 });

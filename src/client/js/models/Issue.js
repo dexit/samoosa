@@ -12,6 +12,8 @@ class Issue {
     create() {
         this.title = 'New issue';
         this.description = '';
+        this.reporter;
+        this.progress = 0;
 
         // Labels for types are defined by plugin
         this.type = 0;
@@ -23,6 +25,7 @@ class Issue {
         this.version;
         this.milestone;
         this.comments = [];
+        this.assignee;
     }
 
     adopt(properties) {

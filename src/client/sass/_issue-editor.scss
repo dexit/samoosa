@@ -1,71 +1,117 @@
 .issue-editor {
     border: 1px solid material-color('grey', '400');
 
-    &.editing {
+    &.loading {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+    &.expanded {
         .header {
-            button {
+            >button {
                 span {
-                    &.fa-close {
+                    &.fa-minus-circle {
                         display: inline;
                     }
                     
-                    &.fa-edit {
+                    &.fa-plus-circle {
                         display: none;
                     }
                 }
             }
         }
 
-        .meta, .body, .operations, .comments {
+        .meta, .body, .operations, .comments, .add-comment {
             display: block;
         }
     }
 
-    .header {
+    .btn-edit {
+        cursor: text;
+
+        &:hover {
+            outline: 1px solid material-color('grey', '200');
+        }
+    }
+
+    >.header {
         background-color: material-color('grey', '800');
         color: material-color('grey', '200');
-        padding: 10px 15px;
+        padding: 15px;
+
+        img {
+            float: left;
+            margin-right: 15px;
+            width: 30px;
+            height: 30px;
+        }
+
+        .btn-toggle {
+            float: right;
+            width: 30px;
+            height: 30px;
+            display: block;
+        }
+
+        h4 {
+            margin: 0px;
+        }
 
         button {
-            display: block;
-            width: 100%;
-            text-align: left;
-            padding: 0px;
+            float: right;
+            text-align: right;
+        }
 
-            h4, span {
-                line-height: 30px;
+        span, input {
+            line-height: 30px;
+            
+            &.fa-minus-circle {
+                display: none;
             }
-
-            h4 {
-                margin: 0px;
-            }
-
-            span {
-                float: right;
-                
-                &.fa-close {
-                    display: none;
-                }
-                
-                &.fa-edit {
-                    display: inline;
-                }
+            
+            &.fa-plus-circle {
+                display: inline;
             }
         }
     }
 
-    .meta, .body, .operations, .comments {
+    .meta, .body, .operations, .comments, .add-comment {
         display: none;
-        padding: 10px 15px;
+        padding: 15px;
     }
 
-    .meta, .comments {
+    .meta, .comments, .add-comment {
         background-color: material-color('grey', '300');
     }
 
+    .meta {
+        .meta-field {
+            clear: both;
+
+            select {
+                float: right;
+                width: 200px;
+            }
+        }
+    }
+
+    .body {
+        textarea, .btn-edit {
+            resize: none;
+            display: block;
+            width: 100%;
+            min-height: 100px;
+        }
+    }
+    
     .comments {
         .comment {
             display: flex;
+            margin-top: 15px;
+
+            &:first-child {
+                margin-top: 0px;
+            }   
 
             .collaborator {
                 width: 80px;
@@ -83,6 +129,24 @@
                 border-radius: 5px;
                 background-color: material-color('grey', '100');
             }
+        }
+    }
+
+    .add-comment {
+        text-align: right;
+        
+        textarea {    
+            text-align: left;
+            padding: 5px 10px;
+            resize: none;
+            display: block;
+            width: 100%;
+            border-radius: 5px;
+            background-color: material-color('grey', '100');
+        }
+        
+        button {
+            margin-top: 15px;
         }
     }
 }

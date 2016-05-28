@@ -1,15 +1,24 @@
 'use strict';
 
 class Issue {
+    static create() {
+        let issue = new Issue();
+
+        issue.index = window.resources.issues.length;
+        window.resources.issues[issue.index] = issue;
+
+        return issue;
+    }
+
     constructor(properties) {
         if(properties) {
             this.adopt(properties);
         } else {
-            this.create();
+            this.useStandard();
         }
     }
 
-    create() {
+    useStandard() {
         this.title = 'New issue';
         this.description = '';
         this.reporter;

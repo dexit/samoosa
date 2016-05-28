@@ -10,42 +10,70 @@
  */
 .btn-transparent {
   border: 0px;
-  background-color: transparent; }
+  background-color: transparent;
+  padding: 0px;
+  text-align: left; }
 
 .issue-editor {
   border: 1px solid #bdbdbd; }
-  .issue-editor.editing .header button span.fa-close {
+  .issue-editor.loading {
+    pointer-events: none;
+    opacity: 0.5; }
+  .issue-editor.expanded .header > button span.fa-minus-circle {
     display: inline; }
-  .issue-editor.editing .header button span.fa-edit {
+  .issue-editor.expanded .header > button span.fa-plus-circle {
     display: none; }
-  .issue-editor.editing .meta, .issue-editor.editing .body, .issue-editor.editing .operations, .issue-editor.editing .comments {
+  .issue-editor.expanded .meta, .issue-editor.expanded .body, .issue-editor.expanded .operations, .issue-editor.expanded .comments, .issue-editor.expanded .add-comment {
     display: block; }
-  .issue-editor .header {
+  .issue-editor .btn-edit {
+    cursor: text; }
+    .issue-editor .btn-edit:hover {
+      outline: 1px solid #eeeeee; }
+  .issue-editor > .header {
     background-color: #424242;
     color: #eeeeee;
-    padding: 10px 15px; }
-    .issue-editor .header button {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 0px; }
-      .issue-editor .header button h4, .issue-editor .header button span {
-        line-height: 30px; }
-      .issue-editor .header button h4 {
-        margin: 0px; }
-      .issue-editor .header button span {
-        float: right; }
-        .issue-editor .header button span.fa-close {
-          display: none; }
-        .issue-editor .header button span.fa-edit {
-          display: inline; }
-  .issue-editor .meta, .issue-editor .body, .issue-editor .operations, .issue-editor .comments {
+    padding: 15px; }
+    .issue-editor > .header img {
+      float: left;
+      margin-right: 15px;
+      width: 30px;
+      height: 30px; }
+    .issue-editor > .header .btn-toggle {
+      float: right;
+      width: 30px;
+      height: 30px;
+      display: block; }
+    .issue-editor > .header h4 {
+      margin: 0px; }
+    .issue-editor > .header button {
+      float: right;
+      text-align: right; }
+    .issue-editor > .header span, .issue-editor > .header input {
+      line-height: 30px; }
+      .issue-editor > .header span.fa-minus-circle, .issue-editor > .header input.fa-minus-circle {
+        display: none; }
+      .issue-editor > .header span.fa-plus-circle, .issue-editor > .header input.fa-plus-circle {
+        display: inline; }
+  .issue-editor .meta, .issue-editor .body, .issue-editor .operations, .issue-editor .comments, .issue-editor .add-comment {
     display: none;
-    padding: 10px 15px; }
-  .issue-editor .meta, .issue-editor .comments {
+    padding: 15px; }
+  .issue-editor .meta, .issue-editor .comments, .issue-editor .add-comment {
     background-color: #e0e0e0; }
+  .issue-editor .meta .meta-field {
+    clear: both; }
+    .issue-editor .meta .meta-field select {
+      float: right;
+      width: 200px; }
+  .issue-editor .body textarea, .issue-editor .body .btn-edit {
+    resize: none;
+    display: block;
+    width: 100%;
+    min-height: 100px; }
   .issue-editor .comments .comment {
-    display: flex; }
+    display: flex;
+    margin-top: 15px; }
+    .issue-editor .comments .comment:first-child {
+      margin-top: 0px; }
     .issue-editor .comments .comment .collaborator {
       width: 80px;
       padding-right: 15px;
@@ -57,11 +85,23 @@
       padding: 5px 10px;
       border-radius: 5px;
       background-color: #f5f5f5; }
+  .issue-editor .add-comment {
+    text-align: right; }
+    .issue-editor .add-comment textarea {
+      text-align: left;
+      padding: 5px 10px;
+      resize: none;
+      display: block;
+      width: 100%;
+      border-radius: 5px;
+      background-color: #f5f5f5; }
+    .issue-editor .add-comment button {
+      margin-top: 15px; }
 
-.milestone-editor.collapsed > .header .fa-chevron-down {
+.milestone-editor.collapsed > .header .fa.fa-chevron-down {
   display: none; }
 
-.milestone-editor.collapsed > .header .fa-chevron-right {
+.milestone-editor.collapsed > .header .fa.fa-chevron-right {
   display: inline-block; }
 
 .milestone-editor.collapsed .columns {
@@ -69,10 +109,13 @@
 
 .milestone-editor > .header {
   border-bottom: 1px solid #bdbdbd; }
-  .milestone-editor > .header .fa-chevron-down {
-    display: inline-block; }
-  .milestone-editor > .header .fa-chevron-right {
-    display: none; }
+  .milestone-editor > .header .fa {
+    width: 30px;
+    text-align: center; }
+    .milestone-editor > .header .fa.fa-chevron-down {
+      display: inline-block; }
+    .milestone-editor > .header .fa.fa-chevron-right {
+      display: none; }
   .milestone-editor > .header button {
     padding: 0px;
     display: block;
@@ -96,5 +139,13 @@
 
 .scrum-container.list .milestone-editor:not(.collapsed) .columns {
   display: block; }
+  .scrum-container.list .milestone-editor:not(.collapsed) .columns .column {
+    border: 0px; }
+    .scrum-container.list .milestone-editor:not(.collapsed) .columns .column > .header {
+      border-bottom: 1px solid #bdbdbd; }
+    .scrum-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header {
+      padding: 5px 15px 5px 5px; }
+      .scrum-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header h4 {
+        font-size: 14px; }
 
 /*# sourceMappingURL=client.css.map */

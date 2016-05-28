@@ -47,6 +47,12 @@ class ApiHelper {
         });
     }
     
+    addIssueComment() {
+        return new Promise((callback) => {
+            callback([]);
+        });
+    }
+    
     getMilestones() {
         return new Promise((callback) => {
             window.resources.milestones = [];

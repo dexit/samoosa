@@ -2,10 +2,45 @@
 
 let ApiHelper = require('../../../src/client/js/helpers/ApiHelper');
 
-function call(url) {
+function get(url, param) {
+    return new Promise((callback) => {
+        $.ajax({
+            url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + 'access_token=' + localStorage.getItem('githubApiToken'),
+            type: 'GET',
+            success: (result) => {
+                callback(result);
+            }
+        });
+    });
+}
+
+function patch(url, data) {
+    if(typeof data === 'object') {
+        data = JSON.stringify(data);
+    }
+
     return new Promise((callback) => {
         $.ajax({
             url: 'https://api.github.com' + url + '?access_token=' + localStorage.getItem('githubApiToken'),
+            type: 'PATCH',
+            data: data,
+            success: (result) => {
+                callback(result);
+            }
+        });
+    });
+}
+
+function post(url, data) {
+    if(typeof data === 'object') {
+        data = JSON.stringify(data);
+    }
+
+    return new Promise((callback) => {
+        $.ajax({
+            url: 'https://api.github.com' + url + '?access_token=' + localStorage.getItem('githubApiToken'),
+            type: 'POST',
+            data: data,
             success: (result) => {
                 callback(result);
             }
@@ -18,7 +53,7 @@ let labelCache;
 class GitHubApi extends ApiHelper {
     getCollaborators() {
         return new Promise((callback) => {
-            call('/repos/Putaitu/mondai/collaborators')
+            get('/repos/Putaitu/mondai/collaborators')
             .then((collaborators) => {
                 this.processCollaborators(collaborators);
 
@@ -29,7 +64,7 @@ class GitHubApi extends ApiHelper {
 
     getIssues() {
         return new Promise((callback) => {
-            call('/repos/Putaitu/mondai/issues')//?state=all')
+            get('/repos/Putaitu/mondai/issues', 'state=all')
             .then((issues) => {
                 this.processIssues(issues);
 
@@ -41,7 +76,7 @@ class GitHubApi extends ApiHelper {
     getLabels() {
         return new Promise((callback) => {
             if(!labelCache) {
-                call('/repos/Putaitu/mondai/labels')
+                get('/repos/Putaitu/mondai/labels')
                 .then((labels) => {
                     labelCache = labels;
 
@@ -101,7 +136,7 @@ class GitHubApi extends ApiHelper {
 
     getMilestones() {
         return new Promise((callback) => {
-            call('/repos/Putaitu/mondai/milestones')
+            get('/repos/Putaitu/mondai/milestones')
             .then((milestones) => {
                 this.processMilestones(milestones);
                 
@@ -242,6 +277,10 @@ class GitHubApi extends ApiHelper {
                 }
             }
 
+            if(gitHubIssue.state == 'closed') {
+                issue.column = resources.issueColumns.length - 1;
+            }
+
             if(gitHubIssue.milestone) {
                 issue.milestone = ResourceHelper.getMilestone(gitHubIssue.milestone.title);
             }
@@ -254,15 +293,78 @@ class GitHubApi extends ApiHelper {
 
     updateIssue(issue) {
         return new Promise((callback) => {
-            // TODO: Match GitHub format and POST
+            // Directly mappable properties
+            let gitHubIssue = {
+                title: issue.title,
+                body: issue.description,
+                labels: []
+            };
 
-            callback();
+            // Assignee
+            let assignee = resources.collaborators[issue.assignee];
+
+            if(assignee) {
+                gitHubIssue.assignee = assignee.name;
+            }
+
+            // State
+            let issueColumn = resources.issueColumns[issue.column];
+
+            gitHubIssue.state = issueColumn == 'done' ? 'closed' : 'open';
+
+            // GitHub counts numbers from 1, Mondai counts from 0
+            if(issue.milestone >= 0) {
+                gitHubIssue.milestone = parseInt(issue.milestone) + 1;
+            }
+
+            // Type
+            let issueType = resources.issueTypes[issue.type];
+
+            if(issueType) {
+                gitHubIssue.labels.push('type:' + issueType);
+            }
+
+            // Version
+            let version = resources.versions[issue.version];
+
+            if(version) {
+                gitHubIssue.labels.push('version:' + version);
+            }
+            
+            // Priority
+            let issuePriority = resources.issuePriorities[issue.priority];
+
+            if(issuePriority) {
+                gitHubIssue.labels.push('priority:' + issuePriority);
+            }
+
+            // Column
+            if(issueColumn && issueColumn != 'to do' && issueColumn != 'done') {
+                gitHubIssue.labels.push('column:' + issueColumn);
+            }
+
+            // PATCH data to api
+            patch('/repos/Putaitu/mondai/issues/' + (issue.index + 1), gitHubIssue)
+            .then(() => {
+                callback();
+            });
+        });
+    }
+
+    addIssueComment(issue, text) {
+        return new Promise((callback) => {
+            post('/repos/Putaitu/mondai/issues/' + (issue.index + 1) + '/comments', {
+                body: text
+            })
+            .then(() => {
+                callback(); 
+            });
         });
     }
 
     getIssueComments(issue) {
         return new Promise((callback) => {
-            call('/repos/Putaitu/mondai/issues/' + (issue.index + 1) + '/comments')
+            get('/repos/Putaitu/mondai/issues/' + (issue.index + 1) + '/comments')
             .then((gitHubComments) => {
                 let comments = [];
 

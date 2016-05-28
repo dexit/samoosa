@@ -13,7 +13,7 @@ class Issue {
         this.title = 'New issue';
         this.description = '';
         this.reporter;
-        this.progress = 0;
+        this.column = 0;
 
         // Labels for types are defined by plugin
         this.type = 0;

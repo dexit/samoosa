@@ -16,29 +16,29 @@ function call(url) {
 let labelCache;
 
 class GitHubApi extends ApiHelper {
-    static getCollaborators() {
+    getCollaborators() {
         return new Promise((callback) => {
             call('/repos/Putaitu/mondai/collaborators')
             .then((collaborators) => {
-                GitHubApi.processCollaborators(collaborators);
+                this.processCollaborators(collaborators);
 
                 callback();
             });
         });
     }
 
-    static getIssues() {
+    getIssues() {
         return new Promise((callback) => {
             call('/repos/Putaitu/mondai/issues')//?state=all')
             .then((issues) => {
-                GitHubApi.processIssues(issues);
+                this.processIssues(issues);
 
                 callback();
             });
         });
     }
     
-    static getLabels() {
+    getLabels() {
         return new Promise((callback) => {
             if(!labelCache) {
                 call('/repos/Putaitu/mondai/labels')
@@ -55,53 +55,77 @@ class GitHubApi extends ApiHelper {
         });
     }
 
-    static getIssueTypes() {
+    getIssueTypes() {
         return new Promise((callback) => {
-            GitHubApi.getLabels()
+            this.getLabels()
             .then((labels) => {
-                GitHubApi.processIssueTypes(labels);
+                this.processIssueTypes(labels);
 
                 callback();
             });
         });
     }
     
-    static getVersions() {
+    getIssueColumns() {
         return new Promise((callback) => {
-            GitHubApi.getLabels()
+            this.getLabels()
             .then((labels) => {
-                GitHubApi.processVersions(labels);
+                this.processIssueColumns(labels);
+
+                callback();
+            });
+        });
+    }
+    
+    getIssuePriorities() {
+        return new Promise((callback) => {
+            this.getLabels()
+            .then((labels) => {
+                this.processIssuePriorities(labels);
+
+                callback();
+            });
+        });
+    }
+    
+    getVersions() {
+        return new Promise((callback) => {
+            this.getLabels()
+            .then((labels) => {
+                this.processVersions(labels);
 
                 callback();
             });
         });
     }
 
-    static getMilestones() {
+    getMilestones() {
         return new Promise((callback) => {
             call('/repos/Putaitu/mondai/milestones')
             .then((milestones) => {
-                GitHubApi.processMilestones(milestones);
+                this.processMilestones(milestones);
                 
                 callback();
             });    
         });
+
+        console.log('asdasd');
     }
     
-    static processMilestones(milestones) {
-        window.settings.milestones = [];
+    processMilestones(milestones) {
+        window.resources.milestones = [];
         
         for(let i in milestones) {
             let milestone = milestones[i];
 
             milestone.index = i;
 
-            window.settings.milestones.push(milestone);
+            window.resources.milestones.push(milestone);
         }
     }
 
-    static processVersions(labels) {
-        window.settings.versions = [];
+    processVersions(labels) {
+        window.resources.versions = [];
 
         for(let label of labels) {
             let versionIndex = label.name.indexOf('version:');
@@ -109,38 +133,70 @@ class GitHubApi extends ApiHelper {
             if(versionIndex > -1) {
                 let versionName = label.name.replace('version:', '');
 
-                window.settings.versions.push(versionName);
+                window.resources.versions.push(versionName);
             }
         }
     }
-
-    static processIssueTypes(labels) {
-        window.settings.types = [];
+    
+    processIssuePriorities(labels) {
+        window.resources.issuePriorities = [];
         
         for(let label of labels) {
-            let typeIndex = label.name.indexOf('type:');
+            let index = label.name.indexOf('priority:');
             
-            if(typeIndex > -1) {
-                let typeName = label.name.replace('type:', '');
+            if(index > -1) {
+                let name = label.name.replace('priority:', '');
 
-                window.settings.types.push(typeName);
+                window.resources.issuePriorities.push(name);
             }
         }
     }
 
-    static processCollaborators(collaborators) {
-        window.settings.collaborators = [];
+    processIssueColumns(labels) {
+        window.resources.issueColumns = [];
+        
+        window.resources.issueColumns.push('to do');
+        
+        for(let label of labels) {
+            let index = label.name.indexOf('column:');
+            
+            if(index > -1) {
+                let name = label.name.replace('column:', '');
+
+                window.resources.issueColumns.push(name);
+            }
+        }
+        
+        window.resources.issueColumns.push('done');
+    }
+
+    processIssueTypes(labels) {
+        window.resources.issueTypes = [];
+        
+        for(let label of labels) {
+            let index = label.name.indexOf('type:');
+            
+            if(index > -1) {
+                let name = label.name.replace('type:', '');
+
+                window.resources.issueTypes.push(name);
+            }
+        }
+    }
+
+    processCollaborators(collaborators) {
+        window.resources.collaborators = [];
 
         for(let collaborator of collaborators) {
-            window.settings.collaborators.push({
+            window.resources.collaborators.push({
                 name: collaborator.login,
                 avatar: collaborator.avatar_url,
             });
         }
     }
 
-    static processIssues(issues) {
-        window.settings.issues = [];
+    processIssues(issues) {
+        window.resources.issues = [];
         
         for(let gitHubIssue of issues) {
             let issue = new Issue();
@@ -156,18 +212,32 @@ class GitHubApi extends ApiHelper {
 
             for(let label of gitHubIssue.labels) {
                 let typeIndex = label.name.indexOf('type:');
+                let priorityIndex = label.name.indexOf('priority:');
                 let versionIndex = label.name.indexOf('version:');
+                let columnIndex = label.name.indexOf('column:');
 
                 if(typeIndex > -1) {
-                    let typeName = label.name.replace('type:', '');
+                    let name = label.name.replace('type:', '');
                     
-                    issue.type = ResourceHelper.getIssueType(typeName);
+                    issue.type = ResourceHelper.getIssueType(name);
                 }
                 
                 if(versionIndex > -1) {
-                    let typeName = label.name.replace('version:', '');
+                    let name = label.name.replace('version:', '');
                     
-                    issue.version = ResourceHelper.getVersion(typeName);
+                    issue.version = ResourceHelper.getVersion(name);
+                }
+                
+                if(priorityIndex > -1) {
+                    let name = label.name.replace('priority:', '');
+                    
+                    issue.priority = ResourceHelper.getIssuePriority(name);
+                }
+                
+                if(columnIndex > -1) {
+                    let name = label.name.replace('column:', '');
+                    
+                    issue.column = ResourceHelper.getIssueColumn(name);
                 }
             }
 
@@ -175,8 +245,20 @@ class GitHubApi extends ApiHelper {
                 issue.milestone = ResourceHelper.getMilestone(gitHubIssue.milestone.title);
             }
 
-            window.settings.issues.push(issue);
+            window.resources.issues[gitHubIssue.number] = issue;
         }
+    }
+
+    updateIssue(issue) {
+        return new Promise((callback) => {
+            // TODO: Match GitHub format and POST
+
+            callback();
+        });
+    }
+
+    getIssueComments(issue) {
+        
     }
 }
 

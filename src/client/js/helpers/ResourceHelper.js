@@ -1,9 +1,11 @@
 'use strict';
 
+window.resources = {};
+
 class ResourceHelper {
     static getCollaborator(name) {
-        for(let i in window.settings.collaborators) {
-            let collaborator = window.settings.collaborators[i];
+        for(let i in window.resources.collaborators) {
+            let collaborator = window.resources.collaborators[i];
             
             if(collaborator.name == name) {
                 return i;
@@ -11,9 +13,31 @@ class ResourceHelper {
         }
     }
     
+    static getIssuePriority(name) {
+        for(let i in window.resources.issuePriorities) {
+            let type = window.resources.issuePriorities[i];
+            
+            if(type == name) {
+                return i;
+            }
+        }
+    }
+    
+    static getIssueColumn(name) {
+        for(let i in window.resources.issueColumns) {
+            let type = window.resources.issueColumns[i];
+            
+            if(type == name) {
+                return i;
+            }
+        }
+
+        return 0;
+    }
+    
     static getIssueType(name) {
-        for(let i in window.settings.types) {
-            let type = window.settings.types[i];
+        for(let i in window.resources.issueTypes) {
+            let type = window.resources.issueTypes[i];
             
             if(type == name) {
                 return i;
@@ -22,8 +46,8 @@ class ResourceHelper {
     }
     
     static getVersion(name) {
-        for(let i in window.settings.versions) {
-            let version = window.settings.versions[i];
+        for(let i in window.resources.versions) {
+            let version = window.resources.versions[i];
             
             if(version == name) {
                 return i;
@@ -32,8 +56,8 @@ class ResourceHelper {
     }
     
     static getMilestone(name) {
-        for(let i in window.settings.milestones) {
-            let milestone = window.settings.milestones[i];
+        for(let i in window.resources.milestones) {
+            let milestone = window.resources.milestones[i];
             
             if(milestone.title == name) {
                 return i;

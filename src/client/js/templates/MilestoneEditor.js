@@ -10,14 +10,14 @@ module.exports = function render() {
             ).click(() => { this.onClickToggle(); })
         ),
         _.div({class: 'columns'},
-            _.each(window.settings.columns, (columnIndex, column) => {
+            _.each(window.resources.columns, (columnIndex, column) => {
                 return _.div({class: 'column'},
                     _.div({class: 'header'},
                         _.h4(column)
                     ),
                     _.div({class: 'body'},
-                        _.each(window.settings.issues, (issueIndex, issue) => {
-                            if(issue.progress == columnIndex && issue.milestone == this.model.index) {
+                        _.each(window.resources.issues, (issueIndex, issue) => {
+                            if(issue.column == columnIndex && issue.milestone == this.model.index) {
                                 return new IssueEditor({
                                     model: issue
                                 }).$element;      

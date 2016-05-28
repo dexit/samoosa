@@ -15,7 +15,7 @@ module.exports = function render(view) {
             _.div({class: 'meta-field type'},
                 _.label('Type'),
                 _.select(
-                    _.each(window.settings.types, (i, type) => {
+                    _.each(window.resources.issueTypes, (i, type) => {
                         return _.option({value: i}, type);
                     })
                 ).change(() => { view.onChange(); }).val(issue.type)
@@ -23,7 +23,7 @@ module.exports = function render(view) {
             _.div({class: 'meta-field priority'},
                 _.label('Priority'),
                 _.select(
-                    _.each(window.settings.priorities, (i, priority) => {
+                    _.each(window.resources.issuePriorities, (i, priority) => {
                         return _.option({value: i}, priority);
                     })
                 ).change(() => { view.onChange(); }).val(issue.priority)
@@ -31,7 +31,7 @@ module.exports = function render(view) {
             _.div({class: 'meta-field assignee'},
                 _.label('Assignee'),
                 _.select(
-                    _.each(window.settings.collaborators, (i, collaborator) => {
+                    _.each(window.resources.collaborators, (i, collaborator) => {
                         return _.option({value: i}, collaborator.name);
                     })
                 ).change(() => { view.onChange(); }).val(issue.assignee)
@@ -39,7 +39,7 @@ module.exports = function render(view) {
             _.div({class: 'meta-field version'},
                 _.label('Version'),
                 _.select(
-                    _.each(window.settings.versions, (i, version) => {
+                    _.each(window.resources.versions, (i, version) => {
                         return _.option({value: i}, version);
                     })
                 ).change(() => { view.onChange(); }).val(issue.version)
@@ -50,7 +50,7 @@ module.exports = function render(view) {
         ),
         _.div({class: 'comments'},
             _.each(view.model.comments, (i, comment) => {
-                let collaborator = window.settings.collaborators[comment.collaborator];
+                let collaborator = window.resources.collaborators[comment.collaborator];
                 let text = comment.text;
                 
                 return _.div({class: 'comment'},

@@ -94,7 +94,7 @@
       .milestone-editor .columns .column > .header h4 {
         margin: 0px; }
 
-.scrum-container.list .columns {
+.scrum-container.list .milestone-editor:not(.collapsed) .columns {
   display: block; }
 
 /*# sourceMappingURL=client.css.map */

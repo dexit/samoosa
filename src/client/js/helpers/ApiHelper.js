@@ -33,6 +33,20 @@ class ApiHelper {
         });
     }
     
+    getIssueColumns() {
+        return new Promise((callback) => {
+            window.resources.issueColumns = [];
+            
+            callback();
+        });
+    }
+    
+    getIssueComments() {
+        return new Promise((callback) => {
+            callback([]);
+        });
+    }
+    
     getMilestones() {
         return new Promise((callback) => {
             window.resources.milestones = [];

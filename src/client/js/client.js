@@ -3,6 +3,7 @@
 // Libs
 require('exomon');
 window.Promise = require('bluebird');
+window.markdownToHtml = require('marked');
 
 // Helpers
 window.ResourceHelper = require('./helpers/ResourceHelper');

@@ -61,8 +61,13 @@
 
 .scrum-container {
     &.list {
-        .columns {
-            display: block;
+        .milestone-editor {
+
+            &:not(.collapsed) {
+                .columns {
+                    display: block;
+                }
+            }
         }
     }
 }

@@ -25,6 +25,7 @@ class Issue {
         this.version;
         this.milestone;
         this.comments = [];
+        this.labels = [];
         this.assignee;
     }
 

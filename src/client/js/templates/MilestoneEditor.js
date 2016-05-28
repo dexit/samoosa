@@ -10,7 +10,7 @@ module.exports = function render() {
             ).click(() => { this.onClickToggle(); })
         ),
         _.div({class: 'columns'},
-            _.each(window.resources.columns, (columnIndex, column) => {
+            _.each(window.resources.issueColumns, (columnIndex, column) => {
                 return _.div({class: 'column'},
                     _.div({class: 'header'},
                         _.h4(column)

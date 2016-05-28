@@ -8,13 +8,15 @@ module.exports = function render(view) {
             _.button({class: 'btn-transparent'},
                 _.span({class: 'fa fa-edit'}),
                 _.span({class: 'fa fa-close'}),
-                _.h4(view.model.title)
+                _.h4({'data-property': 'title'},
+                    view.model.title
+                )
             ).click(() => { view.onClickEdit(); })
         ),
         _.div({class: 'meta'},
             _.div({class: 'meta-field type'},
                 _.label('Type'),
-                _.select(
+                _.select({'data-property': 'type'},
                     _.each(window.resources.issueTypes, (i, type) => {
                         return _.option({value: i}, type);
                     })
@@ -22,7 +24,7 @@ module.exports = function render(view) {
             ),
             _.div({class: 'meta-field priority'},
                 _.label('Priority'),
-                _.select(
+                _.select({'data-property': 'priority'},
                     _.each(window.resources.issuePriorities, (i, priority) => {
                         return _.option({value: i}, priority);
                     })
@@ -30,7 +32,7 @@ module.exports = function render(view) {
             ),
             _.div({class: 'meta-field assignee'},
                 _.label('Assignee'),
-                _.select(
+                _.select({'data-property': 'assignee'},
                     _.each(window.resources.collaborators, (i, collaborator) => {
                         return _.option({value: i}, collaborator.name);
                     })
@@ -38,7 +40,7 @@ module.exports = function render(view) {
             ),
             _.div({class: 'meta-field version'},
                 _.label('Version'),
-                _.select(
+                _.select({'data-property': 'version'},
                     _.each(window.resources.versions, (i, version) => {
                         return _.option({value: i}, version);
                     })
@@ -46,23 +48,7 @@ module.exports = function render(view) {
             )
         ),
         _.div({class: 'body'},
-            view.model.description
-        ),
-        _.div({class: 'comments'},
-            _.each(view.model.comments, (i, comment) => {
-                let collaborator = window.resources.collaborators[comment.collaborator];
-                let text = comment.text;
-                
-                return _.div({class: 'comment'},
-                    _.div({class: 'collaborator'},
-                        _.img({src: collaborator.avatar}),
-                        _.p(collaborator.name)    
-                    ),
-                    _.div({class: 'text'},
-                        text
-                    )
-                );
-            })
+            markdownToHtml(view.model.description)
         )
     );
 };

@@ -220,24 +220,25 @@ class GitHubApi extends ApiHelper {
                     let name = label.name.replace('type:', '');
                     
                     issue.type = ResourceHelper.getIssueType(name);
-                }
-                
-                if(versionIndex > -1) {
+
+                } else if(versionIndex > -1) {
                     let name = label.name.replace('version:', '');
                     
                     issue.version = ResourceHelper.getVersion(name);
-                }
-                
-                if(priorityIndex > -1) {
+                    
+                } else if(priorityIndex > -1) {
                     let name = label.name.replace('priority:', '');
                     
                     issue.priority = ResourceHelper.getIssuePriority(name);
-                }
-                
-                if(columnIndex > -1) {
+
+                } else if(columnIndex > -1) {
                     let name = label.name.replace('column:', '');
                     
                     issue.column = ResourceHelper.getIssueColumn(name);
+
+                } else {
+                    issue.labels.push(label);
+
                 }
             }
 
@@ -245,7 +246,9 @@ class GitHubApi extends ApiHelper {
                 issue.milestone = ResourceHelper.getMilestone(gitHubIssue.milestone.title);
             }
 
-            window.resources.issues[gitHubIssue.number] = issue;
+            issue.index = gitHubIssue.number - 1
+
+            window.resources.issues[issue.index] = issue;
         }
     }
 
@@ -258,7 +261,23 @@ class GitHubApi extends ApiHelper {
     }
 
     getIssueComments(issue) {
-        
+        return new Promise((callback) => {
+            call('/repos/Putaitu/mondai/issues/' + (issue.index + 1) + '/comments')
+            .then((gitHubComments) => {
+                let comments = [];
+
+                for(let gitHubComment of gitHubComments) {
+                    let comment = {
+                        collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
+                        text: gitHubComment.body
+                    };
+
+                    comments.push(comment);
+                }
+
+                callback(comments);            
+            });
+        });
     }
 }
 

@@ -33,6 +33,14 @@ class ApiHelper {
         });
     }
     
+    getIssueEstimates() {
+        return new Promise((callback) => {
+            window.resources.issueEstimates = [];
+            
+            callback();
+        });
+    }
+    
     getIssueColumns() {
         return new Promise((callback) => {
             window.resources.issueColumns = [];
@@ -75,6 +83,7 @@ class ApiHelper {
                 collaborators: false,
                 issueTypes: false,
                 issuePriorities: false,
+                issueEstimates: false,
                 issueColumns: false,
                 milestones: false,
                 versions: false,
@@ -106,6 +115,11 @@ class ApiHelper {
             this.getIssuePriorities()
             .then(() => {
                 check('issuePriorities');
+            });
+            
+            this.getIssueEstimates()
+            .then(() => {
+                check('issueEstimates');
             });
             
             this.getIssueColumns()

@@ -66,6 +66,14 @@ module.exports = function render() {
                         return _.option({value: i}, version);
                     })
                 ).change(() => { this.onChange(); }).val(issue.version)
+            ),
+            _.div({class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '')},
+                _.label('Estimate'),
+                _.select({'data-property': 'estimate'},
+                    _.each(window.resources.issueEstimates, (i, estimate) => {
+                        return _.option({value: i}, estimate);
+                    })
+                ).change(() => { this.onChange(); }).val(issue.estimate)
             )
         ),
         _.div({class: 'body'},

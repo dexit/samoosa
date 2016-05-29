@@ -120,6 +120,7 @@ class IssueEditor extends View {
         this.model.assignee = this.getProperty('assignee');
         this.model.version = this.getProperty('version'); 
         this.model.description = this.getProperty('description');
+        this.model.estimate = this.getProperty('estimate');
 
         this.$element.toggleClass('loading', true);
 

@@ -123,6 +123,17 @@ class GitHubApi extends ApiHelper {
         });
     }
     
+    getIssueEstimates() {
+        return new Promise((callback) => {
+            this.getLabels()
+            .then((labels) => {
+                this.processIssueEstimates(labels);
+
+                callback();
+            });
+        });
+    }
+    
     getVersions() {
         return new Promise((callback) => {
             this.getLabels()
@@ -183,6 +194,20 @@ class GitHubApi extends ApiHelper {
                 let name = label.name.replace('priority:', '');
 
                 window.resources.issuePriorities.push(name);
+            }
+        }
+    }
+    
+    processIssueEstimates(labels) {
+        window.resources.issueEstimates = [];
+        
+        for(let label of labels) {
+            let index = label.name.indexOf('estimate:');
+            
+            if(index > -1) {
+                let name = label.name.replace('estimate:', '');
+
+                window.resources.issueEstimates.push(name);
             }
         }
     }
@@ -248,6 +273,7 @@ class GitHubApi extends ApiHelper {
             for(let label of gitHubIssue.labels) {
                 let typeIndex = label.name.indexOf('type:');
                 let priorityIndex = label.name.indexOf('priority:');
+                let estimateIndex = label.name.indexOf('estimate:');
                 let versionIndex = label.name.indexOf('version:');
                 let columnIndex = label.name.indexOf('column:');
 
@@ -260,6 +286,12 @@ class GitHubApi extends ApiHelper {
                     let name = label.name.replace('version:', '');
                     
                     issue.version = ResourceHelper.getVersion(name);
+                
+                } else if(estimateIndex > -1) {
+                    let name = label.name.replace('estimate:', '');
+                    
+                    issue.estimate = ResourceHelper.getIssueEstimate(name);
+
                     
                 } else if(priorityIndex > -1) {
                     let name = label.name.replace('priority:', '');
@@ -330,7 +362,14 @@ class GitHubApi extends ApiHelper {
             if(version) {
                 gitHubIssue.labels.push('version:' + version);
             }
-            
+           
+            // Estimate
+            let issueEstimate = resources.issueEstimates[issue.estimate];
+
+            if(issueEstimate) {
+                gitHubIssue.labels.push('estimate:' + issueEstimate);
+            }
+
             // Priority
             let issuePriority = resources.issuePriorities[issue.priority];
 

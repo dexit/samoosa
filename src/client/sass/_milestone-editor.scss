@@ -66,7 +66,7 @@
     }
 }
 
-.scrum-container {
+.board-container {
     &.list {
         .milestone-editor {
             &:not(.collapsed) {
@@ -89,6 +89,22 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    &.dragging {
+        .milestone-editor {
+            .columns {
+                .column {
+                    outline: 2px solid material-color('grey', '300');
+                    background-color: 2px solid material-color('grey', '100');
+
+                    &.hovering {
+                        outline: 2px solid material-color('green', '300');
+                        background-color: 2px solid material-color('green', '100');
                     }
                 }
             }

@@ -35,6 +35,84 @@ class IssueEditor extends View {
         return $property.val() || $property.text();
     }
 
+    onClickDragHandle(e) {
+        $('.board-container').toggleClass('dragging', true);
+
+        this.$element.css({
+            top: this.$element.offset().top,
+            left: this.$element.offset().left,
+            width: this.$element.outerWidth(),
+            height: this.$element.outerHeight(),
+            'pointer-events': 'none'
+        });
+
+        $('body').append(this.$element);
+       
+        this.$element.css({
+            position: 'absolute'
+        }); 
+        
+        let prev = {
+            x: e.pageX,
+            y: e.pageY
+        };
+
+
+        $('.milestone-editor .columns .column')
+            .on('mouseenter', function() {
+                $(this).toggleClass('hovering', true);
+            })
+            .on('mouseleave', function() {
+                $(this).toggleClass('hovering', false); 
+            });
+
+        $(document)
+            .off('mousemove')
+            .on('mousemove', (e) => {
+                let current = {
+                    x: e.pageX,
+                    y: e.pageY
+                };
+
+                let delta = {
+                    x: current.x - prev.x,
+                    y: current.y - prev.y
+                };
+
+                this.$element.css({
+                    top: this.$element.offset().top + delta.y,
+                    left: this.$element.offset().left + delta.x
+                });
+
+                prev = current;
+            });
+
+        $(document)
+            .off('mouseup')
+            .on('mouseup', (e) => { this.onReleaseDragHandle(e); });
+    }
+
+    onReleaseDragHandle(e) {
+        $(document)
+            .off('mouseup')
+            .off('mousemove');
+        
+        $('.board-container').toggleClass('dragging', false);
+        this.$element.removeAttr('style');
+        
+        $('.milestone-editor .columns .column.hovering .body').first().append(this.$element);
+        
+        $('.milestone-editor .columns .column')
+            .off('mouseenter')
+            .off('mouseleave').
+            toggleClass('hovering', false);
+
+        this.model.milestone = this.$element.parents('.milestone-editor').attr('data-index');
+        this.model.column = this.$element.parents('.column').attr('data-index');
+    
+        this.onChange();
+    }
+
     onChange() {
         this.model.title = this.getProperty('title'); 
         this.model.type = this.getProperty('type'); 

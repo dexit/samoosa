@@ -1,5 +1,5 @@
 module.exports = function render() {
-    return _.div({class: 'milestone-editor'},
+    return _.div({class: 'milestone-editor', 'data-index': this.model.index},
         _.div({class: 'header'},
             _.button({class: 'btn-transparent'},
                 _.h4({}, 
@@ -11,7 +11,7 @@ module.exports = function render() {
         ),
         _.div({class: 'columns'},
             _.each(window.resources.issueColumns, (columnIndex, column) => {
-                return _.div({class: 'column'},
+                return _.div({class: 'column', 'data-index': columnIndex},
                     _.div({class: 'header'},
                         _.h4(column)
                     ),

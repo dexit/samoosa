@@ -18,14 +18,14 @@ window.Issue = require('./models/Issue');
 window.IssueEditor = require('./views/IssueEditor');
 window.MilestoneEditor = require('./views/MilestoneEditor');
 
-Router.route('/scrum/', () => {
+Router.route('/board/', () => {
     ApiHelper.getResources()
     .then(() => {
         $('.app-container').html(
-            _.div({class: 'scrum-container'},
+            _.div({class: 'board-container'},
                 _.div({class: 'toolbar'},
                     _.button('list').click(() => {
-                        $('.scrum-container').toggleClass('list');
+                        $('.board-container').toggleClass('list');
                     })
                 ),
                 _.div({class: 'workspace'},

@@ -137,15 +137,22 @@
       .milestone-editor .columns .column > .header h4 {
         margin: 0px; }
 
-.scrum-container.list .milestone-editor:not(.collapsed) .columns {
+.board-container.list .milestone-editor:not(.collapsed) .columns {
   display: block; }
-  .scrum-container.list .milestone-editor:not(.collapsed) .columns .column {
+  .board-container.list .milestone-editor:not(.collapsed) .columns .column {
     border: 0px; }
-    .scrum-container.list .milestone-editor:not(.collapsed) .columns .column > .header {
+    .board-container.list .milestone-editor:not(.collapsed) .columns .column > .header {
       border-bottom: 1px solid #bdbdbd; }
-    .scrum-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header {
+    .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header {
       padding: 5px 15px 5px 5px; }
-      .scrum-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header h4 {
+      .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header h4 {
         font-size: 14px; }
+
+.board-container.dragging .milestone-editor .columns .column {
+  outline: 2px solid #e0e0e0;
+  background-color: 2px solid #f5f5f5; }
+  .board-container.dragging .milestone-editor .columns .column.hovering {
+    outline: 2px solid #81c784;
+    background-color: 2px solid #c8e6c9; }
 
 /*# sourceMappingURL=client.css.map */

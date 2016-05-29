@@ -188,15 +188,20 @@ body, html {
 .navbar {
   width: 60px;
   margin: 0px;
-  background-color: #424242;
-  border-radius: 0px; }
-  .navbar .buttons a, .navbar .buttons button {
+  background-color: #212121;
+  border-radius: 0px;
+  border: 0px; }
+  .navbar .buttons a {
     display: block;
-    width: 50px;
+    width: 60px;
     text-align: center; }
-    .navbar .buttons a .fa, .navbar .buttons button .fa {
+    .navbar .buttons a.active {
+      background-color: #eeeeee; }
+      .navbar .buttons a.active .fa {
+        color: #212121; }
+    .navbar .buttons a .fa {
       color: #eeeeee;
-      line-height: 50px;
+      line-height: 60px;
       font-size: 24px; }
 
 .user-container .profile {
@@ -204,5 +209,33 @@ body, html {
   .user-container .profile img {
     width: 60px;
     height: 60px; }
+
+.resource-editor {
+  padding: 15px;
+  width: 25%;
+  height: 50%;
+  float: left;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0; }
+  .resource-editor .body {
+    overflow-y: auto; }
+    .resource-editor .body .item button {
+      border: 0px;
+      background-color: transparent;
+      color: #e53935; }
+  .resource-editor .footer {
+    display: flex; }
+    .resource-editor .footer input, .resource-editor .footer button {
+      line-height: 30px;
+      height: 30px;
+      border: 1px solid #e0e0e0; }
+    .resource-editor .footer input {
+      flex-grow: 1;
+      border-right: 0px; }
+    .resource-editor .footer button {
+      flex-shrink: 0;
+      width: 30px;
+      background-color: #43a047;
+      color: #f5f5f5; }
 
 /*# sourceMappingURL=client.css.map */

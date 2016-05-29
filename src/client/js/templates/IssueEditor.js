@@ -89,7 +89,7 @@ module.exports = function render() {
                     this.onChange();
                     
                     this.$element.find('.body .btn-edit').html(
-                        markdownToHtml(this.model.description)
+                        markdownToHtml(this.model.description) || ''
                     );
                 })
                 .blur(this.onBlur)

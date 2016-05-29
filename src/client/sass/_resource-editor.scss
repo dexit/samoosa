@@ -1,0 +1,42 @@
+.resource-editor {
+    padding: 15px; 
+    width: 25%;
+    height: 50%;
+    float: left;
+    border-right: 1px solid material-color('grey', '300');
+    border-bottom: 1px solid material-color('grey', '300');
+
+    .body {
+        overflow-y: auto;
+
+        .item {
+            button {
+                border: 0px;
+                background-color: transparent;
+                color: material-color('red', '600');
+            }
+        }
+    }
+
+    .footer {
+        display: flex;
+
+        input, button {
+            line-height: 30px;
+            height: 30px;
+            border: 1px solid material-color('grey', '300');
+        }
+
+        input {
+            flex-grow: 1;
+            border-right: 0px;
+        }
+
+        button {
+            flex-shrink: 0;
+            width: 30px;
+            background-color: material-color('green', '600');
+            color: material-color('grey', '100');
+        }
+    }
+}

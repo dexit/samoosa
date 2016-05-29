@@ -18,6 +18,7 @@ window.Issue = require('./models/Issue');
 window.Navbar = require('./views/Navbar');
 window.IssueEditor = require('./views/IssueEditor');
 window.MilestoneEditor = require('./views/MilestoneEditor');
+window.ResourceEditor = require('./views/ResourceEditor');
 
 // User
 Router.route('/user/', () => {
@@ -82,6 +83,27 @@ Router.route('/list/', () => {
                             title: 'Backlog',
                         }
                     }).$element
+                )
+            );
+    });
+});
+
+// Settings
+Router.route('/settings/', () => {
+    ApiHelper.getResources()
+    .then(() => {
+        $('.app-container').empty()
+            .append(new Navbar().$element)
+            .append(
+                _.div({class: 'workspace settings-container'},
+                    _.each(window.resources, (name, resource) => {
+                        if(name != 'issues') {
+                            return new ResourceEditor({
+                                name: name,
+                                model: resource
+                            }).$element;   
+                        }
+                    })
                 )
             );
     });

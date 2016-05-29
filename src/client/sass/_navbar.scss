@@ -1,18 +1,27 @@
 .navbar {
     width: 60px;
     margin: 0px;
-    background-color: material-color('grey', '800');
+    background-color: material-color('grey', '900');
     border-radius: 0px;
+    border: 0px;
 
     .buttons {
-        a, button {
+        a {
             display: block;
-            width: 50px;
+            width: 60px;
             text-align: center;
+
+            &.active {
+                background-color: material-color('grey', '200');
+                
+                .fa {
+                    color: material-color('grey', '900');
+                }
+            }
 
             .fa {
                 color: material-color('grey', '200');
-                line-height: 50px;
+                line-height: 60px;
                 font-size: 24px;
             }
         }

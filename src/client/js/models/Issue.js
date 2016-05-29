@@ -1,13 +1,24 @@
 'use strict';
 
 class Issue {
-    static create() {
-        let issue = new Issue();
+    static create(properties) {
+        return new Promise((callback) => {
+            let issue = new Issue();
 
-        issue.index = window.resources.issues.length;
-        window.resources.issues[issue.index] = issue;
+            issue.index = window.resources.issues.length;
+            window.resources.issues[issue.index] = issue;
 
-        return issue;
+            if(properties) {
+                for(let k in properties) {
+                    issue[k] = properties[k];
+                }
+            }
+
+            ApiHelper.createIssue(issue)
+            .then(() => {
+                callback(issue);
+            });
+        });
     }
 
     constructor(properties) {

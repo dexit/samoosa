@@ -51,6 +51,15 @@ function post(url, data) {
 let labelCache;
 
 class GitHubApi extends ApiHelper {
+    createIssue(issue) {
+        return new Promise((callback) => {
+            post('/repos/Putaitu/mondai/issues', this.convertIssue(issue))
+            .then(() => {
+                callback(issue);
+            });
+        });
+    }
+
     getCollaborators() {
         return new Promise((callback) => {
             get('/repos/Putaitu/mondai/collaborators')
@@ -323,67 +332,71 @@ class GitHubApi extends ApiHelper {
         }
     }
 
+    convertIssue(issue) {
+        // Directly mappable properties
+        let gitHubIssue = {
+            title: issue.title,
+            body: issue.description,
+            labels: []
+        };
+
+        // Assignee
+        let assignee = resources.collaborators[issue.assignee];
+
+        if(assignee) {
+            gitHubIssue.assignee = assignee.name;
+        }
+
+        // State
+        let issueColumn = resources.issueColumns[issue.column];
+
+        gitHubIssue.state = issueColumn == 'done' ? 'closed' : 'open';
+
+        // GitHub counts numbers from 1, Mondai counts from 0
+        if(issue.milestone >= 0) {
+            gitHubIssue.milestone = parseInt(issue.milestone) + 1;
+        }
+
+        // Type
+        let issueType = resources.issueTypes[issue.type];
+
+        if(issueType) {
+            gitHubIssue.labels.push('type:' + issueType);
+        }
+
+        // Version
+        let version = resources.versions[issue.version];
+
+        if(version) {
+            gitHubIssue.labels.push('version:' + version);
+        }
+       
+        // Estimate
+        let issueEstimate = resources.issueEstimates[issue.estimate];
+
+        if(issueEstimate) {
+            gitHubIssue.labels.push('estimate:' + issueEstimate);
+        }
+
+        // Priority
+        let issuePriority = resources.issuePriorities[issue.priority];
+
+        if(issuePriority) {
+            gitHubIssue.labels.push('priority:' + issuePriority);
+        }
+
+        // Column
+        if(issueColumn && issueColumn != 'to do' && issueColumn != 'done') {
+            gitHubIssue.labels.push('column:' + issueColumn);
+        }
+
+        return gitHubIssue;
+    }
+
     updateIssue(issue) {
         return new Promise((callback) => {
-            // Directly mappable properties
-            let gitHubIssue = {
-                title: issue.title,
-                body: issue.description,
-                labels: []
-            };
-
-            // Assignee
-            let assignee = resources.collaborators[issue.assignee];
-
-            if(assignee) {
-                gitHubIssue.assignee = assignee.name;
-            }
-
-            // State
-            let issueColumn = resources.issueColumns[issue.column];
-
-            gitHubIssue.state = issueColumn == 'done' ? 'closed' : 'open';
-
-            // GitHub counts numbers from 1, Mondai counts from 0
-            if(issue.milestone >= 0) {
-                gitHubIssue.milestone = parseInt(issue.milestone) + 1;
-            }
-
-            // Type
-            let issueType = resources.issueTypes[issue.type];
-
-            if(issueType) {
-                gitHubIssue.labels.push('type:' + issueType);
-            }
-
-            // Version
-            let version = resources.versions[issue.version];
-
-            if(version) {
-                gitHubIssue.labels.push('version:' + version);
-            }
-           
-            // Estimate
-            let issueEstimate = resources.issueEstimates[issue.estimate];
-
-            if(issueEstimate) {
-                gitHubIssue.labels.push('estimate:' + issueEstimate);
-            }
-
-            // Priority
-            let issuePriority = resources.issuePriorities[issue.priority];
-
-            if(issuePriority) {
-                gitHubIssue.labels.push('priority:' + issuePriority);
-            }
-
-            // Column
-            if(issueColumn && issueColumn != 'to do' && issueColumn != 'done') {
-                gitHubIssue.labels.push('column:' + issueColumn);
-            }
-
             // PATCH data to api
-            patch('/repos/Putaitu/mondai/issues/' + (issue.index + 1), gitHubIssue)
+            patch('/repos/Putaitu/mondai/issues/' + (issue.index + 1), this.convertIssue(issue))
             .then(() => {
                 callback();
             });

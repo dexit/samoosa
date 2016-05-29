@@ -33,7 +33,7 @@
             }
         }
 
-        button {
+        .btn-toggle {
             padding: 0px;
             display: block;
             width: 100%;
@@ -97,6 +97,10 @@
 
     &.dragging {
         .milestone-editor {
+            * {
+                user-select: none; 
+            }
+
             .columns {
                 .column {
                     outline: 2px solid material-color('grey', '300');

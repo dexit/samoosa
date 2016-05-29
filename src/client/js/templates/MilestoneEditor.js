@@ -1,13 +1,16 @@
 module.exports = function render() {
     return _.div({class: 'milestone-editor', 'data-index': this.model.index},
         _.div({class: 'header'},
-            _.button({class: 'btn-transparent'},
-                _.h4({}, 
-                    _.span({class: 'fa fa-chevron-right'}),
-                    _.span({class: 'fa fa-chevron-down'}),
-                    this.model.title
-                )
-            ).click(() => { this.onClickToggle(); })
+            _.button({class: 'btn-toggle btn-transparent'},
+                _.span({class: 'fa fa-chevron-right'}),
+                _.span({class: 'fa fa-chevron-down'})
+            ).click(() => { this.onClickToggle(); }),
+            _.h4({}, 
+                this.model.title
+            ),
+            _.button({class: 'btn-new-issue'},
+                'New issue'
+            ).click(() => { this.onClickNewIssue(); })
         ),
         _.div({class: 'columns'},
             _.each(window.resources.issueColumns, (columnIndex, column) => {

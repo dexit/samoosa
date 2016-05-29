@@ -125,7 +125,7 @@
       display: inline-block; }
     .milestone-editor > .header .fa.fa-chevron-right {
       display: none; }
-  .milestone-editor > .header button {
+  .milestone-editor > .header .btn-toggle {
     padding: 0px;
     display: block;
     width: 100%;
@@ -156,6 +156,9 @@
       padding: 5px 15px 5px 5px; }
       .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header h4 {
         font-size: 14px; }
+
+.board-container.dragging .milestone-editor * {
+  user-select: none; }
 
 .board-container.dragging .milestone-editor .columns .column {
   outline: 2px solid #e0e0e0;

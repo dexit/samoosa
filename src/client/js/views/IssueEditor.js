@@ -9,6 +9,9 @@ class IssueEditor extends View {
         this.fetch();
     }
 
+    /**
+     * Event: Click the toggle button
+     */
     onClickToggle() {
         let wasExpanded = this.$element.hasClass('expanded');
 
@@ -21,6 +24,9 @@ class IssueEditor extends View {
         }
     }
 
+    /**
+     * Gets an IMG tag with the avatar of the assigned collaborator
+     */
     getAssigneeAvatar() {
         let assignee = window.resources.collaborators[this.model.assignee];
 
@@ -29,12 +35,20 @@ class IssueEditor extends View {
         }
     }
 
+    /**
+     * Gets a property from the DOM of the editor
+     *
+     * @param {String} key
+     */
     getProperty(key) {
         let $property = this.$element.find('*[data-property="' + key + '"]');
         
         return $property.val() || $property.text();
     }
 
+    /**
+     * Event: Click the dragging handle
+     */
     onClickDragHandle(e) {
         $('.board-container').toggleClass('dragging', true);
 
@@ -46,8 +60,6 @@ class IssueEditor extends View {
             'pointer-events': 'none'
         });
 
-        $('body').append(this.$element);
-       
         this.$element.css({
             position: 'absolute'
         }); 
@@ -92,6 +104,9 @@ class IssueEditor extends View {
             .on('mouseup', (e) => { this.onReleaseDragHandle(e); });
     }
 
+    /**
+     * Event: Release the dragging handle
+     */
     onReleaseDragHandle(e) {
         $(document)
             .off('mouseup')
@@ -113,6 +128,9 @@ class IssueEditor extends View {
         this.onChange();
     }
 
+    /**
+     * Event: Fires on every change to a property
+     */
     onChange() {
         this.model.title = this.getProperty('title'); 
         this.model.type = this.getProperty('type'); 
@@ -130,6 +148,9 @@ class IssueEditor extends View {
         });
     }
     
+    /**
+     * Event: Click the edit button of a field
+     */
     onClickEdit() {
         $(this)
             .toggleClass('hidden', true)
@@ -138,6 +159,9 @@ class IssueEditor extends View {
             .focus(); 
     }
 
+    /**
+     * Event: Click the comment button
+     */
     onClickComment() {
         let text = this.$element.find('.add-comment textarea').val();
 
@@ -149,6 +173,9 @@ class IssueEditor extends View {
         });
     }
 
+    /**
+     * Event: Remove focus from input fields
+     */
     onBlur() {
         $(this)
             .toggleClass('hidden', true)
@@ -156,6 +183,9 @@ class IssueEditor extends View {
             .toggleClass('hidden', false); 
     }
 
+    /**
+     * Lazy-loads the comments
+     */
     getComments() {
         let $comments = this.$element.find('.comments');
 

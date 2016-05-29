@@ -1,6 +1,12 @@
 'use strict';
 
 class ApiHelper {
+    createIssue(issue) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+    
     getIssues() {
         return new Promise((callback) => {
             window.resources.issues = [];

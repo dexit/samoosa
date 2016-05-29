@@ -8,7 +8,9 @@ module.exports = function render() {
             _.div({class: 'drag-handle'},
                 _.span({class: 'fa fa-bars'})
             ).on('mousedown', (e) => { this.onClickDragHandle(e) }),
-            this.getAssigneeAvatar(),
+            _.div({class: 'assignee-avatar'},
+                this.getAssigneeAvatar()
+            ),
             _.button({class: 'btn-toggle btn-transparent'},
                 _.span({class: 'fa fa-minus-circle'}),
                 _.span({class: 'fa fa-plus-circle'})
@@ -54,7 +56,7 @@ module.exports = function render() {
                 ).change(() => {
                     this.onChange();
 
-                    this.$element.find('.header img').replaceWith(
+                    this.$element.find('.header .assignee-avatar').html(
                         this.getAssigneeAvatar()
                     );
                 }).val(issue.assignee)

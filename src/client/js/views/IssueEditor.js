@@ -184,7 +184,7 @@ class IssueEditor extends View {
     }
 
     /**
-     * Lazy-loads the comments
+     * Lazy-load the comments
      */
     getComments() {
         let $comments = this.$element.find('.comments');

@@ -19,6 +19,7 @@
     
     >.header {
         border-bottom: 1px solid material-color('grey', '400');
+        padding: 15px;
 
         .fa {
             width: 30px;
@@ -83,6 +84,14 @@
                         .issue-editor {
                             .header {
                                 padding: 5px 15px 5px 5px;
+                                position: relative;
+
+                                .drag-handle {
+                                    position: absolute;
+                                    width: 50%;
+                                    left: 25%;
+                                    top: 0%;
+                                }
 
                                 h4 {
                                     font-size: 14px;
@@ -98,7 +107,7 @@
     &.dragging {
         .milestone-editor {
             * {
-                user-select: none; 
+                user-select: none !important; 
             }
 
             .columns {

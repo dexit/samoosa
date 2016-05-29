@@ -14,6 +14,17 @@
   padding: 0px;
   text-align: left; }
 
+body, html {
+  height: 100%; }
+
+.app-container {
+  display: flex;
+  min-height: 100%; }
+  .app-container .navbar {
+    flex-shrink: 0; }
+  .app-container .workspace {
+    flex-grow: 1; }
+
 .issue-editor {
   border: 1px solid #bdbdbd; }
   .issue-editor.loading {
@@ -117,7 +128,8 @@
   display: none; }
 
 .milestone-editor > .header {
-  border-bottom: 1px solid #bdbdbd; }
+  border-bottom: 1px solid #bdbdbd;
+  padding: 15px; }
   .milestone-editor > .header .fa {
     width: 30px;
     text-align: center; }
@@ -153,12 +165,18 @@
     .board-container.list .milestone-editor:not(.collapsed) .columns .column > .header {
       border-bottom: 1px solid #bdbdbd; }
     .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header {
-      padding: 5px 15px 5px 5px; }
+      padding: 5px 15px 5px 5px;
+      position: relative; }
+      .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header .drag-handle {
+        position: absolute;
+        width: 50%;
+        left: 25%;
+        top: 0%; }
       .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header h4 {
         font-size: 14px; }
 
 .board-container.dragging .milestone-editor * {
-  user-select: none; }
+  user-select: none !important; }
 
 .board-container.dragging .milestone-editor .columns .column {
   outline: 2px solid #e0e0e0;
@@ -166,5 +184,25 @@
   .board-container.dragging .milestone-editor .columns .column.hovering {
     outline: 2px solid #81c784;
     background-color: 2px solid #c8e6c9; }
+
+.navbar {
+  width: 60px;
+  margin: 0px;
+  background-color: #424242;
+  border-radius: 0px; }
+  .navbar .buttons a, .navbar .buttons button {
+    display: block;
+    width: 50px;
+    text-align: center; }
+    .navbar .buttons a .fa, .navbar .buttons button .fa {
+      color: #eeeeee;
+      line-height: 50px;
+      font-size: 24px; }
+
+.user-container .profile {
+  padding: 15px; }
+  .user-container .profile img {
+    width: 60px;
+    height: 60px; }
 
 /*# sourceMappingURL=client.css.map */

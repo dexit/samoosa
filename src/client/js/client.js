@@ -15,20 +15,40 @@ window.ApiHelper = new GitHubApi();
 window.Issue = require('./models/Issue');
 
 // Views
+window.Navbar = require('./views/Navbar');
 window.IssueEditor = require('./views/IssueEditor');
 window.MilestoneEditor = require('./views/MilestoneEditor');
 
+// User
+Router.route('/user/', () => {
+    ApiHelper.getUser()
+    .then((user) => {
+        $('.app-container').empty()
+            .append(new Navbar().$element)
+            .append(
+                _.div({class: 'workspace user-container'},
+                    _.div({class: 'profile'},
+                        _.h4('Current user'),
+                        _.img({src: user.avatar}),
+                        _.p(user.name),
+                        _.h4('Session'),
+                        _.button('Change account').click(() => {
+                            ApiHelper.logOut();
+                        })
+                    ) 
+                )
+            );
+    });
+});
+
+// Board
 Router.route('/board/', () => {
     ApiHelper.getResources()
     .then(() => {
-        $('.app-container').html(
-            _.div({class: 'board-container'},
-                _.div({class: 'toolbar'},
-                    _.button('list').click(() => {
-                        $('.board-container').toggleClass('list');
-                    })
-                ),
-                _.div({class: 'workspace'},
+        $('.app-container').empty()
+            .append(new Navbar().$element)
+            .append(
+                _.div({class: 'workspace board-container'},
                     _.each(window.resources.milestones, (i, milestone) => {
                         return new MilestoneEditor({
                             model: milestone,
@@ -40,8 +60,30 @@ Router.route('/board/', () => {
                         }
                     }).$element
                 )
-            )
-        );
+            );
+    });
+});
+
+// List
+Router.route('/list/', () => {
+    ApiHelper.getResources()
+    .then(() => {
+        $('.app-container').empty()
+            .append(new Navbar().$element)
+            .append(
+                _.div({class: 'workspace board-container list'},
+                    _.each(window.resources.milestones, (i, milestone) => {
+                        return new MilestoneEditor({
+                            model: milestone,
+                        }).$element;
+                    }),
+                    new MilestoneEditor({
+                        model: {
+                            title: 'Backlog',
+                        }
+                    }).$element
+                )
+            );
     });
 });
 

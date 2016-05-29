@@ -2,58 +2,103 @@
 
 let ApiHelper = require('../../../src/client/js/helpers/ApiHelper');
 
-function get(url, param) {
-    return new Promise((callback) => {
-        $.ajax({
-            url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + 'access_token=' + localStorage.getItem('githubApiToken'),
-            type: 'GET',
-            success: (result) => {
-                callback(result);
-            }
-        });
-    });
-}
-
-function patch(url, data) {
-    if(typeof data === 'object') {
-        data = JSON.stringify(data);
-    }
-
-    return new Promise((callback) => {
-        $.ajax({
-            url: 'https://api.github.com' + url + '?access_token=' + localStorage.getItem('githubApiToken'),
-            type: 'PATCH',
-            data: data,
-            success: (result) => {
-                callback(result);
-            }
-        });
-    });
-}
-
-function post(url, data) {
-    if(typeof data === 'object') {
-        data = JSON.stringify(data);
-    }
-
-    return new Promise((callback) => {
-        $.ajax({
-            url: 'https://api.github.com' + url + '?access_token=' + localStorage.getItem('githubApiToken'),
-            type: 'POST',
-            data: data,
-            success: (result) => {
-                callback(result);
-            }
-        });
-    });
-}
-
 let labelCache;
 
 class GitHubApi extends ApiHelper {
+    get(url, param) {
+        return new Promise((callback) => {
+            $.ajax({
+                url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + 'access_token=' + this.getApiToken(),
+                type: 'GET',
+                success: (result) => {
+                    callback(result);
+                },
+                error: () => {
+                    this.resetApiToken();
+                }
+            });
+        });
+    }
+
+    patch(url, data) {
+        if(typeof data === 'object') {
+            data = JSON.stringify(data);
+        }
+
+        return new Promise((callback) => {
+            $.ajax({
+                url: 'https://api.github.com' + url + '?access_token=' + this.getApiToken(),
+                type: 'PATCH',
+                data: data,
+                success: (result) => {
+                    callback(result);
+                },
+                error: () => {
+                    this.resetApiToken(); 
+                }
+            });
+        });
+    }
+
+    post(url, data) {
+        if(typeof data === 'object') {
+            data = JSON.stringify(data);
+        }
+
+        return new Promise((callback) => {
+            $.ajax({
+                url: 'https://api.github.com' + url + '?access_token=' + this.getApiToken(),
+                type: 'POST',
+                data: data,
+                success: (result) => {
+                    callback(result);
+                },
+                error: () => {
+                    this.resetApiToken(); 
+                }
+            });
+        });
+    }
+
+    resetApiToken() {
+        localStorage.setItem('gitHubApiToken', '');
+
+        this.getApiToken();
+
+        location.reload();
+    }
+
+    getApiToken() {
+        if(!localStorage.getItem('gitHubApiToken')) {
+            localStorage.setItem('gitHubApiToken', prompt('Please input API token'));
+        }
+
+        return localStorage.getItem('gitHubApiToken');
+    }
+    
+    getUser() {
+        return new Promise((callback) => {
+            this.get('/user')
+            .then((gitHubUser) => {
+                let user = {
+                    name: gitHubUser.login,
+                    avatar: gitHubUser.avatar_url
+                };
+
+                callback(user);
+            });   
+        });
+    }
+
+    logOut() {
+        localStorage.setItem('gitHubApiToken', '');
+        
+        location.reload();
+    }
+
     createIssue(issue) {
         return new Promise((callback) => {
-            post('/repos/Putaitu/mondai/issues', this.convertIssue(issue))
+            this.post('/repos/Putaitu/mondai/issues', this.convertIssue(issue))
             .then(() => {
                 callback(issue);
             });
@@ -62,7 +107,7 @@ class GitHubApi extends ApiHelper {
 
     getCollaborators() {
         return new Promise((callback) => {
-            get('/repos/Putaitu/mondai/collaborators')
+            this.get('/repos/Putaitu/mondai/collaborators')
             .then((collaborators) => {
                 this.processCollaborators(collaborators);
 
@@ -73,7 +118,7 @@ class GitHubApi extends ApiHelper {
 
     getIssues() {
         return new Promise((callback) => {
-            get('/repos/Putaitu/mondai/issues', 'state=all')
+            this.get('/repos/Putaitu/mondai/issues', 'state=all')
             .then((issues) => {
                 this.processIssues(issues);
 
@@ -85,7 +130,7 @@ class GitHubApi extends ApiHelper {
     getLabels() {
         return new Promise((callback) => {
             if(!labelCache) {
-                get('/repos/Putaitu/mondai/labels')
+                this.get('/repos/Putaitu/mondai/labels')
                 .then((labels) => {
                     labelCache = labels;
 
@@ -156,7 +201,7 @@ class GitHubApi extends ApiHelper {
 
     getMilestones() {
         return new Promise((callback) => {
-            get('/repos/Putaitu/mondai/milestones')
+            this.get('/repos/Putaitu/mondai/milestones')
             .then((milestones) => {
                 this.processMilestones(milestones);
                 
@@ -395,8 +440,7 @@ class GitHubApi extends ApiHelper {
 
     updateIssue(issue) {
         return new Promise((callback) => {
-            // PATCH data to api
-            patch('/repos/Putaitu/mondai/issues/' + (issue.index + 1), this.convertIssue(issue))
+            this.patch('/repos/Putaitu/mondai/issues/' + (issue.index + 1), this.convertIssue(issue))
             .then(() => {
                 callback();
             });
@@ -405,7 +449,7 @@ class GitHubApi extends ApiHelper {
 
     addIssueComment(issue, text) {
         return new Promise((callback) => {
-            post('/repos/Putaitu/mondai/issues/' + (issue.index + 1) + '/comments', {
+            this.post('/repos/Putaitu/mondai/issues/' + (issue.index + 1) + '/comments', {
                 body: text
             })
             .then(() => {
@@ -416,7 +460,7 @@ class GitHubApi extends ApiHelper {
 
     getIssueComments(issue) {
         return new Promise((callback) => {
-            get('/repos/Putaitu/mondai/issues/' + (issue.index + 1) + '/comments')
+            this.get('/repos/Putaitu/mondai/issues/' + (issue.index + 1) + '/comments')
             .then((gitHubComments) => {
                 let comments = [];
 

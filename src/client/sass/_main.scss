@@ -4,3 +4,20 @@
     padding: 0px;
     text-align: left;
 }
+
+body, html {
+    height: 100%;
+}
+
+.app-container {
+    display: flex;
+    min-height: 100%;
+
+    .navbar {
+        flex-shrink: 0;
+    }
+
+    .workspace {
+        flex-grow: 1;
+    }
+}

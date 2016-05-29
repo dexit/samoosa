@@ -7,6 +7,16 @@ class ApiHelper {
         });
     }
     
+    getUser() {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+
+    logOut() {
+        location.reload();
+    }
+
     getIssues() {
         return new Promise((callback) => {
             window.resources.issues = [];

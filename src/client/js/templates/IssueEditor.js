@@ -6,7 +6,7 @@ module.exports = function render() {
     return _.div({class: 'issue-editor'},
         _.div({class: 'header'},
             _.div({class: 'drag-handle'},
-                _.span({class: 'fa fa-cog'})
+                _.span({class: 'fa fa-bars'})
             ).on('mousedown', (e) => { this.onClickDragHandle(e) }),
             this.getAssigneeAvatar(),
             _.button({class: 'btn-toggle btn-transparent'},

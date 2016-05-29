@@ -74,6 +74,20 @@ class ResourceHelper {
             }
         }
     }
+
+    static reloadResource(resource) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+
+    static removeResource(resource, index) {
+        
+    }
+
+    static addResource(resource, item) {
+        
+    }
 }
 
 module.exports = ResourceHelper;

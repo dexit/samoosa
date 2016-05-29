@@ -24,6 +24,14 @@ class ResourceEditor extends View {
             }
         }
     }
+
+    onClickDelete(index) {
+        ResourceHelper.removeResource(this.name, index);
+    }
+    
+    onClickAdd(name) {
+        ResourceHelper.addResource(this.name, name);
+    }
 }
 
 module.exports = ResourceEditor;

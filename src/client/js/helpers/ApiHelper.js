@@ -1,22 +1,6 @@
 'use strict';
 
 class ApiHelper {
-    createIssue(issue) {
-        return new Promise((callback) => {
-            callback();
-        });
-    }
-    
-    getUser() {
-        return new Promise((callback) => {
-            callback();
-        });
-    }
-
-    logOut() {
-        location.reload();
-    }
-
     getIssues() {
         return new Promise((callback) => {
             window.resources.issues = [];
@@ -65,18 +49,6 @@ class ApiHelper {
         });
     }
     
-    getIssueComments() {
-        return new Promise((callback) => {
-            callback([]);
-        });
-    }
-    
-    addIssueComment() {
-        return new Promise((callback) => {
-            callback([]);
-        });
-    }
-    
     getMilestones() {
         return new Promise((callback) => {
             window.resources.milestones = [];
@@ -92,8 +64,66 @@ class ApiHelper {
             callback();
         });
     }
+    
+    createIssue(issue) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+    
+    getUser() {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+
+    logOut() {
+        location.reload();
+    }
+    
+    getIssueComments() {
+        return new Promise((callback) => {
+            callback([]);
+        });
+    }
+    
+    addIssueComment() {
+        return new Promise((callback) => {
+            callback([]);
+        });
+    }
+
+    getResource(resource) {
+        switch(resource) {
+            case 'collaborators':
+                return this.getCollaborators();
+
+            case 'issueTypes':
+                return this.getIssueTypes();
+
+            case 'issuePriorities':
+                return this.getIssuePriorities();
+
+            case 'issueEstimates':
+                return this.getIssueEstimates();
+
+            case 'issueColumns':
+                return this.getIssueColumns();
+
+            case 'milestones':
+                return this.getMilestones();
+
+            case 'versions':
+                return this.getVersions();
+
+            case 'issues':
+                return this.getIssues();
+        }
+    }
 
     getResources() {
+        let helper = this;
+
         return new Promise((callback) => {
             let loaded = {
                 collaborators: false,
@@ -118,45 +148,21 @@ class ApiHelper {
                 callback();
             }
 
-            this.getCollaborators()
-            .then(() => {
-                check('collaborators');
-            });
+            function get(resource) {
+                helper.getResource(resource)
+                .then(() => {
+                    check(resource);
+                });
+            }
 
-            this.getIssueTypes()
-            .then(() => {
-                check('issueTypes');
-            });
-            
-            this.getIssuePriorities()
-            .then(() => {
-                check('issuePriorities');
-            });
-            
-            this.getIssueEstimates()
-            .then(() => {
-                check('issueEstimates');
-            });
-            
-            this.getIssueColumns()
-            .then(() => {
-                check('issueColumns');
-            });
-            
-            this.getMilestones()
-            .then(() => {
-                check('milestones');
-            });
-            
-            this.getVersions()
-            .then(() => {
-                check('versions');
-            });
-            
-            this.getIssues()
-            .then(() => {
-                check('issues');
-            });
+            get('collaborators');
+            get('issueTypes');
+            get('issuePriorities');
+            get('issueEstimates');
+            get('issueColumns');
+            get('milestones');
+            get('versions');
+            get('issues');
         });
     }
 }

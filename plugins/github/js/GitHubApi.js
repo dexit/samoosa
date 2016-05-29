@@ -211,7 +211,7 @@ class GitHubApi extends ApiHelper {
 
         console.log('asdasd');
     }
-    
+
     processMilestones(milestones) {
         window.resources.milestones = [];
         

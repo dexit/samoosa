@@ -11,7 +11,7 @@ module.exports = function render() {
                     _.label(item.name || item.title || item),
                     _.button(
                         _.span({class: 'fa fa-remove'})
-                    )
+                    ).click(() => { this.onClickRemove(i); })
                 );
             })
         ),
@@ -19,7 +19,7 @@ module.exports = function render() {
             _.input({type: 'text'}),
             _.button(
                 _.span({class: 'fa fa-plus'})
-            )
+            ).click(() => { this.onClickAdd(this.$element.find('.footer input').val()); })
         )
     );
 };

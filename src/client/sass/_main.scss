@@ -24,25 +24,44 @@ body, html {
 
 .tabbed-container {
     .tabs {
-        position: relative;
+        display: flex;
+        background-color: material-color('grey', '600');
+        padding-top: 15px;
 
+        &:after {
+            content: '';
+            display: block;
+            flex-grow: 1;
+            border-bottom: 1px solid material-color('grey', '300');
+        }
+        
         .tab {
-            button {
-                height: 30px;
-                line-height: 30px;
-                position: absolute;
-                top: 0px;
-            }
-
-            .content {
-                margin-top: 30px;
-                display: none;
-            }
+            background-color: transparent;
+            border: 0px;
+            border-bottom: 1px solid material-color('grey', '300');
+            display: block;
+            flex-shrink: 0;
+            flex-base: 0;
+            color: material-color('grey', '300');
+            padding: 10px 15px;
 
             &.active {
-                .content {
-                    display: block;
-                }
+                color: material-color('grey', '900');
+                background-color: #fff;
+                border-top: 1px solid material-color('grey', '300');
+                border-left: 1px solid material-color('grey', '300');
+                border-right: 1px solid material-color('grey', '300');
+                border-bottom: 0px;
+            }
+        }
+    }
+
+    .panes {
+        .pane {
+            display: none;
+            
+            &.active {
+                display: block;
             }
         }
     }

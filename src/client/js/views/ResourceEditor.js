@@ -4,33 +4,34 @@ class ResourceEditor extends View {
     constructor(params) {
         super(params);
 
-        this.prettyName();
-
         this.template = require('../templates/ResourceEditor');
+
+        // Special cases
+        if(this.name == 'issueColumns') {
+            for(let i = this.model.length - 1; i >= 0; i--) {
+                if(this.model[i] == 'to do' || this.model[i] == 'done') {
+                    this.model.splice(i, 1);
+                }
+            }
+        }
 
         this.fetch();
     }
 
-    prettyName() {
-        this.prettyName = this.name;
+    onClickRemove(index) {
+        console.log(index);
 
-        for(let i in this.prettyName) {
-            if(i == 0) {
-                this.prettyName = this.prettyName.substring(0,1).toUpperCase() + this.prettyName.substring(1);
-
-            } else if(this.prettyName[i] == this.prettyName[i].toUpperCase()) {
-                this.prettyName = this.prettyName.substring(0, i) + ' ' + this.prettyName.substring(i);
-            
-            }
-        }
-    }
-
-    onClickDelete(index) {
-        ResourceHelper.removeResource(this.name, index);
+        ResourceHelper.removeResource(this.name, index)
+        .then(() => {
+            this.render()
+        });
     }
     
     onClickAdd(name) {
-        ResourceHelper.addResource(this.name, name);
+        ResourceHelper.addResource(this.name, name)
+        .then(() => {
+            this.render();
+        });
     }
 }
 

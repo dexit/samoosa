@@ -20,6 +20,29 @@ window.IssueEditor = require('./views/IssueEditor');
 window.MilestoneEditor = require('./views/MilestoneEditor');
 window.ResourceEditor = require('./views/ResourceEditor');
 
+// ----------
+// Global functions
+// ----------
+// Pretty name
+function prettyName(name) {
+    let prettyName = name;
+
+    for(let i in prettyName) {
+        if(i == 0) {
+            prettyName = prettyName.substring(0,1).toUpperCase() + prettyName.substring(1);
+
+        } else if(prettyName[i] == prettyName[i].toUpperCase()) {
+            prettyName = prettyName.substring(0, i) + ' ' + prettyName.substring(i);
+        
+        }
+    }
+
+    return prettyName;
+}
+
+// ----------
+// Routes
+// ----------
 // User
 Router.route('/user/', () => {
     ApiHelper.getUser()
@@ -100,17 +123,30 @@ Router.route('/settings/', () => {
                         _.div({class: 'tabs'},
                             _.each(window.resources, (name, resource) => {
                                 if(name != 'issues') {
-                                    return _.div({class: 'tab' + (name == 'issueTypes' ? ' active' : '')},
-                                        _.button(name).click(function() {
-                                            $(this).parens('.tabs').find('.tab').toggleClass('active', false);
-                                            $(this).parent().toggleClass('active', true);
-                                        }),
-                                        _.div({class: 'content'},
-                                            new ResourceEditor({
-                                                name: name,
-                                                model: resource
-                                            }).$element
-                                        )
+                                    return _.button({class: 'tab' + (name == 'issueTypes' ? ' active' : '')},
+                                        prettyName(name)
+                                    ).click(function() {
+                                        let index = $(this).index();
+                                        
+                                        $(this).parent().children().each(function(i) {
+                                            $(this).toggleClass('active', i == index);
+                                        });
+
+                                        $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
+                                            $(this).toggleClass('active', i == index);
+                                        });
+                                    });
+                                }
+                            })
+                        ),
+                        _.div({class: 'panes'},
+                            _.each(window.resources, (name, resource) => {
+                                if(name != 'issues') {
+                                    return _.div({class: 'pane' + (name == 'issueTypes' ? ' active' : '')},
+                                        new ResourceEditor({
+                                            name: name,
+                                            model: resource
+                                        }).$element
                                     );
                                 }
                             })

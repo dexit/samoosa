@@ -2,9 +2,6 @@
 
 module.exports = function render() {
     return _.div({class: 'resource-editor'},
-        _.div({class: 'header'},
-            _.h4(this.prettyName)
-        ),
         _.div({class: 'body'},
             _.each(this.model, (i, item) => {
                 return _.div({class: 'item'},
@@ -19,7 +16,9 @@ module.exports = function render() {
             _.input({type: 'text'}),
             _.button(
                 _.span({class: 'fa fa-plus'})
-            ).click(() => { this.onClickAdd(this.$element.find('.footer input').val()); })
+            ).click(() => {
+                this.onClickAdd(this.$element.find('.footer input').val());
+            })
         )
     );
 };

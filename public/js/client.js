@@ -185,7 +185,7 @@ route.url=url;var counter=1;var _iteratorNormalCompletion=true;var _didIteratorE
      * Runs before render
      */},{key:"prerender",value:function prerender(){} /**
      * Renders this view
-     */},{key:"render",value:function render(){var $output=void 0;if(typeof this.template==='function'){$output=this.template.call(this,this);}if($output){if(this.$element){this.$element.replaceWith($output);}else {this.$element=$output;}}} /**
+     */},{key:"render",value:function render(){var $output=void 0;if(typeof this.template==='function'){$output=this.template.call(this,this);}if($output){if(this.$element){this.$element.html($output.children());}else {this.$element=$output;}}} /**
      * Runs after render
      */},{key:"postrender",value:function postrender(){} /**
      * Removes the view from DOM and memory
@@ -442,7 +442,234 @@ route+=strict&&endsWithSlash?'':'(?=\\/|$)';}return new RegExp('^'+route,flags(o
  */function pathToRegexp(path,keys,options){keys=keys||[];if(!isarray(keys)){options= /** @type {!Object} */keys;keys=[];}else if(!options){options={};}if(path instanceof RegExp){return regexpToRegexp(path, /** @type {!Array} */keys);}if(isarray(path)){return arrayToRegexp( /** @type {!Array} */path, /** @type {!Array} */keys,options);}return stringToRegexp( /** @type {string} */path, /** @type {!Array} */keys,options);}},{"isarray":10}],10:[function(require,module,exports){module.exports=Array.isArray||function(arr){return Object.prototype.toString.call(arr)=='[object Array]';};},{}],11:[function(require,module,exports){ // shim for using process in browser
 var process=module.exports={};var queue=[];var draining=false;var currentQueue;var queueIndex=-1;function cleanUpNextTick(){if(!draining||!currentQueue){return;}draining=false;if(currentQueue.length){queue=currentQueue.concat(queue);}else {queueIndex=-1;}if(queue.length){drainQueue();}}function drainQueue(){if(draining){return;}var timeout=setTimeout(cleanUpNextTick);draining=true;var len=queue.length;while(len){currentQueue=queue;queue=[];while(++queueIndex<len){if(currentQueue){currentQueue[queueIndex].run();}}queueIndex=-1;len=queue.length;}currentQueue=null;draining=false;clearTimeout(timeout);}process.nextTick=function(fun){var args=new Array(arguments.length-1);if(arguments.length>1){for(var i=1;i<arguments.length;i++){args[i-1]=arguments[i];}}queue.push(new Item(fun,args));if(queue.length===1&&!draining){setTimeout(drainQueue,0);}}; // v8 likes predictible objects
 function Item(fun,array){this.fun=fun;this.array=array;}Item.prototype.run=function(){this.fun.apply(null,this.array);};process.title='browser';process.browser=true;process.env={};process.argv=[];process.version=''; // empty string to avoid regexp issues
-process.versions={};function noop(){}process.on=noop;process.addListener=noop;process.once=noop;process.off=noop;process.removeListener=noop;process.removeAllListeners=noop;process.emit=noop;process.binding=function(name){throw new Error('process.binding is not supported');};process.cwd=function(){return '/';};process.chdir=function(dir){throw new Error('process.chdir is not supported');};process.umask=function(){return 0;};},{}],12:[function(require,module,exports){'use strict';var ApiHelper=require('../../../src/client/js/helpers/ApiHelper');var labelCache=void 0;var GitHubApi=function(_ApiHelper){_inherits(GitHubApi,_ApiHelper);function GitHubApi(){_classCallCheck(this,GitHubApi);return _possibleConstructorReturn(this,Object.getPrototypeOf(GitHubApi).apply(this,arguments));}_createClass(GitHubApi,[{key:"get",value:function get(url,param){var _this3=this;return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+'access_token='+_this3.getApiToken(),type:'GET',success:function success(result){callback(result);},error:function error(){_this3.resetApiToken();}});});}},{key:"patch",value:function patch(url,data){var _this4=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this4.getApiToken(),type:'PATCH',data:data,success:function success(result){callback(result);},error:function error(){_this4.resetApiToken();}});});}},{key:"post",value:function post(url,data){var _this5=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this5.getApiToken(),type:'POST',data:data,success:function success(result){callback(result);},error:function error(){_this5.resetApiToken();}});});}},{key:"resetApiToken",value:function resetApiToken(){localStorage.setItem('gitHubApiToken','');this.getApiToken();location.reload();}},{key:"getApiToken",value:function getApiToken(){if(!localStorage.getItem('gitHubApiToken')){localStorage.setItem('gitHubApiToken',prompt('Please input API token'));}return localStorage.getItem('gitHubApiToken');}},{key:"getUser",value:function getUser(){var _this6=this;return new Promise(function(callback){_this6.get('/user').then(function(gitHubUser){var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};callback(user);});});}},{key:"logOut",value:function logOut(){localStorage.setItem('gitHubApiToken','');location.reload();}},{key:"createIssue",value:function createIssue(issue){var _this7=this;return new Promise(function(callback){_this7.post('/repos/Putaitu/mondai/issues',_this7.convertIssue(issue)).then(function(){callback(issue);});});}},{key:"getCollaborators",value:function getCollaborators(){var _this8=this;return new Promise(function(callback){_this8.get('/repos/Putaitu/mondai/collaborators').then(function(collaborators){_this8.processCollaborators(collaborators);callback();});});}},{key:"getIssues",value:function getIssues(){var _this9=this;return new Promise(function(callback){_this9.get('/repos/Putaitu/mondai/issues','state=all').then(function(issues){_this9.processIssues(issues);callback();});});}},{key:"getLabels",value:function getLabels(){var _this10=this;return new Promise(function(callback){if(!labelCache){_this10.get('/repos/Putaitu/mondai/labels').then(function(labels){labelCache=labels;callback(labelCache);});}else {callback(labelCache);}});}},{key:"getIssueTypes",value:function getIssueTypes(){var _this11=this;return new Promise(function(callback){_this11.getLabels().then(function(labels){_this11.processIssueTypes(labels);callback();});});}},{key:"getIssueColumns",value:function getIssueColumns(){var _this12=this;return new Promise(function(callback){_this12.getLabels().then(function(labels){_this12.processIssueColumns(labels);callback();});});}},{key:"getIssuePriorities",value:function getIssuePriorities(){var _this13=this;return new Promise(function(callback){_this13.getLabels().then(function(labels){_this13.processIssuePriorities(labels);callback();});});}},{key:"getIssueEstimates",value:function getIssueEstimates(){var _this14=this;return new Promise(function(callback){_this14.getLabels().then(function(labels){_this14.processIssueEstimates(labels);callback();});});}},{key:"getVersions",value:function getVersions(){var _this15=this;return new Promise(function(callback){_this15.getLabels().then(function(labels){_this15.processVersions(labels);callback();});});}},{key:"getMilestones",value:function getMilestones(){var _this16=this;return new Promise(function(callback){_this16.get('/repos/Putaitu/mondai/milestones').then(function(milestones){_this16.processMilestones(milestones);callback();});});console.log('asdasd');}},{key:"processMilestones",value:function processMilestones(milestones){window.resources.milestones=[];for(var i in milestones){var milestone=milestones[i];milestone.index=i;window.resources.milestones.push(milestone);}}},{key:"processVersions",value:function processVersions(labels){window.resources.versions=[];var _iteratorNormalCompletion3=true;var _didIteratorError3=false;var _iteratorError3=undefined;try{for(var _iterator3=labels[Symbol.iterator](),_step3;!(_iteratorNormalCompletion3=(_step3=_iterator3.next()).done);_iteratorNormalCompletion3=true){var label=_step3.value;var versionIndex=label.name.indexOf('version:');if(versionIndex>-1){var versionName=label.name.replace('version:','');window.resources.versions.push(versionName);}}}catch(err){_didIteratorError3=true;_iteratorError3=err;}finally {try{if(!_iteratorNormalCompletion3&&_iterator3.return){_iterator3.return();}}finally {if(_didIteratorError3){throw _iteratorError3;}}}}},{key:"processIssuePriorities",value:function processIssuePriorities(labels){window.resources.issuePriorities=[];var _iteratorNormalCompletion4=true;var _didIteratorError4=false;var _iteratorError4=undefined;try{for(var _iterator4=labels[Symbol.iterator](),_step4;!(_iteratorNormalCompletion4=(_step4=_iterator4.next()).done);_iteratorNormalCompletion4=true){var label=_step4.value;var index=label.name.indexOf('priority:');if(index>-1){var name=label.name.replace('priority:','');window.resources.issuePriorities.push(name);}}}catch(err){_didIteratorError4=true;_iteratorError4=err;}finally {try{if(!_iteratorNormalCompletion4&&_iterator4.return){_iterator4.return();}}finally {if(_didIteratorError4){throw _iteratorError4;}}}}},{key:"processIssueEstimates",value:function processIssueEstimates(labels){window.resources.issueEstimates=[];var _iteratorNormalCompletion5=true;var _didIteratorError5=false;var _iteratorError5=undefined;try{for(var _iterator5=labels[Symbol.iterator](),_step5;!(_iteratorNormalCompletion5=(_step5=_iterator5.next()).done);_iteratorNormalCompletion5=true){var label=_step5.value;var index=label.name.indexOf('estimate:');if(index>-1){var name=label.name.replace('estimate:','');window.resources.issueEstimates.push(name);}}}catch(err){_didIteratorError5=true;_iteratorError5=err;}finally {try{if(!_iteratorNormalCompletion5&&_iterator5.return){_iterator5.return();}}finally {if(_didIteratorError5){throw _iteratorError5;}}}}},{key:"processIssueColumns",value:function processIssueColumns(labels){window.resources.issueColumns=[];window.resources.issueColumns.push('to do');var _iteratorNormalCompletion6=true;var _didIteratorError6=false;var _iteratorError6=undefined;try{for(var _iterator6=labels[Symbol.iterator](),_step6;!(_iteratorNormalCompletion6=(_step6=_iterator6.next()).done);_iteratorNormalCompletion6=true){var label=_step6.value;var index=label.name.indexOf('column:');if(index>-1){var name=label.name.replace('column:','');window.resources.issueColumns.push(name);}}}catch(err){_didIteratorError6=true;_iteratorError6=err;}finally {try{if(!_iteratorNormalCompletion6&&_iterator6.return){_iterator6.return();}}finally {if(_didIteratorError6){throw _iteratorError6;}}}window.resources.issueColumns.push('done');}},{key:"processIssueTypes",value:function processIssueTypes(labels){window.resources.issueTypes=[];var _iteratorNormalCompletion7=true;var _didIteratorError7=false;var _iteratorError7=undefined;try{for(var _iterator7=labels[Symbol.iterator](),_step7;!(_iteratorNormalCompletion7=(_step7=_iterator7.next()).done);_iteratorNormalCompletion7=true){var label=_step7.value;var index=label.name.indexOf('type:');if(index>-1){var name=label.name.replace('type:','');window.resources.issueTypes.push(name);}}}catch(err){_didIteratorError7=true;_iteratorError7=err;}finally {try{if(!_iteratorNormalCompletion7&&_iterator7.return){_iterator7.return();}}finally {if(_didIteratorError7){throw _iteratorError7;}}}}},{key:"processCollaborators",value:function processCollaborators(collaborators){window.resources.collaborators=[];var _iteratorNormalCompletion8=true;var _didIteratorError8=false;var _iteratorError8=undefined;try{for(var _iterator8=collaborators[Symbol.iterator](),_step8;!(_iteratorNormalCompletion8=(_step8=_iterator8.next()).done);_iteratorNormalCompletion8=true){var collaborator=_step8.value;window.resources.collaborators.push({name:collaborator.login,avatar:collaborator.avatar_url});}}catch(err){_didIteratorError8=true;_iteratorError8=err;}finally {try{if(!_iteratorNormalCompletion8&&_iterator8.return){_iterator8.return();}}finally {if(_didIteratorError8){throw _iteratorError8;}}}}},{key:"processIssues",value:function processIssues(issues){window.resources.issues=[];var _iteratorNormalCompletion9=true;var _didIteratorError9=false;var _iteratorError9=undefined;try{for(var _iterator9=issues[Symbol.iterator](),_step9;!(_iteratorNormalCompletion9=(_step9=_iterator9.next()).done);_iteratorNormalCompletion9=true){var gitHubIssue=_step9.value;var issue=new Issue();issue.title=gitHubIssue.title;issue.description=gitHubIssue.body;issue.reporter=ResourceHelper.getCollaborator(gitHubIssue.user.login);if(gitHubIssue.assignee){issue.assignee=ResourceHelper.getCollaborator(gitHubIssue.assignee.login);}var _iteratorNormalCompletion10=true;var _didIteratorError10=false;var _iteratorError10=undefined;try{for(var _iterator10=gitHubIssue.labels[Symbol.iterator](),_step10;!(_iteratorNormalCompletion10=(_step10=_iterator10.next()).done);_iteratorNormalCompletion10=true){var label=_step10.value;var typeIndex=label.name.indexOf('type:');var priorityIndex=label.name.indexOf('priority:');var estimateIndex=label.name.indexOf('estimate:');var versionIndex=label.name.indexOf('version:');var columnIndex=label.name.indexOf('column:');if(typeIndex>-1){var name=label.name.replace('type:','');issue.type=ResourceHelper.getIssueType(name);}else if(versionIndex>-1){var _name=label.name.replace('version:','');issue.version=ResourceHelper.getVersion(_name);}else if(estimateIndex>-1){var _name2=label.name.replace('estimate:','');issue.estimate=ResourceHelper.getIssueEstimate(_name2);}else if(priorityIndex>-1){var _name3=label.name.replace('priority:','');issue.priority=ResourceHelper.getIssuePriority(_name3);}else if(columnIndex>-1){var _name4=label.name.replace('column:','');issue.column=ResourceHelper.getIssueColumn(_name4);}else {issue.labels.push(label);}}}catch(err){_didIteratorError10=true;_iteratorError10=err;}finally {try{if(!_iteratorNormalCompletion10&&_iterator10.return){_iterator10.return();}}finally {if(_didIteratorError10){throw _iteratorError10;}}}if(gitHubIssue.state=='closed'){issue.column=resources.issueColumns.length-1;}if(gitHubIssue.milestone){issue.milestone=ResourceHelper.getMilestone(gitHubIssue.milestone.title);}issue.index=gitHubIssue.number-1;window.resources.issues[issue.index]=issue;}}catch(err){_didIteratorError9=true;_iteratorError9=err;}finally {try{if(!_iteratorNormalCompletion9&&_iterator9.return){_iterator9.return();}}finally {if(_didIteratorError9){throw _iteratorError9;}}}}},{key:"convertIssue",value:function convertIssue(issue){ // Directly mappable properties
+process.versions={};function noop(){}process.on=noop;process.addListener=noop;process.once=noop;process.off=noop;process.removeListener=noop;process.removeAllListeners=noop;process.emit=noop;process.binding=function(name){throw new Error('process.binding is not supported');};process.cwd=function(){return '/';};process.chdir=function(dir){throw new Error('process.chdir is not supported');};process.umask=function(){return 0;};},{}],12:[function(require,module,exports){'use strict';var ApiHelper=require('../../../src/client/js/helpers/ApiHelper');var labelCache=void 0;var GitHubApi=function(_ApiHelper){_inherits(GitHubApi,_ApiHelper);function GitHubApi(){_classCallCheck(this,GitHubApi);return _possibleConstructorReturn(this,Object.getPrototypeOf(GitHubApi).apply(this,arguments));}_createClass(GitHubApi,[{key:"get", // ----------
+// Generic API methods
+// ----------
+/**
+     * GET method
+     *
+     * @param {String} url
+     * @param {String} param
+     *
+     * @returns {Promise} promise
+     */value:function get(url,param){var _this3=this;return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+'access_token='+_this3.getApiToken(),type:'GET',success:function success(result){callback(result);},error:function error(){_this3.resetApiToken();}});});} /**
+     * DELETE method
+     *
+     * @param {String} url
+     * @param {String} param
+     *
+     * @returns {Promise} promise
+     */},{key:"delete",value:function _delete(url,param){var _this4=this;return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+'access_token='+_this4.getApiToken(),type:'DELETE',success:function success(result){callback(result);},error:function error(){_this4.resetApiToken();}});});} /**
+     * PATCH method
+     *
+     * @param {String} url
+     * @param {Object} data
+     *
+     * @returns {Promise} promise
+     */},{key:"patch",value:function patch(url,data){var _this5=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this5.getApiToken(),type:'PATCH',data:data,success:function success(result){callback(result);},error:function error(){_this5.resetApiToken();}});});} /**
+     * POST method
+     *
+     * @param {String} url
+     * @param {Object} data
+     *
+     * @returns {Promise} promise
+     */},{key:"post",value:function post(url,data){var _this6=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this6.getApiToken(),type:'POST',data:data,success:function success(result){callback(result);},error:function error(){_this6.resetApiToken();}});});} /**
+     * PUT method
+     *
+     * @param {String} url
+     *
+     * @returns {Promise} promise
+     */},{key:"put",value:function put(url){var _this7=this;return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this7.getApiToken(),type:'PUT',success:function success(result){callback(result);},error:function error(){_this7.resetApiToken();}});});} // ----------
+// Session methods
+// ----------
+/**
+     * Resets the API token and reloads
+     */},{key:"resetApiToken",value:function resetApiToken(){localStorage.setItem('gitHubApiToken','');this.getApiToken();location.reload();} /**
+     * Gets the API token and prompts for one if needed
+     * 
+     * @returns {String} token
+     */},{key:"getApiToken",value:function getApiToken(){if(!localStorage.getItem('gitHubApiToken')){localStorage.setItem('gitHubApiToken',prompt('Please input API token'));}return localStorage.getItem('gitHubApiToken');} /**
+     * Gets the currently logged in user object
+     *
+     * @returns {Promise} promise
+     */},{key:"getUser",value:function getUser(){var _this8=this;return new Promise(function(callback){_this8.get('/user').then(function(gitHubUser){var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};callback(user);});});} /**
+     * Logs out the currently logged in user and reloads
+     */},{key:"logOut",value:function logOut(){localStorage.setItem('gitHubApiToken','');location.reload();} // ----------
+// Resource getters
+// ----------
+/**
+     * Gets collaborators
+     *
+     * @returns {Promise} promise
+     */},{key:"getCollaborators",value:function getCollaborators(){var _this9=this;return new Promise(function(callback){_this9.get('/repos/Putaitu/mondai/collaborators').then(function(collaborators){_this9.processCollaborators(collaborators);callback();});});} /**
+     * Gets issues
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssues",value:function getIssues(){var _this10=this;return new Promise(function(callback){_this10.get('/repos/Putaitu/mondai/issues','state=all').then(function(issues){_this10.processIssues(issues);callback();});});} /**
+     * Gets labels and caches them
+     *
+     * @returns {Promise} promise
+     */},{key:"getLabels",value:function getLabels(){var _this11=this;return new Promise(function(callback){if(!labelCache){_this11.get('/repos/Putaitu/mondai/labels').then(function(labels){labelCache=labels;callback(labelCache);});}else {callback(labelCache);}});} /**
+     * Gets issue types
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssueTypes",value:function getIssueTypes(){var _this12=this;return new Promise(function(callback){_this12.getLabels().then(function(labels){_this12.processIssueTypes(labels);callback();});});} /**
+     * Gets issue columns
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssueColumns",value:function getIssueColumns(){var _this13=this;return new Promise(function(callback){_this13.getLabels().then(function(labels){_this13.processIssueColumns(labels);callback();});});} /**
+     * Gets issue priorities
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssuePriorities",value:function getIssuePriorities(){var _this14=this;return new Promise(function(callback){_this14.getLabels().then(function(labels){_this14.processIssuePriorities(labels);callback();});});} /**
+     * Gets issue estimates
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssueEstimates",value:function getIssueEstimates(){var _this15=this;return new Promise(function(callback){_this15.getLabels().then(function(labels){_this15.processIssueEstimates(labels);callback();});});} /**
+     * Gets versions
+     *
+     * @returns {Promise} promise
+     */},{key:"getVersions",value:function getVersions(){var _this16=this;return new Promise(function(callback){_this16.getLabels().then(function(labels){_this16.processVersions(labels);callback();});});} /**
+     * Gets milestones
+     *
+     * @returns {Promise} promise
+     */},{key:"getMilestones",value:function getMilestones(){var _this17=this;return new Promise(function(callback){_this17.get('/repos/Putaitu/mondai/milestones').then(function(milestones){_this17.processMilestones(milestones);callback();});});} // ----------
+// Resource adders
+// ----------
+/**
+     * Adds a new issue
+     *
+     * @param {Object} issue
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssue",value:function addIssue(issue){var _this18=this;return new Promise(function(callback){_this18.post('/repos/Putaitu/mondai/issues',_this18.convertIssue(issue)).then(function(){callback(issue);});});} /**
+     * Adds collaborator
+     *
+     * @param {String} collaborator
+     *
+     * @returns {Promise} promise
+     */},{key:"addCollaborator",value:function addCollaborator(collaborator){var _this19=this;return new Promise(function(callback){_this19.put('/repos/Putaitu/mondai/collaborators/'+collaborator).then(function(){callback();});});} /**
+     * Adds issue type
+     *
+     * @param {String} type
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssueType",value:function addIssueType(type){var _this20=this;return new Promise(function(callback){_this20.post('/repos/Putaitu/mondai/labels',{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
+     * Adds issue priority
+     *
+     * @param {String} priority
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssuePriority",value:function addIssuePriority(priority){var _this21=this;return new Promise(function(callback){_this21.post('/repos/Putaitu/mondai/labels',{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
+     * Adds issue estimate
+     *
+     * @param {String} estimate
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssueEstimate",value:function addIssueEstimate(estimate){var _this22=this;return new Promise(function(callback){_this22.post('/repos/Putaitu/mondai/labels',{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
+     * Adds issue column
+     *
+     * @param {String} column
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssueColumn",value:function addIssueColumn(column){var _this23=this;return new Promise(function(callback){_this23.post('/repos/Putaitu/mondai/labels',{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
+     * Adds milestone 
+     * TODO: Add remaining properties
+     *
+     * @param {String} milestone
+     *
+     * @returns {Promise} promise
+     */},{key:"addMilestone",value:function addMilestone(milestone){var _this24=this;return new Promise(function(callback){_this24.post('/repos/Putaitu/mondai/milestones',{title:milestone}).then(function(){callback();});});} /**
+     * Adds version
+     *
+     * @param {String} version
+     *
+     * @returns {Promise} promise
+     */},{key:"addVersion",value:function addVersion(version){var _this25=this;return new Promise(function(callback){_this25.post('/repos/Putaitu/mondai/labels',{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
+// Resource removers
+// ----------
+/**
+     * Removes collaborator
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeCollaborator",value:function removeCollaborator(index){var _this26=this;return new Promise(function(callback){_this26.delete('/repos/Putaitu/mondai/collaborators/'+window.resources.collaborators[index]).then(function(){callback();});});} /**
+     * Removes issue type
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssueType",value:function removeIssueType(index){var _this27=this;return new Promise(function(callback){_this27.delete('/repos/Putaitu/mondai/labels/type:'+window.resources.issueTypes[index]).then(function(){callback();});});} /**
+     * Removes issue priority
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssuePriority",value:function removeIssuePriority(index){var _this28=this;return new Promise(function(callback){_this28.delete('/repos/Putaitu/mondai/labels/priority:'+window.resources.issuePriorities[index]).then(function(){callback();});});} /**
+     * Removes issue estimate
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssueEstimate",value:function removeIssueEstimate(index){var _this29=this;return new Promise(function(callback){_this29.delete('/repos/Putaitu/mondai/labels/estimate:'+window.resources.issueEstimates[index]).then(function(){callback();});});} /**
+     * Removes issue column
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssueColumn",value:function removeIssueColumn(index){var _this30=this;return new Promise(function(callback){_this30.delete('/repos/Putaitu/mondai/labels/column:'+window.resources.issueColumns[index]).then(function(){callback();});});} /**
+     * Removes milestone 
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeMilestone",value:function removeMilestone(index){var _this31=this;return new Promise(function(callback){_this31.delete('/repos/Putaitu/mondai/milestones/'+(index+1)).then(function(){callback();});});} /**
+     * Removes version
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeVersion",value:function removeVersion(index){var _this32=this;return new Promise(function(callback){_this32.delete('/repos/Putaitu/mondai/labels/version:'+window.resources.versions[index]).then(function(){callback();});});} // ----------
+// Resource processing methods
+// ----------
+/**
+     * Process milestones
+     *
+     * @param {Array} milestones
+     */},{key:"processMilestones",value:function processMilestones(milestones){window.resources.milestones=[];for(var i in milestones){var milestone=milestones[i];milestone.index=i;window.resources.milestones.push(milestone);}} /**
+     * Process versions
+     *
+     * @param {Array} labels
+     */},{key:"processVersions",value:function processVersions(labels){window.resources.versions=[];var _iteratorNormalCompletion3=true;var _didIteratorError3=false;var _iteratorError3=undefined;try{for(var _iterator3=labels[Symbol.iterator](),_step3;!(_iteratorNormalCompletion3=(_step3=_iterator3.next()).done);_iteratorNormalCompletion3=true){var label=_step3.value;var versionIndex=label.name.indexOf('version:');if(versionIndex>-1){var versionName=label.name.replace('version:','');window.resources.versions.push(versionName);}}}catch(err){_didIteratorError3=true;_iteratorError3=err;}finally {try{if(!_iteratorNormalCompletion3&&_iterator3.return){_iterator3.return();}}finally {if(_didIteratorError3){throw _iteratorError3;}}}} /**
+     * Process issue priotities
+     *
+     * @param {Array} labels
+     */},{key:"processIssuePriorities",value:function processIssuePriorities(labels){window.resources.issuePriorities=[];var _iteratorNormalCompletion4=true;var _didIteratorError4=false;var _iteratorError4=undefined;try{for(var _iterator4=labels[Symbol.iterator](),_step4;!(_iteratorNormalCompletion4=(_step4=_iterator4.next()).done);_iteratorNormalCompletion4=true){var label=_step4.value;var index=label.name.indexOf('priority:');if(index>-1){var name=label.name.replace('priority:','');window.resources.issuePriorities.push(name);}}}catch(err){_didIteratorError4=true;_iteratorError4=err;}finally {try{if(!_iteratorNormalCompletion4&&_iterator4.return){_iterator4.return();}}finally {if(_didIteratorError4){throw _iteratorError4;}}}} /**
+     * Process issue estimates
+     *
+     * @param {Array} labels
+     */},{key:"processIssueEstimates",value:function processIssueEstimates(labels){window.resources.issueEstimates=[];var _iteratorNormalCompletion5=true;var _didIteratorError5=false;var _iteratorError5=undefined;try{for(var _iterator5=labels[Symbol.iterator](),_step5;!(_iteratorNormalCompletion5=(_step5=_iterator5.next()).done);_iteratorNormalCompletion5=true){var label=_step5.value;var index=label.name.indexOf('estimate:');if(index>-1){var name=label.name.replace('estimate:','');window.resources.issueEstimates.push(name);}}}catch(err){_didIteratorError5=true;_iteratorError5=err;}finally {try{if(!_iteratorNormalCompletion5&&_iterator5.return){_iterator5.return();}}finally {if(_didIteratorError5){throw _iteratorError5;}}}} /**
+     * Process issue columns
+     *
+     * @param {Array} labels
+     */},{key:"processIssueColumns",value:function processIssueColumns(labels){window.resources.issueColumns=[];window.resources.issueColumns.push('to do');var _iteratorNormalCompletion6=true;var _didIteratorError6=false;var _iteratorError6=undefined;try{for(var _iterator6=labels[Symbol.iterator](),_step6;!(_iteratorNormalCompletion6=(_step6=_iterator6.next()).done);_iteratorNormalCompletion6=true){var label=_step6.value;var index=label.name.indexOf('column:');if(index>-1){var name=label.name.replace('column:','');window.resources.issueColumns.push(name);}}}catch(err){_didIteratorError6=true;_iteratorError6=err;}finally {try{if(!_iteratorNormalCompletion6&&_iterator6.return){_iterator6.return();}}finally {if(_didIteratorError6){throw _iteratorError6;}}}window.resources.issueColumns.push('done');} /**
+     * Process issue types
+     *
+     * @param {Array} labels
+     */},{key:"processIssueTypes",value:function processIssueTypes(labels){window.resources.issueTypes=[];var _iteratorNormalCompletion7=true;var _didIteratorError7=false;var _iteratorError7=undefined;try{for(var _iterator7=labels[Symbol.iterator](),_step7;!(_iteratorNormalCompletion7=(_step7=_iterator7.next()).done);_iteratorNormalCompletion7=true){var label=_step7.value;var index=label.name.indexOf('type:');if(index>-1){var name=label.name.replace('type:','');window.resources.issueTypes.push(name);}}}catch(err){_didIteratorError7=true;_iteratorError7=err;}finally {try{if(!_iteratorNormalCompletion7&&_iterator7.return){_iterator7.return();}}finally {if(_didIteratorError7){throw _iteratorError7;}}}} /**
+     * Process collaborators
+     *
+     * @param {Array} collaborators
+     */},{key:"processCollaborators",value:function processCollaborators(collaborators){window.resources.collaborators=[];var _iteratorNormalCompletion8=true;var _didIteratorError8=false;var _iteratorError8=undefined;try{for(var _iterator8=collaborators[Symbol.iterator](),_step8;!(_iteratorNormalCompletion8=(_step8=_iterator8.next()).done);_iteratorNormalCompletion8=true){var collaborator=_step8.value;window.resources.collaborators.push({name:collaborator.login,avatar:collaborator.avatar_url});}}catch(err){_didIteratorError8=true;_iteratorError8=err;}finally {try{if(!_iteratorNormalCompletion8&&_iterator8.return){_iterator8.return();}}finally {if(_didIteratorError8){throw _iteratorError8;}}}} /**
+     * Process issues
+     *
+     * @param {Array} issues
+     */},{key:"processIssues",value:function processIssues(issues){window.resources.issues=[];var _iteratorNormalCompletion9=true;var _didIteratorError9=false;var _iteratorError9=undefined;try{for(var _iterator9=issues[Symbol.iterator](),_step9;!(_iteratorNormalCompletion9=(_step9=_iterator9.next()).done);_iteratorNormalCompletion9=true){var gitHubIssue=_step9.value;var issue=new Issue();issue.title=gitHubIssue.title;issue.description=gitHubIssue.body;issue.reporter=ResourceHelper.getCollaborator(gitHubIssue.user.login);if(gitHubIssue.assignee){issue.assignee=ResourceHelper.getCollaborator(gitHubIssue.assignee.login);}var _iteratorNormalCompletion10=true;var _didIteratorError10=false;var _iteratorError10=undefined;try{for(var _iterator10=gitHubIssue.labels[Symbol.iterator](),_step10;!(_iteratorNormalCompletion10=(_step10=_iterator10.next()).done);_iteratorNormalCompletion10=true){var label=_step10.value;var typeIndex=label.name.indexOf('type:');var priorityIndex=label.name.indexOf('priority:');var estimateIndex=label.name.indexOf('estimate:');var versionIndex=label.name.indexOf('version:');var columnIndex=label.name.indexOf('column:');if(typeIndex>-1){var name=label.name.replace('type:','');issue.type=ResourceHelper.getIssueType(name);}else if(versionIndex>-1){var _name=label.name.replace('version:','');issue.version=ResourceHelper.getVersion(_name);}else if(estimateIndex>-1){var _name2=label.name.replace('estimate:','');issue.estimate=ResourceHelper.getIssueEstimate(_name2);}else if(priorityIndex>-1){var _name3=label.name.replace('priority:','');issue.priority=ResourceHelper.getIssuePriority(_name3);}else if(columnIndex>-1){var _name4=label.name.replace('column:','');issue.column=ResourceHelper.getIssueColumn(_name4);}else {issue.labels.push(label);}}}catch(err){_didIteratorError10=true;_iteratorError10=err;}finally {try{if(!_iteratorNormalCompletion10&&_iterator10.return){_iterator10.return();}}finally {if(_didIteratorError10){throw _iteratorError10;}}}if(gitHubIssue.state=='closed'){issue.column=resources.issueColumns.length-1;}if(gitHubIssue.milestone){issue.milestone=ResourceHelper.getMilestone(gitHubIssue.milestone.title);}issue.index=gitHubIssue.number-1;window.resources.issues[issue.index]=issue;}}catch(err){_didIteratorError9=true;_iteratorError9=err;}finally {try{if(!_iteratorNormalCompletion9&&_iterator9.return){_iterator9.return();}}finally {if(_didIteratorError9){throw _iteratorError9;}}}} /**
+     * Convert issue model to GitHub schema
+     *
+     * @param {Object} issue
+     */},{key:"convertIssue",value:function convertIssue(issue){ // Directly mappable properties
 var gitHubIssue={title:issue.title,body:issue.description,labels:[]}; // Assignee
 var assignee=resources.collaborators[issue.assignee];if(assignee){gitHubIssue.assignee=assignee.name;} // State
 var issueColumn=resources.issueColumns[issue.column];gitHubIssue.state=issueColumn=='done'?'closed':'open'; // GitHub counts numbers from 1, Mondai counts from 0
@@ -451,18 +678,227 @@ var issueType=resources.issueTypes[issue.type];if(issueType){gitHubIssue.labels.
 var version=resources.versions[issue.version];if(version){gitHubIssue.labels.push('version:'+version);} // Estimate
 var issueEstimate=resources.issueEstimates[issue.estimate];if(issueEstimate){gitHubIssue.labels.push('estimate:'+issueEstimate);} // Priority
 var issuePriority=resources.issuePriorities[issue.priority];if(issuePriority){gitHubIssue.labels.push('priority:'+issuePriority);} // Column
-if(issueColumn&&issueColumn!='to do'&&issueColumn!='done'){gitHubIssue.labels.push('column:'+issueColumn);}return gitHubIssue;}},{key:"updateIssue",value:function updateIssue(issue){var _this17=this;return new Promise(function(callback){_this17.patch('/repos/Putaitu/mondai/issues/'+(issue.index+1),_this17.convertIssue(issue)).then(function(){callback();});});}},{key:"addIssueComment",value:function addIssueComment(issue,text){var _this18=this;return new Promise(function(callback){_this18.post('/repos/Putaitu/mondai/issues/'+(issue.index+1)+'/comments',{body:text}).then(function(){callback();});});}},{key:"getIssueComments",value:function getIssueComments(issue){var _this19=this;return new Promise(function(callback){_this19.get('/repos/Putaitu/mondai/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion11=true;var _didIteratorError11=false;var _iteratorError11=undefined;try{for(var _iterator11=gitHubComments[Symbol.iterator](),_step11;!(_iteratorNormalCompletion11=(_step11=_iterator11.next()).done);_iteratorNormalCompletion11=true){var gitHubComment=_step11.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body};comments.push(comment);}}catch(err){_didIteratorError11=true;_iteratorError11=err;}finally {try{if(!_iteratorNormalCompletion11&&_iterator11.return){_iterator11.return();}}finally {if(_didIteratorError11){throw _iteratorError11;}}}callback(comments);});});}}]);return GitHubApi;}(ApiHelper);module.exports=GitHubApi;},{"../../../src/client/js/helpers/ApiHelper":14}],13:[function(require,module,exports){'use strict'; // Libs
+if(issueColumn&&issueColumn!='to do'&&issueColumn!='done'){gitHubIssue.labels.push('column:'+issueColumn);}return gitHubIssue;} /**
+     * Update issue
+     *
+     * @param {Object} issue
+     */},{key:"updateIssue",value:function updateIssue(issue){var _this33=this;return new Promise(function(callback){_this33.patch('/repos/Putaitu/mondai/issues/'+(issue.index+1),_this33.convertIssue(issue)).then(function(){callback();});});} /**
+     * Add issue comment
+     *
+     * @param {Object} issue
+     * @param {String} text
+     */},{key:"addIssueComment",value:function addIssueComment(issue,text){var _this34=this;return new Promise(function(callback){_this34.post('/repos/Putaitu/mondai/issues/'+(issue.index+1)+'/comments',{body:text}).then(function(){callback();});});} /**
+     * Get issue comments
+     *
+     * @param {Object} issue
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssueComments",value:function getIssueComments(issue){var _this35=this;return new Promise(function(callback){_this35.get('/repos/Putaitu/mondai/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion11=true;var _didIteratorError11=false;var _iteratorError11=undefined;try{for(var _iterator11=gitHubComments[Symbol.iterator](),_step11;!(_iteratorNormalCompletion11=(_step11=_iterator11.next()).done);_iteratorNormalCompletion11=true){var gitHubComment=_step11.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body};comments.push(comment);}}catch(err){_didIteratorError11=true;_iteratorError11=err;}finally {try{if(!_iteratorNormalCompletion11&&_iterator11.return){_iterator11.return();}}finally {if(_didIteratorError11){throw _iteratorError11;}}}callback(comments);});});}}]);return GitHubApi;}(ApiHelper);module.exports=GitHubApi;},{"../../../src/client/js/helpers/ApiHelper":14}],13:[function(require,module,exports){'use strict'; // Libs
 require('exomon');window.Promise=require('bluebird');window.markdownToHtml=require('marked'); // Helpers
 window.ResourceHelper=require('./helpers/ResourceHelper');var GitHubApi=require('../../../plugins/github/js/GitHubApi');window.ApiHelper=new GitHubApi(); // Models
 window.Issue=require('./models/Issue'); // Views
-window.Navbar=require('./views/Navbar');window.IssueEditor=require('./views/IssueEditor');window.MilestoneEditor=require('./views/MilestoneEditor');window.ResourceEditor=require('./views/ResourceEditor'); // User
+window.Navbar=require('./views/Navbar');window.IssueEditor=require('./views/IssueEditor');window.MilestoneEditor=require('./views/MilestoneEditor');window.ResourceEditor=require('./views/ResourceEditor'); // ----------
+// Global functions
+// ----------
+// Pretty name
+function prettyName(name){var prettyName=name;for(var i in prettyName){if(i==0){prettyName=prettyName.substring(0,1).toUpperCase()+prettyName.substring(1);}else if(prettyName[i]==prettyName[i].toUpperCase()){prettyName=prettyName.substring(0,i)+' '+prettyName.substring(i);}}return prettyName;} // ----------
+// Routes
+// ----------
+// User
 Router.route('/user/',function(){ApiHelper.getUser().then(function(user){$('.app-container').empty().append(new Navbar().$element).append(_.div({class:'workspace user-container'},_.div({class:'profile'},_.h4('Current user'),_.img({src:user.avatar}),_.p(user.name),_.h4('Session'),_.button('Change account').click(function(){ApiHelper.logOut();}))));});}); // Board
 Router.route('/board/',function(){ApiHelper.getResources().then(function(){$('.app-container').empty().append(new Navbar().$element).append(_.div({class:'workspace board-container'},_.each(window.resources.milestones,function(i,milestone){return new MilestoneEditor({model:milestone}).$element;}),new MilestoneEditor({model:{title:'Backlog'}}).$element));});}); // List
 Router.route('/list/',function(){ApiHelper.getResources().then(function(){$('.app-container').empty().append(new Navbar().$element).append(_.div({class:'workspace board-container list'},_.each(window.resources.milestones,function(i,milestone){return new MilestoneEditor({model:milestone}).$element;}),new MilestoneEditor({model:{title:'Backlog'}}).$element));});}); // Settings
-Router.route('/settings/',function(){ApiHelper.getResources().then(function(){$('.app-container').empty().append(new Navbar().$element).append(_.div({class:'workspace settings-container'},_.div({class:'tabbed-container'},_.div({class:'tabs'},_.each(window.resources,function(name,resource){if(name!='issues'){return _.div({class:'tab'+(name=='issueTypes'?' active':'')},_.button(name).click(function(){$(this).parens('.tabs').find('.tab').toggleClass('active',false);$(this).parent().toggleClass('active',true);}),_.div({class:'content'},new ResourceEditor({name:name,model:resource}).$element));}})))));});});Router.init();},{"../../../plugins/github/js/GitHubApi":12,"./helpers/ResourceHelper":15,"./models/Issue":16,"./views/IssueEditor":21,"./views/MilestoneEditor":22,"./views/Navbar":23,"./views/ResourceEditor":24,"bluebird":1,"exomon":7,"marked":8}],14:[function(require,module,exports){'use strict';var ApiHelper=function(){function ApiHelper(){_classCallCheck(this,ApiHelper);}_createClass(ApiHelper,[{key:"getIssues",value:function getIssues(){return new Promise(function(callback){window.resources.issues=[];callback();});}},{key:"getCollaborators",value:function getCollaborators(){return new Promise(function(callback){window.resources.collaborators=[];callback();});}},{key:"getIssueTypes",value:function getIssueTypes(){return new Promise(function(callback){window.resources.issueTypes=[];callback();});}},{key:"getIssuePriorities",value:function getIssuePriorities(){return new Promise(function(callback){window.resources.issuePriorities=[];callback();});}},{key:"getIssueEstimates",value:function getIssueEstimates(){return new Promise(function(callback){window.resources.issueEstimates=[];callback();});}},{key:"getIssueColumns",value:function getIssueColumns(){return new Promise(function(callback){window.resources.issueColumns=[];callback();});}},{key:"getMilestones",value:function getMilestones(){return new Promise(function(callback){window.resources.milestones=[];callback();});}},{key:"getVersions",value:function getVersions(){return new Promise(function(callback){window.resources.versions=[];callback();});}},{key:"createIssue",value:function createIssue(issue){return new Promise(function(callback){callback();});}},{key:"getUser",value:function getUser(){return new Promise(function(callback){callback();});}},{key:"logOut",value:function logOut(){location.reload();}},{key:"getIssueComments",value:function getIssueComments(){return new Promise(function(callback){callback([]);});}},{key:"addIssueComment",value:function addIssueComment(){return new Promise(function(callback){callback([]);});}},{key:"getResource",value:function getResource(resource){switch(resource){case 'collaborators':return this.getCollaborators();case 'issueTypes':return this.getIssueTypes();case 'issuePriorities':return this.getIssuePriorities();case 'issueEstimates':return this.getIssueEstimates();case 'issueColumns':return this.getIssueColumns();case 'milestones':return this.getMilestones();case 'versions':return this.getVersions();case 'issues':return this.getIssues();}}},{key:"getResources",value:function getResources(){var helper=this;return new Promise(function(callback){var loaded={collaborators:false,issueTypes:false,issuePriorities:false,issueEstimates:false,issueColumns:false,milestones:false,versions:false,issues:false};function check(resource){loaded[resource]=true;for(var _resource in loaded){if(!loaded[_resource]){return;}}callback();}function get(resource){helper.getResource(resource).then(function(){check(resource);});}get('collaborators');get('issueTypes');get('issuePriorities');get('issueEstimates');get('issueColumns');get('milestones');get('versions');get('issues');});}}]);return ApiHelper;}();module.exports=ApiHelper;},{}],15:[function(require,module,exports){'use strict';window.resources={};var ResourceHelper=function(){function ResourceHelper(){_classCallCheck(this,ResourceHelper);}_createClass(ResourceHelper,null,[{key:"getCollaborator",value:function getCollaborator(name){for(var i in window.resources.collaborators){var collaborator=window.resources.collaborators[i];if(collaborator.name==name){return i;}}}},{key:"getIssuePriority",value:function getIssuePriority(name){for(var i in window.resources.issuePriorities){var type=window.resources.issuePriorities[i];if(type==name){return i;}}}},{key:"getIssueEstimate",value:function getIssueEstimate(name){for(var i in window.resources.issueEstimates){var type=window.resources.issueEstimates[i];if(type==name){return i;}}}},{key:"getIssueColumn",value:function getIssueColumn(name){for(var i in window.resources.issueColumns){var type=window.resources.issueColumns[i];if(type==name){return i;}}return 0;}},{key:"getIssueType",value:function getIssueType(name){for(var i in window.resources.issueTypes){var type=window.resources.issueTypes[i];if(type==name){return i;}}}},{key:"getVersion",value:function getVersion(name){for(var i in window.resources.versions){var version=window.resources.versions[i];if(version==name){return i;}}}},{key:"getMilestone",value:function getMilestone(name){for(var i in window.resources.milestones){var milestone=window.resources.milestones[i];if(milestone.title==name){return i;}}}},{key:"reloadResource",value:function reloadResource(resource){return new Promise(function(callback){callback();});}},{key:"removeResource",value:function removeResource(resource,index){}},{key:"addResource",value:function addResource(resource,item){}}]);return ResourceHelper;}();module.exports=ResourceHelper;},{}],16:[function(require,module,exports){'use strict';var Issue=function(){_createClass(Issue,null,[{key:"create",value:function create(properties){return new Promise(function(callback){var issue=new Issue();issue.index=window.resources.issues.length;window.resources.issues[issue.index]=issue;if(properties){for(var k in properties){issue[k]=properties[k];}}ApiHelper.createIssue(issue).then(function(){callback(issue);});});}}]);function Issue(properties){_classCallCheck(this,Issue);if(properties){this.adopt(properties);}else {this.useStandard();}}_createClass(Issue,[{key:"useStandard",value:function useStandard(){this.title='New issue';this.description='';this.reporter;this.column=0; // Labels for types are defined by plugin
+Router.route('/settings/',function(){ApiHelper.getResources().then(function(){$('.app-container').empty().append(new Navbar().$element).append(_.div({class:'workspace settings-container'},_.div({class:'tabbed-container'},_.div({class:'tabs'},_.each(window.resources,function(name,resource){if(name!='issues'){return _.button({class:'tab'+(name=='issueTypes'?' active':'')},prettyName(name)).click(function(){var index=$(this).index();$(this).parent().children().each(function(i){$(this).toggleClass('active',i==index);});$(this).parents('.tabbed-container').find('.panes .pane').each(function(i){$(this).toggleClass('active',i==index);});});}})),_.div({class:'panes'},_.each(window.resources,function(name,resource){if(name!='issues'){return _.div({class:'pane'+(name=='issueTypes'?' active':'')},new ResourceEditor({name:name,model:resource}).$element);}})))));});});Router.init();},{"../../../plugins/github/js/GitHubApi":12,"./helpers/ResourceHelper":15,"./models/Issue":16,"./views/IssueEditor":21,"./views/MilestoneEditor":22,"./views/Navbar":23,"./views/ResourceEditor":24,"bluebird":1,"exomon":7,"marked":8}],14:[function(require,module,exports){'use strict';var ApiHelper=function(){function ApiHelper(){_classCallCheck(this,ApiHelper);}_createClass(ApiHelper,[{key:"getIssues", // ----------
+// Resource getters
+// ----------
+/**
+     * Gets issues
+     *
+     * @returns {Promise} promise
+     */value:function getIssues(){return new Promise(function(callback){window.resources.issues=[];callback();});} /**
+     * Gets collaborators
+     *
+     * @returns {Promise} promise
+     */},{key:"getCollaborators",value:function getCollaborators(){return new Promise(function(callback){window.resources.collaborators=[];callback();});} /**
+     * Gets issue types
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssueTypes",value:function getIssueTypes(){return new Promise(function(callback){window.resources.issueTypes=[];callback();});} /**
+     * Gets issue priorities
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssuePriorities",value:function getIssuePriorities(){return new Promise(function(callback){window.resources.issuePriorities=[];callback();});} /**
+     * Gets issue estimates
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssueEstimates",value:function getIssueEstimates(){return new Promise(function(callback){window.resources.issueEstimates=[];callback();});} /**
+     * Gets issue columns
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssueColumns",value:function getIssueColumns(){return new Promise(function(callback){window.resources.issueColumns=[];callback();});} /**
+     * Gets milestones 
+     *
+     * @returns {Promise} promise
+     */},{key:"getMilestones",value:function getMilestones(){return new Promise(function(callback){window.resources.milestones=[];callback();});} /**
+     * Gets versions 
+     *
+     * @returns {Promise} promise
+     */},{key:"getVersions",value:function getVersions(){return new Promise(function(callback){window.resources.versions=[];callback();});} // ----------
+// Resource adders
+// ----------
+/**
+     * Adds issue
+     *
+     * @param {Object} issue
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssue",value:function addIssue(issue){return new Promise(function(callback){callback();});} /**
+     * Adds collaborator
+     *
+     * @param {String} collaborator
+     *
+     * @returns {Promise} promise
+     */},{key:"addCollaborator",value:function addCollaborator(collaborator){return new Promise(function(callback){callback();});} /**
+     * Adds issue type
+     *
+     * @param {String} type
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssueType",value:function addIssueType(type){return new Promise(function(callback){callback();});} /**
+     * Adds issue priority
+     *
+     * @param {String} priority
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssuePriority",value:function addIssuePriority(priority){return new Promise(function(callback){callback();});} /**
+     * Adds issue estimate
+     *
+     * @param {String} estimate
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssueEstimate",value:function addIssueEstimate(estimate){return new Promise(function(callback){callback();});} /**
+     * Adds issue column
+     *
+     * @param {String} column
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssueColumn",value:function addIssueColumn(column){return new Promise(function(callback){callback();});} /**
+     * Adds milestone 
+     *
+     * @param {String} milestone
+     *
+     * @returns {Promise} promise
+     */},{key:"addMilestone",value:function addMilestone(milestone){return new Promise(function(callback){callback();});} /**
+     * Adds version
+     *
+     * @param {String} version
+     *
+     * @returns {Promise} promise
+     */},{key:"addVersion",value:function addVersion(version){return new Promise(function(callback){callback();});} // ----------
+// Resource removers
+// ----------
+/**
+     * Removes issue
+     * NOTE: This is usually disabled
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssue",value:function removeIssue(index){return new Promise(function(callback){callback();});} /**
+     * Removes collaborator
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeCollaborator",value:function removeCollaborator(index){return new Promise(function(callback){callback();});} /**
+     * Removes issue type
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssueType",value:function removeIssueType(index){return new Promise(function(callback){callback();});} /**
+     * Removes issue priority
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssuePriority",value:function removeIssuePriority(index){return new Promise(function(callback){callback();});} /**
+     * Removes issue estimate
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssueEstimate",value:function removeIssueEstimate(index){return new Promise(function(callback){callback();});} /**
+     * Removes issue column
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssueColumn",value:function removeIssueColumn(index){return new Promise(function(callback){callback();});} /**
+     * Removes milestone 
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeMilestone",value:function removeMilestone(index){return new Promise(function(callback){callback();});} /**
+     * Removes version
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeVersion",value:function removeVersion(index){return new Promise(function(callback){callback();});} // ----------
+// Session methods    
+// ----------
+/**
+     * Gets the current user object
+     *
+     * @returns {Promise}
+     */},{key:"getUser",value:function getUser(){return new Promise(function(callback){callback();});} /**
+     * Logs out the current user and reloads
+     */},{key:"logOut",value:function logOut(){location.reload();} // ----------
+// Issue methods
+// ---------- 
+/** 
+     * Gets issue comments
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssueComments",value:function getIssueComments(){return new Promise(function(callback){callback([]);});} /** 
+     * Adds issue comment
+     *
+     * @param {Object} comment
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssueComment",value:function addIssueComment(comment){return new Promise(function(callback){callback([]);});} // ----------
+// Generic methods
+// ----------
+/**
+     * Removes a resource
+     *
+     * @param {String} resource
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeResource",value:function removeResource(resource,index){switch(resource){case 'collaborators':return this.removeCollaborator(index);case 'issueTypes':return this.removeIssueType(index);case 'issuePriorities':return this.removeIssuePriority(index);case 'issueEstimates':return this.removeIssueEstimate(index);case 'issueColumns':return this.removeIssueColumn(index);case 'milestones':return this.removeMilestone(index);case 'versions':return this.removeVersion(index);case 'issues':return this.removeIssue(index);}} /**
+     * Adds a resource
+     *
+     * @param {String} resource
+     * @param {Object} item
+     *
+     * @returns {Promise} promise
+     */},{key:"addResource",value:function addResource(resource,item){switch(resource){case 'collaborators':return this.addCollaborator(item);case 'issueTypes':return this.addIssueType(item);case 'issuePriorities':return this.addIssuePriority(item);case 'issueEstimates':return this.addIssueEstimate(item);case 'issueColumns':return this.addIssueColumn(item);case 'milestones':return this.addMilestone(item);case 'versions':return this.addVersion(item);case 'issues':return this.addIssue(item);}} /**
+     * Gets a resource
+     *
+     * @param {String} resource
+     *
+     * @returns {Promise} promise
+     */},{key:"getResource",value:function getResource(resource){switch(resource){case 'collaborators':return this.getCollaborators();case 'issueTypes':return this.getIssueTypes();case 'issuePriorities':return this.getIssuePriorities();case 'issueEstimates':return this.getIssueEstimates();case 'issueColumns':return this.getIssueColumns();case 'milestones':return this.getMilestones();case 'versions':return this.getVersions();case 'issues':return this.getIssues();}} /**
+     * Gets all resources
+     *
+     * @returns {Promise} promise
+     */},{key:"getResources",value:function getResources(){var helper=this;return new Promise(function(callback){var loaded={};function check(resource){loaded[resource]=true;for(var _resource in loaded){if(!loaded[_resource]){return;}}callback();}function get(resource){loaded[resource]=false;window.resources[resource]=[];helper.getResource(resource).then(function(){check(resource);});}get('issueTypes');get('issuePriorities');get('issueEstimates');get('issueColumns');get('collaborators');get('milestones');get('versions');get('issues');});}}]);return ApiHelper;}();module.exports=ApiHelper;},{}],15:[function(require,module,exports){'use strict';window.resources={};var ResourceHelper=function(){function ResourceHelper(){_classCallCheck(this,ResourceHelper);}_createClass(ResourceHelper,null,[{key:"getCollaborator",value:function getCollaborator(name){for(var i in window.resources.collaborators){var collaborator=window.resources.collaborators[i];if(collaborator.name==name){return i;}}}},{key:"getIssuePriority",value:function getIssuePriority(name){for(var i in window.resources.issuePriorities){var type=window.resources.issuePriorities[i];if(type==name){return i;}}}},{key:"getIssueEstimate",value:function getIssueEstimate(name){for(var i in window.resources.issueEstimates){var type=window.resources.issueEstimates[i];if(type==name){return i;}}}},{key:"getIssueColumn",value:function getIssueColumn(name){for(var i in window.resources.issueColumns){var type=window.resources.issueColumns[i];if(type==name){return i;}}return 0;}},{key:"getIssueType",value:function getIssueType(name){for(var i in window.resources.issueTypes){var type=window.resources.issueTypes[i];if(type==name){return i;}}}},{key:"getVersion",value:function getVersion(name){for(var i in window.resources.versions){var version=window.resources.versions[i];if(version==name){return i;}}}},{key:"getMilestone",value:function getMilestone(name){for(var i in window.resources.milestones){var milestone=window.resources.milestones[i];if(milestone.title==name){return i;}}}},{key:"reloadResource",value:function reloadResource(resource){return new Promise(function(callback){ApiHelper.getResource(resource).then(function(){callback();});});}},{key:"removeResource",value:function removeResource(resource,index){return new Promise(function(callback){ApiHelper.removeResource(resource,index).then(function(){window.resources[resource].splice(index,1);callback();});});}},{key:"addResource",value:function addResource(resource,item){return new Promise(function(callback){ApiHelper.addResource(resource,item).then(function(){window.resources[resource].push(item);callback();});});}}]);return ResourceHelper;}();module.exports=ResourceHelper;},{}],16:[function(require,module,exports){'use strict';var Issue=function(){_createClass(Issue,null,[{key:"create",value:function create(properties){return new Promise(function(callback){var issue=new Issue();issue.index=window.resources.issues.length;window.resources.issues[issue.index]=issue;if(properties){for(var k in properties){issue[k]=properties[k];}}ResourceHelper.addResource('issue',issue).then(function(){callback(issue);});});}}]);function Issue(properties){_classCallCheck(this,Issue);if(properties){this.adopt(properties);}else {this.useStandard();}}_createClass(Issue,[{key:"useStandard",value:function useStandard(){this.title='New issue';this.description='';this.reporter;this.column=0; // Labels for types are defined by plugin
 this.type=0; // Labels for properties are defined by plugin
 this.priority=3; // Optional params
-this.version;this.milestone;this.comments=[];this.labels=[];this.assignee;}},{key:"adopt",value:function adopt(properties){for(var k in properties){this[k]=properties[k];}}}]);return Issue;}();module.exports=Issue;},{}],17:[function(require,module,exports){var Issue=require('../models/Issue');module.exports=function render(){var _this20=this;var issue=new Issue(this.model);return _.div({class:'issue-editor'},_.div({class:'header'},_.div({class:'drag-handle'},_.span({class:'fa fa-bars'})).on('mousedown',function(e){_this20.onClickDragHandle(e);}),_.div({class:'assignee-avatar'},this.getAssigneeAvatar()),_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa fa-minus-circle'}),_.span({class:'fa fa-plus-circle'})).click(function(){_this20.onClickToggle();}),_.h4({},_.span({class:'btn-edit'},this.model.title).click(this.onClickEdit),_.input({type:'text',class:'edit hidden btn-transparent','data-property':'title',value:this.model.title}).change(function(){_this20.onChange();_this20.$element.find('.header .btn-edit').html(_this20.model.title);}).blur(this.onBlur))),_.div({class:'meta'},_.div({class:'meta-field type'+(window.resources.issueTypes.length<1?' hidden':'')},_.label('Type'),_.select({'data-property':'type'},_.each(window.resources.issueTypes,function(i,type){return _.option({value:i},type);})).change(function(){_this20.onChange();}).val(issue.type)),_.div({class:'meta-field priority'+(window.resources.issuePriorities.length<1?' hidden':'')},_.label('Priority'),_.select({'data-property':'priority'},_.each(window.resources.issuePriorities,function(i,priority){return _.option({value:i},priority);})).change(function(){_this20.onChange();}).val(issue.priority)),_.div({class:'meta-field assignee'},_.label('Assignee'),_.select({'data-property':'assignee'},_.each(window.resources.collaborators,function(i,collaborator){return _.option({value:i},collaborator.name);})).change(function(){_this20.onChange();_this20.$element.find('.header .assignee-avatar').html(_this20.getAssigneeAvatar());}).val(issue.assignee)),_.div({class:'meta-field version'+(window.resources.versions.length<1?' hidden':'')},_.label('Version'),_.select({'data-property':'version'},_.each(window.resources.versions,function(i,version){return _.option({value:i},version);})).change(function(){_this20.onChange();}).val(issue.version)),_.div({class:'meta-field estimate'+(window.resources.issueEstimates.length<1?' hidden':'')},_.label('Estimate'),_.select({'data-property':'estimate'},_.each(window.resources.issueEstimates,function(i,estimate){return _.option({value:i},estimate);})).change(function(){_this20.onChange();}).val(issue.estimate))),_.div({class:'body'},_.div({class:'btn-edit'},markdownToHtml(this.model.description)).click(this.onClickEdit),_.textarea({class:'edit hidden btn-transparent','data-property':'description'},this.model.description).change(function(){_this20.onChange();_this20.$element.find('.body .btn-edit').html(markdownToHtml(_this20.model.description)||'');}).blur(this.onBlur)),_.div({class:'comments'}),_.div({class:'add-comment'},_.textarea({class:'btn-transparent',placeholder:'Add comment here...'}),_.button({},'Comment').click(function(){_this20.onClickComment();})));};},{"../models/Issue":16}],18:[function(require,module,exports){'use strict';module.exports=function render(){var _this21=this;return _.div({class:'milestone-editor','data-index':this.model.index},_.div({class:'header'},_.h4({},_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa fa-chevron-right'}),_.span({class:'fa fa-chevron-down'}),this.model.title).click(function(){_this21.onClickToggle();})),_.button({class:'btn-new-issue'},'New issue').click(function(){_this21.onClickNewIssue();})),_.div({class:'columns'},_.each(window.resources.issueColumns,function(columnIndex,column){return _.div({class:'column','data-index':columnIndex},_.div({class:'header'},_.h4(column)),_.div({class:'body'},_.each(window.resources.issues,function(issueIndex,issue){if(issue.column==columnIndex&&issue.milestone==_this21.model.index){return new IssueEditor({model:issue}).$element;}})));})));};},{}],19:[function(require,module,exports){'use strict';module.exports=function Navbar(){return _.div({class:'navbar'},_.div({class:'buttons'},_.a({href:'/#/user/',class:Router.url=='/user/'?'active':''},_.span({class:'fa fa-user'})),_.a({href:'/#/board/',class:Router.url=='/board/'?'active':''},_.span({class:'fa fa-columns'})),_.a({href:'/#/list/',class:Router.url=='/list/'?'active':''},_.span({class:'fa fa-list'})),_.a({href:'/#/settings/',class:Router.url=='/settings/'?'active':''},_.span({class:'fa fa-cog'}))));};},{}],20:[function(require,module,exports){'use strict';module.exports=function render(){var _this22=this;return _.div({class:'resource-editor'},_.div({class:'header'},_.h4(this.prettyName)),_.div({class:'body'},_.each(this.model,function(i,item){return _.div({class:'item'},_.label(item.name||item.title||item),_.button(_.span({class:'fa fa-remove'})).click(function(){_this22.onClickRemove(i);}));})),_.div({class:'footer'},_.input({type:'text'}),_.button(_.span({class:'fa fa-plus'})).click(function(){_this22.onClickAdd(_this22.$element.find('.footer input').val());})));};},{}],21:[function(require,module,exports){'use strict';var IssueEditor=function(_View2){_inherits(IssueEditor,_View2);function IssueEditor(params){_classCallCheck(this,IssueEditor);var _this23=_possibleConstructorReturn(this,Object.getPrototypeOf(IssueEditor).call(this,params));_this23.template=require('../templates/IssueEditor');_this23.fetch();return _this23;} /**
+this.version;this.milestone;this.comments=[];this.labels=[];this.assignee;}},{key:"adopt",value:function adopt(properties){for(var k in properties){this[k]=properties[k];}}}]);return Issue;}();module.exports=Issue;},{}],17:[function(require,module,exports){var Issue=require('../models/Issue');module.exports=function render(){var _this36=this;var issue=new Issue(this.model);return _.div({class:'issue-editor'},_.div({class:'header'},_.div({class:'drag-handle'},_.span({class:'fa fa-bars'})).on('mousedown',function(e){_this36.onClickDragHandle(e);}),_.div({class:'assignee-avatar'},this.getAssigneeAvatar()),_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa fa-minus-circle'}),_.span({class:'fa fa-plus-circle'})).click(function(){_this36.onClickToggle();}),_.h4({},_.span({class:'btn-edit'},this.model.title).click(this.onClickEdit),_.input({type:'text',class:'edit hidden btn-transparent','data-property':'title',value:this.model.title}).change(function(){_this36.onChange();_this36.$element.find('.header .btn-edit').html(_this36.model.title);}).blur(this.onBlur))),_.div({class:'meta'},_.div({class:'meta-field type'+(window.resources.issueTypes.length<1?' hidden':'')},_.label('Type'),_.select({'data-property':'type'},_.each(window.resources.issueTypes,function(i,type){return _.option({value:i},type);})).change(function(){_this36.onChange();}).val(issue.type)),_.div({class:'meta-field priority'+(window.resources.issuePriorities.length<1?' hidden':'')},_.label('Priority'),_.select({'data-property':'priority'},_.each(window.resources.issuePriorities,function(i,priority){return _.option({value:i},priority);})).change(function(){_this36.onChange();}).val(issue.priority)),_.div({class:'meta-field assignee'},_.label('Assignee'),_.select({'data-property':'assignee'},_.each(window.resources.collaborators,function(i,collaborator){return _.option({value:i},collaborator.name);})).change(function(){_this36.onChange();_this36.$element.find('.header .assignee-avatar').html(_this36.getAssigneeAvatar());}).val(issue.assignee)),_.div({class:'meta-field version'+(window.resources.versions.length<1?' hidden':'')},_.label('Version'),_.select({'data-property':'version'},_.each(window.resources.versions,function(i,version){return _.option({value:i},version);})).change(function(){_this36.onChange();}).val(issue.version)),_.div({class:'meta-field estimate'+(window.resources.issueEstimates.length<1?' hidden':'')},_.label('Estimate'),_.select({'data-property':'estimate'},_.each(window.resources.issueEstimates,function(i,estimate){return _.option({value:i},estimate);})).change(function(){_this36.onChange();}).val(issue.estimate))),_.div({class:'body'},_.div({class:'btn-edit'},markdownToHtml(this.model.description)).click(this.onClickEdit),_.textarea({class:'edit hidden btn-transparent','data-property':'description'},this.model.description).change(function(){_this36.onChange();_this36.$element.find('.body .btn-edit').html(markdownToHtml(_this36.model.description)||'');}).blur(this.onBlur)),_.div({class:'comments'}),_.div({class:'add-comment'},_.textarea({class:'btn-transparent',placeholder:'Add comment here...'}),_.button({},'Comment').click(function(){_this36.onClickComment();})));};},{"../models/Issue":16}],18:[function(require,module,exports){'use strict';module.exports=function render(){var _this37=this;return _.div({class:'milestone-editor','data-index':this.model.index},_.div({class:'header'},_.h4({},_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa fa-chevron-right'}),_.span({class:'fa fa-chevron-down'}),this.model.title).click(function(){_this37.onClickToggle();})),_.button({class:'btn-new-issue'},'New issue').click(function(){_this37.onClickNewIssue();})),_.div({class:'columns'},_.each(window.resources.issueColumns,function(columnIndex,column){return _.div({class:'column','data-index':columnIndex},_.div({class:'header'},_.h4(column)),_.div({class:'body'},_.each(window.resources.issues,function(issueIndex,issue){if(issue.column==columnIndex&&issue.milestone==_this37.model.index){return new IssueEditor({model:issue}).$element;}})));})));};},{}],19:[function(require,module,exports){'use strict';module.exports=function Navbar(){return _.div({class:'navbar'},_.div({class:'buttons'},_.a({href:'/#/user/',class:Router.url=='/user/'?'active':''},_.span({class:'fa fa-user'})),_.a({href:'/#/board/',class:Router.url=='/board/'?'active':''},_.span({class:'fa fa-columns'})),_.a({href:'/#/list/',class:Router.url=='/list/'?'active':''},_.span({class:'fa fa-list'})),_.a({href:'/#/settings/',class:Router.url=='/settings/'?'active':''},_.span({class:'fa fa-cog'}))));};},{}],20:[function(require,module,exports){'use strict';module.exports=function render(){var _this38=this;return _.div({class:'resource-editor'},_.div({class:'body'},_.each(this.model,function(i,item){return _.div({class:'item'},_.label(item.name||item.title||item),_.button(_.span({class:'fa fa-remove'})).click(function(){_this38.onClickRemove(i);}));})),_.div({class:'footer'},_.input({type:'text'}),_.button(_.span({class:'fa fa-plus'})).click(function(){_this38.onClickAdd(_this38.$element.find('.footer input').val());})));};},{}],21:[function(require,module,exports){'use strict';var IssueEditor=function(_View2){_inherits(IssueEditor,_View2);function IssueEditor(params){_classCallCheck(this,IssueEditor);var _this39=_possibleConstructorReturn(this,Object.getPrototypeOf(IssueEditor).call(this,params));_this39.template=require('../templates/IssueEditor');_this39.fetch();return _this39;} /**
      * Event: Click the toggle button
      */_createClass(IssueEditor,[{key:"onClickToggle",value:function onClickToggle(){var wasExpanded=this.$element.hasClass('expanded');$('.issue-editor').removeClass('expanded');this.$element.toggleClass('expanded',!wasExpanded);if(!wasExpanded){this.getComments();}} /**
      * Gets an IMG tag with the avatar of the assigned collaborator
@@ -472,17 +908,18 @@ this.version;this.milestone;this.comments=[];this.labels=[];this.assignee;}},{ke
      * @param {String} key
      */},{key:"getProperty",value:function getProperty(key){var $property=this.$element.find('*[data-property="'+key+'"]');return $property.val()||$property.text();} /**
      * Event: Click the dragging handle
-     */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this24=this;$('.board-container').toggleClass('dragging',true);this.$element.css({top:this.$element.offset().top,left:this.$element.offset().left,width:this.$element.outerWidth(),height:this.$element.outerHeight(),'pointer-events':'none'});this.$element.css({position:'absolute'});var prev={x:e.pageX,y:e.pageY};$('.milestone-editor .columns .column').on('mouseenter',function(){$(this).toggleClass('hovering',true);}).on('mouseleave',function(){$(this).toggleClass('hovering',false);});$(document).off('mousemove').on('mousemove',function(e){var current={x:e.pageX,y:e.pageY};var delta={x:current.x-prev.x,y:current.y-prev.y};_this24.$element.css({top:_this24.$element.offset().top+delta.y,left:_this24.$element.offset().left+delta.x});prev=current;});$(document).off('mouseup').on('mouseup',function(e){_this24.onReleaseDragHandle(e);});} /**
+     */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this40=this;$('.board-container').toggleClass('dragging',true);this.$element.css({top:this.$element.offset().top,left:this.$element.offset().left,width:this.$element.outerWidth(),height:this.$element.outerHeight(),'pointer-events':'none'});this.$element.css({position:'absolute'});var prev={x:e.pageX,y:e.pageY};$('.milestone-editor .columns .column').on('mouseenter',function(){$(this).toggleClass('hovering',true);}).on('mouseleave',function(){$(this).toggleClass('hovering',false);});$(document).off('mousemove').on('mousemove',function(e){var current={x:e.pageX,y:e.pageY};var delta={x:current.x-prev.x,y:current.y-prev.y};_this40.$element.css({top:_this40.$element.offset().top+delta.y,left:_this40.$element.offset().left+delta.x});prev=current;});$(document).off('mouseup').on('mouseup',function(e){_this40.onReleaseDragHandle(e);});} /**
      * Event: Release the dragging handle
      */},{key:"onReleaseDragHandle",value:function onReleaseDragHandle(e){$(document).off('mouseup').off('mousemove');$('.board-container').toggleClass('dragging',false);this.$element.removeAttr('style');$('.milestone-editor .columns .column.hovering .body').first().append(this.$element);$('.milestone-editor .columns .column').off('mouseenter').off('mouseleave').toggleClass('hovering',false);this.model.milestone=this.$element.parents('.milestone-editor').attr('data-index');this.model.column=this.$element.parents('.column').attr('data-index');this.onChange();} /**
      * Event: Fires on every change to a property
-     */},{key:"onChange",value:function onChange(){var _this25=this;this.model.title=this.getProperty('title');this.model.type=this.getProperty('type');this.model.priority=this.getProperty('priority');this.model.assignee=this.getProperty('assignee');this.model.version=this.getProperty('version');this.model.description=this.getProperty('description');this.model.estimate=this.getProperty('estimate');this.$element.toggleClass('loading',true);ApiHelper.updateIssue(this.model).then(function(){_this25.$element.toggleClass('loading',false);});} /**
+     */},{key:"onChange",value:function onChange(){var _this41=this;this.model.title=this.getProperty('title');this.model.type=this.getProperty('type');this.model.priority=this.getProperty('priority');this.model.assignee=this.getProperty('assignee');this.model.version=this.getProperty('version');this.model.description=this.getProperty('description');this.model.estimate=this.getProperty('estimate');this.$element.toggleClass('loading',true);ApiHelper.updateIssue(this.model).then(function(){_this41.$element.toggleClass('loading',false);});} /**
      * Event: Click the edit button of a field
      */},{key:"onClickEdit",value:function onClickEdit(){$(this).toggleClass('hidden',true).siblings('.edit').toggleClass('hidden',false).focus();} /**
      * Event: Click the comment button
-     */},{key:"onClickComment",value:function onClickComment(){var _this26=this;var text=this.$element.find('.add-comment textarea').val();this.$element.toggleClass('loading',true);ApiHelper.addIssueComment(this.model,text).then(function(){_this26.getComments();});} /**
+     */},{key:"onClickComment",value:function onClickComment(){var _this42=this;var text=this.$element.find('.add-comment textarea').val();this.$element.toggleClass('loading',true);ApiHelper.addIssueComment(this.model,text).then(function(){_this42.getComments();});} /**
      * Event: Remove focus from input fields
      */},{key:"onBlur",value:function onBlur(){$(this).toggleClass('hidden',true).siblings('.btn-edit').toggleClass('hidden',false);} /**
      * Lazy-load the comments
-     */},{key:"getComments",value:function getComments(){var _this27=this;var $comments=this.$element.find('.comments');ApiHelper.getIssueComments(this.model).then(function(comments){_this27.$element.toggleClass('loading',false);$comments.html(_.each(comments,function(i,comment){var collaborator=window.resources.collaborators[comment.collaborator];var text=markdownToHtml(comment.text);return _.div({class:'comment'},_.div({class:'collaborator'},_.img({src:collaborator.avatar}),_.p(collaborator.name)),_.div({class:'text'},text));}));});}}]);return IssueEditor;}(View);module.exports=IssueEditor;},{"../templates/IssueEditor":17}],22:[function(require,module,exports){'use strict';var MilestoneEditor=function(_View3){_inherits(MilestoneEditor,_View3);function MilestoneEditor(params){_classCallCheck(this,MilestoneEditor);var _this28=_possibleConstructorReturn(this,Object.getPrototypeOf(MilestoneEditor).call(this,params));_this28.template=require('../templates/MilestoneEditor');_this28.fetch();return _this28;}_createClass(MilestoneEditor,[{key:"onClickNewIssue",value:function onClickNewIssue(){Issue.create({milestone:this.model.index}).then(function(issue){var $issue=new IssueEditor({model:issue}).$element;$('.milestone-editor[data-index="'+issue.milestone+'"] .column[data-index="'+issue.column+'"]').append($issue);});}},{key:"onClickToggle",value:function onClickToggle(){this.$element.toggleClass('collapsed');}}]);return MilestoneEditor;}(View);module.exports=MilestoneEditor;},{"../templates/MilestoneEditor":18}],23:[function(require,module,exports){'use strict';var Navbar=function(_View4){_inherits(Navbar,_View4);function Navbar(params){_classCallCheck(this,Navbar);var _this29=_possibleConstructorReturn(this,Object.getPrototypeOf(Navbar).call(this,params));_this29.template=require('../templates/Navbar');_this29.fetch();return _this29;}return Navbar;}(View);module.exports=Navbar;},{"../templates/Navbar":19}],24:[function(require,module,exports){'use strict';var ResourceEditor=function(_View5){_inherits(ResourceEditor,_View5);function ResourceEditor(params){_classCallCheck(this,ResourceEditor);var _this30=_possibleConstructorReturn(this,Object.getPrototypeOf(ResourceEditor).call(this,params));_this30.prettyName();_this30.template=require('../templates/ResourceEditor');_this30.fetch();return _this30;}_createClass(ResourceEditor,[{key:"prettyName",value:function prettyName(){this.prettyName=this.name;for(var i in this.prettyName){if(i==0){this.prettyName=this.prettyName.substring(0,1).toUpperCase()+this.prettyName.substring(1);}else if(this.prettyName[i]==this.prettyName[i].toUpperCase()){this.prettyName=this.prettyName.substring(0,i)+' '+this.prettyName.substring(i);}}}},{key:"onClickDelete",value:function onClickDelete(index){ResourceHelper.removeResource(this.name,index);}},{key:"onClickAdd",value:function onClickAdd(name){ResourceHelper.addResource(this.name,name);}}]);return ResourceEditor;}(View);module.exports=ResourceEditor;},{"../templates/ResourceEditor":20}]},{},[13]);
+     */},{key:"getComments",value:function getComments(){var _this43=this;var $comments=this.$element.find('.comments');ApiHelper.getIssueComments(this.model).then(function(comments){_this43.$element.toggleClass('loading',false);$comments.html(_.each(comments,function(i,comment){var collaborator=window.resources.collaborators[comment.collaborator];var text=markdownToHtml(comment.text);return _.div({class:'comment'},_.div({class:'collaborator'},_.img({src:collaborator.avatar}),_.p(collaborator.name)),_.div({class:'text'},text));}));});}}]);return IssueEditor;}(View);module.exports=IssueEditor;},{"../templates/IssueEditor":17}],22:[function(require,module,exports){'use strict';var MilestoneEditor=function(_View3){_inherits(MilestoneEditor,_View3);function MilestoneEditor(params){_classCallCheck(this,MilestoneEditor);var _this44=_possibleConstructorReturn(this,Object.getPrototypeOf(MilestoneEditor).call(this,params));_this44.template=require('../templates/MilestoneEditor');_this44.fetch();return _this44;}_createClass(MilestoneEditor,[{key:"onClickNewIssue",value:function onClickNewIssue(){Issue.create({milestone:this.model.index}).then(function(issue){var $issue=new IssueEditor({model:issue}).$element;$('.milestone-editor[data-index="'+issue.milestone+'"] .column[data-index="'+issue.column+'"]').append($issue);});}},{key:"onClickToggle",value:function onClickToggle(){this.$element.toggleClass('collapsed');}}]);return MilestoneEditor;}(View);module.exports=MilestoneEditor;},{"../templates/MilestoneEditor":18}],23:[function(require,module,exports){'use strict';var Navbar=function(_View4){_inherits(Navbar,_View4);function Navbar(params){_classCallCheck(this,Navbar);var _this45=_possibleConstructorReturn(this,Object.getPrototypeOf(Navbar).call(this,params));_this45.template=require('../templates/Navbar');_this45.fetch();return _this45;}return Navbar;}(View);module.exports=Navbar;},{"../templates/Navbar":19}],24:[function(require,module,exports){'use strict';var ResourceEditor=function(_View5){_inherits(ResourceEditor,_View5);function ResourceEditor(params){_classCallCheck(this,ResourceEditor);var _this46=_possibleConstructorReturn(this,Object.getPrototypeOf(ResourceEditor).call(this,params));_this46.template=require('../templates/ResourceEditor'); // Special cases
+if(_this46.name=='issueColumns'){for(var i=_this46.model.length-1;i>=0;i--){if(_this46.model[i]=='to do'||_this46.model[i]=='done'){_this46.model.splice(i,1);}}}_this46.fetch();return _this46;}_createClass(ResourceEditor,[{key:"onClickRemove",value:function onClickRemove(index){var _this47=this;console.log(index);ResourceHelper.removeResource(this.name,index).then(function(){_this47.render();});}},{key:"onClickAdd",value:function onClickAdd(name){var _this48=this;ResourceHelper.addResource(this.name,name).then(function(){_this48.render();});}}]);return ResourceEditor;}(View);module.exports=ResourceEditor;},{"../templates/ResourceEditor":20}]},{},[13]);
 //# sourceMappingURL=public/js/maps/client.js.map

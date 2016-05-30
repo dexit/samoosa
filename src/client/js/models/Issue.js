@@ -14,7 +14,7 @@ class Issue {
                 }
             }
 
-            ApiHelper.createIssue(issue)
+            ResourceHelper.addResource('issue', issue)
             .then(() => {
                 callback(issue);
             });

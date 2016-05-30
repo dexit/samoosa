@@ -28,10 +28,12 @@ class ResourceEditor extends View {
     }
     
     onClickAdd(name) {
-        ResourceHelper.addResource(this.name, name)
-        .then(() => {
-            this.render();
-        });
+        if(name) {
+            ResourceHelper.addResource(this.name, name)
+            .then(() => {
+                this.render();
+            });
+        }
     }
 }
 

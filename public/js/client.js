@@ -452,34 +452,38 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * @param {String} param
      *
      * @returns {Promise} promise
-     */value:function get(url,param){var _this3=this;return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+'access_token='+_this3.getApiToken(),type:'GET',success:function success(result){callback(result);},error:function error(){_this3.resetApiToken();}});});} /**
+     */value:function get(url,param){var _this3=this;return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+'access_token='+_this3.getApiToken(),type:'GET',success:function success(result){callback(result);},error:function error(e){_this3.error(e);}});});} /**
      * DELETE method
      *
      * @param {String} url
      * @param {String} param
      *
      * @returns {Promise} promise
-     */},{key:"delete",value:function _delete(url,param){var _this4=this;return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+'access_token='+_this4.getApiToken(),type:'DELETE',success:function success(result){callback(result);},error:function error(){_this4.resetApiToken();}});});} /**
+     */},{key:"delete",value:function _delete(url,param){var _this4=this;return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+'access_token='+_this4.getApiToken(),type:'DELETE',success:function success(result){callback(result);},error:function error(e){_this4.error(e);}});});} /**
      * PATCH method
      *
      * @param {String} url
      * @param {Object} data
      *
      * @returns {Promise} promise
-     */},{key:"patch",value:function patch(url,data){var _this5=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this5.getApiToken(),type:'PATCH',data:data,success:function success(result){callback(result);},error:function error(){_this5.resetApiToken();}});});} /**
+     */},{key:"patch",value:function patch(url,data){var _this5=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this5.getApiToken(),type:'PATCH',data:data,success:function success(result){callback(result);},error:function error(e){_this5.error(e);}});});} /**
      * POST method
      *
      * @param {String} url
      * @param {Object} data
      *
      * @returns {Promise} promise
-     */},{key:"post",value:function post(url,data){var _this6=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this6.getApiToken(),type:'POST',data:data,success:function success(result){callback(result);},error:function error(){_this6.resetApiToken();}});});} /**
+     */},{key:"post",value:function post(url,data){var _this6=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this6.getApiToken(),type:'POST',data:data,success:function success(result){callback(result);},error:function error(e){_this6.error(e);}});});} /**
      * PUT method
      *
      * @param {String} url
      *
      * @returns {Promise} promise
-     */},{key:"put",value:function put(url){var _this7=this;return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this7.getApiToken(),type:'PUT',success:function success(result){callback(result);},error:function error(){_this7.resetApiToken();}});});} // ----------
+     */},{key:"put",value:function put(url){var _this7=this;return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this7.getApiToken(),type:'PUT',success:function success(result){callback(result);},error:function error(e){_this7.error(e);}});});} /**
+     * Error message
+     *
+     * @param {Object} error
+     */},{key:"error",value:function error(_error){if(_error){switch(_error.status){case 401:this.resetApiToken();break;default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(_error.statusText);}break;}console.log(_error);}} // ----------
 // Session methods
 // ----------
 /**
@@ -921,5 +925,5 @@ this.version;this.milestone;this.comments=[];this.labels=[];this.assignee;}},{ke
      */},{key:"onBlur",value:function onBlur(){$(this).toggleClass('hidden',true).siblings('.btn-edit').toggleClass('hidden',false);} /**
      * Lazy-load the comments
      */},{key:"getComments",value:function getComments(){var _this43=this;var $comments=this.$element.find('.comments');ApiHelper.getIssueComments(this.model).then(function(comments){_this43.$element.toggleClass('loading',false);$comments.html(_.each(comments,function(i,comment){var collaborator=window.resources.collaborators[comment.collaborator];var text=markdownToHtml(comment.text);return _.div({class:'comment'},_.div({class:'collaborator'},_.img({src:collaborator.avatar}),_.p(collaborator.name)),_.div({class:'text'},text));}));});}}]);return IssueEditor;}(View);module.exports=IssueEditor;},{"../templates/IssueEditor":17}],22:[function(require,module,exports){'use strict';var MilestoneEditor=function(_View3){_inherits(MilestoneEditor,_View3);function MilestoneEditor(params){_classCallCheck(this,MilestoneEditor);var _this44=_possibleConstructorReturn(this,Object.getPrototypeOf(MilestoneEditor).call(this,params));_this44.template=require('../templates/MilestoneEditor');_this44.fetch();return _this44;}_createClass(MilestoneEditor,[{key:"onClickNewIssue",value:function onClickNewIssue(){Issue.create({milestone:this.model.index}).then(function(issue){var $issue=new IssueEditor({model:issue}).$element;$('.milestone-editor[data-index="'+issue.milestone+'"] .column[data-index="'+issue.column+'"]').append($issue);});}},{key:"onClickToggle",value:function onClickToggle(){this.$element.toggleClass('collapsed');}}]);return MilestoneEditor;}(View);module.exports=MilestoneEditor;},{"../templates/MilestoneEditor":18}],23:[function(require,module,exports){'use strict';var Navbar=function(_View4){_inherits(Navbar,_View4);function Navbar(params){_classCallCheck(this,Navbar);var _this45=_possibleConstructorReturn(this,Object.getPrototypeOf(Navbar).call(this,params));_this45.template=require('../templates/Navbar');_this45.fetch();return _this45;}return Navbar;}(View);module.exports=Navbar;},{"../templates/Navbar":19}],24:[function(require,module,exports){'use strict';var ResourceEditor=function(_View5){_inherits(ResourceEditor,_View5);function ResourceEditor(params){_classCallCheck(this,ResourceEditor);var _this46=_possibleConstructorReturn(this,Object.getPrototypeOf(ResourceEditor).call(this,params));_this46.template=require('../templates/ResourceEditor'); // Special cases
-if(_this46.name=='issueColumns'){for(var i=_this46.model.length-1;i>=0;i--){if(_this46.model[i]=='to do'||_this46.model[i]=='done'){_this46.model.splice(i,1);}}}_this46.fetch();return _this46;}_createClass(ResourceEditor,[{key:"onClickRemove",value:function onClickRemove(index){var _this47=this;console.log(index);ResourceHelper.removeResource(this.name,index).then(function(){_this47.render();});}},{key:"onClickAdd",value:function onClickAdd(name){var _this48=this;ResourceHelper.addResource(this.name,name).then(function(){_this48.render();});}}]);return ResourceEditor;}(View);module.exports=ResourceEditor;},{"../templates/ResourceEditor":20}]},{},[13]);
+if(_this46.name=='issueColumns'){for(var i=_this46.model.length-1;i>=0;i--){if(_this46.model[i]=='to do'||_this46.model[i]=='done'){_this46.model.splice(i,1);}}}_this46.fetch();return _this46;}_createClass(ResourceEditor,[{key:"onClickRemove",value:function onClickRemove(index){var _this47=this;console.log(index);ResourceHelper.removeResource(this.name,index).then(function(){_this47.render();});}},{key:"onClickAdd",value:function onClickAdd(name){var _this48=this;if(name){ResourceHelper.addResource(this.name,name).then(function(){_this48.render();});}}}]);return ResourceEditor;}(View);module.exports=ResourceEditor;},{"../templates/ResourceEditor":20}]},{},[13]);
 //# sourceMappingURL=public/js/maps/client.js.map

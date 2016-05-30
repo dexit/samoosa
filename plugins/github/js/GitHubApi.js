@@ -24,8 +24,8 @@ class GitHubApi extends ApiHelper {
                 success: (result) => {
                     callback(result);
                 },
-                error: () => {
-                    this.resetApiToken();
+                error: (e) => {
+                    this.error(e);
                 }
             });
         });
@@ -47,8 +47,8 @@ class GitHubApi extends ApiHelper {
                 success: (result) => {
                     callback(result);
                 },
-                error: () => {
-                    this.resetApiToken();
+                error: (e) => {
+                    this.error(e);
                 }
             });
         });
@@ -75,8 +75,8 @@ class GitHubApi extends ApiHelper {
                 success: (result) => {
                     callback(result);
                 },
-                error: () => {
-                    this.resetApiToken(); 
+                error: (e) => {
+                    this.error(e);
                 }
             });
         });
@@ -103,8 +103,8 @@ class GitHubApi extends ApiHelper {
                 success: (result) => {
                     callback(result);
                 },
-                error: () => {
-                    this.resetApiToken(); 
+                error: (e) => {
+                    this.error(e);
                 }
             });
         });
@@ -125,11 +125,36 @@ class GitHubApi extends ApiHelper {
                 success: (result) => {
                     callback(result);
                 },
-                error: () => {
-                    this.resetApiToken(); 
+                error: (e) => {
+                    this.error(e);
                 }
             });
         });
+    }
+
+    /**
+     * Error message
+     *
+     * @param {Object} error
+     */
+    error(error) {
+        if(error) {
+            switch(error.status) {
+                case 401:
+                    this.resetApiToken();
+                    break;
+
+                default:
+                    if(error.responseJSON) {
+                        alert(error.responseJSON.message);
+                    } else {
+                        alert(error.statusText);
+                    } 
+                    break;
+            }
+
+            console.log(error);
+        }
     }
 
     // ----------

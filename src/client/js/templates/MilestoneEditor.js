@@ -3,6 +3,7 @@
 module.exports = function render() {
     return _.div({class: 'milestone-editor', 'data-index': this.model.index},
         _.div({class: 'header'},
+            _.div({class: 'progress-bar', style: 'width: 0%'}),
             _.h4({}, 
                 _.button({class: 'btn-toggle btn-transparent'},
                     _.span({class: 'fa fa-chevron-right'}),
@@ -10,9 +11,17 @@ module.exports = function render() {
                     this.model.title
                 ).click(() => { this.onClickToggle(); })
             ),
-            _.button({class: 'btn-new-issue'},
-                'New issue'
-            ).click(() => { this.onClickNewIssue(); })
+            _.div({class: 'toolbar'},
+                _.span({class: 'progress-text'},
+                    'Done: ',
+                    _.span({class: 'completed'}),
+                    '/',
+                    _.span({class: 'total'})
+                ),
+                _.button({class: 'btn-new-issue'},
+                    'New issue'
+                ).click(() => { this.onClickNewIssue(); })
+            )
         ),
         _.div({class: 'columns'},
             _.each(window.resources.issueColumns, (columnIndex, column) => {

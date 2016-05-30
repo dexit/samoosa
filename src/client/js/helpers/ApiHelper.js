@@ -443,6 +443,9 @@ class ApiHelper {
 
             case 'issues':
                 return this.addIssue(item);
+        
+            default:
+                alert('Resource "' + resource + '" is unknown');
         }
     }
 
@@ -488,6 +491,8 @@ class ApiHelper {
      */
     getResources() {
         let helper = this;
+        
+        spinner(true);
 
         return new Promise((callback) => {
             let loaded = {};
@@ -502,6 +507,8 @@ class ApiHelper {
                 }
 
                 callback();
+
+                spinner(false);
             }
 
             function get(resource) {

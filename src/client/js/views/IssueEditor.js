@@ -57,7 +57,8 @@ class IssueEditor extends View {
             left: this.$element.offset().left,
             width: this.$element.outerWidth(),
             height: this.$element.outerHeight(),
-            'pointer-events': 'none'
+            'pointer-events': 'none',
+            'z-index': 999
         });
 
         this.$element.css({
@@ -126,6 +127,11 @@ class IssueEditor extends View {
         this.model.column = this.$element.parents('.column').attr('data-index');
     
         this.onChange();
+        
+        // Update milestones
+        for(let milestoneEditor of ViewHelper.getAll('MilestoneEditor')) {
+            milestoneEditor.updateProgress();
+        }
     }
 
     /**

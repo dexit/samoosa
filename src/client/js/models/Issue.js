@@ -14,7 +14,7 @@ class Issue {
                 }
             }
 
-            ResourceHelper.addResource('issue', issue)
+            ResourceHelper.addResource('issues', issue)
             .then(() => {
                 callback(issue);
             });

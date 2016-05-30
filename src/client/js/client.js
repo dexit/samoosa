@@ -24,7 +24,7 @@ window.ResourceEditor = require('./views/ResourceEditor');
 // Global functions
 // ----------
 // Pretty name
-function prettyName(name) {
+window.prettyName = function(name) {
     let prettyName = name;
 
     for(let i in prettyName) {
@@ -38,6 +38,21 @@ function prettyName(name) {
     }
 
     return prettyName;
+}
+
+// Spinner
+window.spinner = function(active) {
+    $('.spinner-backdrop').remove();
+       
+    if(active) { 
+        $('body').append(
+            _.div({class: 'spinner-backdrop'},
+                _.div({class: 'spinner-container'},
+                    _.span({class: 'spinner-icon fa fa-refresh'})
+                )
+            )
+        );
+    }
 }
 
 // ----------

@@ -180,10 +180,21 @@ class IssueEditor extends View {
         this.model.description = this.getProperty('description');
         this.model.estimate = this.getProperty('estimate');
 
+        // Update data type attribute
         this.$element.attr('data-type', resources.issueTypes[this.model.type]);
 
+        // Update avatar image
+        this.$element.find('.header .assignee-avatar').html(
+            this.getAssigneeAvatar()
+        );
+
+        // Start loading
         this.$element.toggleClass('loading', true);
 
+        // Update priority indicator
+        this.$element.find('.priority-indicator').replaceWith(this.getPriorityIndicator());
+
+        // Update the issue though the API
         ApiHelper.updateIssue(this.model)
         .then(() => {
             this.$element.toggleClass('loading', false);
@@ -223,6 +234,36 @@ class IssueEditor extends View {
             .toggleClass('hidden', true)
             .siblings('.btn-edit')
             .toggleClass('hidden', false); 
+    }
+
+    /**
+     * Gets priority icon
+     *
+     * @returns {String} icon
+     */
+    getPriorityIndicator() {
+        let priority = resources.issuePriorities[this.model.priority];
+        let icon = '';
+
+        switch(priority) {
+            case 'low': case 'trivial':
+                icon = 'arrow-down';
+                break;
+
+            case 'medium': case 'minor':
+                icon = 'arrow-up';
+                break;
+            
+            case 'high': case 'critical':
+                icon = 'arrow-up';
+                break;
+            
+            case 'blocker':
+                icon = 'arrow-up';
+                break;
+        }
+
+        return _.span({class: 'priority-indicator fa fa-' + icon + ' ' + priority});
     }
 
     /**

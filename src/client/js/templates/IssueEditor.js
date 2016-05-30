@@ -15,6 +15,7 @@ module.exports = function render() {
                 _.span({class: 'fa fa-minus-circle'}),
                 _.span({class: 'fa fa-plus-circle'})
             ).click(() => { this.onClickToggle(); }),
+            this.getPriorityIndicator(),
             _.h4({},
                 _.span({class: 'btn-edit'},
                     this.model.title
@@ -53,13 +54,7 @@ module.exports = function render() {
                     _.each(window.resources.collaborators, (i, collaborator) => {
                         return _.option({value: i}, collaborator.name);
                     })
-                ).change(() => {
-                    this.onChange();
-
-                    this.$element.find('.header .assignee-avatar').html(
-                        this.getAssigneeAvatar()
-                    );
-                }).val(issue.assignee)
+                ).change(() => { this.onChange(); }).val(issue.assignee)
             ),
             _.div({class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '')},
                 _.label('Version'),

@@ -67,115 +67,127 @@ window.scroll = function(amount) {
 // ----------
 // User
 Router.route('/user/', () => {
-    ApiHelper.getUser()
-    .then((user) => {
-        $('.app-container').empty()
-            .append(new Navbar().$element)
-            .append(
-                _.div({class: 'workspace user-container'},
-                    _.div({class: 'profile'},
-                        _.h4('Current user'),
-                        _.img({src: user.avatar}),
-                        _.p(user.name),
-                        _.h4('Session'),
-                        _.button('Change account').click(() => {
-                            ApiHelper.logOut();
-                        })
-                    ) 
-                )
-            );
+    ApiHelper.checkConnection()
+    .then(() => {
+        ApiHelper.getUser()
+        .then((user) => {
+            $('.app-container').empty()
+                .append(new Navbar().$element)
+                .append(
+                    _.div({class: 'workspace user-container'},
+                        _.div({class: 'profile'},
+                            _.h4('Current user'),
+                            _.img({src: user.avatar}),
+                            _.p(user.name),
+                            _.h4('Session'),
+                            _.button('Change account').click(() => {
+                                ApiHelper.logOut();
+                            })
+                        ) 
+                    )
+                );
+        });
     });
 });
 
 // Board
 Router.route('/board/', () => {
-    ApiHelper.getResources()
+    ApiHelper.checkConnection()
     .then(() => {
-        $('.app-container').empty()
-            .append(new Navbar().$element)
-            .append(
-                _.div({class: 'workspace board-container'},
-                    _.each(window.resources.milestones, (i, milestone) => {
-                        return new MilestoneEditor({
-                            model: milestone,
-                        }).$element;
-                    }),
-                    new MilestoneEditor({
-                        model: {
-                            title: 'Backlog',
-                        }
-                    }).$element
-                )
-            );
+        ApiHelper.getResources()
+        .then(() => {
+            $('.app-container').empty()
+                .append(new Navbar().$element)
+                .append(
+                    _.div({class: 'workspace board-container'},
+                        _.each(window.resources.milestones, (i, milestone) => {
+                            return new MilestoneEditor({
+                                model: milestone,
+                            }).$element;
+                        }),
+                        new MilestoneEditor({
+                            model: {
+                                title: 'Backlog',
+                            }
+                        }).$element
+                    )
+                );
+        });
     });
 });
 
 // List
 Router.route('/list/', () => {
-    ApiHelper.getResources()
+    ApiHelper.checkConnection()
     .then(() => {
-        $('.app-container').empty()
-            .append(new Navbar().$element)
-            .append(
-                _.div({class: 'workspace board-container list'},
-                    _.each(window.resources.milestones, (i, milestone) => {
-                        return new MilestoneEditor({
-                            model: milestone,
-                        }).$element;
-                    }),
-                    new MilestoneEditor({
-                        model: {
-                            title: 'Backlog',
-                        }
-                    }).$element
-                )
-            );
+        ApiHelper.getResources()
+        .then(() => {
+            $('.app-container').empty()
+                .append(new Navbar().$element)
+                .append(
+                    _.div({class: 'workspace board-container list'},
+                        _.each(window.resources.milestones, (i, milestone) => {
+                            return new MilestoneEditor({
+                                model: milestone,
+                            }).$element;
+                        }),
+                        new MilestoneEditor({
+                            model: {
+                                title: 'Backlog',
+                            }
+                        }).$element
+                    )
+                );
+        });
     });
 });
 
 // Settings
 Router.route('/settings/', () => {
-    ApiHelper.getResources()
+    ApiHelper.checkConnection()
     .then(() => {
-        $('.app-container').empty()
-            .append(new Navbar().$element)
-            .append(
-                _.div({class: 'workspace settings-container'},
-                    _.div({class: 'tabbed-container'},
-                        _.div({class: 'tabs'},
-                            _.each(window.resources, (name, resource) => {
-                                if(name != 'issues') {
-                                    return _.button({class: 'tab' + (name == 'issueTypes' ? ' active' : '')},
-                                        prettyName(name)
-                                    ).click(function() {
-                                        let index = $(this).index();
-                                        
-                                        $(this).parent().children().each(function(i) {
-                                            $(this).toggleClass('active', i == index);
-                                        });
+        ApiHelper.getResources()
+        .then(() => {
+            $('.app-container').empty()
+                .append(new Navbar().$element)
+                .append(
+                    _.div({class: 'workspace settings-container'},
+                        _.div({class: 'tabbed-container'},
+                            _.div({class: 'tabs'},
+                                _.each(window.resources, (name, resource) => {
+                                    if(name != 'issues') {
+                                        return _.button({class: 'tab' + (name == 'issueTypes' ? ' active' : '')},
+                                            prettyName(name)
+                                        ).click(function() {
+                                            let index = $(this).index();
+                                            
+                                            $(this).parent().children().each(function(i) {
+                                                $(this).toggleClass('active', i == index);
+                                            });
 
-                                        $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
-                                            $(this).toggleClass('active', i == index);
+                                            $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
+                                                $(this).toggleClass('active', i == index);
+                                            });
                                         });
-                                    });
-                                }
-                            })
-                        ),
-                        _.div({class: 'panes'},
-                            _.each(window.resources, (name, resource) => {
-                                if(name != 'issues') {
-                                    return _.div({class: 'pane' + (name == 'issueTypes' ? ' active' : '')},
-                                        new ResourceEditor({
-                                            name: name,
-                                            model: resource
-                                        }).$element
-                                    );
-                                }
-                            })
+                                    }
+                                })
+                            ),
+                            _.div({class: 'panes'},
+                                _.each(window.resources, (name, resource) => {
+                                    if(name != 'issues') {
+                                        return _.div({class: 'pane' + (name == 'issueTypes' ? ' active' : '')},
+                                            new ResourceEditor({
+                                                name: name,
+                                                model: resource
+                                            }).$element
+                                        );
+                                    }
+                                })
+                            )
                         )
                     )
-                )
-            );
+                );
+        });
     });
 });
 

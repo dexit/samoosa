@@ -4,7 +4,30 @@ let ApiHelper = require('../../../src/client/js/helpers/ApiHelper');
 
 let labelCache;
 
+let org = localStorage.getItem('gitHubOrg');
+let repo = localStorage.getItem('gitHubRepo');
+
 class GitHubApi extends ApiHelper {
+    // ----------
+    // Checkers
+    // ----------
+    /**
+     * Check whether the connection to the source has been made
+     */
+    checkConnection() {
+        return new Promise((callback) => {
+            if(!localStorage.getItem('gitHubOrg')) {
+                localStorage.setItem('gitHubOrg', prompt('Please input org name'));
+            }
+
+            if(!localStorage.getItem('gitHubRepo')) {
+                localStorage.setItem('gitHubRepo', prompt('Please input repo name'));
+            }
+
+            callback();
+        });
+    }
+
     // ----------
     // Generic API methods
     // ----------
@@ -222,7 +245,7 @@ class GitHubApi extends ApiHelper {
      */
     getCollaborators() {
         return new Promise((callback) => {
-            this.get('/repos/Putaitu/mondai/collaborators')
+            this.get('/repos/' + org + '/' + repo + '/collaborators')
             .then((collaborators) => {
                 this.processCollaborators(collaborators);
 
@@ -238,7 +261,7 @@ class GitHubApi extends ApiHelper {
      */
     getIssues() {
         return new Promise((callback) => {
-            this.get('/repos/Putaitu/mondai/issues', 'state=all')
+            this.get('/repos/' + org + '/' + repo + '/issues', 'state=all')
             .then((issues) => {
                 this.processIssues(issues);
 
@@ -255,7 +278,7 @@ class GitHubApi extends ApiHelper {
     getLabels() {
         return new Promise((callback) => {
             if(!labelCache) {
-                this.get('/repos/Putaitu/mondai/labels')
+                this.get('/repos/' + org + '/' + repo + '/labels')
                 .then((labels) => {
                     labelCache = labels;
 
@@ -356,7 +379,7 @@ class GitHubApi extends ApiHelper {
      */
     getMilestones() {
         return new Promise((callback) => {
-            this.get('/repos/Putaitu/mondai/milestones')
+            this.get('/repos/' + org + '/' + repo + '/milestones')
             .then((milestones) => {
                 this.processMilestones(milestones);
                 
@@ -377,7 +400,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssue(issue) {
         return new Promise((callback) => {
-            this.post('/repos/Putaitu/mondai/issues', this.convertIssue(issue))
+            this.post('/repos/' + org + '/' + repo + '/issues', this.convertIssue(issue))
             .then(() => {
                 callback(issue);
             });
@@ -393,7 +416,7 @@ class GitHubApi extends ApiHelper {
      */
     addCollaborator(collaborator) {
         return new Promise((callback) => {
-            this.put('/repos/Putaitu/mondai/collaborators/' + collaborator)
+            this.put('/repos/' + org + '/' + repo + '/collaborators/' + collaborator)
             .then(() => {
                 callback();
             });    
@@ -409,7 +432,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueType(type) {
         return new Promise((callback) => {
-            this.post('/repos/Putaitu/mondai/labels', {
+            this.post('/repos/' + org + '/' + repo + '/labels', {
                 name: 'type:' + type,
                 color: 'ffffff'
             })
@@ -428,7 +451,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssuePriority(priority) {
         return new Promise((callback) => {
-            this.post('/repos/Putaitu/mondai/labels', {
+            this.post('/repos/' + org + '/' + repo + '/labels', {
                 name: 'priority:' + priority,
                 color: 'ffffff'
             })
@@ -447,7 +470,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueEstimate(estimate) {
         return new Promise((callback) => {
-            this.post('/repos/Putaitu/mondai/labels', {
+            this.post('/repos/' + org + '/' + repo + '/labels', {
                 name: 'estimate:' + estimate,
                 color: 'ffffff'
             })
@@ -466,7 +489,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueColumn(column) {
         return new Promise((callback) => {
-            this.post('/repos/Putaitu/mondai/labels', {
+            this.post('/repos/' + org + '/' + repo + '/labels', {
                 name: 'column:' + column,
                 color: 'ffffff'
             })
@@ -486,7 +509,7 @@ class GitHubApi extends ApiHelper {
      */
     addMilestone(milestone) {
         return new Promise((callback) => {
-            this.post('/repos/Putaitu/mondai/milestones', {
+            this.post('/repos/' + org + '/' + repo + '/milestones', {
                 title: milestone
             })
             .then(() => {
@@ -504,7 +527,7 @@ class GitHubApi extends ApiHelper {
      */
     addVersion(version) {
         return new Promise((callback) => {
-            this.post('/repos/Putaitu/mondai/labels', {
+            this.post('/repos/' + org + '/' + repo + '/labels', {
                 name: 'version:' + version,
                 color: 'ffffff'
             })
@@ -526,7 +549,7 @@ class GitHubApi extends ApiHelper {
      */
     removeCollaborator(index) {
         return new Promise((callback) => {
-            this.delete('/repos/Putaitu/mondai/collaborators/' + window.resources.collaborators[index])
+            this.delete('/repos/' + org + '/' + repo + '/collaborators/' + window.resources.collaborators[index])
             .then(() => {
                 callback();
             });
@@ -542,7 +565,7 @@ class GitHubApi extends ApiHelper {
      */
     removeIssueType(index) {
         return new Promise((callback) => {
-            this.delete('/repos/Putaitu/mondai/labels/type:' + window.resources.issueTypes[index])
+            this.delete('/repos/' + org + '/' + repo + '/labels/type:' + window.resources.issueTypes[index])
             .then(() => {
                 callback();
             });
@@ -558,7 +581,7 @@ class GitHubApi extends ApiHelper {
      */
     removeIssuePriority(index) {
         return new Promise((callback) => {
-            this.delete('/repos/Putaitu/mondai/labels/priority:' + window.resources.issuePriorities[index])
+            this.delete('/repos/' + org + '/' + repo + '/labels/priority:' + window.resources.issuePriorities[index])
             .then(() => {
                 callback();
             });
@@ -574,7 +597,7 @@ class GitHubApi extends ApiHelper {
      */
     removeIssueEstimate(index) {
         return new Promise((callback) => {
-            this.delete('/repos/Putaitu/mondai/labels/estimate:' + window.resources.issueEstimates[index])
+            this.delete('/repos/' + org + '/' + repo + '/labels/estimate:' + window.resources.issueEstimates[index])
             .then(() => {
                 callback();
             });
@@ -590,7 +613,7 @@ class GitHubApi extends ApiHelper {
      */
     removeIssueColumn(index) {
         return new Promise((callback) => {
-            this.delete('/repos/Putaitu/mondai/labels/column:' + window.resources.issueColumns[index])
+            this.delete('/repos/' + org + '/' + repo + '/labels/column:' + window.resources.issueColumns[index])
             .then(() => {
                 callback();
             });
@@ -606,7 +629,7 @@ class GitHubApi extends ApiHelper {
      */
     removeMilestone(index) {
         return new Promise((callback) => {
-            this.delete('/repos/Putaitu/mondai/milestones/' + (index + 1))
+            this.delete('/repos/' + org + '/' + repo + '/milestones/' + (index + 1))
             .then(() => {
                 callback();
             });
@@ -622,7 +645,7 @@ class GitHubApi extends ApiHelper {
      */
     removeVersion(index) {
         return new Promise((callback) => {
-            this.delete('/repos/Putaitu/mondai/labels/version:' + window.resources.versions[index])
+            this.delete('/repos/' + org + '/' + repo + '/labels/version:' + window.resources.versions[index])
             .then(() => {
                 callback();
             });
@@ -704,6 +727,21 @@ class GitHubApi extends ApiHelper {
                 window.resources.issueEstimates.push(name);
             }
         }
+
+        window.resources.issueEstimates.sort((a, b) => {
+            a = parseFloat(a);
+            b = parseFloat(b);
+
+            if(a < b) {
+                return -1;
+            }
+            
+            if(a > b) {
+                return 1;
+            }
+
+            return 0;
+        });
     }
 
     /**
@@ -862,7 +900,7 @@ class GitHubApi extends ApiHelper {
 
         gitHubIssue.state = issueColumn == 'done' ? 'closed' : 'open';
 
-        // GitHub counts numbers from 1, Mondai counts from 0
+        // GitHub counts numbers from 1, ' + repo + ' counts from 0
         if(issue.milestone >= 0) {
             gitHubIssue.milestone = parseInt(issue.milestone) + 1;
         }
@@ -910,7 +948,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssue(issue) {
         return new Promise((callback) => {
-            this.patch('/repos/Putaitu/mondai/issues/' + (issue.index + 1), this.convertIssue(issue))
+            this.patch('/repos/' + org + '/' + repo + '/issues/' + (issue.index + 1), this.convertIssue(issue))
             .then(() => {
                 callback();
             });
@@ -925,7 +963,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueComment(issue, text) {
         return new Promise((callback) => {
-            this.post('/repos/Putaitu/mondai/issues/' + (issue.index + 1) + '/comments', {
+            this.post('/repos/' + org + '/' + repo + '/issues/' + (issue.index + 1) + '/comments', {
                 body: text
             })
             .then(() => {
@@ -943,7 +981,7 @@ class GitHubApi extends ApiHelper {
      */
     getIssueComments(issue) {
         return new Promise((callback) => {
-            this.get('/repos/Putaitu/mondai/issues/' + (issue.index + 1) + '/comments')
+            this.get('/repos/' + org + '/' + repo + '/issues/' + (issue.index + 1) + '/comments')
             .then((gitHubComments) => {
                 let comments = [];
 

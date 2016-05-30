@@ -117,7 +117,7 @@ body, html {
       top: 0px; }
     .issue-editor > .header img {
       float: left;
-      margin-right: 15px;
+      margin-right: 10px;
       width: 30px;
       height: 30px; }
     .issue-editor > .header .drag-handle {
@@ -134,16 +134,28 @@ body, html {
       width: 30px;
       height: 30px;
       display: block; }
+    .issue-editor > .header .priority-indicator {
+      font-size: 10px; }
+      .issue-editor > .header .priority-indicator.low, .issue-editor > .header .priority-indicator.trival {
+        color: #4caf50; }
+      .issue-editor > .header .priority-indicator.medium, .issue-editor > .header .priority-indicator.minor {
+        color: #9e9e9e; }
+      .issue-editor > .header .priority-indicator.high, .issue-editor > .header .priority-indicator.critical {
+        color: #ffeb3b; }
+      .issue-editor > .header .priority-indicator.blocker {
+        color: #f44336; }
     .issue-editor > .header h4 {
-      margin: 0px; }
+      margin: 0px;
+      display: inline;
+      margin-left: 5px; }
     .issue-editor > .header button {
       float: right;
       text-align: right; }
-    .issue-editor > .header span, .issue-editor > .header input {
+    .issue-editor > .header span, .issue-editor > .header input, .issue-editor > .header h4 {
       line-height: 30px; }
-      .issue-editor > .header span.fa-minus-circle, .issue-editor > .header input.fa-minus-circle {
+      .issue-editor > .header span.fa-minus-circle, .issue-editor > .header input.fa-minus-circle, .issue-editor > .header h4.fa-minus-circle {
         display: none; }
-      .issue-editor > .header span.fa-plus-circle, .issue-editor > .header input.fa-plus-circle {
+      .issue-editor > .header span.fa-plus-circle, .issue-editor > .header input.fa-plus-circle, .issue-editor > .header h4.fa-plus-circle {
         display: inline; }
   .issue-editor .meta, .issue-editor .body, .issue-editor .operations, .issue-editor .comments, .issue-editor .add-comment {
     display: none;

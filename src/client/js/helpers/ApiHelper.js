@@ -2,6 +2,18 @@
 
 class ApiHelper {
     // ----------
+    // Checkers
+    // ----------
+    /**
+     * Check whether the connection to the source has been made
+     */
+    checkConnection() {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+
+    // ----------
     // Resource getters
     // ----------
     /**

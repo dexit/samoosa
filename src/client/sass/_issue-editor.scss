@@ -60,7 +60,7 @@
 
         img {
             float: left;
-            margin-right: 15px;
+            margin-right: 10px;
             width: 30px;
             height: 30px;
         }
@@ -85,8 +85,30 @@
             display: block;
         }
 
+        .priority-indicator {
+            font-size: 10px;
+
+            &.low, &.trival {
+                color: material-color('green', '500');
+            }
+            
+            &.medium, &.minor {
+                color: material-color('grey', '500');
+            }
+            
+            &.high, &.critical {
+                color: material-color('yellow', '500');
+            }
+            
+            &.blocker {
+                color: material-color('red', '500');
+            }
+        }
+
         h4 {
             margin: 0px;
+            display: inline;
+            margin-left: 5px;
         }
 
         button {
@@ -94,7 +116,7 @@
             text-align: right;
         }
 
-        span, input {
+        span, input, h4 {
             line-height: 30px;
             
             &.fa-minus-circle {

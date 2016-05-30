@@ -16,12 +16,16 @@ class MilestoneEditor extends View {
         
         Issue.create({ milestone: this.model.index })
         .then((issue) => {
-            let $issue = new IssueEditor({
+            let editor = new IssueEditor({
                 model: issue
-            }).$element; 
+            }); 
+
+            let $issue = editor.$element;
 
             $('.milestone-editor[data-index="' + issue.milestone + '"] .column[data-index="' + issue.column + '"]').append($issue);
-            
+           
+            $issue.find('.header .btn-edit').click();
+
             spinner(false);
         });
     }

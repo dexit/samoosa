@@ -1,6 +1,14 @@
 .issue-editor {
     border: 1px solid material-color('grey', '400');
 
+    &[data-type="bug"] {
+        >.header {
+            &:before {
+                background-color: material-color('red', '500');
+            }
+        }
+    }
+
     &.loading {
         pointer-events: none;
         opacity: 0.5;
@@ -38,6 +46,17 @@
         background-color: material-color('grey', '800');
         color: material-color('grey', '200');
         padding: 0px 15px 15px 15px;
+        position: relative;
+
+        &:before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 100%;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+        }
 
         img {
             float: left;

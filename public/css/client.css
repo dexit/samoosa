@@ -87,6 +87,8 @@ body, html {
 
 .issue-editor {
   border: 1px solid #bdbdbd; }
+  .issue-editor[data-type="bug"] > .header:before {
+    background-color: #f44336; }
   .issue-editor.loading {
     pointer-events: none;
     opacity: 0.5; }
@@ -103,7 +105,16 @@ body, html {
   .issue-editor > .header {
     background-color: #424242;
     color: #eeeeee;
-    padding: 0px 15px 15px 15px; }
+    padding: 0px 15px 15px 15px;
+    position: relative; }
+    .issue-editor > .header:before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 100%;
+      position: absolute;
+      left: 0px;
+      top: 0px; }
     .issue-editor > .header img {
       float: left;
       margin-right: 15px;

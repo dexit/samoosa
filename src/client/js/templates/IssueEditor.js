@@ -3,7 +3,7 @@ let Issue = require('../models/Issue');
 module.exports = function render() {
     let issue = new Issue(this.model);
 
-    return _.div({class: 'issue-editor'},
+    return _.div({class: 'issue-editor', 'data-type': resources.issueTypes[issue.type]},
         _.div({class: 'header'},
             _.div({class: 'drag-handle'},
                 _.span({class: 'fa fa-bars'})

@@ -38,7 +38,7 @@ window.prettyName = function(name) {
     }
 
     return prettyName;
-}
+};
 
 // Spinner
 window.spinner = function(active) {
@@ -53,6 +53,13 @@ window.spinner = function(active) {
             )
         );
     }
+};
+
+// Scroll on page
+window.scroll = function(amount) {
+    let current = $(document).scrollTop();
+
+    $(document).scrollTop(current + amount);
 }
 
 // ----------

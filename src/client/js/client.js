@@ -96,14 +96,26 @@ Router.route('/settings/', () => {
             .append(new Navbar().$element)
             .append(
                 _.div({class: 'workspace settings-container'},
-                    _.each(window.resources, (name, resource) => {
-                        if(name != 'issues') {
-                            return new ResourceEditor({
-                                name: name,
-                                model: resource
-                            }).$element;   
-                        }
-                    })
+                    _.div({class: 'tabbed-container'},
+                        _.div({class: 'tabs'},
+                            _.each(window.resources, (name, resource) => {
+                                if(name != 'issues') {
+                                    return _.div({class: 'tab' + (name == 'issueTypes' ? ' active' : '')},
+                                        _.button(name).click(function() {
+                                            $(this).parens('.tabs').find('.tab').toggleClass('active', false);
+                                            $(this).parent().toggleClass('active', true);
+                                        }),
+                                        _.div({class: 'content'},
+                                            new ResourceEditor({
+                                                name: name,
+                                                model: resource
+                                            }).$element
+                                        )
+                                    );
+                                }
+                            })
+                        )
+                    )
                 )
             );
     });

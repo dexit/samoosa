@@ -7,6 +7,7 @@ window.markdownToHtml = require('marked');
 
 // Helpers
 window.ResourceHelper = require('./helpers/ResourceHelper');
+window.SettingsHelper = require('./helpers/SettingsHelper');
 
 let GitHubApi = require('../../../plugins/github/js/GitHubApi');
 window.ApiHelper = new GitHubApi();
@@ -65,6 +66,21 @@ window.scroll = function(amount) {
 // ----------
 // Routes
 // ----------
+// Root
+Router.route('/', () => {
+    ApiHelper.checkConnection()
+    .then(() => {
+        $('.app-container').empty()
+            .append(new Navbar().$element)
+            .append(
+                _.div({class: 'workspace root-container'},
+                    _.h4('Mondai Issue Tracker'),
+                    _.p('Welcome')
+                )
+            );
+    });
+});
+
 // User
 Router.route('/user/', () => {
     ApiHelper.checkConnection()

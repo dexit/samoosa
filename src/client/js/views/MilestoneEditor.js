@@ -32,6 +32,12 @@ class MilestoneEditor extends View {
 
     onClickToggle() {
         this.$element.toggleClass('collapsed');
+        
+        SettingsHelper.set(
+            'milestone',
+            this.model.index,
+            this.$element.hasClass('collapsed') ? 'collapsed' : ''
+        );
     }
 
     updateProgress() {

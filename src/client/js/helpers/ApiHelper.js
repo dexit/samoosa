@@ -336,6 +336,121 @@ class ApiHelper {
     }
 
     // ----------
+    // Resource updaters
+    // ---------- 
+    /**
+     * Updates issue
+     *
+     * @param {Object} issue
+     *
+     * @param {Number} index
+     * @returns {Promise} promise
+     */ 
+    updateIssue(index, issue) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+    
+    /**
+     * Updates collaborator
+     *
+     * @param {Number} index
+     * @param {String} collaborator
+     *
+     * @returns {Promise} promise
+     */
+    updateCollaborator(index, collaborator) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+    
+    /**
+     * Updates issue type
+     *
+     * @param {Number} index
+     * @param {String} type
+     *
+     * @returns {Promise} promise
+     */
+    updateIssueType(index, type) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+    
+    /**
+     * Updates issue priority
+     *
+     * @param {Number} index
+     * @param {String} priority
+     *
+     * @returns {Promise} promise
+     */
+    updateIssuePriority(index, priority) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+    
+    /**
+     * Updates issue estimate
+     *
+     * @param {Number} index
+     * @param {String} estimate
+     *
+     * @returns {Promise} promise
+     */
+    updateIssueEstimate(index, estimate) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+    
+    /**
+     * Updates issue column
+     *
+     * @param {Number} index
+     * @param {String} column
+     *
+     * @returns {Promise} promise
+     */
+    updateIssueColumn(index, column) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+    
+    /**
+     * Updates milestone 
+     *
+     * @param {Number} index
+     * @param {Object} milestone
+     *
+     * @returns {Promise} promise
+     */
+    updateMilestone(index, milestone) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+    
+    /**
+     * Updates version
+     *
+     * @param {Number} index
+     * @param {String} version
+     *
+     * @returns {Promise} promise
+     */
+    updateVersion(index, version) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+    
+    // ----------
     // Session methods    
     // ----------
     /**

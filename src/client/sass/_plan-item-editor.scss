@@ -1,6 +1,68 @@
-.plan-item-editor {
-    border: 1px solid material-color('grey', '500');
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 5px;
+body {
+    >.plan-item-editor {
+        border: 1px solid material-color('grey', '500');
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 5px;
+        width: 600px;
+
+        .drag-handle {
+            display: none;
+        }
+
+        input {
+            border-radius: 0px;
+            border: 1px solid material-color('grey', '300');
+            display: block;
+            line-height: 30px;
+            width: 100%;
+            padding: 0px 5px;
+        }
+        
+        .header {
+            margin-bottom: 15px;
+
+            input {
+                width: 60%;
+            }
+
+            button {
+                float: right;
+            }
+        }
+
+        .footer {
+            margin-top: 15px;
+            text-align: right;
+        }   
+    }
+}
+
+.plan-container {
+    .plan-item-editor {
+        overflow: hidden;
+        padding: 0px;
+        width: 100%;
+        background-color: material-color('grey', '800');
+        color: material-color('grey', '100');
+        border-left: 0px;
+        border-right: 0px;
+        border-bottom: 0px;
+        border-radius: 0px;
+
+        &.loading {
+            opacity: 0.5;
+            pointer-event: none;
+        }
+            
+        .drag-handle {
+            display: block;
+            cursor: move;
+            padding: 5px 10px;
+        }
+
+        .header, .body, .footer {
+            display: none;    
+        }
+    }
 }

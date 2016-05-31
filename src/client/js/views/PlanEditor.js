@@ -4,7 +4,28 @@ class PlanEditor extends View {
     constructor(params) {
         super(params);
 
+        this.currentYear = new Date().getFullYear().toString();
+        this.currentMonth = (new Date().getMonth() + 1).toString();
+
+        if(this.currentMonth.length == 1) {
+            this.currentMonth = '0' + this.currentMonth;
+        }
+            
+        this.template = require('../templates/PlanEditor');
+
         this.init();
+    }
+    
+    onClickYear(year) {
+        this.currentYear = year;
+
+        this.render();
+    }
+
+    onClickMonth(month) {
+        this.currentMonth = month;
+
+        this.render();
     }
 
     getYears() {
@@ -31,59 +52,63 @@ class PlanEditor extends View {
         return [
             { 
                 name: 'january',
-                number: 1
+                number: '01'
             },
             { 
                 name: 'february',
-                number: 2
+                number: '02'
             },
             { 
                 name: 'march',
-                number: 3
+                number: '03'
             },
             { 
                 name: 'april',
-                number: 4
+                number: '04'
             },
             { 
                 name: 'may',
-                number: 5
+                number: '05'
             },
             { 
                 name: 'june',
-                number: 6
+                number: '06'
             },
             { 
                 name: 'july',
-                number: 7
+                number: '07'
             },
             { 
                 name: 'august',
-                number: 8
+                number: '08'
             },
             { 
                 name: 'september',
-                number: 9
+                number: '09'
             },
             { 
                 name: 'october',
-                number: 10
+                number: '10'
             },
             { 
                 name: 'november',
-                number: 11
+                number: '11'
             },
             { 
                 name: 'december',
-                number: 12
+                number: '12'
             }
         ];
+    }
+
+    onClickAddMilestone(date) {
+        
     }
 
     getDates(year, month) {
         let dates = [];
         
-        for(let i = 1; i < 31; i++) {
+        for(let i = 1; i <= new Date(year, month, 0).getDate(); i++) {
             let day = i.toString();
 
             if(day.length == 1) {
@@ -94,26 +119,6 @@ class PlanEditor extends View {
         }
         
        return dates; 
-    }
-
-    render() {
-        this.$element = _.div({class: 'plan-editor'},
-            _.div({class: 'years'},
-                _.each(this.getYears(), (i, year) => {
-                    return _.button({class: 'year'}, year.number);
-                })
-            ),
-            _.div({class: 'months'},
-                _.each(this.getMonths(), (i, month) => {
-                    return _.button({class: 'month'}, month.name);
-                })
-            ),
-            _.div({class: 'dates'},
-                _.each(this.getDates('2016', '06'), (i, date) => {
-                    return _.div({class: 'date', 'data-date': date});
-                })
-            )
-        );
     }
 }
 

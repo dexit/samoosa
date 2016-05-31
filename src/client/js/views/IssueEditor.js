@@ -120,7 +120,6 @@ class IssueEditor extends View {
                 });
 
                 // Scroll page if dragging near the top or bottom
-                // TODO: Improve this logic to scroll even if use isn't moving the pointer
                 let scrollSpeed = 5;
 
                 if(current.y > viewport.y + viewport.h - 100) {

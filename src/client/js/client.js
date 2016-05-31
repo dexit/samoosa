@@ -121,12 +121,7 @@ Router.route('/plan/', () => {
                 .append(new Navbar().$element)
                 .append(
                     _.div({class: 'workspace plan-container'},
-                        new PlanEditor().$element,
-                        _.each(window.resources.milestones, (i, milestone) => {
-                            return new PlanItemEditor({
-                                model: milestone,
-                            }).$element;
-                        })
+                        new PlanEditor().$element
                     )
                 );
         });

@@ -653,6 +653,39 @@ class GitHubApi extends ApiHelper {
     }
 
     // ----------
+    // Resource updaters
+    // ----------
+    /**
+     * Update issue
+     *
+     * @param {Object} issue
+     */
+    updateIssue(issue) {
+        return new Promise((callback) => {
+            this.patch('/repos/' + org + '/' + repo + '/issues/' + (issue.index + 1), this.convertIssue(issue))
+            .then(() => {
+                callback();
+            });
+        });
+    }
+
+    /**
+     * Updates milestone 
+     *
+     * @param {Object} milestone
+     *
+     * @returns {Promise} promise
+     */
+    updateMilestone(milestone) {
+        return new Promise((callback) => {
+            this.patch('/repos/' + org + '/' + repo + '/milestones/' + (parseInt(milestone.index) + 1), this.convertMilestone(milestone))
+            .then(() => {
+                callback();
+            });
+        });
+    }
+
+    // ----------
     // Resource processing methods
     // ----------
     /**
@@ -664,9 +697,12 @@ class GitHubApi extends ApiHelper {
         window.resources.milestones = [];
         
         for(let i in milestones) {
-            let milestone = milestones[i];
-
-            milestone.index = i;
+            let milestone = {
+                index: i,
+                title: milestones[i].title,
+                description: milestones[i].description,
+                endDate: milestones[i].due_on
+            };
 
             window.resources.milestones.push(milestone);
         }
@@ -891,6 +927,22 @@ class GitHubApi extends ApiHelper {
     }
 
     /**
+     * Convert milestone model to GitHub schema
+     *
+     * @param {Object} milestone
+     */
+    convertMilestone(milestone) {
+        let gitHubMilestone = {
+            title: milestone.title,
+            description: milestone.description,
+            due_on: milestone.endDate,
+            state: milestone.closed ? 'closed' : 'open'
+        };
+
+        return gitHubMilestone;
+    }
+
+    /**
      * Convert issue model to GitHub schema
      *
      * @param {Object} issue
@@ -954,20 +1006,6 @@ class GitHubApi extends ApiHelper {
         }
 
         return gitHubIssue;
-    }
-
-    /**
-     * Update issue
-     *
-     * @param {Object} issue
-     */
-    updateIssue(issue) {
-        return new Promise((callback) => {
-            this.patch('/repos/' + org + '/' + repo + '/issues/' + (issue.index + 1), this.convertIssue(issue))
-            .then(() => {
-                callback();
-            });
-        });
     }
 
     /**

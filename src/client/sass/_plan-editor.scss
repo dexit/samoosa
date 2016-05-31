@@ -1,47 +1,66 @@
+.plan-container {
+    &.dragging {
+        .plan-editor {
+            * {
+                user-select: none;
+            }
+        }
+    }
+}
+
 .plan-editor {
-    .date {
-        display: block;
-        position: relative;
-        float: left;
-        width: calc(100% / 7);
-        height: 200px;
-        border-right: 1px solid material-color('grey', '300');
-        border-bottom: 1px solid material-color('grey', '300');
-    
-        .plan-item-editor {
-            position: absolute;
-            bottom: 0px;
-            padding: 0px;
-            width: 100%;
-            background-color: material-color('grey', '800');
-            color: material-color('grey', '100');
-            border-left: 0px;
-            border-right: 0px;
-            border-bottom: 0px;
-            border-radius: 0px;
+    position: relative;
+    height: 100%;
 
-            @for $i from 0 through 10 {
-                &:nth-child(#{$i + 1}) {
-                    bottom: #{$i * 31}px;
-                }
+    .years, .months {
+        line-height: 30px;
+        height: 30px;
+        display: flex;
+
+        button {
+            line-height: 30px;
+            height: 30px;
+            flex-grow: 1;
+            flex-basis: 0;
+            border: 0px;
+            background-color: #fff;
+            border-right: 1px solid material-color('grey', '300');
+            border-bottom: 1px solid material-color('grey', '300');
+
+            &.active {
+                background-color: material-color('grey', '400');
             }
 
-            .header {
-                padding: 0px;
-                height: 30px;
+            &:last-child {
+                border-right: 0px;
+            }
+        }
+    }
 
-                h4 {
-                    padding-left: 5px;
-                    margin: 0px;
-                    font-size: 12px;
+    .dates {
+        height: calc(100% - 60px);
+
+        .date {
+            display: block;
+            position: relative;
+            float: left;
+            width: calc(100% / 7);
+            height: calc(100% / 5);
+            border-right: 1px solid material-color('grey', '300');
+            border-bottom: 1px solid material-color('grey', '300');
+
+            .footer {
+                position: absolute;
+                bottom: 0px;
+                text-align: right;
+                width: 100%;
+            
+                button {
                     line-height: 30px;
-                    height: 30px;
-                }
-            }
-
-            .body, .footer {
-                display: none;    
-            }
+                    width: 30px;
+                    text-align: center;
+                }    
+            } 
         }
     }
 }

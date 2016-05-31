@@ -336,63 +336,92 @@ body, html {
       background-color: #43a047;
       color: #f5f5f5; }
 
-.plan-editor .date {
-  display: block;
-  position: relative;
-  float: left;
-  width: calc(100% / 7);
-  height: 200px;
-  border-right: 1px solid #e0e0e0;
-  border-bottom: 1px solid #e0e0e0; }
-  .plan-editor .date .plan-item-editor {
-    position: absolute;
-    bottom: 0px;
-    padding: 0px;
-    width: 100%;
-    background-color: #424242;
-    color: #f5f5f5;
-    border-left: 0px;
-    border-right: 0px;
-    border-bottom: 0px;
-    border-radius: 0px; }
-    .plan-editor .date .plan-item-editor:nth-child(1) {
-      bottom: 0px; }
-    .plan-editor .date .plan-item-editor:nth-child(2) {
-      bottom: 31px; }
-    .plan-editor .date .plan-item-editor:nth-child(3) {
-      bottom: 62px; }
-    .plan-editor .date .plan-item-editor:nth-child(4) {
-      bottom: 93px; }
-    .plan-editor .date .plan-item-editor:nth-child(5) {
-      bottom: 124px; }
-    .plan-editor .date .plan-item-editor:nth-child(6) {
-      bottom: 155px; }
-    .plan-editor .date .plan-item-editor:nth-child(7) {
-      bottom: 186px; }
-    .plan-editor .date .plan-item-editor:nth-child(8) {
-      bottom: 217px; }
-    .plan-editor .date .plan-item-editor:nth-child(9) {
-      bottom: 248px; }
-    .plan-editor .date .plan-item-editor:nth-child(10) {
-      bottom: 279px; }
-    .plan-editor .date .plan-item-editor:nth-child(11) {
-      bottom: 310px; }
-    .plan-editor .date .plan-item-editor .header {
-      padding: 0px;
-      height: 30px; }
-      .plan-editor .date .plan-item-editor .header h4 {
-        padding-left: 5px;
-        margin: 0px;
-        font-size: 12px;
-        line-height: 30px;
-        height: 30px; }
-    .plan-editor .date .plan-item-editor .body, .plan-editor .date .plan-item-editor .footer {
-      display: none; }
+.plan-container.dragging .plan-editor * {
+  user-select: none; }
 
-.plan-item-editor {
+.plan-editor {
+  position: relative;
+  height: 100%; }
+  .plan-editor .years, .plan-editor .months {
+    line-height: 30px;
+    height: 30px;
+    display: flex; }
+    .plan-editor .years button, .plan-editor .months button {
+      line-height: 30px;
+      height: 30px;
+      flex-grow: 1;
+      flex-basis: 0;
+      border: 0px;
+      background-color: #fff;
+      border-right: 1px solid #e0e0e0;
+      border-bottom: 1px solid #e0e0e0; }
+      .plan-editor .years button.active, .plan-editor .months button.active {
+        background-color: #bdbdbd; }
+      .plan-editor .years button:last-child, .plan-editor .months button:last-child {
+        border-right: 0px; }
+  .plan-editor .dates {
+    height: calc(100% - 60px); }
+    .plan-editor .dates .date {
+      display: block;
+      position: relative;
+      float: left;
+      width: calc(100% / 7);
+      height: calc(100% / 5);
+      border-right: 1px solid #e0e0e0;
+      border-bottom: 1px solid #e0e0e0; }
+      .plan-editor .dates .date .footer {
+        position: absolute;
+        bottom: 0px;
+        text-align: right;
+        width: 100%; }
+        .plan-editor .dates .date .footer button {
+          line-height: 30px;
+          width: 30px;
+          text-align: center; }
+
+body > .plan-item-editor {
   border: 1px solid #9e9e9e;
   background-color: #fff;
   padding: 15px;
-  border-radius: 5px; }
+  border-radius: 5px;
+  width: 600px; }
+  body > .plan-item-editor .drag-handle {
+    display: none; }
+  body > .plan-item-editor input {
+    border-radius: 0px;
+    border: 1px solid #e0e0e0;
+    display: block;
+    line-height: 30px;
+    width: 100%;
+    padding: 0px 5px; }
+  body > .plan-item-editor .header {
+    margin-bottom: 15px; }
+    body > .plan-item-editor .header input {
+      width: 60%; }
+    body > .plan-item-editor .header button {
+      float: right; }
+  body > .plan-item-editor .footer {
+    margin-top: 15px;
+    text-align: right; }
+
+.plan-container .plan-item-editor {
+  overflow: hidden;
+  padding: 0px;
+  width: 100%;
+  background-color: #424242;
+  color: #f5f5f5;
+  border-left: 0px;
+  border-right: 0px;
+  border-bottom: 0px;
+  border-radius: 0px; }
+  .plan-container .plan-item-editor.loading {
+    opacity: 0.5;
+    pointer-event: none; }
+  .plan-container .plan-item-editor .drag-handle {
+    display: block;
+    cursor: move;
+    padding: 5px 10px; }
+  .plan-container .plan-item-editor .header, .plan-container .plan-item-editor .body, .plan-container .plan-item-editor .footer {
+    display: none; }
 
 /*# sourceMappingURL=client.css.map */

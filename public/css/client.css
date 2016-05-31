@@ -363,21 +363,19 @@ body, html {
     height: calc(100% - 60px); }
     .plan-editor .dates .date {
       display: block;
-      position: relative;
       float: left;
       width: calc(100% / 7);
       height: calc(100% / 5);
       border-right: 1px solid #e0e0e0;
       border-bottom: 1px solid #e0e0e0; }
-      .plan-editor .dates .date .footer {
-        position: absolute;
-        bottom: 0px;
-        text-align: right;
-        width: 100%; }
-        .plan-editor .dates .date .footer button {
-          line-height: 30px;
-          width: 30px;
-          text-align: center; }
+      .plan-editor .dates .date.hovering {
+        outline: 2px solid #81c784;
+        background-color: 2px solid #c8e6c9; }
+      .plan-editor .dates .date .body > button {
+        float: right;
+        line-height: 30px;
+        width: 30px;
+        text-align: center; }
 
 body > .plan-item-editor {
   border: 1px solid #9e9e9e;

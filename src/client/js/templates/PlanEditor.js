@@ -41,9 +41,7 @@ module.exports = function render() {
                                     model: milestone,
                                 }).$element;
                             }
-                        })
-                    ),
-                    _.div({class: 'footer'},
+                        }),
                         _.button({class: 'btn-transparent'},
                             _.span({class: 'fa fa-plus'})
                         )

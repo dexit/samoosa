@@ -119,27 +119,27 @@ class PlanItemEditor extends View {
         // Unset temporary classes and styling
         $('.plan-container').toggleClass('dragging', false);
         this.$element.removeAttr('style');
+        this.$element.find('button, input').removeAttr('style');
         
         // Unregister column mouse events and unset hovering state
-        $('.plen-editor .dates .date')
+        $('.plan-editor .dates .date')
             .off('mouseenter')
             .off('mouseleave').
             toggleClass('hovering', false);
 
-        // Check if any change happened
+        // Find new target element
         let $target = $('.plan-editor .dates .date.hovering .body').first();
         
-        if($target[0] != this.$element.parent()[0]) {
+        // If the dragging event lasted less than 100 ms, open dialog
+        if(Date.now() - this.prevClick < 100) {
+            this.openDialog();
+
+        } else if($target.length > 0) {
             // Place this element into the hovered date container
             $target.prepend(this.$element);
             
             // Trigger the change event
             this.onChange();
-        
-        // If not, open dialog
-        } else {
-            this.openDialog();
-
         }
     }
 
@@ -147,8 +147,8 @@ class PlanItemEditor extends View {
      * Event: Click the dragging handle
      */
     onClickDragHandle(e) {
-        // Cache the previous parent
-        let $parent = this.$element.parent();
+        // Cache the previous click
+        this.prevClick = Date.now();
 
         // Set class on board container
         $('.plan-container').toggleClass('dragging', true);
@@ -163,6 +163,10 @@ class PlanItemEditor extends View {
             'z-index': 999
         });
         
+        this.$element.find('button, input').css({
+            'pointer-events': 'none',
+        });
+
         // Buffer the offset between mouse cursor and element position
         let offset = {
             x: this.$element.offset().left - e.pageX,
@@ -179,9 +183,6 @@ class PlanItemEditor extends View {
             x: e.pageX,
             y: e.pageY
         };
-
-        // Place the element in a global scope
-        $('.plan-container').append(this.$element);
 
         // Column mouse hover events
         $('.plan-editor .dates .date')
@@ -216,9 +217,6 @@ class PlanItemEditor extends View {
         $(document)
             .off('mouseup')
             .on('mouseup', (e) => {
-                // Append the element back to its parent, in case it wans't dropped correctly
-                $parent.append(this.$element);
-                
                 this.onReleaseDragHandle(e);
             });
     }

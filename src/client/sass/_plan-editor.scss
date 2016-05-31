@@ -42,20 +42,20 @@
 
         .date {
             display: block;
-            position: relative;
             float: left;
             width: calc(100% / 7);
             height: calc(100% / 5);
             border-right: 1px solid material-color('grey', '300');
             border-bottom: 1px solid material-color('grey', '300');
 
-            .footer {
-                position: absolute;
-                bottom: 0px;
-                text-align: right;
-                width: 100%;
-            
-                button {
+            &.hovering {
+                outline: 2px solid material-color('green', '300');
+                background-color: 2px solid material-color('green', '100');
+            }
+
+            .body {
+                >button {
+                    float: right;
                     line-height: 30px;
                     width: 30px;
                     text-align: center;

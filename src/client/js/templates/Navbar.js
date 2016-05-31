@@ -6,6 +6,9 @@ module.exports = function Navbar() {
             _.a({href: '/#/user/', class: Router.url == '/user/' ? 'active' : ''},
                 _.span({class: 'fa fa-user'})
             ),
+            _.a({href: '/#/plan/', class: Router.url == '/plan/' ? 'active' : ''},
+                _.span({class: 'fa fa-calendar'})
+            ),
             _.a({href: '/#/board/', class: Router.url == '/board/' ? 'active' : ''},
                 _.span({class: 'fa fa-columns'})
             ),

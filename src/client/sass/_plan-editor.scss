@@ -1,0 +1,47 @@
+.plan-editor {
+    .date {
+        display: block;
+        position: relative;
+        float: left;
+        width: calc(100% / 7);
+        height: 200px;
+        border-right: 1px solid material-color('grey', '300');
+        border-bottom: 1px solid material-color('grey', '300');
+    
+        .plan-item-editor {
+            position: absolute;
+            bottom: 0px;
+            padding: 0px;
+            width: 100%;
+            background-color: material-color('grey', '800');
+            color: material-color('grey', '100');
+            border-left: 0px;
+            border-right: 0px;
+            border-bottom: 0px;
+            border-radius: 0px;
+
+            @for $i from 0 through 10 {
+                &:nth-child(#{$i + 1}) {
+                    bottom: #{$i * 31}px;
+                }
+            }
+
+            .header {
+                padding: 0px;
+                height: 30px;
+
+                h4 {
+                    padding-left: 5px;
+                    margin: 0px;
+                    font-size: 12px;
+                    line-height: 30px;
+                    height: 30px;
+                }
+            }
+
+            .body, .footer {
+                display: none;    
+            }
+        }
+    }
+}

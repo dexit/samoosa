@@ -62,6 +62,12 @@ class IssueEditor extends View {
             'pointer-events': 'none',
             'z-index': 999
         });
+        
+        // Buffer the offset between mouse cursor and element position
+        let offset = {
+            x: this.$element.offset().left - e.pageX,
+            y: this.$element.offset().top - e.pageY
+        };
 
         // Add absolute positioning afterwards to allow getting proper offset
         this.$element.css({
@@ -109,8 +115,8 @@ class IssueEditor extends View {
 
                 // Apply new CSS positioning values
                 this.$element.css({
-                    top: this.$element.offset().top + delta.y,
-                    left: this.$element.offset().left + delta.x
+                    top: current.y + offset.y,
+                    left: current.x + offset.x
                 });
 
                 // Scroll page if dragging near the top or bottom
@@ -147,7 +153,9 @@ class IssueEditor extends View {
         this.$element.removeAttr('style');
         
         // Place this element into the hovered column
-        $('.milestone-editor .columns .column.hovering .body').first().append(this.$element);
+        $('.milestone-editor .columns .column.hovering .body')
+            .first()
+            .prepend(this.$element);
         
         // Unregister column mouse events and unset hovering state
         $('.milestone-editor .columns .column')
@@ -209,7 +217,8 @@ class IssueEditor extends View {
             .toggleClass('hidden', true)
             .siblings('.edit')
             .toggleClass('hidden', false)
-            .focus(); 
+            .focus()
+            .select(); 
     }
 
     /**

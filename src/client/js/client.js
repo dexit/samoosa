@@ -20,6 +20,8 @@ window.Navbar = require('./views/Navbar');
 window.IssueEditor = require('./views/IssueEditor');
 window.MilestoneEditor = require('./views/MilestoneEditor');
 window.ResourceEditor = require('./views/ResourceEditor');
+window.PlanItemEditor = require('./views/PlanItemEditor');
+window.PlanEditor = require('./views/PlanEditor');
 
 // ----------
 // Global functions
@@ -106,13 +108,41 @@ Router.route('/user/', () => {
     });
 });
 
+// Plan
+Router.route('/plan/', () => {
+    ApiHelper.checkConnection()
+    .then(() => {
+        ApiHelper.getResources()
+        .then(() => {
+            ViewHelper.clear();
+            
+            $('.app-container')
+                .empty()
+                .append(new Navbar().$element)
+                .append(
+                    _.div({class: 'workspace plan-container'},
+                        new PlanEditor().$element,
+                        _.each(window.resources.milestones, (i, milestone) => {
+                            return new PlanItemEditor({
+                                model: milestone,
+                            }).$element;
+                        })
+                    )
+                );
+        });
+    });
+});
+
 // Board
 Router.route('/board/', () => {
     ApiHelper.checkConnection()
     .then(() => {
         ApiHelper.getResources()
         .then(() => {
-            $('.app-container').empty()
+            ViewHelper.clear();
+
+            $('.app-container')
+                .empty()
                 .append(new Navbar().$element)
                 .append(
                     _.div({class: 'workspace board-container'},
@@ -138,7 +168,10 @@ Router.route('/list/', () => {
     .then(() => {
         ApiHelper.getResources()
         .then(() => {
-            $('.app-container').empty()
+            ViewHelper.clear();
+            
+            $('.app-container')
+                .empty()
                 .append(new Navbar().$element)
                 .append(
                     _.div({class: 'workspace board-container list'},
@@ -164,7 +197,10 @@ Router.route('/settings/', () => {
     .then(() => {
         ApiHelper.getResources()
         .then(() => {
-            $('.app-container').empty()
+            ViewHelper.clear();
+            
+            $('.app-container')
+                .empty()
                 .append(new Navbar().$element)
                 .append(
                     _.div({class: 'workspace settings-container'},

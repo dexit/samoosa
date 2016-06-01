@@ -16,19 +16,13 @@ module.exports = function render() {
                 ).click(() => { this.onClickMonth(month.number); });
             })
         ),
-        _.div({class: 'weeks'},
-            _.each(this.getWeeks(this.currentYear, this.currentMonth), (i, week) => {
-                return _.div({class: 'week'},
-                    week
-                );
-            })
-        ),
         _.div({class: 'dates'},
             _.each(this.getDates(this.currentYear, this.currentMonth), (i, date) => {
                 return _.div({class: 'date', 'data-date': date},
                     _.div({class: 'header'},
-                        _.span({class: 'number'}, date.getDate()),
-                        _.span({class: 'name'}, date.getDayName())
+                        _.span({class: 'datenumber'}, date.getDate()),
+                        _.span({class: 'weekday'}, date.getDayName()),
+                        _.span({class: 'weeknumber'}, 'w ' + date.getWeek())
                     ),
                     _.div({class: 'body'},
                         _.each(window.resources.milestones, (i, milestone) => {

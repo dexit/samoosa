@@ -3,6 +3,16 @@
  */
 body, html {
     height: 100%;
+
+    *:not(.edit) {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+    }
+
+    h4 {
+        font-size: 16px;
+    }
 }
 
 /**

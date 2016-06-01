@@ -36,6 +36,10 @@ class MilestoneEditor extends View {
 
             spinner(false);
         });
+
+        if(this.$element.hasClass('collapsed')) {
+            this.onClickToggle();
+        }
     }
 
     /**

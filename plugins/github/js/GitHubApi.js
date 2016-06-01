@@ -42,7 +42,7 @@ class GitHubApi extends ApiHelper {
     get(url, param) {
         return new Promise((callback) => {
             $.ajax({
-                url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + 'access_token=' + this.getApiToken(),
+                url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + 'access_token=' + this.getApiToken() + '&per_page=100',
                 type: 'GET',
                 success: (result) => {
                     callback(result);
@@ -919,7 +919,7 @@ class GitHubApi extends ApiHelper {
                 issue.milestone = ResourceHelper.getMilestone(gitHubIssue.milestone.title);
             }
 
-            issue.index = gitHubIssue.number - 1
+            issue.index = parseInt(gitHubIssue.number) - 1;
 
             window.resources.issues[issue.index] = issue;
         }
@@ -966,9 +966,12 @@ class GitHubApi extends ApiHelper {
 
         gitHubIssue.state = issueColumn == 'done' ? 'closed' : 'open';
 
+        // Milestone
         // GitHub counts numbers from 1, ' + repo + ' counts from 0
         if(issue.milestone >= 0) {
             gitHubIssue.milestone = parseInt(issue.milestone) + 1;
+        } else {
+            gitHubIssue.milestone = null;
         }
 
         // Type
@@ -1010,13 +1013,30 @@ class GitHubApi extends ApiHelper {
     /**
      * Add issue comment
      *
-     * @param {Object} issue
+     * @param {Issue} issue
      * @param {String} text
      */
     addIssueComment(issue, text) {
         return new Promise((callback) => {
             this.post('/repos/' + org + '/' + repo + '/issues/' + (issue.index + 1) + '/comments', {
                 body: text
+            })
+            .then(() => {
+                callback(); 
+            });
+        });
+    }
+
+    /**
+     * Update issue comment
+     *
+     * @param {Issue} issue
+     * @param {Object} comment
+     */
+    updateIssueComment(issue, comment) {
+        return new Promise((callback) => {
+            this.patch('/repos/' + org + '/' + repo + '/issues/comments/' + comment.index, {
+                body: comment.text
             })
             .then(() => {
                 callback(); 
@@ -1040,7 +1060,8 @@ class GitHubApi extends ApiHelper {
                 for(let gitHubComment of gitHubComments) {
                     let comment = {
                         collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
-                        text: gitHubComment.body
+                        text: gitHubComment.body,
+                        index: gitHubComment.id
                     };
 
                     comments.push(comment);

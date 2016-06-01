@@ -68,7 +68,7 @@ class PlanItemEditor extends View {
         // Start loading
         this.$element.toggleClass('loading', true);
         
-        ApiHelper.updateMilestone(this.model)
+        ResourceHelper.updateResource('milestones', this.model)
         .then(() => {
             this.$element.toggleClass('loading', false);
         }); 

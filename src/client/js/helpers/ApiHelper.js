@@ -488,11 +488,26 @@ class ApiHelper {
     /** 
      * Adds issue comment
      *
+     * @param {Issue} issue
      * @param {Object} comment
      *
      * @returns {Promise} promise
      */
-    addIssueComment(comment) {
+    addIssueComment(issue, comment) {
+        return new Promise((callback) => {
+            callback([]);
+        });
+    }
+    
+    /** 
+     * Updates issue comment
+     *
+     * @param {Issue} issue
+     * @param {Object} comment
+     *
+     * @returns {Promise} promise
+     */
+    updateIssueComment(issue, comment) {
         return new Promise((callback) => {
             callback([]);
         });
@@ -570,6 +585,45 @@ class ApiHelper {
 
             case 'issues':
                 return this.addIssue(item);
+        
+            default:
+                alert('Resource "' + resource + '" is unknown');
+        }
+    }
+    
+    /**
+     * Updates a resource
+     *
+     * @param {String} resource
+     * @param {Object} item
+     *
+     * @returns {Promise} promise
+     */
+    updateResource(resource, item) {
+        switch(resource) {
+            case 'collaborators':
+                return this.updateCollaborator(item);
+
+            case 'issueTypes':
+                return this.updateIssueType(item);
+
+            case 'issuePriorities':
+                return this.updateIssuePriority(item);
+
+            case 'issueEstimates':
+                return this.updateIssueEstimate(item);
+
+            case 'issueColumns':
+                return this.updateIssueColumn(item);
+
+            case 'milestones':
+                return this.updateMilestone(item);
+
+            case 'versions':
+                return this.updateVersion(item);
+
+            case 'issues':
+                return this.updateIssue(item);
         
             default:
                 alert('Resource "' + resource + '" is unknown');

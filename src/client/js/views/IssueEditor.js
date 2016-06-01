@@ -10,17 +10,28 @@ class IssueEditor extends View {
     }
 
     /**
+     * Cancels multi select
+     */
+    static cancelMultiSelect() {
+        $('.issue-editor').toggleClass('selected', false); 
+        
+        $('body').off('click');
+    }
+
+    /**
      * Event: Click the toggle button
      */
     onClickToggle() {
-        let wasExpanded = this.$element.hasClass('expanded');
+        if(!InputHelper.isShiftDown) {
+            let wasExpanded = this.$element.hasClass('expanded');
 
-        $('.issue-editor').removeClass('expanded');
+            $('.issue-editor').removeClass('expanded');
 
-        this.$element.toggleClass('expanded', !wasExpanded);
-    
-        if(!wasExpanded) {
-            this.getComments();
+            this.$element.toggleClass('expanded', !wasExpanded);
+        
+            if(!wasExpanded) {
+                this.getComments();
+            }
         }
     }
 
@@ -50,92 +61,98 @@ class IssueEditor extends View {
      * Event: Click the dragging handle
      */
     onClickDragHandle(e) {
-        // Set class on board container
-        $('.board-container').toggleClass('dragging', true);
+        if(!InputHelper.isShiftDown) {
+            // Set class on board container
+            $('.board-container').toggleClass('dragging', true);
 
-        // Apply temporary CSS properties
-        this.$element.css({
-            top: this.$element.offset().top,
-            left: this.$element.offset().left,
-            width: this.$element.outerWidth(),
-            height: this.$element.outerHeight(),
-            'pointer-events': 'none',
-            'z-index': 999
-        });
-        
-        // Buffer the offset between mouse cursor and element position
-        let offset = {
-            x: this.$element.offset().left - e.pageX,
-            y: this.$element.offset().top - e.pageY
-        };
+            // Set element
+            let $element = this.$element;
 
-        // Add absolute positioning afterwards to allow getting proper offset
-        this.$element.css({
-            position: 'absolute'
-        }); 
-        
-        // Buffer previous pointer location
-        let prev = {
-            x: e.pageX,
-            y: e.pageY
-        };
+            if($('.issue-editor.selected').length > 0) {
+                $element = $('.issue-editor.selected');
+            }
 
-        // Column mouse hover events
-        $('.milestone-editor .columns .column')
-            .on('mouseenter', function() {
-                $(this).toggleClass('hovering', true);
-            })
-            .on('mouseleave', function() {
-                $(this).toggleClass('hovering', false); 
+            // Apply temporary CSS properties
+            $element.each(function(i) {
+                $(this).css({
+                    top: $element.first().offset().top,
+                    left: $element.first().offset().left,
+                    width: $element.first().outerWidth(),
+                    height: $element.first().outerHeight(),
+                    'pointer-events': 'none',
+                    'z-index': 999 - i,
+                    'margin-top': (30 * i) + 'px'
+                });
             });
+            
+            // Buffer the offset between mouse cursor and element position
+            let offset = {
+                x: this.$element.offset().left - e.pageX,
+                y: this.$element.offset().top - e.pageY
+            };
 
-        // Document pointer movement logic
-        $(document)
-            .off('mousemove')
-            .on('mousemove', (e) => {
-                // Get current pointer location
-                let current = {
-                    x: e.pageX,
-                    y: e.pageY
-                };
+            // Add absolute positioning afterwards to allow getting proper offset
+            $element.css({
+                position: 'absolute'
+            }); 
+            
+            // Buffer previous pointer location
+            let prev = {
+                x: e.pageX,
+                y: e.pageY
+            };
 
-                // Get current viewport
-                let viewport = {
-                    x: 0,
-                    y: $(document).scrollTop(),
-                    w: $(window).width(),
-                    h: $(window).height()
-                };
-
-                // Calculate delta
-                let delta = {
-                    x: current.x - prev.x,
-                    y: current.y - prev.y
-                };
-
-                // Apply new CSS positioning values
-                this.$element.css({
-                    top: current.y + offset.y,
-                    left: current.x + offset.x
+            // Column mouse hover events
+            $('.milestone-editor .columns .column')
+                .on('mouseenter', function() {
+                    $(this).toggleClass('hovering', true);
+                })
+                .on('mouseleave', function() {
+                    $(this).toggleClass('hovering', false); 
                 });
 
-                // Scroll page if dragging near the top or bottom
-                let scrollSpeed = 5;
+            // Document pointer movement logic
+            $(document)
+                .off('mousemove')
+                .on('mousemove', (e) => {
+                    // Get current pointer location
+                    let current = {
+                        x: e.pageX,
+                        y: e.pageY
+                    };
 
-                if(current.y > viewport.y + viewport.h - 100) {
-                    scroll(1 * scrollSpeed);
-                } else if(current.y < viewport.y + 100) {
-                    scroll(-1 * scrollSpeed);
-                }
+                    // Get current viewport
+                    let viewport = {
+                        x: 0,
+                        y: $(document).scrollTop(),
+                        w: $(window).width(),
+                        h: $(window).height()
+                    };
 
-                // Replace previous position buffer data
-                prev = current;
-            });
+                    // Apply new CSS positioning values
+                    $element.css({
+                        top: current.y + offset.y,
+                        left: current.x + offset.x
+                    });
 
-        // Document pointer release mouse button logic
-        $(document)
-            .off('mouseup')
-            .on('mouseup', (e) => { this.onReleaseDragHandle(e); });
+                    // Scroll page if dragging near the top or bottom
+                    let scrollSpeed = 5;
+
+                    if(current.y > viewport.y + viewport.h - 100) {
+                        scroll(1 * scrollSpeed);
+                    } else if(current.y < viewport.y + 100) {
+                        scroll(-1 * scrollSpeed);
+                    }
+
+                    // Replace previous position buffer data
+                    prev = current;
+                });
+
+            // Document pointer release mouse button logic
+            $(document)
+                .off('mouseup')
+                .on('mouseup', (e) => { this.onReleaseDragHandle(e); });
+        }
     }
 
     /**
@@ -147,14 +164,21 @@ class IssueEditor extends View {
             .off('mouseup')
             .off('mousemove');
         
+        // Set element
+        let $element = this.$element;
+
+        if($('.issue-editor.selected').length > 0) {
+            $element = $('.issue-editor.selected');
+        }
+
         // Unset temporary classes and styling
         $('.board-container').toggleClass('dragging', false);
-        this.$element.removeAttr('style');
+        $element.removeAttr('style');
         
         // Place this element into the hovered column
         $('.milestone-editor .columns .column.hovering .body')
             .first()
-            .prepend(this.$element);
+            .prepend($element);
         
         // Unregister column mouse events and unset hovering state
         $('.milestone-editor .columns .column')
@@ -163,12 +187,21 @@ class IssueEditor extends View {
             toggleClass('hovering', false);
 
         // Update model data with new information based on DOM location
-        this.model.milestone = this.$element.parents('.milestone-editor').attr('data-index');
-        this.model.column = this.$element.parents('.column').attr('data-index');
-    
-        // Trigger the change event
-        this.onChange();
+        $element.each(function(i) {
+            for(let view of ViewHelper.getAll('IssueEditor')) {
+                if(this == view.$element[0]) {
+                    view.model.milestone = view.$element.parents('.milestone-editor').attr('data-index');
+                    view.model.column = view.$element.parents('.column').attr('data-index');
+                
+                    // Trigger the change event
+                    view.onChange();
+                }
+            }
+        });
         
+        // Cancel multiselect
+        IssueEditor.cancelMultiSelect();
+
         // Update milestones progress
         for(let milestoneEditor of ViewHelper.getAll('MilestoneEditor')) {
             milestoneEditor.updateProgress();
@@ -212,12 +245,14 @@ class IssueEditor extends View {
      * Event: Click the edit button of a field
      */
     onClickEdit() {
-        $(this)
-            .toggleClass('hidden', true)
-            .siblings('.edit')
-            .toggleClass('hidden', false)
-            .focus()
-            .select(); 
+        if(!InputHelper.isShiftDown) {
+            $(this)
+                .toggleClass('hidden', true)
+                .siblings('.edit')
+                .toggleClass('hidden', false)
+                .focus()
+                .select(); 
+        }
     }
 
     /**
@@ -242,6 +277,27 @@ class IssueEditor extends View {
             .toggleClass('hidden', true)
             .siblings('.btn-edit')
             .toggleClass('hidden', false); 
+    }
+
+    /**
+     * Event: Click entire container element
+     *
+     * @param {Object} event
+     */
+    onClickElement(e) {
+        // Check for shift key
+        if(InputHelper.isShiftDown) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            this.$element.toggleClass('selected');
+
+            $('body')
+            .off('click')
+            .on('click', function() {
+                IssueEditor.cancelMultiSelect();
+            });
+        }
     }
 
     /**
@@ -280,26 +336,54 @@ class IssueEditor extends View {
     getComments() {
         let $comments = this.$element.find('.comments');
 
-        ApiHelper.getIssueComments(this.model)
-        .then((comments) => {
-            this.$element.toggleClass('loading', false);
-            
-            $comments.html(
-                _.each(comments, (i, comment) => {
-                    let collaborator = window.resources.collaborators[comment.collaborator];
-                    let text = markdownToHtml(comment.text);
-                    
-                    return _.div({class: 'comment'},
-                        _.div({class: 'collaborator'},
-                            _.img({src: collaborator.avatar}),
-                            _.p(collaborator.name)    
-                        ),
-                        _.div({class: 'text'},
-                            text
-                        )
-                    );
-                })
-            );
+        ApiHelper.getUser()
+        .then((user) => {
+            ApiHelper.getIssueComments(this.model)
+            .then((comments) => {
+                this.$element.toggleClass('loading', false);
+                
+                $comments.html(
+                    _.each(comments, (i, comment) => {
+                        let collaborator = window.resources.collaborators[comment.collaborator];
+                        let text = markdownToHtml(comment.text);
+                        let isUser = collaborator.name == user.name;
+                        
+                        return _.div({class: 'comment', 'data-index': comment.index},
+                            _.div({class: 'collaborator'},
+                                _.img({src: collaborator.avatar}),
+                                _.p(collaborator.name)    
+                            ),
+                            _.if(isUser, 
+                                _.div({class: 'btn-edit'},
+                                    text
+                                ).click(this.onClickEdit),
+                                _.textarea({class: 'edit hidden text btn-transparent'},
+                                    comment.text
+                                ).change(() => {
+                                    this.$element.toggleClass('loading', true);
+                                    
+                                    comment.text = this.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
+
+                                    this.$element.find('.comments .comment[data-index="' + comment.index + '"] .btn-edit').html(
+                                        markdownToHtml(comment.text) || ''
+                                    );
+
+                                    ApiHelper.updateIssueComment(this.model, comment)
+                                    .then(() => {
+                                        this.$element.toggleClass('loading', false);
+                                    });
+                                })
+                                .blur(this.onBlur)
+                            ),
+                            _.if(!isUser,
+                                _.div({class: 'text'},
+                                    text
+                                )
+                            )
+                        );
+                    })
+                );
+            });
         });
     }
 }

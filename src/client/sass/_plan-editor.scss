@@ -65,28 +65,12 @@
             }
         }
 
-        .weeks {
-            position: absolute;
-            top: 70px;
-            left: 0px;
-            width: 30px;
-            text-align: center;
-            height: calc(100% - 70px);
-
-            .week {
-                padding-top: 5px;
-                height: calc(100% / 5);
-                border-right: 1px solid material-color('grey', '300');
-                border-bottom: 1px solid material-color('grey', '300');
-            }
-        }
-
         .dates {
             position: absolute;
             top: 70px;
-            left: 30px;
+            left: 0px;
             height: calc(100% - 70px);
-            width: calc(100% - 30px);
+            width: 100%;
             
             * {
                 -webkit-user-select: none;
@@ -110,10 +94,19 @@
                 .header {
                     padding: 5px;
 
-                    .name {
+                    .datenumber {
+                        font-weight: bold;
+                    }
+
+                    .weekday {
                         color: material-color('grey', '400');
                         font-weight: bold;
                         margin-left: 5px;
+                    }
+
+                    .weeknumber {
+                        color: material-color('grey', '400');
+                        float: right;
                     }
                 }
 

@@ -1,12 +1,42 @@
 .issue-editor {
     border: 1px solid material-color('grey', '400');
 
+    // Type indicators
     &[data-type="bug"] {
         >.header {
             &:before {
                 background-color: material-color('red', '500');
             }
         }
+    }
+    
+    &[data-type="enhancement"] {
+        >.header {
+            &:before {
+                background-color: material-color('green', '500');
+            }
+        }
+    }
+    
+    &[data-type="task"] {
+        >.header {
+            &:before {
+                background-color: material-color('blue', '500');
+            }
+        }
+    }
+    
+    &[data-type="question"] {
+        >.header {
+            &:before {
+                background-color: material-color('yellow', '500');
+            }
+        }
+    }
+
+    // States
+    &.selected {
+        border: 1px solid material-color('blue', '500');
     }
 
     &.loading {
@@ -38,7 +68,7 @@
         cursor: text;
 
         &:hover {
-            outline: 1px solid material-color('grey', '200');
+            outline: 1px solid material-color('blue', '500');
         }
     }
 
@@ -177,7 +207,8 @@
                 }
             }
 
-            .text {
+            .text, .btn-edit, .edit {
+                resize: none;
                 flex-grow: 1;
                 padding: 5px 10px;
                 border-radius: 5px;

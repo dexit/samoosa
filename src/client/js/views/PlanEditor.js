@@ -4,8 +4,8 @@ class PlanEditor extends View {
     constructor(params) {
         super(params);
 
-        this.currentYear = new Date().getFullYear().toString();
-        this.currentMonth = (new Date().getMonth() + 1).toString();
+        this.currentYear = new Date().getFullYear();
+        this.currentMonth = new Date().getMonth() + 1;
 
         if(this.currentMonth.length == 1) {
             this.currentMonth = '0' + this.currentMonth;
@@ -17,13 +17,13 @@ class PlanEditor extends View {
     }
     
     onClickYear(year) {
-        this.currentYear = year;
+        this.currentYear = parseInt(year);
 
         this.render();
     }
 
     onClickMonth(month) {
-        this.currentMonth = month;
+        this.currentMonth = parseInt(month);
 
         this.render();
     }
@@ -73,23 +73,6 @@ class PlanEditor extends View {
         });
     }
 
-    getWeeks(year, month) {
-        let weeks = [];
-        let map = {};
-
-        for(let date of this.getDates(year, month)) {
-            let week = date.getWeek();
-
-            // Check if we included this week already
-            if(!map[week]) {
-                map[week] = true;
-                weeks.push(week);
-            }
-        }
-
-        return weeks;
-    }
-
     getDates(year, month) {
         let dates = [];
 
@@ -100,7 +83,7 @@ class PlanEditor extends View {
                 day = '0' + day;
             }
             
-            if(month.length == 1) {
+            if(month.toString().length == 1) {
                 month = '0' + month;
             }
 

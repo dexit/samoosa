@@ -79,15 +79,14 @@ module.exports = function render() {
             ).click(this.onClickEdit),
             _.textarea({class: 'edit hidden btn-transparent', 'data-property': 'description'},
                 this.model.description
-            )
-                .change(() => {
-                    this.onChange();
-                    
-                    this.$element.find('.body .btn-edit').html(
-                        markdownToHtml(this.model.description) || ''
-                    );
-                })
-                .blur(this.onBlur)
+            ).change(() => {
+                this.onChange();
+                
+                this.$element.find('.body .btn-edit').html(
+                    markdownToHtml(this.model.description) || ''
+                );
+            })
+            .blur(this.onBlur)
         ),
         _.div({class: 'comments'}),
         _.div({class: 'add-comment'},
@@ -96,5 +95,5 @@ module.exports = function render() {
                 'Comment'
             ).click(() => { this.onClickComment(); })
         )
-    );
+    ).click((e) => { this.onClickElement(e); });
 };

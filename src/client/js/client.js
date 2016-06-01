@@ -8,6 +8,7 @@ window.markdownToHtml = require('marked');
 // Helpers
 window.ResourceHelper = require('./helpers/ResourceHelper');
 window.SettingsHelper = require('./helpers/SettingsHelper');
+window.InputHelper = require('./helpers/InputHelper');
 
 let GitHubApi = require('../../../plugins/github/js/GitHubApi');
 window.ApiHelper = new GitHubApi();
@@ -256,7 +257,7 @@ Router.route('/settings/', () => {
                         _.div({class: 'tabbed-container'},
                             _.div({class: 'tabs'},
                                 _.each(window.resources, (name, resource) => {
-                                    if(name != 'issues') {
+                                    if(name != 'issues' && name != 'milestones') {
                                         return _.button({class: 'tab' + (name == 'issueTypes' ? ' active' : '')},
                                             prettyName(name)
                                         ).click(function() {
@@ -275,7 +276,7 @@ Router.route('/settings/', () => {
                             ),
                             _.div({class: 'panes'},
                                 _.each(window.resources, (name, resource) => {
-                                    if(name != 'issues') {
+                                    if(name != 'issues' && name != 'milestones') {
                                         return _.div({class: 'pane' + (name == 'issueTypes' ? ' active' : '')},
                                             new ResourceEditor({
                                                 name: name,

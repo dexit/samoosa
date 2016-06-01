@@ -1,13 +1,15 @@
 .milestone-editor {
     &.collapsed {
         >.header {
-            .fa {
-                &.fa-chevron-down {
-                    display: none;
-                }
-                
-                &.fa-chevron-right {
-                    display: inline-block;
+            .title {
+                .fa {
+                    &.fa-chevron-down {
+                        display: none;
+                    }
+                    
+                    &.fa-chevron-right {
+                        display: inline-block;
+                    }
                 }
             }
         }

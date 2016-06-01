@@ -13,6 +13,12 @@
  */
 body, html {
   height: 100%; }
+  body *:not(.edit), html *:not(.edit) {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none; }
+  body h4, html h4 {
+    font-size: 16px; }
 
 /**
  * A transparent, border-less button
@@ -108,6 +114,14 @@ body, html {
   border: 1px solid #bdbdbd; }
   .issue-editor[data-type="bug"] > .header:before {
     background-color: #f44336; }
+  .issue-editor[data-type="enhancement"] > .header:before {
+    background-color: #4caf50; }
+  .issue-editor[data-type="task"] > .header:before {
+    background-color: #2196f3; }
+  .issue-editor[data-type="question"] > .header:before {
+    background-color: #ffeb3b; }
+  .issue-editor.selected {
+    border: 1px solid #2196f3; }
   .issue-editor.loading {
     pointer-events: none;
     opacity: 0.5; }
@@ -120,7 +134,7 @@ body, html {
   .issue-editor .btn-edit {
     cursor: text; }
     .issue-editor .btn-edit:hover {
-      outline: 1px solid #eeeeee; }
+      outline: 1px solid #2196f3; }
   .issue-editor > .header {
     background-color: #424242;
     color: #eeeeee;
@@ -202,7 +216,8 @@ body, html {
       flex-shrink: 0; }
       .issue-editor .comments .comment .collaborator img {
         max-width: 100%; }
-    .issue-editor .comments .comment .text {
+    .issue-editor .comments .comment .text, .issue-editor .comments .comment .btn-edit, .issue-editor .comments .comment .edit {
+      resize: none;
       flex-grow: 1;
       padding: 5px 10px;
       border-radius: 5px;
@@ -220,10 +235,10 @@ body, html {
     .issue-editor .add-comment button {
       margin-top: 15px; }
 
-.milestone-editor.collapsed > .header .fa.fa-chevron-down {
+.milestone-editor.collapsed > .header .title .fa.fa-chevron-down {
   display: none; }
 
-.milestone-editor.collapsed > .header .fa.fa-chevron-right {
+.milestone-editor.collapsed > .header .title .fa.fa-chevron-right {
   display: inline-block; }
 
 .milestone-editor.collapsed .columns {
@@ -435,24 +450,12 @@ body, html {
         .plan-container .plan-editor .months button.active {
           color: #424242;
           background-color: #fff; }
-    .plan-container .plan-editor .weeks {
-      position: absolute;
-      top: 70px;
-      left: 0px;
-      width: 30px;
-      text-align: center;
-      height: calc(100% - 70px); }
-      .plan-container .plan-editor .weeks .week {
-        padding-top: 5px;
-        height: calc(100% / 5);
-        border-right: 1px solid #e0e0e0;
-        border-bottom: 1px solid #e0e0e0; }
     .plan-container .plan-editor .dates {
       position: absolute;
       top: 70px;
-      left: 30px;
+      left: 0px;
       height: calc(100% - 70px);
-      width: calc(100% - 30px); }
+      width: 100%; }
       .plan-container .plan-editor .dates * {
         -webkit-user-select: none;
         -moz-user-select: none;
@@ -469,10 +472,15 @@ body, html {
           background-color: 2px solid #c8e6c9; }
         .plan-container .plan-editor .dates .date .header {
           padding: 5px; }
-          .plan-container .plan-editor .dates .date .header .name {
+          .plan-container .plan-editor .dates .date .header .datenumber {
+            font-weight: bold; }
+          .plan-container .plan-editor .dates .date .header .weekday {
             color: #bdbdbd;
             font-weight: bold;
             margin-left: 5px; }
+          .plan-container .plan-editor .dates .date .header .weeknumber {
+            color: #bdbdbd;
+            float: right; }
         .plan-container .plan-editor .dates .date .body > button {
           float: right;
           line-height: 30px;

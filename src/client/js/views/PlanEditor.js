@@ -29,79 +29,48 @@ class PlanEditor extends View {
     }
 
     getYears() {
-        return [
-            {
-                number: 2015
-            },
-            {
-                number: 2016
-            },
-            {
-                number: 2017
-            },
-            {
-                number: 2018
-            },
-            {
-                number: 2019
-            }
-        ];
+        let years = [];
+
+        for(let i = new Date().getFullYear() - 2; i < new Date().getFullYear() + 4; i++) {
+            years.push({
+                number: i
+            });
+        }
+
+        return years;
     }
 
     getMonths() {
-        return [
-            { 
-                name: 'january',
-                number: '01'
-            },
-            { 
-                name: 'february',
-                number: '02'
-            },
-            { 
-                name: 'march',
-                number: '03'
-            },
-            { 
-                name: 'april',
-                number: '04'
-            },
-            { 
-                name: 'may',
-                number: '05'
-            },
-            { 
-                name: 'june',
-                number: '06'
-            },
-            { 
-                name: 'july',
-                number: '07'
-            },
-            { 
-                name: 'august',
-                number: '08'
-            },
-            { 
-                name: 'september',
-                number: '09'
-            },
-            { 
-                name: 'october',
-                number: '10'
-            },
-            { 
-                name: 'november',
-                number: '11'
-            },
-            { 
-                name: 'december',
-                number: '12'
+        let months = [];
+
+        for(let i = 1; i <= 12; i++) {
+            let num = i.toString();
+
+            if(num.length == 1) {
+                num = '0' + num;
             }
-        ];
+
+            months.push({
+                name: new Date('2016-' + num + '-01').getMonthName(),
+                number: i
+            });
+        }
+
+        return months;
     }
 
     onClickAddMilestone(date) {
+        spinner(true);
+
+        ResourceHelper.addResource('milestones', {
+            title: 'New milestone',
+            endDate: date.toISOString()
+        })
+        .then(() => {
+            this.render();
+
+            spinner(false);
+        });
     }
 
     getWeeks(year, month) {

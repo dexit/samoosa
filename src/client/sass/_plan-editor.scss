@@ -87,6 +87,12 @@
             left: 30px;
             height: calc(100% - 70px);
             width: calc(100% - 30px);
+            
+            * {
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                user-select: none;
+            }
 
             .date {
                 display: block;

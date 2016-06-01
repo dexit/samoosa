@@ -77,6 +77,8 @@ class ResourceHelper {
 
     static reloadResource(resource) {
         return new Promise((callback) => {
+            window.resources[resource] = [];
+
             ApiHelper.getResource(resource)
             .then(() => {
                 callback();
@@ -88,9 +90,10 @@ class ResourceHelper {
         return new Promise((callback) => {
             ApiHelper.removeResource(resource, index)
             .then(() => {
-                window.resources[resource].splice(index, 1);
-
-                callback();
+                this.reloadResource(resource)
+                .then(() => {
+                    callback();
+                });
             });
         });
     }
@@ -99,9 +102,10 @@ class ResourceHelper {
         return new Promise((callback) => {
             ApiHelper.addResource(resource, item)
             .then(() => {
-                window.resources[resource].push(item);
-                
-                callback();
+                this.reloadResource(resource)
+                .then(() => {
+                    callback();
+                });
             });
         });
     }

@@ -1,6 +1,12 @@
 'use strict';
 
+/**
+ * The data model for issues
+ */
 class Issue {
+    /**
+     * Create a new issue and push it to the remote source
+     */
     static create(properties) {
         return new Promise((callback) => {
             let issue = new Issue();
@@ -29,6 +35,9 @@ class Issue {
         }
     }
 
+    /**
+     * Apply standard values
+     */
     useStandard() {
         this.title = 'New issue';
         this.description = '';
@@ -42,6 +51,7 @@ class Issue {
         this.priority = 3;
         
         // Optional params
+        this.estimate;
         this.version;
         this.milestone;
         this.comments = [];
@@ -49,6 +59,33 @@ class Issue {
         this.assignee;
     }
 
+    /**
+     * Check is issue is closed
+     *
+     * @returns {Boolean} closed
+     */
+    isClosed() {
+        return this.column == window.resources.issueColumns.length - 1;
+    }
+
+    /**
+     * Get estimated hours
+     *
+     * @returns {Number} hours
+     */
+    getEstimatedHours() {
+        let estimate = window.resources.issueEstimates[this.estimate];
+
+        if(estimate) {
+            return parseFloat(estimate);
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Adopt properties into this model
+     */
     adopt(properties) {
         for(let k in properties) {
             this[k] = properties[k];

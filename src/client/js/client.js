@@ -60,6 +60,26 @@ Date.prototype.getDayName = function() {
     return weekday[this.getDay()]; 
 };
 
+// Date month name extension
+Date.prototype.getMonthName = function() {
+    var month = [
+        'January',    
+        'February',    
+        'March',    
+        'April',    
+        'May',    
+        'June',    
+        'July',    
+        'August',    
+        'September',    
+        'October',    
+        'November',    
+        'December'
+    ];
+
+    return month[this.getMonth()]; 
+};
+
 // Pretty name
 window.prettyName = function(name) {
     let prettyName = name;

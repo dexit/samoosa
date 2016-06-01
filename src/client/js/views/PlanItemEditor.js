@@ -75,6 +75,21 @@ class PlanItemEditor extends View {
     }
 
     /**
+     * Event: Click delete button
+     */
+    onClickDelete() {
+        spinner(true);
+
+        ResourceHelper.removeResource('milestones', this.model.index)
+        .then(() => {
+            ViewHelper.removeAll('PlanItemEditor');
+            ViewHelper.get('PlanEditor').render();
+
+            spinner(false);
+        });
+    }
+
+    /**
      * Event: Click close button
      */
     onClickClose() {
@@ -121,15 +136,15 @@ class PlanItemEditor extends View {
         this.$element.removeAttr('style');
         this.$element.find('button, input').removeAttr('style');
         
+        // Find new target element
+        let $target = $('.plan-editor .dates .date.hovering .body').first();
+        
         // Unregister column mouse events and unset hovering state
         $('.plan-editor .dates .date')
             .off('mouseenter')
             .off('mouseleave').
             toggleClass('hovering', false);
 
-        // Find new target element
-        let $target = $('.plan-editor .dates .date.hovering .body').first();
-        
         // If the dragging event lasted less than 100 ms, open dialog
         if(Date.now() - this.prevClick < 100) {
             this.openDialog();

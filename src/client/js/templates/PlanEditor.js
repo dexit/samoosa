@@ -46,7 +46,7 @@ module.exports = function render() {
                         }),
                         _.button({class: 'btn-transparent'},
                             _.span({class: 'fa fa-plus'})
-                        )
+                        ).click(() => { this.onClickAddMilestone(date); })
                     )
                 );
             })

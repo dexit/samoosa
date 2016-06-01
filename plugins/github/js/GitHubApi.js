@@ -501,17 +501,14 @@ class GitHubApi extends ApiHelper {
     
     /**
      * Adds milestone 
-     * TODO: Add remaining properties
      *
-     * @param {String} milestone
+     * @param {Object} milestone
      *
      * @returns {Promise} promise
      */
     addMilestone(milestone) {
         return new Promise((callback) => {
-            this.post('/repos/' + org + '/' + repo + '/milestones', {
-                title: milestone
-            })
+            this.post('/repos/' + org + '/' + repo + '/milestones', this.convertMilestone(milestone))
             .then(() => {
                 callback();
             });
@@ -629,7 +626,7 @@ class GitHubApi extends ApiHelper {
      */
     removeMilestone(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + org + '/' + repo + '/milestones/' + (index + 1))
+            this.delete('/repos/' + org + '/' + repo + '/milestones/' + (parseInt(index) + 1))
             .then(() => {
                 callback();
             });
@@ -697,14 +694,16 @@ class GitHubApi extends ApiHelper {
         window.resources.milestones = [];
         
         for(let i in milestones) {
+            let index = parseInt(milestones[i].number) - 1;
+
             let milestone = {
-                index: i,
+                index: index,
                 title: milestones[i].title,
                 description: milestones[i].description,
                 endDate: milestones[i].due_on
             };
 
-            window.resources.milestones.push(milestone);
+            window.resources.milestones[index] = milestone;
         }
         
         window.resources.milestones.sort((a, b) => {

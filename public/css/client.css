@@ -416,7 +416,8 @@ body, html {
   user-select: none; }
 
 .plan-container {
-  position: relative; }
+  position: relative;
+  overflow: hidden; }
   .plan-container .plan-editor {
     position: absolute;
     height: 100%;
@@ -434,6 +435,19 @@ body, html {
         border: 0px;
         padding: 0px;
         text-transform: capitalize; }
+    .plan-container .plan-editor .undated {
+      position: absolute;
+      z-index: 99;
+      bottom: 0px;
+      right: 0px;
+      width: calc((100% / 7) + 20px);
+      border-top-left-radius: 5px;
+      padding: 10px;
+      background-color: #f44336; }
+      .plan-container .plan-editor .undated h4 {
+        margin-top: 0px;
+        font-weight: bold;
+        color: #fff; }
     .plan-container .plan-editor .years {
       position: absolute;
       top: 0px;

@@ -10,6 +10,7 @@
 
 .plan-container {
     position: relative;
+    overflow: hidden;
 
     .plan-editor {
         position: absolute;
@@ -30,6 +31,23 @@
                 border: 0px;
                 padding: 0px;
                 text-transform: capitalize;
+            }
+        }
+
+        .undated {
+            position: absolute;
+            z-index: 99;
+            bottom: 0px;
+            right: 0px;
+            width: calc((100% / 7) + 20px);
+            border-top-left-radius: 5px;
+            padding: 10px;
+            background-color: material-color('red', '500');
+
+            h4 {
+                margin-top: 0px;
+                font-weight: bold;
+                color: #fff;
             }
         }
 

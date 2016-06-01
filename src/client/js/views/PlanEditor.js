@@ -28,6 +28,12 @@ class PlanEditor extends View {
         this.render();
     }
 
+    updateUndatedBox() {
+        if(this.getUndatedMilestones().length < 1) {
+            $('.plan-editor .undated').remove();
+        }
+    }
+
     getUndatedMilestones() {
         let milestones = [];
         

@@ -47,12 +47,15 @@ module.exports = function render() {
                 );
             })
         ),
-        _.div({class: 'undated'},
-            _.each(this.getUndatedMilestones(), (i, milestone) => {
-                return _.div({},
-                    milestone.title
-                )  
-            })
+        _.if(this.getUndatedMilestones().length > 0,
+            _.div({class: 'undated'},
+                _.h4('Undated'),
+                _.each(this.getUndatedMilestones(), (i, milestone) => {
+                    return new PlanItemEditor({
+                        model: milestone,
+                    }).$element;
+                })
+            )
         )
     );
 }

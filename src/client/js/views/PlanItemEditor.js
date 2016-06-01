@@ -155,6 +155,9 @@ class PlanItemEditor extends View {
             
             // Trigger the change event
             this.onChange();
+        
+            // Update the undated box
+            ViewHelper.get('PlanEditor').updateUndatedBox();
         }
     }
 
@@ -182,10 +185,21 @@ class PlanItemEditor extends View {
             'pointer-events': 'none',
         });
 
+        // Find the offset parent
+        let $offsetParent = this.$element.parents('.dates');
+        let offsetDOM = $offsetParent.offset();
+
+        if($offsetParent.length < 1) {
+            $offsetParent = this.$element.parents('.undated');
+            offsetDOM = $offsetParent.offset();
+
+            offsetDOM.top += this.$element.height();
+        }
+
         // Buffer the offset between mouse cursor and element position
         let offset = {
-            x: this.$element.offset().left - e.pageX - this.$element.parents('.dates').offset().left,
-            y: this.$element.offset().top - e.pageY - this.$element.parents('.dates').offset().top
+            x: this.$element.offset().left - e.pageX - offsetDOM.left,
+            y: this.$element.offset().top - e.pageY - offsetDOM.top
         };
 
         // Add absolute positioning afterwards to allow getting proper offset

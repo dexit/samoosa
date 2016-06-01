@@ -102,23 +102,45 @@ class PlanEditor extends View {
     }
 
     onClickAddMilestone(date) {
-        
+    }
+
+    getWeeks(year, month) {
+        let weeks = [];
+        let map = {};
+
+        for(let date of this.getDates(year, month)) {
+            let week = date.getWeek();
+
+            // Check if we included this week already
+            if(!map[week]) {
+                map[week] = true;
+                weeks.push(week);
+            }
+        }
+
+        return weeks;
     }
 
     getDates(year, month) {
         let dates = [];
-        
+
         for(let i = 1; i <= new Date(year, month, 0).getDate(); i++) {
             let day = i.toString();
 
             if(day.length == 1) {
                 day = '0' + day;
             }
+            
+            if(month.length == 1) {
+                month = '0' + month;
+            }
 
-            dates.push(year + '-' + month + '-' + day); 
+            let date = new Date(year + '-' + month + '-' + day).floor();
+
+            dates.push(date); 
         }
-        
-       return dates; 
+
+        return dates; 
     }
 }
 

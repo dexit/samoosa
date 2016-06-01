@@ -8,59 +8,107 @@
     }
 }
 
-.plan-editor {
+.plan-container {
     position: relative;
-    height: 100%;
 
-    .years, .months {
-        line-height: 30px;
-        height: 30px;
-        display: flex;
+    .plan-editor {
+        position: absolute;
+        height: 100%;
+        width: 100%;
 
-        button {
+        .years, .months {
             line-height: 30px;
             height: 30px;
-            flex-grow: 1;
-            flex-basis: 0;
-            border: 0px;
-            background-color: #fff;
-            border-right: 1px solid material-color('grey', '300');
-            border-bottom: 1px solid material-color('grey', '300');
+            width: 100%;
+            display: flex;
 
-            &.active {
-                background-color: material-color('grey', '400');
-            }
+            button {
+                line-height: 30px;
+                height: 30px;
+                flex-grow: 1;
+                flex-basis: 0;
+                border: 0px;
+                background-color: #fff;
+                border-right: 1px solid material-color('grey', '300');
+                border-bottom: 1px solid material-color('grey', '300');
 
-            &:last-child {
-                border-right: 0px;
+                &.active {
+                    background-color: material-color('grey', '400');
+                }
+
+                &:last-child {
+                    border-right: 0px;
+                }
             }
         }
-    }
 
-    .dates {
-        height: calc(100% - 60px);
+        .years {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
 
-        .date {
-            display: block;
-            float: left;
-            width: calc(100% / 7);
-            height: calc(100% / 5);
-            border-right: 1px solid material-color('grey', '300');
-            border-bottom: 1px solid material-color('grey', '300');
+        .months {
+            position: absolute;
+            top: 30px;
+            left: 0px;
+        }
 
-            &.hovering {
-                outline: 2px solid material-color('green', '300');
-                background-color: 2px solid material-color('green', '100');
+        .weeks {
+            position: absolute;
+            top: 60px;
+            left: 0px;
+            width: 30px;
+            text-align: center;
+            height: calc(100% - 60px);
+
+            .week {
+                padding-top: 5px;
+                height: calc(100% / 5);
+                border-right: 1px solid material-color('grey', '300');
+                border-bottom: 1px solid material-color('grey', '300');
             }
+        }
 
-            .body {
-                >button {
-                    float: right;
-                    line-height: 30px;
-                    width: 30px;
-                    text-align: center;
-                }    
-            } 
+        .dates {
+            position: absolute;
+            top: 60px;
+            left: 30px;
+            height: calc(100% - 60px);
+            width: calc(100% - 30px);
+
+            .date {
+                display: block;
+                float: left;
+                width: calc(100% / 7);
+                height: calc(100% / 5);
+                border-right: 1px solid material-color('grey', '300');
+                border-bottom: 1px solid material-color('grey', '300');
+
+                &.hovering {
+                    outline: 2px solid material-color('green', '300');
+                    background-color: 2px solid material-color('green', '100');
+                }
+
+                .header {
+                    padding: 5px;
+
+                    .name {
+                        color: material-color('grey', '400');
+                        font-weight: bold;
+                        margin-left: 5px;
+                    }
+                }
+
+                .body {
+                    >button {
+                        float: right;
+                        line-height: 30px;
+                        width: 30px;
+                        text-align: center;
+                    }    
+                } 
+            }
         }
     }
 }

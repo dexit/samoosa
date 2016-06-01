@@ -26,6 +26,40 @@ window.PlanEditor = require('./views/PlanEditor');
 // ----------
 // Global functions
 // ----------
+// Floor date extension
+Date.prototype.floor = function() {
+    this.setHours(0, 0, 0, 0);
+
+    return this;
+};
+
+// Date week number extension
+Date.prototype.getWeek = function() {
+    var date = new Date(this.getTime());
+    
+    date.floor();
+    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+    
+    var week1 = new Date(date.getFullYear(), 0, 4);
+    
+    return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+};
+
+// Date day name extension
+Date.prototype.getDayName = function() {
+    var weekday = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+    ];
+
+    return weekday[this.getDay()]; 
+};
+
 // Pretty name
 window.prettyName = function(name) {
     let prettyName = name;

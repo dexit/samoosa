@@ -16,17 +16,19 @@ module.exports = function render() {
                 ).click(() => { this.onClickMonth(month.number); });
             })
         ),
+        _.div({class: 'weeks'},
+            _.each(this.getWeeks(this.currentYear, this.currentMonth), (i, week) => {
+                return _.div({class: 'week'},
+                    week
+                );
+            })
+        ),
         _.div({class: 'dates'},
             _.each(this.getDates(this.currentYear, this.currentMonth), (i, date) => {
-                let currentDate = new Date(date);
-
-                currentDate.setHours(0);
-                currentDate.setMinutes(0);
-                currentDate.setSeconds(0);
-                
                 return _.div({class: 'date', 'data-date': date},
                     _.div({class: 'header'},
-                        _.span({}, currentDate.getDate())
+                        _.span({class: 'number'}, date.getDate()),
+                        _.span({class: 'name'}, date.getDayName())
                     ),
                     _.div({class: 'body'},
                         _.each(window.resources.milestones, (i, milestone) => {
@@ -36,7 +38,7 @@ module.exports = function render() {
                             dueDate.setMinutes(0);
                             dueDate.setSeconds(0);
 
-                            if(dueDate.valueOf() == currentDate.valueOf()) {
+                            if(dueDate.valueOf() == date.valueOf()) {
                                 return new PlanItemEditor({
                                     model: milestone,
                                 }).$element;

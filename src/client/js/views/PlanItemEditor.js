@@ -59,7 +59,7 @@ class PlanItemEditor extends View {
         this.model.description = this.$element.find('.body input').val();
         
         if(dateString) {
-            this.model.endDate = new Date(dateString).toISOString();
+            this.model.endDate = new Date(dateString).floor().toISOString();
         }
 
         // Update DOM elements to match model
@@ -92,7 +92,7 @@ class PlanItemEditor extends View {
         });
 
         setTimeout(() => {
-            prev.$parent.append(this.$element);
+            prev.$parent.prepend(this.$element);
             this.$element.removeAttr('style');
         }, 550);
     }
@@ -169,8 +169,8 @@ class PlanItemEditor extends View {
 
         // Buffer the offset between mouse cursor and element position
         let offset = {
-            x: this.$element.offset().left - e.pageX,
-            y: this.$element.offset().top - e.pageY
+            x: this.$element.offset().left - e.pageX - this.$element.parents('.dates').offset().left,
+            y: this.$element.offset().top - e.pageY - this.$element.parents('.dates').offset().top
         };
 
         // Add absolute positioning afterwards to allow getting proper offset

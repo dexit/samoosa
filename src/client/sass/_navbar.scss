@@ -7,6 +7,7 @@
 
     .buttons {
         position: fixed;
+        height: 100%;
 
         a {
             margin-top: 5px;
@@ -14,6 +15,11 @@
             width: 60px;
             margin-left: 10px;
             text-align: center;
+
+            &.bottom {
+                position: absolute;
+                bottom: 5px;
+            }
 
             &.active {
                 background-color: material-color('grey', '200');

@@ -120,6 +120,19 @@ class ApiHelper {
         });
     }
    
+    /**
+     * Gets projects
+     *
+     * @returns {Promise} promise
+     */
+    getProjects() {
+        return new Promise((callback) => {
+            window.resources.projects = [];
+
+            callback(); 
+        });
+    }
+
     // ----------
     // Resource adders
     // ----------
@@ -450,6 +463,21 @@ class ApiHelper {
         });
     }
     
+    /**
+     * Updates project
+     *
+     * @param {Number} index
+     * @param {Object} project
+     *
+     * @returns {Promise} promise
+     */
+    updateProject(index, project) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+
+    
     // ----------
     // Session methods    
     // ----------
@@ -549,6 +577,9 @@ class ApiHelper {
 
             case 'issues':
                 return this.removeIssue(index);
+            
+            case 'projects':
+                return this.removeProject(index);
         }
     }
     
@@ -585,6 +616,9 @@ class ApiHelper {
 
             case 'issues':
                 return this.addIssue(item);
+            
+            case 'projects':
+                return this.addProject(item);
         
             default:
                 alert('Resource "' + resource + '" is unknown');
@@ -625,6 +659,9 @@ class ApiHelper {
             case 'issues':
                 return this.updateIssue(item);
         
+            case 'projects':
+                return this.updateProject(item);
+            
             default:
                 alert('Resource "' + resource + '" is unknown');
         }
@@ -661,6 +698,9 @@ class ApiHelper {
                 return this.getVersions();
 
             case 'issues':
+                return this.getIssues();
+            
+            case 'projects':
                 return this.getIssues();
         }
     }
@@ -711,6 +751,7 @@ class ApiHelper {
             get('milestones');
             get('versions');
             get('issues');
+            get('projects');
         });
     }
 }

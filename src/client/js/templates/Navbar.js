@@ -6,6 +6,9 @@ module.exports = function Navbar() {
             _.a({href: './#/user/', class: Router.url == '/user/' ? 'active' : ''},
                 _.span({class: 'fa fa-user'})
             ),
+            _.a({href: './#/projects/', class: Router.url == '/projects/' ? 'active' : ''},
+                _.span({class: 'fa ' + (Router.url == '/projects/' ? 'fa-folder-open' : 'fa-folder')})
+            ),
             _.a({href: './#/plan/', class: Router.url == '/plan/' ? 'active' : ''},
                 _.span({class: 'fa fa-calendar'})
             ),
@@ -15,10 +18,9 @@ module.exports = function Navbar() {
             _.a({href: './#/list/', class: Router.url == '/list/' ? 'active' : ''},
                 _.span({class: 'fa fa-list'})
             ),
-            _.a({href: './#/settings/', class: Router.url == '/settings/' ? 'active' : ''},
+            _.a({href: './#/settings/', class: 'bottom' + (Router.url == '/settings/' ? ' active' : '')},
                 _.span({class: 'fa fa-cog'})
             )
-
         )
     );
 };

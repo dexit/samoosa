@@ -357,13 +357,17 @@ body, html {
   border-radius: 0px;
   border: 0px; }
   .navbar .buttons {
-    position: fixed; }
+    position: fixed;
+    height: 100%; }
     .navbar .buttons a {
       margin-top: 5px;
       display: block;
       width: 60px;
       margin-left: 10px;
       text-align: center; }
+      .navbar .buttons a.bottom {
+        position: absolute;
+        bottom: 5px; }
       .navbar .buttons a.active {
         background-color: #eeeeee;
         border-top-left-radius: 2px;

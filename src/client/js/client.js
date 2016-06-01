@@ -127,6 +127,8 @@ window.scroll = function(amount) {
 Router.route('/', () => {
     ApiHelper.checkConnection()
     .then(() => {
+        ViewHelper.clear();
+
         $('.app-container').empty()
             .append(new Navbar().$element)
             .append(
@@ -144,6 +146,8 @@ Router.route('/user/', () => {
     .then(() => {
         ApiHelper.getUser()
         .then((user) => {
+            ViewHelper.clear();
+
             $('.app-container').empty()
                 .append(new Navbar().$element)
                 .append(
@@ -160,6 +164,17 @@ Router.route('/user/', () => {
                     )
                 );
         });
+    });
+});
+
+// Projects
+Router.route('/projects/', () => {
+    ApiHelper.checkConnection()
+    .then(() => {
+        ViewHelper.clear();
+
+        $('.app-container').empty()
+            .append(new Navbar().$element)
     });
 });
 

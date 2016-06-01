@@ -15,7 +15,7 @@ class PlanEditor extends View {
 
         this.init();
     }
-    
+   
     onClickYear(year) {
         this.currentYear = parseInt(year);
 
@@ -26,6 +26,18 @@ class PlanEditor extends View {
         this.currentMonth = parseInt(month);
 
         this.render();
+    }
+
+    getUndatedMilestones() {
+        let milestones = [];
+        
+        for(let milestone of resources.milestones) {
+            if(!milestone.endDate) {
+                milestones.push(milestone);
+            }
+        }
+
+        return milestones;
     }
 
     getYears() {

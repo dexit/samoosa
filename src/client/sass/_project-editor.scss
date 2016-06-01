@@ -23,8 +23,9 @@
         flex-grow: 1;
         
         .header {
-            background-color: material-color('grey', '800');
-            color: #fff;
+            h4 {
+                font-weight: bold;
+            }
         }
 
         .body {

@@ -8,15 +8,15 @@ class ProjectEditor extends View {
 
         this.fetch();
 
-        this.$element.find('input[type="checkbox"]')[0].checked = SettingsHelper.get('projects', 'current') == this.model.title;
+        this.$element.find('input[type="radio"]')[0].checked = SettingsHelper.get('projects', 'current') == this.model.title;
     }
 
-    onClickCheckbox() {
-        $('.project-editor input[type="checkbox"]').each(function() {
+    onClickRadioButton() {
+        $('.project-editor input[type="radio"]').each(function() {
             this.checked = false; 
         });
 
-        this.$element.find('input[type="checkbox"]')[0].checked = true;
+        this.$element.find('input[type="radio"]')[0].checked = true;
 
         SettingsHelper.set('projects', 'current', this.model.title);
     }

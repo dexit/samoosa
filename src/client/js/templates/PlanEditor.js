@@ -26,16 +26,18 @@ module.exports = function render() {
                     ),
                     _.div({class: 'body'},
                         _.each(window.resources.milestones, (i, milestone) => {
-                            let dueDate = new Date(milestone.endDate);
+                            if(milestone.endDate) {
+                                let dueDate = new Date(milestone.endDate);
 
-                            dueDate.setHours(0);
-                            dueDate.setMinutes(0);
-                            dueDate.setSeconds(0);
+                                dueDate.setHours(0);
+                                dueDate.setMinutes(0);
+                                dueDate.setSeconds(0);
 
-                            if(dueDate.valueOf() == date.valueOf()) {
-                                return new PlanItemEditor({
-                                    model: milestone,
-                                }).$element;
+                                if(dueDate.valueOf() == date.valueOf()) {
+                                    return new PlanItemEditor({
+                                        model: milestone,
+                                    }).$element;
+                                }
                             }
                         }),
                         _.button({class: 'btn-transparent'},
@@ -43,6 +45,13 @@ module.exports = function render() {
                         ).click(() => { this.onClickAddMilestone(date); })
                     )
                 );
+            })
+        ),
+        _.div({class: 'undated'},
+            _.each(this.getUndatedMilestones(), (i, milestone) => {
+                return _.div({},
+                    milestone.title
+                )  
             })
         )
     );

@@ -554,8 +554,7 @@ body > .plan-item-editor {
       transform: translate(-50%, -50%); }
   .project-editor .content {
     flex-grow: 1; }
-    .project-editor .content .header {
-      background-color: #424242;
-      color: #fff; }
+    .project-editor .content .header h4 {
+      font-weight: bold; }
 
 /*# sourceMappingURL=client.css.map */

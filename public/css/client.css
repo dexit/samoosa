@@ -369,7 +369,7 @@ body, html {
         position: absolute;
         bottom: 5px; }
       .navbar .buttons a.active {
-        background-color: #eeeeee;
+        background-color: #fff;
         border-top-left-radius: 2px;
         border-bottom-left-radius: 2px;
         box-shadow: -5px 0px 5px -5px rgba(0, 0, 0, 0.5), 0px -5px 5px -5px rgba(0, 0, 0, 0.5), 0px 5px 5px -5px rgba(0, 0, 0, 0.5); }
@@ -535,5 +535,27 @@ body > .plan-item-editor {
     padding: 5px 10px; }
   .plan-container .plan-item-editor .header, .plan-container .plan-item-editor .body, .plan-container .plan-item-editor .footer {
     display: none; }
+
+.project-editor {
+  padding: 15px;
+  display: flex;
+  border: 1px solid #eeeeee;
+  border-radius: 2px;
+  box-shadow: 0px 5px 5px -5px rgba(0, 0, 0, 0.5);
+  margin: 15px; }
+  .project-editor .toolbar {
+    flex-shrink: 0;
+    position: relative;
+    width: 60px; }
+    .project-editor .toolbar input {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%); }
+  .project-editor .content {
+    flex-grow: 1; }
+    .project-editor .content .header {
+      background-color: #424242;
+      color: #fff; }
 
 /*# sourceMappingURL=client.css.map */

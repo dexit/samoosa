@@ -127,8 +127,6 @@ class ApiHelper {
      */
     getProjects() {
         return new Promise((callback) => {
-            window.resources.projects = [];
-
             callback(); 
         });
     }
@@ -751,7 +749,6 @@ class ApiHelper {
             get('milestones');
             get('versions');
             get('issues');
-            get('projects');
         });
     }
 }

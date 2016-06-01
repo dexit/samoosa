@@ -23,6 +23,7 @@ window.MilestoneEditor = require('./views/MilestoneEditor');
 window.ResourceEditor = require('./views/ResourceEditor');
 window.PlanItemEditor = require('./views/PlanItemEditor');
 window.PlanEditor = require('./views/PlanEditor');
+window.ProjectEditor = require('./views/ProjectEditor');
 
 // ----------
 // Global functions
@@ -129,14 +130,15 @@ Router.route('/', () => {
     .then(() => {
         ViewHelper.clear();
 
-        $('.app-container').empty()
-            .append(new Navbar().$element)
-            .append(
-                _.div({class: 'workspace root-container'},
-                    _.h4('Mondai Issue Tracker'),
-                    _.p('Welcome')
-                )
-            );
+        $('.app-container')
+        .empty()
+        .append(new Navbar().$element)
+        .append(
+            _.div({class: 'workspace root-container'},
+                _.h4('Mondai Issue Tracker'),
+                _.p('Welcome')
+            )
+        );
     });
 });
 
@@ -148,21 +150,22 @@ Router.route('/user/', () => {
         .then((user) => {
             ViewHelper.clear();
 
-            $('.app-container').empty()
-                .append(new Navbar().$element)
-                .append(
-                    _.div({class: 'workspace user-container'},
-                        _.div({class: 'profile'},
-                            _.h4('Current user'),
-                            _.img({src: user.avatar}),
-                            _.p(user.name),
-                            _.h4('Session'),
-                            _.button('Change account').click(() => {
-                                ApiHelper.logOut();
-                            })
-                        ) 
-                    )
-                );
+            $('.app-container')
+            .empty()
+            .append(new Navbar().$element)
+            .append(
+                _.div({class: 'workspace user-container'},
+                    _.div({class: 'profile'},
+                        _.h4('Current user'),
+                        _.img({src: user.avatar}),
+                        _.p(user.name),
+                        _.h4('Session'),
+                        _.button('Change account').click(() => {
+                            ApiHelper.logOut();
+                        })
+                    ) 
+                )
+            );
         });
     });
 });
@@ -171,10 +174,23 @@ Router.route('/user/', () => {
 Router.route('/projects/', () => {
     ApiHelper.checkConnection()
     .then(() => {
-        ViewHelper.clear();
+        ApiHelper.getProjects()
+        .then(() => {
+            ViewHelper.clear();
 
-        $('.app-container').empty()
+            $('.app-container')
+            .empty()
             .append(new Navbar().$element)
+            .append(
+                _.div({class: 'workspace projects-container'},
+                    _.each(window.resources.projects, (i, project) => {
+                        return new ProjectEditor({
+                            model: project
+                        }).$element;
+                    })
+                )
+            );
+        });
     });
 });
 
@@ -187,13 +203,13 @@ Router.route('/plan/', () => {
             ViewHelper.clear();
             
             $('.app-container')
-                .empty()
-                .append(new Navbar().$element)
-                .append(
-                    _.div({class: 'workspace plan-container'},
-                        new PlanEditor().$element
-                    )
-                );
+            .empty()
+            .append(new Navbar().$element)
+            .append(
+                _.div({class: 'workspace plan-container'},
+                    new PlanEditor().$element
+                )
+            );
         });
     });
 });
@@ -207,22 +223,22 @@ Router.route('/board/', () => {
             ViewHelper.clear();
 
             $('.app-container')
-                .empty()
-                .append(new Navbar().$element)
-                .append(
-                    _.div({class: 'workspace board-container'},
-                        _.each(window.resources.milestones, (i, milestone) => {
-                            return new MilestoneEditor({
-                                model: milestone,
-                            }).$element;
-                        }),
-                        new MilestoneEditor({
-                            model: {
-                                title: 'Backlog',
-                            }
-                        }).$element
-                    )
-                );
+            .empty()
+            .append(new Navbar().$element)
+            .append(
+                _.div({class: 'workspace board-container'},
+                    _.each(window.resources.milestones, (i, milestone) => {
+                        return new MilestoneEditor({
+                            model: milestone,
+                        }).$element;
+                    }),
+                    new MilestoneEditor({
+                        model: {
+                            title: 'Backlog',
+                        }
+                    }).$element
+                )
+            );
         });
     });
 });
@@ -236,22 +252,22 @@ Router.route('/list/', () => {
             ViewHelper.clear();
             
             $('.app-container')
-                .empty()
-                .append(new Navbar().$element)
-                .append(
-                    _.div({class: 'workspace board-container list'},
-                        _.each(window.resources.milestones, (i, milestone) => {
-                            return new MilestoneEditor({
-                                model: milestone,
-                            }).$element;
-                        }),
-                        new MilestoneEditor({
-                            model: {
-                                title: 'Backlog',
-                            }
-                        }).$element
-                    )
-                );
+            .empty()
+            .append(new Navbar().$element)
+            .append(
+                _.div({class: 'workspace board-container list'},
+                    _.each(window.resources.milestones, (i, milestone) => {
+                        return new MilestoneEditor({
+                            model: milestone,
+                        }).$element;
+                    }),
+                    new MilestoneEditor({
+                        model: {
+                            title: 'Backlog',
+                        }
+                    }).$element
+                )
+            );
         });
     });
 });
@@ -265,45 +281,45 @@ Router.route('/settings/', () => {
             ViewHelper.clear();
             
             $('.app-container')
-                .empty()
-                .append(new Navbar().$element)
-                .append(
-                    _.div({class: 'workspace settings-container'},
-                        _.div({class: 'tabbed-container'},
-                            _.div({class: 'tabs'},
-                                _.each(window.resources, (name, resource) => {
-                                    if(name != 'issues' && name != 'milestones') {
-                                        return _.button({class: 'tab' + (name == 'issueTypes' ? ' active' : '')},
-                                            prettyName(name)
-                                        ).click(function() {
-                                            let index = $(this).index();
-                                            
-                                            $(this).parent().children().each(function(i) {
-                                                $(this).toggleClass('active', i == index);
-                                            });
-
-                                            $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
-                                                $(this).toggleClass('active', i == index);
-                                            });
+            .empty()
+            .append(new Navbar().$element)
+            .append(
+                _.div({class: 'workspace settings-container'},
+                    _.div({class: 'tabbed-container'},
+                        _.div({class: 'tabs'},
+                            _.each(window.resources, (name, resource) => {
+                                if(name != 'issues' && name != 'milestones') {
+                                    return _.button({class: 'tab' + (name == 'issueTypes' ? ' active' : '')},
+                                        prettyName(name)
+                                    ).click(function() {
+                                        let index = $(this).index();
+                                        
+                                        $(this).parent().children().each(function(i) {
+                                            $(this).toggleClass('active', i == index);
                                         });
-                                    }
-                                })
-                            ),
-                            _.div({class: 'panes'},
-                                _.each(window.resources, (name, resource) => {
-                                    if(name != 'issues' && name != 'milestones') {
-                                        return _.div({class: 'pane' + (name == 'issueTypes' ? ' active' : '')},
-                                            new ResourceEditor({
-                                                name: name,
-                                                model: resource
-                                            }).$element
-                                        );
-                                    }
-                                })
-                            )
+
+                                        $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
+                                            $(this).toggleClass('active', i == index);
+                                        });
+                                    });
+                                }
+                            })
+                        ),
+                        _.div({class: 'panes'},
+                            _.each(window.resources, (name, resource) => {
+                                if(name != 'issues' && name != 'milestones') {
+                                    return _.div({class: 'pane' + (name == 'issueTypes' ? ' active' : '')},
+                                        new ResourceEditor({
+                                            name: name,
+                                            model: resource
+                                        }).$element
+                                    );
+                                }
+                            })
                         )
                     )
-                );
+                )
+            );
         });
     });
 });

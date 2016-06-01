@@ -1,3 +1,13 @@
+/**
+ * Global body/html styles
+ */
+body, html {
+    height: 100%;
+}
+
+/**
+ * A transparent, border-less button
+ */
 .btn-transparent {
     border: 0px;
     background-color: transparent;
@@ -5,10 +15,9 @@
     text-align: left;
 }
 
-body, html {
-    height: 100%;
-}
-
+/**
+ * The main app container
+ */
 .app-container {
     display: flex;
     min-height: 100%;
@@ -23,28 +32,35 @@ body, html {
     }
 }
 
+/**
+ * Generic tabs
+ */
+.tab {
+    background-image: linear-gradient(to top, rgba(0, 0, 0, 0.5), 5%, rgba(0, 0, 0, 0));
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    line-height: 30px;
+    height: 30px;
+
+    &.active {
+        background-image: none;
+        box-shadow: -5px 0px 5px -5px rgba(0, 0, 0, 0.5), 0px -5px 5px -5px rgba(0, 0, 0, 0.5), 5px 0px 5px -5px rgba(0, 0, 0, 0.5);
+    }
+}
+
 .tabbed-container {
     .tabs {
         display: flex;
-        background-color: material-color('grey', '600');
-        padding-top: 15px;
+        background-color: material-color('grey', '700');
+        padding-top: 5px;
 
-        &:after {
-            content: '';
-            display: block;
-            flex-grow: 1;
-            border-bottom: 1px solid material-color('grey', '300');
-        }
-        
         .tab {
             background-color: transparent;
             border: 0px;
-            border-bottom: 1px solid material-color('grey', '300');
             display: block;
-            flex-shrink: 0;
-            flex-base: 0;
+            flex-grow: 1;
+            flex-basis: 0;
             color: material-color('grey', '300');
-            padding: 10px 15px;
 
             &.active {
                 color: material-color('grey', '900');
@@ -68,6 +84,9 @@ body, html {
     }
 }
 
+/**
+ * Spinner for AJAX operations
+ */
 @keyframes spinner-icon {
     from {
         transform: rotate(0deg);

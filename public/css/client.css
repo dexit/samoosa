@@ -8,15 +8,24 @@
  * @param {string} [color-variant='500']  - quoted, lowercase color variant (e.g.
  *                                          '200', 'a100')
  */
+/**
+ * Global body/html styles
+ */
+body, html {
+  height: 100%; }
+
+/**
+ * A transparent, border-less button
+ */
 .btn-transparent {
   border: 0px;
   background-color: transparent;
   padding: 0px;
   text-align: left; }
 
-body, html {
-  height: 100%; }
-
+/**
+ * The main app container
+ */
 .app-container {
   display: flex;
   min-height: 100%; }
@@ -26,24 +35,30 @@ body, html {
     flex-grow: 1;
     display: relative; }
 
+/**
+ * Generic tabs
+ */
+.tab {
+  background-image: linear-gradient(to top, rgba(0, 0, 0, 0.5), 5%, transparent);
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  line-height: 30px;
+  height: 30px; }
+  .tab.active {
+    background-image: none;
+    box-shadow: -5px 0px 5px -5px rgba(0, 0, 0, 0.5), 0px -5px 5px -5px rgba(0, 0, 0, 0.5), 5px 0px 5px -5px rgba(0, 0, 0, 0.5); }
+
 .tabbed-container .tabs {
   display: flex;
-  background-color: #757575;
-  padding-top: 15px; }
-  .tabbed-container .tabs:after {
-    content: '';
-    display: block;
-    flex-grow: 1;
-    border-bottom: 1px solid #e0e0e0; }
+  background-color: #616161;
+  padding-top: 5px; }
   .tabbed-container .tabs .tab {
     background-color: transparent;
     border: 0px;
-    border-bottom: 1px solid #e0e0e0;
     display: block;
-    flex-shrink: 0;
-    flex-base: 0;
-    color: #e0e0e0;
-    padding: 10px 15px; }
+    flex-grow: 1;
+    flex-basis: 0;
+    color: #e0e0e0; }
     .tabbed-container .tabs .tab.active {
       color: #212121;
       background-color: #fff;
@@ -57,6 +72,9 @@ body, html {
   .tabbed-container .panes .pane.active {
     display: block; }
 
+/**
+ * Spinner for AJAX operations
+ */
 @keyframes spinner-icon {
   from {
     transform: rotate(0deg); }
@@ -284,7 +302,7 @@ body, html {
     background-color: 2px solid #c8e6c9; }
 
 .navbar {
-  width: 60px;
+  width: 70px;
   margin: 0px;
   background-color: #212121;
   border-radius: 0px;
@@ -292,11 +310,16 @@ body, html {
   .navbar .buttons {
     position: fixed; }
     .navbar .buttons a {
+      margin-top: 5px;
       display: block;
       width: 60px;
+      margin-left: 10px;
       text-align: center; }
       .navbar .buttons a.active {
-        background-color: #eeeeee; }
+        background-color: #eeeeee;
+        border-top-left-radius: 2px;
+        border-bottom-left-radius: 2px;
+        box-shadow: -5px 0px 5px -5px rgba(0, 0, 0, 0.5), 0px -5px 5px -5px rgba(0, 0, 0, 0.5), 0px 5px 5px -5px rgba(0, 0, 0, 0.5); }
         .navbar .buttons a.active .fa {
           color: #212121; }
       .navbar .buttons a .fa {
@@ -347,37 +370,44 @@ body, html {
     width: 100%; }
     .plan-container .plan-editor .years, .plan-container .plan-editor .months {
       line-height: 30px;
-      height: 30px;
+      height: 35px;
       width: 100%;
-      display: flex; }
+      display: flex;
+      padding-top: 5px; }
       .plan-container .plan-editor .years button, .plan-container .plan-editor .months button {
-        line-height: 30px;
-        height: 30px;
+        background-color: transparent;
         flex-grow: 1;
         flex-basis: 0;
         border: 0px;
-        background-color: #fff;
-        border-right: 1px solid #e0e0e0;
-        border-bottom: 1px solid #e0e0e0; }
-        .plan-container .plan-editor .years button.active, .plan-container .plan-editor .months button.active {
-          background-color: #bdbdbd; }
-        .plan-container .plan-editor .years button:last-child, .plan-container .plan-editor .months button:last-child {
-          border-right: 0px; }
+        padding: 0px;
+        text-transform: capitalize; }
     .plan-container .plan-editor .years {
       position: absolute;
       top: 0px;
-      left: 0px; }
+      left: 0px;
+      background-color: #424242; }
+      .plan-container .plan-editor .years button {
+        color: #bdbdbd; }
+        .plan-container .plan-editor .years button.active {
+          color: #e0e0e0;
+          background-color: #616161; }
     .plan-container .plan-editor .months {
       position: absolute;
-      top: 30px;
-      left: 0px; }
+      top: 35px;
+      left: 0px;
+      background-color: #616161; }
+      .plan-container .plan-editor .months button {
+        color: #e0e0e0; }
+        .plan-container .plan-editor .months button.active {
+          color: #424242;
+          background-color: #fff; }
     .plan-container .plan-editor .weeks {
       position: absolute;
-      top: 60px;
+      top: 70px;
       left: 0px;
       width: 30px;
       text-align: center;
-      height: calc(100% - 60px); }
+      height: calc(100% - 70px); }
       .plan-container .plan-editor .weeks .week {
         padding-top: 5px;
         height: calc(100% / 5);
@@ -385,9 +415,9 @@ body, html {
         border-bottom: 1px solid #e0e0e0; }
     .plan-container .plan-editor .dates {
       position: absolute;
-      top: 60px;
+      top: 70px;
       left: 30px;
-      height: calc(100% - 60px);
+      height: calc(100% - 70px);
       width: calc(100% - 30px); }
       .plan-container .plan-editor .dates .date {
         display: block;

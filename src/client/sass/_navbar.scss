@@ -1,5 +1,5 @@
 .navbar {
-    width: 60px;
+    width: 70px;
     margin: 0px;
     background-color: material-color('grey', '900');
     border-radius: 0px;
@@ -9,12 +9,17 @@
         position: fixed;
 
         a {
+            margin-top: 5px;
             display: block;
             width: 60px;
+            margin-left: 10px;
             text-align: center;
 
             &.active {
                 background-color: material-color('grey', '200');
+                border-top-left-radius: 2px;
+                border-bottom-left-radius: 2px;
+                box-shadow: -5px 0px 5px -5px rgba(0, 0, 0, 0.5), 0px -5px 5px -5px rgba(0, 0, 0, 0.5), 0px 5px 5px -5px rgba(0, 0, 0, 0.5);
                 
                 .fa {
                     color: material-color('grey', '900');

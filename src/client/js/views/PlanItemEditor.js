@@ -184,7 +184,7 @@ class PlanItemEditor extends View {
             y: e.pageY
         };
 
-        // Column mouse hover events
+        // Date mouse hover events
         $('.plan-editor .dates .date')
             .on('mouseenter', function() {
                 $(this).toggleClass('hovering', true);

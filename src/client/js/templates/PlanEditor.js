@@ -4,14 +4,14 @@ module.exports = function render() {
     return _.div({class: 'plan-editor'},
         _.div({class: 'years'},
             _.each(this.getYears(), (i, year) => {
-                return _.button({class: 'year' + (this.currentYear == year.number ? ' active' : '')},
+                return _.button({class: 'tab year' + (this.currentYear == year.number ? ' active' : '')},
                     year.number
                 ).click(() => { this.onClickYear(year.number); });
             })
         ),
         _.div({class: 'months'},
             _.each(this.getMonths(), (i, month) => {
-                return _.button({class: 'month' + (this.currentMonth == month.number ? ' active' : '')},
+                return _.button({class: 'tab month' + (this.currentMonth == month.number ? ' active' : '')},
                     month.name
                 ).click(() => { this.onClickMonth(month.number); });
             })

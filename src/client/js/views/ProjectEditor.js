@@ -19,6 +19,9 @@ class ProjectEditor extends View {
         this.$element.find('input[type="radio"]')[0].checked = true;
 
         SettingsHelper.set('projects', 'current', this.model.title);
+    
+        // Clear resource cache
+        resources = {};
     }
 }
 

@@ -21,10 +21,6 @@ Router.route('/', () => {
                 )
             )
         );
-        
-        setTimeout(() => {
-            location.hash = SettingsHelper.get('view', 'default', '/board/');
-        }, 3000);
     });
 });
 

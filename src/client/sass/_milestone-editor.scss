@@ -140,6 +140,24 @@
 .board-container {
     &.list {
         .milestone-editor {
+            >.header {
+                h4 {
+                    width: 900px;
+                    margin: 0px auto;
+                }
+
+                .title {
+                    .fa {
+                        width: 18px;
+                        margin-right: 5px;
+                    }
+                }
+
+                .stats {
+                    right: calc(50% - 450px);
+                }   
+            }
+
             &:not(.collapsed) {
                 .columns {
                     display: block;
@@ -149,11 +167,16 @@
 
                         >.header {
                             border-bottom: 1px solid material-color('grey', '400');
+                            width: 900px;
+                            margin: 0px auto;
                         }
 
                         .issue-editor {
+                            width: 900px;
+                            margin: 0px auto;
+                            
                             .header {
-                                padding: 5px 15px 5px 5px;
+                                padding: 5px 30px 5px 5px;
                                 position: relative;
 
                                 .drag-handle {

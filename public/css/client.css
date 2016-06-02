@@ -369,22 +369,38 @@ body, html {
       .milestone-editor .columns .column > .header h4 {
         margin: 0px; }
 
+.board-container.list .milestone-editor > .header h4 {
+  width: 900px;
+  margin: 0px auto; }
+
+.board-container.list .milestone-editor > .header .title .fa {
+  width: 18px;
+  margin-right: 5px; }
+
+.board-container.list .milestone-editor > .header .stats {
+  right: calc(50% - 450px); }
+
 .board-container.list .milestone-editor:not(.collapsed) .columns {
   display: block; }
   .board-container.list .milestone-editor:not(.collapsed) .columns .column {
     border: 0px; }
     .board-container.list .milestone-editor:not(.collapsed) .columns .column > .header {
-      border-bottom: 1px solid #bdbdbd; }
-    .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header {
-      padding: 5px 15px 5px 5px;
-      position: relative; }
-      .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header .drag-handle {
-        position: absolute;
-        width: 50%;
-        left: 25%;
-        top: 0%; }
-      .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header h4 {
-        font-size: 14px; }
+      border-bottom: 1px solid #bdbdbd;
+      width: 900px;
+      margin: 0px auto; }
+    .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor {
+      width: 900px;
+      margin: 0px auto; }
+      .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header {
+        padding: 5px 30px 5px 5px;
+        position: relative; }
+        .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header .drag-handle {
+          position: absolute;
+          width: 50%;
+          left: 25%;
+          top: 0%; }
+        .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header h4 {
+          font-size: 14px; }
 
 .board-container.dragging .milestone-editor .columns .column {
   outline: 2px solid #e0e0e0;

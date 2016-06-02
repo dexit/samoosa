@@ -196,7 +196,7 @@ Router.route('/settings/', () => {
                     _.div({class: 'tabbed-container'},
                         _.div({class: 'tabs'},
                             _.each(window.resources, (name, resource) => {
-                                if(name != 'issues' && name != 'milestones') {
+                                if(name != 'issues' && name != 'milestones' && name != 'projects') {
                                     return _.button({class: 'tab' + (name == 'issueTypes' ? ' active' : '')},
                                         prettyName(name)
                                     ).click(function() {
@@ -215,7 +215,7 @@ Router.route('/settings/', () => {
                         ),
                         _.div({class: 'panes'},
                             _.each(window.resources, (name, resource) => {
-                                if(name != 'issues' && name != 'milestones') {
+                                if(name != 'issues' && name != 'milestones' && name != 'projects') {
                                     return _.div({class: 'pane' + (name == 'issueTypes' ? ' active' : '')},
                                         new ResourceEditor({
                                             name: name,

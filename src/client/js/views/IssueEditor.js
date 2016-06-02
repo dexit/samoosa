@@ -172,15 +172,14 @@ class IssueEditor extends View {
             }
 
             // Apply temporary CSS properties
-            $element.each(function(i) {
-                $(this).css({
-                    top: $element.first().offset().top,
-                    left: $element.first().offset().left,
-                    width: $element.first().outerWidth(),
-                    height: $element.first().outerHeight(),
+            $element.each((i, element) => {
+                $(element).css({
+                    top: this.$element.offset().top,
+                    left: this.$element.offset().left,
+                    width: this.$element.outerWidth(),
+                    height: this.$element.outerHeight(),
                     'pointer-events': 'none',
-                    'z-index': 999 - i,
-                    'margin-top': (30 * i) + 'px'
+                    'z-index': 999
                 });
             });
             
@@ -195,12 +194,6 @@ class IssueEditor extends View {
                 position: 'absolute'
             }); 
             
-            // Buffer previous pointer location
-            let prev = {
-                x: e.pageX,
-                y: e.pageY
-            };
-
             // Column mouse hover events
             $('.milestone-editor .columns .column')
                 .on('mouseenter', function() {
@@ -242,9 +235,6 @@ class IssueEditor extends View {
                     } else if(current.y < viewport.y + 100) {
                         scroll(-1 * scrollSpeed);
                     }
-
-                    // Replace previous position buffer data
-                    prev = current;
                 });
 
             // Document pointer release mouse button logic

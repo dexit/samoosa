@@ -1108,17 +1108,15 @@ ApiHelper.updateIssue(this.model).then(function(){_this47.$element.toggleClass('
      */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this48=this;if(!InputHelper.isShiftDown){(function(){ // Set class on board container
 $('.board-container').toggleClass('dragging',true); // Set element
 var $element=_this48.$element;if(_this48.usingMultiEdit()){$element=$('.issue-editor.selected');}else {IssueEditor.cancelMultiSelect();} // Apply temporary CSS properties
-$element.each(function(i){$(this).css({top:$element.first().offset().top,left:$element.first().offset().left,width:$element.first().outerWidth(),height:$element.first().outerHeight(),'pointer-events':'none','z-index':999-i,'margin-top':30*i+'px'});}); // Buffer the offset between mouse cursor and element position
+$element.each(function(i,element){$(element).css({top:_this48.$element.offset().top,left:_this48.$element.offset().left,width:_this48.$element.outerWidth(),height:_this48.$element.outerHeight(),'pointer-events':'none','z-index':999});}); // Buffer the offset between mouse cursor and element position
 var offset={x:_this48.$element.offset().left-e.pageX,y:_this48.$element.offset().top-e.pageY}; // Add absolute positioning afterwards to allow getting proper offset
-$element.css({position:'absolute'}); // Buffer previous pointer location
-var prev={x:e.pageX,y:e.pageY}; // Column mouse hover events
+$element.css({position:'absolute'}); // Column mouse hover events
 $('.milestone-editor .columns .column').on('mouseenter',function(){$(this).toggleClass('hovering',true);}).on('mouseleave',function(){$(this).toggleClass('hovering',false);}); // Document pointer movement logic
 $(document).off('mousemove').on('mousemove',function(e){ // Get current pointer location
 var current={x:e.pageX,y:e.pageY}; // Get current viewport
 var viewport={x:0,y:$(document).scrollTop(),w:$(window).width(),h:$(window).height()}; // Apply new CSS positioning values
 $element.css({top:current.y+offset.y,left:current.x+offset.x}); // Scroll page if dragging near the top or bottom
-var scrollSpeed=5;if(current.y>viewport.y+viewport.h-100){scroll(1*scrollSpeed);}else if(current.y<viewport.y+100){scroll(-1*scrollSpeed);} // Replace previous position buffer data
-prev=current;}); // Document pointer release mouse button logic
+var scrollSpeed=5;if(current.y>viewport.y+viewport.h-100){scroll(1*scrollSpeed);}else if(current.y<viewport.y+100){scroll(-1*scrollSpeed);}}); // Document pointer release mouse button logic
 $(document).off('mouseup').on('mouseup',function(e){_this48.onReleaseDragHandle(e);});})();}} /**
      * Event: Release the dragging handle
      */},{key:"onReleaseDragHandle",value:function onReleaseDragHandle(e){ // Unregister mouse events
@@ -1127,7 +1125,7 @@ var $element=this.$element;if(this.usingMultiEdit()){$element=$('.issue-editor.s
 $('.board-container').toggleClass('dragging',false);$element.removeAttr('style'); // Place this element into the hovered column
 $('.milestone-editor .columns .column.hovering .body').first().prepend($element); // Unregister column mouse events and unset hovering state
 $('.milestone-editor .columns .column').off('mouseenter').off('mouseleave').toggleClass('hovering',false); // Update model data with new information based on DOM location
-$element.each(function(i){var _iteratorNormalCompletion12=true;var _didIteratorError12=false;var _iteratorError12=undefined;try{for(var _iterator12=ViewHelper.getAll('IssueEditor')[Symbol.iterator](),_step12;!(_iteratorNormalCompletion12=(_step12=_iterator12.next()).done);_iteratorNormalCompletion12=true){var view=_step12.value;if(this==view.$element[0]){view.model.milestone=view.$element.parents('.milestone-editor').attr('data-index');view.model.column=view.$element.parents('.column').attr('data-index'); // Trigger the change event
+$element.each(function(i){var _iteratorNormalCompletion12=true;var _didIteratorError12=false;var _iteratorError12=undefined;try{for(var _iterator12=ViewHelper.getAll('IssueEditor')[Symbol.iterator](),_step12;!(_iteratorNormalCompletion12=(_step12=_iterator12.next()).done);_iteratorNormalCompletion12=true){var view=_step12.value;if(this==view.$element[0]){view.model.milestone=view.$element.parents('.milestone-editor').attr('data-index');view.model.column=view.$element.parents('.column').attr('data-index'); // Trigger the sync event
 view.sync();}}}catch(err){_didIteratorError12=true;_iteratorError12=err;}finally {try{if(!_iteratorNormalCompletion12&&_iterator12.return){_iterator12.return();}}finally {if(_didIteratorError12){throw _iteratorError12;}}}}); // Cancel multiselect
 IssueEditor.cancelMultiSelect(); // Update milestones progress
 var _iteratorNormalCompletion13=true;var _didIteratorError13=false;var _iteratorError13=undefined;try{for(var _iterator13=ViewHelper.getAll('MilestoneEditor')[Symbol.iterator](),_step13;!(_iteratorNormalCompletion13=(_step13=_iterator13.next()).done);_iteratorNormalCompletion13=true){var milestoneEditor=_step13.value;milestoneEditor.updateProgress();}}catch(err){_didIteratorError13=true;_iteratorError13=err;}finally {try{if(!_iteratorNormalCompletion13&&_iterator13.return){_iterator13.return();}}finally {if(_didIteratorError13){throw _iteratorError13;}}}} /**

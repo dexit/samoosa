@@ -135,7 +135,9 @@ body, html {
   .issue-editor[data-type="question"] > .header:before {
     background-color: #ffeb3b; }
   .issue-editor.selected {
-    border: 1px solid #2196f3; }
+    outline: 2px solid #2196f3;
+    position: relative;
+    z-index: 999; }
   .issue-editor.loading {
     pointer-events: none;
     opacity: 0.5; }
@@ -145,25 +147,28 @@ body, html {
     display: none; }
   .issue-editor.expanded .meta, .issue-editor.expanded .body, .issue-editor.expanded .operations, .issue-editor.expanded .comments, .issue-editor.expanded .add-comment {
     display: block; }
-  .issue-editor.expanded.selected {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    width: calc(20%);
-    z-index: 500;
-    transform: translate(-50%, -50%); }
-    .issue-editor.expanded.selected .drag-handle {
-      display: none; }
-    .issue-editor.expanded.selected .multi-edit-notification {
-      display: block;
-      font-weight: bold;
-      color: #f44336;
-      margin-bottom: 10px; }
-    .issue-editor.expanded.selected .header {
-      padding-top: 10px; }
-    .issue-editor.expanded.selected .body, .issue-editor.expanded.selected .comments, .issue-editor.expanded.selected .add-comment {
-      display: none; }
-  .issue-editor .multi-edit-notification {
+  .issue-editor.expanded.selected .multi-edit-notification {
+    display: block;
+    font-weight: bold;
+    color: #f44336;
+    margin-bottom: 10px; }
+  .issue-editor.expanded.selected .multi-edit-toggle {
+    display: inline;
+    float: right;
+    margin: 4px 10px 0px 0px; }
+  .issue-editor.expanded.selected .multi-edit-actions {
+    padding-top: 10px;
+    display: block;
+    text-align: right; }
+    .issue-editor.expanded.selected .multi-edit-actions button {
+      margin-left: 10px; }
+  .issue-editor.expanded.selected .drag-handle {
+    display: none; }
+  .issue-editor.expanded.selected .header {
+    padding-top: 15px; }
+  .issue-editor.expanded.selected .body, .issue-editor.expanded.selected .comments, .issue-editor.expanded.selected .add-comment {
+    display: none; }
+  .issue-editor .multi-edit-toggle, .issue-editor .multi-edit-notification, .issue-editor .multi-edit-actions {
     display: none; }
   .issue-editor .btn-edit {
     cursor: text; }

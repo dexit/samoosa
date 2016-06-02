@@ -14,8 +14,9 @@ class IssueEditor extends View {
      */
     static cancelMultiSelect() {
         $('.issue-editor').toggleClass('selected', false); 
-        
-        $('body').off('click');
+        $('.issue-editor .multi-edit-toggle').each(function() {
+            this.checked = false;
+        });
     }
 
     /**
@@ -25,14 +26,25 @@ class IssueEditor extends View {
         e.preventDefault();
         e.stopPropagation();
 
+        if(!this.usingMultiEdit()) {
+            IssueEditor.cancelMultiSelect();
+        }
+
         let wasExpanded = this.$element.hasClass('expanded');
 
         $('.issue-editor').removeClass('expanded');
-
-        this.$element.toggleClass('expanded', !wasExpanded);
     
-        if(!wasExpanded) {
-            this.getComments();
+        this.$element.toggleClass('expanded', !wasExpanded);
+
+        if(this.usingMultiEdit()) {
+            $('.issue-editor .multi-edit-toggle').each(function() {
+                this.checked = false;
+            }); 
+
+        } else {
+            if(!wasExpanded) {
+                this.getComments();
+            }
         }
     }
 
@@ -51,11 +63,95 @@ class IssueEditor extends View {
      * Gets a property from the DOM of the editor
      *
      * @param {String} key
+     * @param {Boolean} useCheckboxes
+     *
+     * @returns {String} value
      */
-    getProperty(key) {
+    getProperty(key, useCheckboxes) {
         let $property = this.$element.find('*[data-property="' + key + '"]');
-        
-        return $property.val() || $property.text();
+        let value = $property.val() || $property.text();
+    
+        if(useCheckboxes) {
+            let $checkbox = this.$element.find('*[data-property="' + key + '"]').siblings('.multi-edit-toggle');
+            
+            if(!$checkbox[0].checked) {
+                return null;
+            }
+        }
+
+        return value;
+    }
+    
+    /**
+     * Sets a property to the DOM of the editor
+     *
+     * @param {String} key
+     * @param {String} value
+     */
+    setProperty(key, value) {
+        let $property = this.$element.find('*[data-property="' + key + '"]');
+        $property.val(value);
+    }
+
+    /**
+     * Updates the model with properties from the DOM
+     */
+    updateModel() {
+        this.model.title = this.getProperty('title'); 
+        this.model.type = this.getProperty('type'); 
+        this.model.priority = this.getProperty('priority');
+        this.model.assignee = this.getProperty('assignee');
+        this.model.version = this.getProperty('version'); 
+        this.model.description = this.getProperty('description');
+        this.model.estimate = this.getProperty('estimate');
+    }
+
+    /**
+     * Updates the DOM with properties from the model
+     */
+    updateDOM() {
+        // Update all fields
+        this.setProperty('title', this.model.title);
+        this.setProperty('type', this.model.type);
+        this.setProperty('priority', this.model.priority);
+        this.setProperty('assignee', this.model.assignee);
+        this.setProperty('version', this.model.version);
+        this.setProperty('description', this.model.description);
+        this.setProperty('estimate', this.model.estimate);
+
+        // Update data type attribute
+        this.$element.attr('data-type', resources.issueTypes[this.model.type]);
+
+        // Update avatar image
+        this.$element.find('.header .assignee-avatar').html(
+            this.getAssigneeAvatar()
+        );
+
+        // Update priority indicator
+        this.$element.find('.priority-indicator').replaceWith(this.getPriorityIndicator());
+    }
+
+    /**
+     * Check whether or not we're using multi edit
+     *
+     * @returns {Boolean} active
+     */
+    usingMultiEdit() {
+        return this.$element.hasClass('selected') && $('.issue-editor.selected').length > 1;
+    }
+
+    /**
+     * Synchronises the model data with the remote backend
+     */
+    sync() {
+        // Start loading
+        this.$element.toggleClass('loading', true);
+
+        // Update the issue though the API
+        ApiHelper.updateIssue(this.model)
+        .then(() => {
+            this.$element.toggleClass('loading', false);
+        });
     }
 
     /**
@@ -69,8 +165,10 @@ class IssueEditor extends View {
             // Set element
             let $element = this.$element;
 
-            if($('.issue-editor.selected').length > 0) {
+            if(this.usingMultiEdit()) {
                 $element = $('.issue-editor.selected');
+            } else {
+                IssueEditor.cancelMultiSelect();
             }
 
             // Apply temporary CSS properties
@@ -168,7 +266,7 @@ class IssueEditor extends View {
         // Set element
         let $element = this.$element;
 
-        if($('.issue-editor.selected').length > 0) {
+        if(this.usingMultiEdit()) {
             $element = $('.issue-editor.selected');
         }
 
@@ -213,40 +311,69 @@ class IssueEditor extends View {
      * Event: Fires on every change to a property
      */
     onChange() {
-        this.model.title = this.getProperty('title'); 
-        this.model.type = this.getProperty('type'); 
-        this.model.priority = this.getProperty('priority');
-        this.model.assignee = this.getProperty('assignee');
-        this.model.version = this.getProperty('version'); 
-        this.model.description = this.getProperty('description');
-        this.model.estimate = this.getProperty('estimate');
+        // Only update values is we're not using multi edit
+        if(!this.usingMultiEdit()) {
+            this.updateModel();
+            this.updateDOM();
+            this.sync();
+        }
+    }
+   
+    /**
+     * Event: Click multi edit apply button
+     */
+    onClickMultiEditApply() {
+        this.updateModel();
+        this.updateDOM();
+        this.sync();
 
-        // Update data type attribute
-        this.$element.attr('data-type', resources.issueTypes[this.model.type]);
-
-        // Update avatar image
-        this.$element.find('.header .assignee-avatar').html(
-            this.getAssigneeAvatar()
-        );
-
-        // Start loading
-        this.$element.toggleClass('loading', true);
-
-        // Update priority indicator
-        this.$element.find('.priority-indicator').replaceWith(this.getPriorityIndicator());
-
-        // Update the issue though the API
-        ApiHelper.updateIssue(this.model)
-        .then(() => {
-            this.$element.toggleClass('loading', false);
-        });
+        // Look for other IssueEditor views and update them as needed
+        if(this.usingMultiEdit()) {
+            for(let view of ViewHelper.getAll('IssueEditor')) {
+                if(view != this && view.$element.hasClass('selected')) {
+                    view.model.type = this.getProperty('type', true) || view.model.type;
+                    view.model.priority = this.getProperty('priority', true) || view.model.priority;
+                    view.model.assignee = this.getProperty('assignee', true) || view.model.assignee;
+                    view.model.version = this.getProperty('version', true) || view.model.version;
+                    view.model.estimate = this.getProperty('estimate', true) || view.model.estimate;
+                
+                    view.updateDOM();
+                    view.sync();
+                }
+            }
+        }
     }
     
+    /**
+     * Event: Click multi edit cancel button
+     */
+    onClickMultiEditCancel() {
+        this.$element.toggleClass('expanded', false);
+
+        IssueEditor.cancelMultiSelect();
+    }
+
+    /**
+     * Event: Fires on changing a checkbox
+     */
+    onChangeCheckbox(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if(this.$element.hasClass('selected')) {
+            this.$element.find('.multi-edit-toggle').each(function(i) {
+                let otherCheckbox = $('.issue-editor.selected .multi-edit-toggle')[i];
+            
+                otherCheckbox.checked = this.checked;
+            });
+        }
+    }
+
     /**
      * Event: Click the edit button of a field
      */
     onClickEdit() {
-        if(!InputHelper.isShiftDown) {
+        if(!InputHelper.isShiftDown && !this.$element.hasClass('selected')) {
             $(this)
                 .toggleClass('hidden', true)
                 .siblings('.edit')
@@ -293,11 +420,9 @@ class IssueEditor extends View {
 
             this.$element.toggleClass('selected');
 
-            $('body')
-            .off('click')
-            .on('click', function() {
-                IssueEditor.cancelMultiSelect();
-            });
+            if(this.$element.hasClass('selected')) {
+                this.$element.toggleClass('expanded', false);
+            }
         }
     }
 

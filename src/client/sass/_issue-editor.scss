@@ -36,7 +36,9 @@
 
     // States
     &.selected {
-        border: 1px solid material-color('blue', '500');
+        outline: 2px solid material-color('blue', '500');
+        position: relative;
+        z-index: 999;
     }
 
     &.loading {
@@ -64,17 +66,6 @@
         }
 
         &.selected {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            width: calc(20%);
-            z-index: 500;
-            transform: translate(-50%, -50%);
-
-            .drag-handle {
-                display: none;
-            }
-
             .multi-edit-notification {
                 display: block;
                 font-weight: bold;
@@ -82,8 +73,28 @@
                 margin-bottom: 10px;
             }
 
-            .header {
+            .multi-edit-toggle {
+                display: inline;
+                float: right;
+                margin: 4px 10px 0px 0px;
+            }
+
+            .multi-edit-actions {
                 padding-top: 10px;
+                display: block;
+                text-align: right;
+
+                button {
+                    margin-left: 10px;
+                }
+            }
+
+            .drag-handle {
+                display: none;
+            }
+
+            .header {
+                padding-top: 15px;
             }
 
             .body, .comments, .add-comment {
@@ -92,7 +103,7 @@
         }
     }
 
-    .multi-edit-notification {
+    .multi-edit-toggle, .multi-edit-notification, .multi-edit-actions {
         display: none;
     }
 

@@ -17,6 +17,10 @@ class InputHelper {
                 case 16:
                     this.isShiftDown = false;
                     break;
+
+                case 27:
+                    IssueEditor.cancelMultiSelect();
+                    break;
             }
         });
     }

@@ -15,6 +15,9 @@ module.exports = function render() {
                 _.span({class: 'fa fa-minus-circle'}),
                 _.span({class: 'fa fa-plus-circle'})
             ).click((e) => { this.onClickToggle(e); }),
+            _.div({class: 'issue-index'},
+                issue.index.toString()
+            ),
             this.getPriorityIndicator(),
             _.h4({},
                 _.span({class: 'btn-edit'},

@@ -192,6 +192,15 @@ body, html {
       margin-right: 10px;
       width: 30px;
       height: 30px; }
+    .issue-editor > .header .issue-index {
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      border-bottom-left-radius: 5px;
+      background-color: #212121;
+      color: #e0e0e0;
+      padding: 2px 5px;
+      font-size: 10px; }
     .issue-editor > .header .drag-handle {
       cursor: move; }
       .issue-editor > .header .drag-handle .fa {

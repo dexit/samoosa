@@ -27,7 +27,13 @@ class SettingsHelper {
     static get(type, key, defaultValue) {
         let result = localStorage.getItem('settings:' + type + ':' + key);
 
-        if(result === 'null' || result === null || result === undefined) {
+        if(
+            result === 'null' ||
+            result === null ||
+            result === undefined ||
+            result === 'undefined' ||
+            typeof result === 'undefined'
+        ) {
             SettingsHelper.set(type, key, defaultValue);
 
             result = defaultValue || false;

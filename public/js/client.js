@@ -1039,7 +1039,7 @@ $(document).keyup(function(e){switch(e.which){case 16:_this39.isShiftDown=false;
      * @param {String} defaultValue
      *
      * @returns {String} value
-     */},{key:"get",value:function get(type,key,defaultValue){var result=localStorage.getItem('settings:'+type+':'+key);if(result==='null'||result===null||result===undefined){SettingsHelper.set(type,key,defaultValue);result=defaultValue||false;}return result;} /**
+     */},{key:"get",value:function get(type,key,defaultValue){var result=localStorage.getItem('settings:'+type+':'+key);if(result==='null'||result===null||result===undefined||result==='undefined'||typeof result==='undefined'){SettingsHelper.set(type,key,defaultValue);result=defaultValue||false;}return result;} /**
      * Sanity check
      *
      * @returns {Boolean} isValid

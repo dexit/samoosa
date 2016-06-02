@@ -292,8 +292,8 @@ class IssueEditor extends View {
                     view.model.milestone = view.$element.parents('.milestone-editor').attr('data-index');
                     view.model.column = view.$element.parents('.column').attr('data-index');
                 
-                    // Trigger the change event
-                    view.onChange();
+                    // Trigger the sync event
+                    view.sync();
                 }
             }
         });
@@ -372,14 +372,14 @@ class IssueEditor extends View {
     /**
      * Event: Click the edit button of a field
      */
-    onClickEdit() {
-        if(!InputHelper.isShiftDown && !this.$element.hasClass('selected')) {
+    onClickEdit($btn) {
+        if(!InputHelper.isShiftDown && !$(this).parents('.issue-editor').hasClass('selected')) {
             $(this)
-                .toggleClass('hidden', true)
-                .siblings('.edit')
-                .toggleClass('hidden', false)
-                .focus()
-                .select(); 
+            .toggleClass('hidden', true)
+            .siblings('.edit')
+            .toggleClass('hidden', false)
+            .focus()
+            .select(); 
         }
     }
 

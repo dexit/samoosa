@@ -90,10 +90,11 @@ class ResourceHelper {
         return new Promise((callback) => {
             ApiHelper.updateResource(resource, item)
             .then(() => {
-                ResourceHelper.reloadResource(resource)
-                .then(() => {
-                    callback();
-                });
+                if(item.index) {
+                    resources[resource][item.index] = item;
+                }
+                
+                callback();
             });
         });
     }
@@ -102,10 +103,9 @@ class ResourceHelper {
         return new Promise((callback) => {
             ApiHelper.removeResource(resource, index)
             .then(() => {
-                ResourceHelper.reloadResource(resource)
-                .then(() => {
-                    callback();
-                });
+                resources[resource].splice(index, 1);
+                
+                callback();
             });
         });
     }
@@ -114,10 +114,9 @@ class ResourceHelper {
         return new Promise((callback) => {
             ApiHelper.addResource(resource, item)
             .then(() => {
-                ResourceHelper.reloadResource(resource)
-                .then(() => {
-                    callback();
-                });
+                resources[resource].push(item);
+
+                callback();
             });
         });
     }

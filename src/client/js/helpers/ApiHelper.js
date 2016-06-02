@@ -731,14 +731,20 @@ class ApiHelper {
             }
 
             function get(resource) {
-                loaded[resource] = false;
-                
-                window.resources[resource] = [];
+                if(!resources[resource] || resources[resource].length < 1) {
+                    loaded[resource] = false;
+                    
+                    window.resources[resource] = [];
 
-                helper.getResource(resource)
-                .then(() => {
+                    helper.getResource(resource)
+                    .then(() => {
+                        check(resource);
+                    });
+                
+                } else {
                     check(resource);
-                });
+
+                }
             }
 
             get('issueTypes');

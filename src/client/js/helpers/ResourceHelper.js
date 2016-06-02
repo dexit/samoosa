@@ -91,7 +91,12 @@ class ResourceHelper {
             ApiHelper.updateResource(resource, item)
             .then(() => {
                 if(item.index) {
+                    item.index = parseInt(item.index);
+
                     resources[resource][item.index] = item;
+                } else {
+                    throw 'Item "' + (item.title || item.name) + '" for resource "' + resource + '" has no index!';
+
                 }
                 
                 callback();
@@ -114,7 +119,9 @@ class ResourceHelper {
         return new Promise((callback) => {
             ApiHelper.addResource(resource, item)
             .then(() => {
-                resources[resource].push(item);
+                item.index = resources[resource].length;
+
+                resources[resource][item.index] = item;
 
                 callback();
             });

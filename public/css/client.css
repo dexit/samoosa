@@ -13,10 +13,14 @@
  */
 body, html {
   height: 100%; }
-  body *:not(.edit), html *:not(.edit) {
+  body *, html * {
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none; }
+    body *.selectable, body *.selectable *, html *.selectable, html *.selectable * {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      user-select: text; }
   body h4, html h4 {
     font-size: 16px; }
 
@@ -110,6 +114,16 @@ body, html {
       font-size: 32px;
       animation: spinner-icon 2s linear infinite; }
 
+.root-container {
+  position: relative; }
+  .root-container .content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -80px); }
+    .root-container .content h1, .root-container .content p {
+      text-align: center; }
+
 .issue-editor {
   border: 1px solid #bdbdbd; }
   .issue-editor[data-type="bug"] > .header:before {
@@ -131,6 +145,26 @@ body, html {
     display: none; }
   .issue-editor.expanded .meta, .issue-editor.expanded .body, .issue-editor.expanded .operations, .issue-editor.expanded .comments, .issue-editor.expanded .add-comment {
     display: block; }
+  .issue-editor.expanded.selected {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: calc(20%);
+    z-index: 500;
+    transform: translate(-50%, -50%); }
+    .issue-editor.expanded.selected .drag-handle {
+      display: none; }
+    .issue-editor.expanded.selected .multi-edit-notification {
+      display: block;
+      font-weight: bold;
+      color: #f44336;
+      margin-bottom: 10px; }
+    .issue-editor.expanded.selected .header {
+      padding-top: 10px; }
+    .issue-editor.expanded.selected .body, .issue-editor.expanded.selected .comments, .issue-editor.expanded.selected .add-comment {
+      display: none; }
+  .issue-editor .multi-edit-notification {
+    display: none; }
   .issue-editor .btn-edit {
     cursor: text; }
     .issue-editor .btn-edit:hover {
@@ -338,11 +372,6 @@ body, html {
       .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header h4 {
         font-size: 14px; }
 
-.board-container.dragging .milestone-editor * {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none; }
-
 .board-container.dragging .milestone-editor .columns .column {
   outline: 2px solid #e0e0e0;
   background-color: 2px solid #f5f5f5; }
@@ -411,9 +440,6 @@ body, html {
       width: 30px;
       background-color: #43a047;
       color: #f5f5f5; }
-
-.plan-container.dragging .plan-editor * {
-  user-select: none; }
 
 .plan-container {
   position: relative;
@@ -553,7 +579,7 @@ body > .plan-item-editor {
 .project-editor {
   padding: 15px;
   display: flex;
-  border: 1px solid #eeeeee;
+  border: 1px solid #e0e0e0;
   border-radius: 2px;
   box-shadow: 0px 5px 5px -5px rgba(0, 0, 0, 0.5);
   margin: 15px; }
@@ -570,5 +596,13 @@ body > .plan-item-editor {
     flex-grow: 1; }
     .project-editor .content .header h4 {
       font-weight: bold; }
+    .project-editor .content .footer {
+      font-size: 12px;
+      margin-top: 10px; }
+      .project-editor .content .footer span {
+        border-radius: 2px;
+        background-color: #e0e0e0;
+        padding: 0px 5px;
+        font-family: monospace; }
 
 /*# sourceMappingURL=client.css.map */

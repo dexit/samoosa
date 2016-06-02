@@ -176,12 +176,6 @@
 
     &.dragging {
         .milestone-editor {
-            * {
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                user-select: none;
-            }
-
             .columns {
                 .column {
                     outline: 2px solid material-color('grey', '300');

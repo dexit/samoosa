@@ -62,6 +62,38 @@
         .meta, .body, .operations, .comments, .add-comment {
             display: block;
         }
+
+        &.selected {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: calc(20%);
+            z-index: 500;
+            transform: translate(-50%, -50%);
+
+            .drag-handle {
+                display: none;
+            }
+
+            .multi-edit-notification {
+                display: block;
+                font-weight: bold;
+                color: material-color('red', '500');
+                margin-bottom: 10px;
+            }
+
+            .header {
+                padding-top: 10px;
+            }
+
+            .body, .comments, .add-comment {
+                display: none;
+            }
+        }
+    }
+
+    .multi-edit-notification {
+        display: none;
     }
 
     .btn-edit {

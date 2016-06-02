@@ -14,13 +14,13 @@ module.exports = function render() {
             _.button({class: 'btn-toggle btn-transparent'},
                 _.span({class: 'fa fa-minus-circle'}),
                 _.span({class: 'fa fa-plus-circle'})
-            ).click(() => { this.onClickToggle(); }),
+            ).click((e) => { this.onClickToggle(e); }),
             this.getPriorityIndicator(),
             _.h4({},
                 _.span({class: 'btn-edit'},
                     this.model.title
                 ).click(this.onClickEdit),
-                _.input({type: 'text', class: 'edit hidden btn-transparent', 'data-property': 'title', value: this.model.title})
+                _.input({type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title})
                     .change(() => {
                         this.onChange();
                         
@@ -32,6 +32,9 @@ module.exports = function render() {
             )
         ),
         _.div({class: 'meta'},
+            _.div({class: 'multi-edit-notification'},
+                'Now editing multiple issues'
+            ),
             _.div({class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '')},
                 _.label('Type'),
                 _.select({'data-property': 'type'},
@@ -77,7 +80,7 @@ module.exports = function render() {
             _.div({class: 'btn-edit'},
                 markdownToHtml(this.model.description)
             ).click(this.onClickEdit),
-            _.textarea({class: 'edit hidden btn-transparent', 'data-property': 'description'},
+            _.textarea({class: 'selectable edit hidden btn-transparent', 'data-property': 'description'},
                 this.model.description
             ).change(() => {
                 this.onChange();

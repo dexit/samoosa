@@ -17,10 +17,6 @@ class GitHubApi extends ApiHelper {
                 localStorage.setItem('gitHubOrg', prompt('Please input org name'));
             }
 
-            if(!SettingsHelper.get('projects', 'current')) {
-                SettingsHelper.set('projects', 'current', prompt('Please input repo name'));
-            }
-
             callback();
         });
     }
@@ -721,7 +717,8 @@ class GitHubApi extends ApiHelper {
             let project = {
                 index: i,
                 title: projects[i].name,
-                description: projects[i].description
+                description: projects[i].description,
+                cloneUrl: projects[i].clone_url
             };
 
             window.resources.projects[i] = project;

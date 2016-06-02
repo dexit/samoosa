@@ -12,6 +12,12 @@ module.exports = function render() {
             ),
             _.div({class: 'body'},
                 this.model.description    
+            ),
+            _.div({class: 'footer'},
+                'Clone URL: ',
+                _.span({class: 'selectable'},
+                    this.model.cloneUrl
+                )
             )
         )
     );

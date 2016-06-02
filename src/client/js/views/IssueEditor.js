@@ -21,17 +21,18 @@ class IssueEditor extends View {
     /**
      * Event: Click the toggle button
      */
-    onClickToggle() {
-        if(!InputHelper.isShiftDown) {
-            let wasExpanded = this.$element.hasClass('expanded');
+    onClickToggle(e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-            $('.issue-editor').removeClass('expanded');
+        let wasExpanded = this.$element.hasClass('expanded');
 
-            this.$element.toggleClass('expanded', !wasExpanded);
-        
-            if(!wasExpanded) {
-                this.getComments();
-            }
+        $('.issue-editor').removeClass('expanded');
+
+        this.$element.toggleClass('expanded', !wasExpanded);
+    
+        if(!wasExpanded) {
+            this.getComments();
         }
     }
 

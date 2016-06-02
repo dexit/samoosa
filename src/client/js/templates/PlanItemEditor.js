@@ -9,10 +9,10 @@ module.exports = function render() {
             _.button({class: 'btn-transparent'},
                 _.span({class: 'fa fa-remove'})
             ).click(() => { this.onClickClose(); }),
-            _.input({class: 'edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title})
+            _.input({class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title})
         ),
         _.div({class: 'body'},
-            _.input({class: 'edit', placeholder: 'Type milestone description here', type: 'text', value: this.model.description})
+            _.input({class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description})
         ),
         _.div({class: 'footer'},
             _.button('Delete').click(() => { this.onClickDelete(); }),

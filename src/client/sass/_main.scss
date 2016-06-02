@@ -4,10 +4,18 @@
 body, html {
     height: 100%;
 
-    *:not(.edit) {
+    * {
         -webkit-user-select: none;
         -moz-user-select: none;
         user-select: none;
+
+        &.selectable {
+            &, * {
+                -webkit-user-select: text;
+                -moz-user-select: text;
+                user-select: text;
+            }
+        }
     }
 
     h4 {

@@ -1,14 +1,4 @@
 .plan-container {
-    &.dragging {
-        .plan-editor {
-            * {
-                user-select: none;
-            }
-        }
-    }
-}
-
-.plan-container {
     position: relative;
     overflow: hidden;
 

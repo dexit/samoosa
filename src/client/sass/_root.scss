@@ -1,0 +1,14 @@
+.root-container {
+    position: relative;
+
+    .content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -80px);
+
+        h1, p {
+            text-align: center;
+        }
+    }
+}

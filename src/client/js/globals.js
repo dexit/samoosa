@@ -1,5 +1,18 @@
 'use strict';
 
+// Convert to HTML from markdown
+window.markdownToHtml = function(string) {
+    if(string) {
+        try {
+            return marked(string);
+
+        } catch(e) {
+            console.log(e);
+        
+        }
+    }
+};
+
 // Floor date extension
 Date.prototype.floor = function() {
     this.setHours(0, 0, 0, 0);

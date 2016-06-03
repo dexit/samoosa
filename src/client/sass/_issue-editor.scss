@@ -1,3 +1,13 @@
+.board-container {
+    &.multi-edit {
+        .issue-editor {
+            &:not(.selected) {
+                opacity: 0.5;
+            }
+        }
+    }
+}
+
 .issue-editor {
     border: 1px solid material-color('grey', '400');
 
@@ -37,8 +47,6 @@
     // States
     &.selected {
         outline: 2px solid material-color('blue', '500');
-        position: relative;
-        z-index: 999;
     }
 
     &.loading {

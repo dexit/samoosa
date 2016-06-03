@@ -8,12 +8,9 @@ Router.route('/', () => {
 
     ApiHelper.checkConnection()
     .then(() => {
-        ViewHelper.clear();
+        $('.workspace').remove();
 
-        $('.app-container')
-        .empty()
-        .append(new Navbar().$element)
-        .append(
+        $('.app-container').append(
             _.div({class: 'workspace root-container'},
                 _.div({class: 'content'},
                     _.h1('Mondai'),
@@ -21,6 +18,8 @@ Router.route('/', () => {
                 )
             )
         );
+       
+        navbar.slideIn();
     });
 });
 
@@ -30,12 +29,9 @@ Router.route('/user/', () => {
     .then(() => {
         ApiHelper.getUser()
         .then((user) => {
-            ViewHelper.clear();
+            $('.workspace').remove();
 
-            $('.app-container')
-            .empty()
-            .append(new Navbar().$element)
-            .append(
+            $('.app-container').append(
                 _.div({class: 'workspace user-container'},
                     _.div({class: 'profile'},
                         _.h4('Current user'),
@@ -48,6 +44,8 @@ Router.route('/user/', () => {
                     ) 
                 )
             );
+
+            navbar.slideIn();
         });
     });
 });
@@ -58,12 +56,9 @@ Router.route('/projects/', () => {
     .then(() => {
         ApiHelper.getProjects()
         .then(() => {
-            ViewHelper.clear();
+            $('.workspace').remove();
 
-            $('.app-container')
-            .empty()
-            .append(new Navbar().$element)
-            .append(
+            $('.app-container').append(
                 _.div({class: 'workspace projects-container'},
                     _.each(window.resources.projects, (i, project) => {
                         return new ProjectEditor({
@@ -72,54 +67,48 @@ Router.route('/projects/', () => {
                     })
                 )
             );
+            
+            navbar.slideIn();
         });
     });
 });
 
 // Plan
-Router.route('/plan/', () => {
+Router.route('/:project/plan/', () => {
     if(!SettingsHelper.check()) {
         return;
     }
-
-    SettingsHelper.set('view', 'default', '/plan/');
 
     ApiHelper.checkConnection()
     .then(() => {
         ApiHelper.getResources()
         .then(() => {
-            ViewHelper.clear();
-            
-            $('.app-container')
-            .empty()
-            .append(new Navbar().$element)
-            .append(
+            $('.workspace').remove();
+
+            $('.app-container').append(
                 _.div({class: 'workspace plan-container'},
                     new PlanEditor().$element
                 )
             );
+            
+            navbar.slideIn();
         });
     });
 });
 
 // Board
-Router.route('/board/', () => {
+Router.route('/:project/board/', () => {
     if(!SettingsHelper.check()) {
         return;
     }
-
-    SettingsHelper.set('view', 'default', '/board/');
 
     ApiHelper.checkConnection()
     .then(() => {
         ApiHelper.getResources()
         .then(() => {
-            ViewHelper.clear();
+            $('.workspace').remove();
 
-            $('.app-container')
-            .empty()
-            .append(new Navbar().$element)
-            .append(
+            $('.app-container').append(
                 _.div({class: 'workspace board-container'},
                     _.each(window.resources.milestones, (i, milestone) => {
                         return new MilestoneEditor({
@@ -133,28 +122,25 @@ Router.route('/board/', () => {
                     }).$element
                 )
             );
+            
+            navbar.slideIn();
         });
     });
 });
 
 // List
-Router.route('/list/', () => {
+Router.route('/:project/list/', () => {
     if(!SettingsHelper.check()) {
         return;
     }
-
-    SettingsHelper.set('view', 'default', '/list/');
 
     ApiHelper.checkConnection()
     .then(() => {
         ApiHelper.getResources()
         .then(() => {
-            ViewHelper.clear();
-            
-            $('.app-container')
-            .empty()
-            .append(new Navbar().$element)
-            .append(
+            $('.workspace').remove();
+
+            $('.app-container').append(
                 _.div({class: 'workspace board-container list'},
                     _.each(window.resources.milestones, (i, milestone) => {
                         return new MilestoneEditor({
@@ -168,12 +154,14 @@ Router.route('/list/', () => {
                     }).$element
                 )
             );
+            
+            navbar.slideIn();
         });
     });
 });
 
 // Settings
-Router.route('/settings/', () => {
+Router.route('/:project/settings/', () => {
     if(!SettingsHelper.check()) {
         return;
     }
@@ -182,12 +170,9 @@ Router.route('/settings/', () => {
     .then(() => {
         ApiHelper.getResources()
         .then(() => {
-            ViewHelper.clear();
-            
-            $('.app-container')
-            .empty()
-            .append(new Navbar().$element)
-            .append(
+            $('.workspace').remove();
+
+            $('.app-container').append(
                 _.div({class: 'workspace settings-container'},
                     _.div({class: 'tabbed-container'},
                         _.div({class: 'tabs'},
@@ -224,8 +209,18 @@ Router.route('/settings/', () => {
                     )
                 )
             );
+            
+            navbar.slideIn();
         });
     });
 });
 
 Router.init();
+
+// Navbar
+let navbar = new Navbar();
+
+$('.app-container').html(
+    navbar.$element
+);
+

@@ -32,4 +32,6 @@ require('./globals');
 require('./routes');
 
 // Title
-$('head title').html(SettingsHelper.get('projects', 'current') + ' - Mondai');
+let currentProject = SettingsHelper.get('projects', 'current');
+
+$('head title').html((currentProject ? currentProject +  ' - ' : '') + 'Mondai');

@@ -2,10 +2,6 @@
 
 // Root
 Router.route('/', () => {
-    if(!SettingsHelper.check()) {
-        return;
-    }
-
     ApiHelper.checkConnection()
     .then(() => {
         $('.workspace').remove();
@@ -45,29 +41,6 @@ Router.route('/user/', () => {
                 )
             );
 
-            navbar.slideIn();
-        });
-    });
-});
-
-// Projects
-Router.route('/projects/', () => {
-    ApiHelper.checkConnection()
-    .then(() => {
-        ApiHelper.getProjects()
-        .then(() => {
-            $('.workspace').remove();
-
-            $('.app-container').append(
-                _.div({class: 'workspace projects-container'},
-                    _.each(window.resources.projects, (i, project) => {
-                        return new ProjectEditor({
-                            model: project
-                        }).$element;
-                    })
-                )
-            );
-            
             navbar.slideIn();
         });
     });

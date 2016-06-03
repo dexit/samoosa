@@ -1,4 +1,4 @@
-# mondai
+# Mondai
 The pluggable issue tracker
 
 ## What is it?

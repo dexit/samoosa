@@ -1,9 +1,5 @@
-let Issue = require('../models/Issue');
-
 module.exports = function render() {
-    let issue = new Issue(this.model);
-
-    return _.div({class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[issue.type]},
+    return _.div({class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type]},
         _.div({class: 'header'},
             _.div({class: 'drag-handle'},
                 _.span({class: 'fa fa-bars'})
@@ -16,7 +12,7 @@ module.exports = function render() {
                 _.span({class: 'fa fa-plus-circle'})
             ).click((e) => { this.onClickToggle(e); }),
             _.div({class: 'issue-index'},
-                issue.index.toString()
+                this.model.index.toString()
             ),
             this.getPriorityIndicator(),
             _.h4({},
@@ -44,7 +40,7 @@ module.exports = function render() {
                     _.each(window.resources.issueTypes, (i, type) => {
                         return _.option({value: i}, type);
                     })
-                ).change(() => { this.onChange(); }).val(issue.type),
+                ).change(() => { this.onChange(); }).val(this.model.type),
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); })
             ),
@@ -54,7 +50,7 @@ module.exports = function render() {
                     _.each(window.resources.issuePriorities, (i, priority) => {
                         return _.option({value: i}, priority);
                     })
-                ).change(() => { this.onChange(); }).val(issue.priority),
+                ).change(() => { this.onChange(); }).val(this.model.priority),
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); })
             ),
@@ -64,7 +60,7 @@ module.exports = function render() {
                     _.each(window.resources.collaborators, (i, collaborator) => {
                         return _.option({value: i}, collaborator.name);
                     })
-                ).change(() => { this.onChange(); }).val(issue.assignee),
+                ).change(() => { this.onChange(); }).val(this.model.assignee),
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); })
             ),
@@ -74,7 +70,7 @@ module.exports = function render() {
                     _.each(window.resources.versions, (i, version) => {
                         return _.option({value: i}, version);
                     })
-                ).change(() => { this.onChange(); }).val(issue.version),
+                ).change(() => { this.onChange(); }).val(this.model.version),
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); })
             ),
@@ -84,7 +80,7 @@ module.exports = function render() {
                     _.each(window.resources.issueEstimates, (i, estimate) => {
                         return _.option({value: i}, estimate);
                     })
-                ).change(() => { this.onChange(); }).val(issue.estimate),
+                ).change(() => { this.onChange(); }).val(this.model.estimate),
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); })
             ),

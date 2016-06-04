@@ -4,6 +4,11 @@ module.exports = function render() {
     return _.div({class: 'resource-editor'},
         _.div({class: 'body'},
             _.each(this.model, (i, item) => {
+                // Special cases
+                if(this.name == 'issueColumns' && (item == 'to do' || item == 'done')) {
+                    return;
+                }
+
                 return _.div({class: 'item'},
                     _.if(typeof item === 'string',
                         _.input({class: 'selectable', value: item, placeholder: 'Input name', type: 'text'})

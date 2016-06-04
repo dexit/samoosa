@@ -6,15 +6,6 @@ class ResourceEditor extends View {
 
         this.template = require('../templates/ResourceEditor');
 
-        // Special cases
-        if(this.name == 'issueColumns') {
-            for(let i = this.model.length - 1; i >= 0; i--) {
-                if(this.model[i] == 'to do' || this.model[i] == 'done') {
-                    this.model.splice(i, 1);
-                }
-            }
-        }
-
         this.fetch();
     }
 

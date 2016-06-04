@@ -105,12 +105,12 @@ class PlanEditor extends View {
         });
     }
 
-    getWeeks(year, month) {
+    getWeeks() {
         let weeks = [];
-        let firstDay = new Date(year, month, 1);
+        let firstDay = new Date(this.currentYear, this.currentMonth, 1);
         let firstWeek = firstDay.getWeek();
 
-        for(let date of this.getDates(year, month)) {
+        for(let date of this.getDates()) {
             if(weeks.indexOf(date.getWeek()) < 0) {
                 weeks.push(date.getWeek());
             }
@@ -119,7 +119,9 @@ class PlanEditor extends View {
         return weeks; 
     }
 
-    getDates(year, month, weekday) {
+    getDates() {
+        let year = this.currentYear;
+        let month = this.currentMonth;
         let dates = [];
 
         for(let i = 1; i <= new Date(year, month, 0).getDate(); i++) {
@@ -135,24 +137,44 @@ class PlanEditor extends View {
 
             let date = new Date(year + '-' + month + '-' + day).floor();
 
-            if(weekday || weekday == 0) {
-                // Moving sunday to the end of the week
-                let usDay = date.getDay() - 1;
-
-                if(usDay < 0) {
-                    usDay = 6;
-                }
-
-                if(usDay == weekday) {
-                    dates.push(date);
-                }
-
-            } else {
-                dates.push(date); 
-            }
+            dates.push(date); 
         }
 
         return dates; 
+    }
+
+    getDate(week, weekday) {
+        for(let date of this.getDates()) {
+            if(date.getWeek() == week && date.getISODay() == weekday) {
+                return date;
+            }
+        } 
+    }
+
+    iterateDates(renderFunction) {
+        let weekdays = this.getWeekDays();
+        let weeks = this.getWeeks();
+        
+        let renders = [];
+
+        for(let y = 0; y < 6; y++) {
+            for(let x = 0; x < 7; x++) {
+                let weekday = weekdays[x];
+                let week = weeks[y];
+                
+                if(week && weekday) {
+                    let date = this.getDate(week, x);
+
+                    renders.push(renderFunction(date));
+                
+                } else {
+                    renders.push(renderFunction());
+                
+                }   
+            }
+        }
+
+        return renders;
     }
 }
 

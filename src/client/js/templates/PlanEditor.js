@@ -16,52 +16,44 @@ module.exports = function render() {
                 ).click(() => { this.onClickMonth(month.number); });
             })
         ),
-        _.div({class: 'weekdays dates'},
-            _.each(this.getWeekDays(), (weekdayIndex, weekday) => {
-                return _.div({class: 'weekday'},
-                    _.div({class: 'header'},
-                        weekday  
-                    ),
-                    _.div({class: 'body'},
-                        _.each(this.getWeeks(this.currentYear, this.currentMonth), (weekIndex, week) => {
-                            let $date = _.div({class: 'date-placeholder'});
-                           
-                            for(let date of this.getDates(this.currentYear, this.currentMonth, weekdayIndex)) {
-                                if(date.getWeek() == week) {
-                                    $date = _.div({class: 'date', 'data-date': date},
-                                        _.div({class: 'header'},
-                                            _.span({class: 'datenumber'}, date.getDate()),
-                                            _.span({class: 'weeknumber'}, 'w ' + date.getWeek())
-                                        ),
-                                        _.div({class: 'body'},
-                                            _.each(window.resources.milestones, (i, milestone) => {
-                                                if(milestone.endDate) {
-                                                    let dueDate = new Date(milestone.endDate);
+        _.div({class: 'weekdays'},
+            _.each(this.getWeekDays(), (i, weekday) => {
+                return _.div({class: 'weekday'}, weekday)
+            }) 
+        ),
+        _.div({class: 'dates'},
+            this.iterateDates((date) => {
+                if(!date) {
+                    return _.div({class: 'date-placeholder'});
+                } else {
+                    return _.div({class: 'date', 'data-date': date},
+                        _.div({class: 'header'},
+                            _.span({class: 'datenumber'}, date.getDate()),
+                            _.span({class: 'weeknumber'}, 'w ' + date.getWeek())
+                        ),
+                        _.div({class: 'body'},
+                            _.each(window.resources.milestones, (i, milestone) => {
+                                if(milestone.endDate) {
+                                    let dueDate = new Date(milestone.endDate);
 
-                                                    dueDate.setHours(0);
-                                                    dueDate.setMinutes(0);
-                                                    dueDate.setSeconds(0);
+                                    dueDate.setHours(0);
+                                    dueDate.setMinutes(0);
+                                    dueDate.setSeconds(0);
 
-                                                    if(dueDate.valueOf() == date.valueOf()) {
-                                                        return new PlanItemEditor({
-                                                            model: milestone,
-                                                        }).$element;
-                                                    }
-                                                }
-                                            }),
-                                            _.button({class: 'btn-transparent'},
-                                                _.span({class: 'fa fa-plus'})
-                                            ).click(() => { this.onClickAddMilestone(date); })
-                                        )
-                                    );
+                                    if(dueDate.valueOf() == date.valueOf()) {
+                                        return new PlanItemEditor({
+                                            model: milestone,
+                                        }).$element;
+                                    }
                                 }
-                            }
-
-                            return $date;
-                        })
-                    )
-                );  
-            })
+                            }),
+                            _.button({class: 'btn-transparent'},
+                                _.span({class: 'fa fa-plus'})
+                            ).click(() => { this.onClickAddMilestone(date); })
+                        )
+                    );
+                } 
+            }) 
         ),
         _.if(this.getUndatedMilestones().length > 0,
             _.div({class: 'undated'},

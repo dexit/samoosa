@@ -20,6 +20,17 @@ Date.prototype.floor = function() {
     return this;
 };
 
+// Get ISO day
+Date.prototype.getISODay = function() {
+    let day = this.getDay() - 1;
+
+    if(day < 0) {
+        day = 6;
+    }   
+
+    return day;
+};
+
 // Date week number extension
 Date.prototype.getWeek = function() {
     var date = new Date(this.getTime());

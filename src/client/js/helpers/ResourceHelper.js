@@ -86,19 +86,16 @@ class ResourceHelper {
         });
     }
 
-    static updateResource(resource, item) {
+    static updateResource(resource, item, index, identifier) {
         return new Promise((callback) => {
-            ApiHelper.updateResource(resource, item)
+            ApiHelper.updateResource(resource, item, identifier)
             .then(() => {
-                if(item.index) {
-                    item.index = parseInt(item.index);
-
-                    resources[resource][item.index] = item;
-                } else {
-                    throw 'Item "' + (item.title || item.name) + '" for resource "' + resource + '" has no index!';
-
+                if(!index) {
+                    index = item.index || resources[resource].indexOf(item);
                 }
-                
+
+                resources[resource][index] = item;
+               
                 callback();
             });
         });
@@ -119,9 +116,13 @@ class ResourceHelper {
         return new Promise((callback) => {
             ApiHelper.addResource(resource, item)
             .then(() => {
-                item.index = resources[resource].length;
+                let index = resources[resource].length;
 
-                resources[resource][item.index] = item;
+                if(typeof item === 'object') {
+                    item.index = index;            
+                }
+
+                resources[resource][index] = item;
 
                 callback();
             });

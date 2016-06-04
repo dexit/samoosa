@@ -19,8 +19,6 @@ class ResourceEditor extends View {
     }
 
     onClickRemove(index) {
-        console.log(index);
-
         ResourceHelper.removeResource(this.name, index)
         .then(() => {
             this.render()
@@ -34,6 +32,15 @@ class ResourceEditor extends View {
                 this.render();
             });
         }
+    }
+
+    onChange(index, identifier) {
+        let value = this.$element.find('.item').eq(index).find('input').val();
+
+        ResourceHelper.updateResource(this.name, value, index, identifier)
+        .then(() => {
+            this.render();
+        });
     }
 }
 

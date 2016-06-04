@@ -701,6 +701,106 @@ class GitHubApi extends ApiHelper {
             });
         });
     }
+    
+    /**
+     * Updates issue type
+     *
+     * @param {String} type
+     * @param {String} previousName
+     *
+     * @returns {Promise} promise
+     */
+    updateIssueType(type, previousName) {
+        return new Promise((callback) => {
+            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/type:' + previousName, {
+                name: 'type:' + type,
+                color: 'ffffff'
+            })
+            .then(() => {
+                callback();
+            });
+        });
+    }
+    
+    /**
+     * Updates issue priority
+     *
+     * @param {String} priority
+     * @param {String} previousName
+     *
+     * @returns {Promise} promise
+     */
+    updateIssuePriority(priority, previousName) {
+        return new Promise((callback) => {
+            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/priority:' + previousName, {
+                name: 'priority:' + priority,
+                color: 'ffffff'
+            })
+            .then(() => {
+                callback();
+            });
+        });
+    }
+    
+    /**
+     * Updates issue estimate
+     *
+     * @param {String} estimate
+     * @param {String} previousName
+     *
+     * @returns {Promise} promise
+     */
+    updateIssueEstimate(estimate, previousName) {
+        return new Promise((callback) => {
+            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/estimate:' + previousName, {
+                name: 'estimate:' + estimate,
+                color: 'ffffff'
+            })
+            .then(() => {
+                callback();
+            });
+        });
+    }
+    
+    /**
+     * Updates issue column
+     *
+     * @param {String} column
+     * @param {String} previousName
+     *
+     * @returns {Promise} promise
+     */
+    updateIssueColumn(column, previousName) {
+        return new Promise((callback) => {
+            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/column:' + previousName, {
+                name: 'column:' + column,
+                color: 'ffffff'
+            })
+            .then(() => {
+                callback();
+            });
+        });
+    }
+    
+    /**
+     * Updates version
+     *
+     * @param {String} version
+     * @param {String} previousName
+     *
+     * @returns {Promise} promise
+     */
+    updateVersion(version, previousName) {
+        return new Promise((callback) => {
+            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/version:' + previousName, {
+                name: 'version:' + version,
+                color: 'ffffff'
+            })
+            .then(() => {
+                callback();
+            });
+        });
+    }
 
     // ----------
     // Resource processing methods

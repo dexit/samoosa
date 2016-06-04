@@ -17,6 +17,7 @@ class IssueEditor extends View {
         $('.issue-editor .multi-edit-toggle').each(function() {
             this.checked = false;
         });
+        $('.board-container').toggleClass('multi-edit', false);
     }
 
     /**
@@ -40,6 +41,8 @@ class IssueEditor extends View {
             $('.issue-editor .multi-edit-toggle').each(function() {
                 this.checked = false;
             }); 
+            
+            $('.board-container').toggleClass('multi-edit', !wasExpanded);
 
         } else {
             if(!wasExpanded) {
@@ -50,6 +53,8 @@ class IssueEditor extends View {
 
     /**
      * Gets an IMG tag with the avatar of the assigned collaborator
+     *
+     * @returns {Object} img
      */
     getAssigneeAvatar() {
         let assignee = window.resources.collaborators[this.model.assignee];
@@ -168,7 +173,7 @@ class IssueEditor extends View {
             if(this.usingMultiEdit()) {
                 $element = $('.issue-editor.selected');
             } else {
-                IssueEditor.cancelMultiSelect();
+                //IssueEditor.cancelMultiSelect();
             }
 
             // Apply temporary CSS properties
@@ -179,7 +184,8 @@ class IssueEditor extends View {
                     width: this.$element.outerWidth(),
                     height: this.$element.outerHeight(),
                     'pointer-events': 'none',
-                    'z-index': 999
+                    'z-index': 999,
+                    'margin-top': (i * 15) + 'px'
                 });
             });
             
@@ -301,11 +307,18 @@ class IssueEditor extends View {
      * Event: Fires on every change to a property
      */
     onChange() {
-        // Only update values is we're not using multi edit
+        // Only update values if we're not using multi edit
         if(!this.usingMultiEdit()) {
             this.updateModel();
             this.updateDOM();
             this.sync();
+        
+            for(let milestoneEditor of ViewHelper.getAll('MilestoneEditor')) {
+                if(milestoneEditor.model.index == this.model.milestone) {
+                    milestoneEditor.updateProgress();
+                    break;
+                }
+            }
         }
     }
    
@@ -413,7 +426,17 @@ class IssueEditor extends View {
             if(this.$element.hasClass('selected')) {
                 this.$element.toggleClass('expanded', false);
             }
+
+        // If not trying to edit the title, allow select of one issue
+        } else {
+            if($(e.target).parents('.btn-edit').length < 1) {
+                $('.issue-editor.selected').removeClass('selected');
+                this.$element.toggleClass('selected', true);
+            }
+
         }
+
+        this.$element.toggleClass('expanded', false);
     }
 
     /**
@@ -473,7 +496,7 @@ class IssueEditor extends View {
                                 _.div({class: 'btn-edit'},
                                     text
                                 ).click(this.onClickEdit),
-                                _.textarea({class: 'edit hidden text btn-transparent'},
+                                _.textarea({class: 'edit selectable hidden text btn-transparent'},
                                     comment.text
                                 ).change(() => {
                                     this.$element.toggleClass('loading', true);

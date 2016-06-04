@@ -29,7 +29,7 @@ module.exports = function render() {
                     })
                     .blur(this.onBlur)
             )
-        ),
+        ).click((e) => { this.onClickElement(e); }),
         _.div({class: 'meta'},
             _.div({class: 'multi-edit-notification'},
                 'Now editing multiple issues'
@@ -113,5 +113,5 @@ module.exports = function render() {
                 'Comment'
             ).click(() => { this.onClickComment(); })
         )
-    ).click((e) => { this.onClickElement(e); });
+    );
 };

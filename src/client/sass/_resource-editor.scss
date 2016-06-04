@@ -4,11 +4,35 @@
     max-width: 300px;
     height: 100%;
 
+    input, button {
+        line-height: 30px;
+        height: 30px;
+        border: 1px solid material-color('grey', '300');
+    }
+
+    label {
+        line-height: 30px;
+        height: 30px;
+    }
+
+    input {
+        padding: 0px 10px;
+    }
+
     .body {
         overflow-y: auto;
 
         .item {
+            display: flex;
+            margin-bottom: 10px;
+
+            input, label {
+                flex-grow: 1;
+            }
+
             button {
+                flex-shrink: 0;
+                width: 30px;
                 border: 0px;
                 background-color: transparent;
                 color: material-color('red', '600');
@@ -18,12 +42,6 @@
 
     .footer {
         display: flex;
-
-        input, button {
-            line-height: 30px;
-            height: 30px;
-            border: 1px solid material-color('grey', '300');
-        }
 
         input {
             flex-grow: 1;

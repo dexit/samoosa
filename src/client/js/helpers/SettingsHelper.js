@@ -48,10 +48,31 @@ class SettingsHelper {
      * @returns {Boolean} isValid
      */
     static check() {
-        if(!SettingsHelper.get('projects','current')) {
+        // If for some reason no project is specified, return to the projects panel
+        if(!SettingsHelper.get('projects','current') && !Router.params.project) {
             location.hash = '/projects/';
             return false;
         }
+
+        // Set current view to preferred
+        SettingsHelper.set(
+            'view',
+            'default',
+            location.hash
+                .replace('/' + Router.params.project, '')
+                .replace('#', '')
+        );
+
+        // Clear resource cache if needed
+        if(SettingsHelper.get('projects', 'current') != Router.params.project) {
+            resources = {};
+        }
+
+        // Set current project setting
+        SettingsHelper.set('projects', 'current', Router.params.project);
+        
+        // Set head title tag
+        $('head title').html(Router.params.project + ' - Mondai');
 
         return true;
     }

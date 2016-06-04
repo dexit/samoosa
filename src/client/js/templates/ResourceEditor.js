@@ -5,7 +5,13 @@ module.exports = function render() {
         _.div({class: 'body'},
             _.each(this.model, (i, item) => {
                 return _.div({class: 'item'},
-                    _.label(item.name || item.title || item),
+                    _.if(typeof item === 'string',
+                        _.input({class: 'selectable', value: item, placeholder: 'Input name', type: 'text'})
+                            .change(() => { this.onChange(i, item); })
+                    ),
+                    _.if(typeof item !== 'string',
+                        _.label(item.title || item.name)
+                    ),
                     _.button(
                         _.span({class: 'fa fa-remove'})
                     ).click(() => { this.onClickRemove(i); })

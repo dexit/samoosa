@@ -1,41 +1,112 @@
 .navbar {
     width: 70px;
     margin: 0px;
-    background-color: material-color('grey', '900');
     border-radius: 0px;
     border: 0px;
+    background-color: material-color('grey', '900');
+
+    &.out {
+        .obscure {
+            width: 100%;
+            transition-delay: 0.05s;
+
+            .content {
+                opacity: 1;
+            }
+        }
+
+        .buttons {
+            button {
+                &:before, .fa {
+                    transition-delay: 0s;
+                }
+            }
+        }
+    }
+
+    &:not(.out) {
+        .buttons {
+            button {
+                &.active {
+                    .fa {
+                        color: material-color('grey', '900');
+                    }
+                    
+                    &:before {
+                        width: 100%;
+                    }
+                }
+            }
+        }
+    }
+
+    .obscure {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        width: 0px;
+        height: 100%;
+        background-color: material-color('grey', '900');
+        transition: width 0.25s ease;
+        transition-delay: 0s;
+        z-index: 1000;
+
+        >.content {
+            position: absolute;
+            height: 100%;
+            top: 0px;
+            left: 70px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            width: calc(100% - 70px);
+            overflow-y: auto;
+        }
+    }
 
     .buttons {
         position: fixed;
         height: 100%;
+        z-index: 10001;
 
-        a {
+        button {
+            border: 0px;
+            padding: 0px;
             margin-top: 5px;
             display: block;
             width: 60px;
+            height: 60px;
             margin-left: 10px;
             text-align: center;
+            position: relative;
+            background-color: transparent;
+
+            &:before {
+                background-color: #fff;
+                transition: width 0.05s ease;
+                transition-delay: 0.2s;
+                display: block;
+                border-top-left-radius: 2px;
+                border-bottom-left-radius: 2px;
+                position: absolute;
+                top: 0px;
+                right: 0px;
+                width: 0%;
+                height: 100%;
+                content: '';
+                z-index: -1;
+            }
 
             &.bottom {
                 position: absolute;
                 bottom: 5px;
             }
 
-            &.active {
-                background-color: #fff;
-                border-top-left-radius: 2px;
-                border-bottom-left-radius: 2px;
-                box-shadow: -5px 0px 5px -5px rgba(0, 0, 0, 0.5), 0px -5px 5px -5px rgba(0, 0, 0, 0.5), 0px 5px 5px -5px rgba(0, 0, 0, 0.5);
-                
-                .fa {
-                    color: material-color('grey', '900');
-                }
-            }
-
             .fa {
                 color: material-color('grey', '200');
                 line-height: 60px;
                 font-size: 24px;
+                transition: color 0.25s ease;
+                transition-delay: 0.2s;
             }
         }
     }    

@@ -3,7 +3,7 @@
 // Libs
 require('exomon');
 window.Promise = require('bluebird');
-window.markdownToHtml = require('marked');
+window.marked = require('marked');
 
 // Helpers
 window.ResourceHelper = require('./helpers/ResourceHelper');
@@ -30,3 +30,8 @@ require('./globals');
 
 // Routes
 require('./routes');
+
+// Title
+let currentProject = SettingsHelper.get('projects', 'current');
+
+$('head title').html((currentProject ? currentProject +  ' - ' : '') + 'Mondai');

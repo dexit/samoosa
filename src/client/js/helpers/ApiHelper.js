@@ -628,31 +628,29 @@ class ApiHelper {
      *
      * @param {String} resource
      * @param {Object} item
+     * @param {String} identifier
      *
      * @returns {Promise} promise
      */
-    updateResource(resource, item) {
+    updateResource(resource, item, identifier) {
         switch(resource) {
-            case 'collaborators':
-                return this.updateCollaborator(item);
-
             case 'issueTypes':
-                return this.updateIssueType(item);
+                return this.updateIssueType(item, identifier);
 
             case 'issuePriorities':
-                return this.updateIssuePriority(item);
+                return this.updateIssuePriority(item, identifier);
 
             case 'issueEstimates':
-                return this.updateIssueEstimate(item);
+                return this.updateIssueEstimate(item, identifier);
 
             case 'issueColumns':
-                return this.updateIssueColumn(item);
+                return this.updateIssueColumn(item, identifier);
+
+            case 'versions':
+                return this.updateVersion(item, identifier);
 
             case 'milestones':
                 return this.updateMilestone(item);
-
-            case 'versions':
-                return this.updateVersion(item);
 
             case 'issues':
                 return this.updateIssue(item);

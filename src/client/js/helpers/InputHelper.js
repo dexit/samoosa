@@ -38,8 +38,15 @@ class InputHelper {
 
         // Register mousedown event
         $(document).mousedown((e) => {
-           
-           InputHelper.poke(); 
+            let $target = $(e.target);
+
+            // Handle multi-select cancel event
+            if($target.parents('.issue-editor').length < 1 && !$target.hasClass('issue-editor')) {
+                IssueEditor.cancelMultiSelect();
+            }
+
+            // Reset the idle timer
+            InputHelper.poke(); 
         });
 
         // Register idle timer

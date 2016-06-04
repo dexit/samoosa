@@ -73,59 +73,75 @@
             }
         }
 
-        .dates {
+        .weekdays {
             position: absolute;
             top: 70px;
             left: 0px;
             height: calc(100% - 70px);
             width: 100%;
+            display: flex;
             
-            * {
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                user-select: none;
-            }
+            .weekday {
+                flex-grow: 1;
+                flex-basis: 0;
 
-            .date {
-                display: block;
-                float: left;
-                width: calc(100% / 7);
-                height: calc(100% / 5);
-                border-right: 1px solid material-color('grey', '300');
-                border-bottom: 1px solid material-color('grey', '300');
-
-                &.hovering {
-                    outline: 2px solid material-color('green', '300');
-                    background-color: 2px solid material-color('green', '100');
+                >.header {
+                    height: 30px;
+                    text-align: center;
+                    line-height: 30px;
+                    border-bottom: 1px solid material-color('grey', '300');
                 }
 
-                .header {
-                    padding: 5px;
+                >.body {
+                    height: calc(100% - 30px);
 
-                    .datenumber {
-                        font-weight: bold;
+                    .date-placeholder {
+                        display: block;
+                        height: calc(100% / 6);
+                        border-right: 1px solid material-color('grey', '300');
+                        border-bottom: 1px solid material-color('grey', '300');
                     }
 
-                    .weekday {
-                        color: material-color('grey', '400');
-                        font-weight: bold;
-                        margin-left: 5px;
-                    }
+                    .date {
+                        display: block;
+                        height: calc(100% / 6);
+                        border-right: 1px solid material-color('grey', '300');
+                        border-bottom: 1px solid material-color('grey', '300');
 
-                    .weeknumber {
-                        color: material-color('grey', '400');
-                        float: right;
+                        &.hovering {
+                            outline: 2px solid material-color('green', '300');
+                            background-color: 2px solid material-color('green', '100');
+                        }
+
+                        .header {
+                            padding: 5px;
+
+                            .datenumber {
+                                font-weight: bold;
+                            }
+
+                            .weekday {
+                                color: material-color('grey', '400');
+                                font-weight: bold;
+                                margin-left: 5px;
+                            }
+
+                            .weeknumber {
+                                color: material-color('grey', '400');
+                                float: right;
+                            }
+                        }
+
+                        .body {
+                            >button {
+                                float: right;
+                                line-height: 30px;
+                                width: 30px;
+                                text-align: center;
+                            }    
+                        } 
                     }
                 }
-
-                .body {
-                    >button {
-                        float: right;
-                        line-height: 30px;
-                        width: 30px;
-                        text-align: center;
-                    }    
-                } 
             }
         }
     }

@@ -580,42 +580,52 @@ body, html {
         .plan-container .plan-editor .months button.active {
           color: #424242;
           background-color: #fff; }
-    .plan-container .plan-editor .dates {
+    .plan-container .plan-editor .weekdays {
       position: absolute;
       top: 70px;
       left: 0px;
       height: calc(100% - 70px);
-      width: 100%; }
-      .plan-container .plan-editor .dates * {
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none; }
-      .plan-container .plan-editor .dates .date {
-        display: block;
-        float: left;
-        width: calc(100% / 7);
-        height: calc(100% / 5);
-        border-right: 1px solid #e0e0e0;
-        border-bottom: 1px solid #e0e0e0; }
-        .plan-container .plan-editor .dates .date.hovering {
-          outline: 2px solid #81c784;
-          background-color: 2px solid #c8e6c9; }
-        .plan-container .plan-editor .dates .date .header {
-          padding: 5px; }
-          .plan-container .plan-editor .dates .date .header .datenumber {
-            font-weight: bold; }
-          .plan-container .plan-editor .dates .date .header .weekday {
-            color: #bdbdbd;
-            font-weight: bold;
-            margin-left: 5px; }
-          .plan-container .plan-editor .dates .date .header .weeknumber {
-            color: #bdbdbd;
-            float: right; }
-        .plan-container .plan-editor .dates .date .body > button {
-          float: right;
+      width: 100%;
+      display: flex; }
+      .plan-container .plan-editor .weekdays .weekday {
+        flex-grow: 1;
+        flex-basis: 0; }
+        .plan-container .plan-editor .weekdays .weekday > .header {
+          height: 30px;
+          text-align: center;
           line-height: 30px;
-          width: 30px;
-          text-align: center; }
+          border-bottom: 1px solid #e0e0e0; }
+        .plan-container .plan-editor .weekdays .weekday > .body {
+          height: calc(100% - 30px); }
+          .plan-container .plan-editor .weekdays .weekday > .body .date-placeholder {
+            display: block;
+            height: calc(100% / 6);
+            border-right: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0; }
+          .plan-container .plan-editor .weekdays .weekday > .body .date {
+            display: block;
+            height: calc(100% / 6);
+            border-right: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0; }
+            .plan-container .plan-editor .weekdays .weekday > .body .date.hovering {
+              outline: 2px solid #81c784;
+              background-color: 2px solid #c8e6c9; }
+            .plan-container .plan-editor .weekdays .weekday > .body .date .header {
+              padding: 5px; }
+              .plan-container .plan-editor .weekdays .weekday > .body .date .header .datenumber {
+                font-weight: bold; }
+              .plan-container .plan-editor .weekdays .weekday > .body .date .header .weekday {
+                color: #bdbdbd;
+                font-weight: bold;
+                margin-left: 5px; }
+              .plan-container .plan-editor .weekdays .weekday > .body .date .header .weeknumber {
+                color: #bdbdbd;
+                float: right; }
+            .plan-container .plan-editor .weekdays .weekday > .body .date .body > button {
+              float: right;
+              line-height: 30px;
+              width: 30px;
+              text-align: center; }
 
 body > .plan-item-editor {
   border: 1px solid #9e9e9e;

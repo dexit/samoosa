@@ -77,6 +77,20 @@ class PlanEditor extends View {
         return months;
     }
 
+    getWeekDays() {
+        let weekdays = [
+            'monday',
+            'tuesday',
+            'wednesday',
+            'thursday',
+            'friday',
+            'saturday',
+            'sunday'
+        ];
+
+        return weekdays;
+    }
+
     onClickAddMilestone(date) {
         spinner(true);
 
@@ -91,7 +105,21 @@ class PlanEditor extends View {
         });
     }
 
-    getDates(year, month) {
+    getWeeks(year, month) {
+        let weeks = [];
+        let firstDay = new Date(year, month, 1);
+        let firstWeek = firstDay.getWeek();
+
+        for(let date of this.getDates(year, month)) {
+            if(weeks.indexOf(date.getWeek()) < 0) {
+                weeks.push(date.getWeek());
+            }
+        }
+
+        return weeks; 
+    }
+
+    getDates(year, month, weekday) {
         let dates = [];
 
         for(let i = 1; i <= new Date(year, month, 0).getDate(); i++) {
@@ -107,7 +135,21 @@ class PlanEditor extends View {
 
             let date = new Date(year + '-' + month + '-' + day).floor();
 
-            dates.push(date); 
+            if(weekday || weekday == 0) {
+                // Moving sunday to the end of the week
+                let usDay = date.getDay() - 1;
+
+                if(usDay < 0) {
+                    usDay = 6;
+                }
+
+                if(usDay == weekday) {
+                    dates.push(date);
+                }
+
+            } else {
+                dates.push(date); 
+            }
         }
 
         return dates; 

@@ -1087,7 +1087,8 @@ setInterval(function(){_this44.incrementIdleTimer();},1000);} /**
      * @param {String} type
      * @param {String} key
      * @param {String} value
-     */value:function set(type,key,value){localStorage.setItem('settings:'+type+':'+key,value);} /**
+     */value:function set(type,key,value){var prefix='settings'; // Exceptions for types not managed on a project basis
+if(type!='projects'){prefix=localStorage.getItem('settings:projects:current')+prefix+':';}localStorage.setItem(prefix+':'+type+':'+key,value);} /**
      * Get value
      *
      * @param {String} type
@@ -1095,7 +1096,8 @@ setInterval(function(){_this44.incrementIdleTimer();},1000);} /**
      * @param {String} defaultValue
      *
      * @returns {String} value
-     */},{key:"get",value:function get(type,key,defaultValue){var result=localStorage.getItem('settings:'+type+':'+key);if(result==='null'||result===null||result===undefined||result==='undefined'||typeof result==='undefined'){SettingsHelper.set(type,key,defaultValue);result=defaultValue||false;}return result;} /**
+     */},{key:"get",value:function get(type,key,defaultValue){var prefix='settings'; // Exceptions for types not managed on a project basis
+if(type!='projects'){prefix=localStorage.getItem('settings:projects:current')+prefix+':';}var result=localStorage.getItem(prefix+':'+type+':'+key);if(result==='null'||result===null||result===undefined||result==='undefined'||typeof result==='undefined'){SettingsHelper.set(type,key,defaultValue);result=defaultValue||false;}return result;} /**
      * Sanity check
      *
      * @returns {Boolean} isValid
@@ -1110,7 +1112,7 @@ $('head title').html(Router.params.project+' - Mondai');return true;}}]);return 
      * Create a new issue and push it to the remote source
      */value:function create(properties){return new Promise(function(callback){var issue=new Issue(properties);ResourceHelper.addResource('issues',issue).then(function(){callback(issue);});});}}]);function Issue(properties){_classCallCheck(this,Issue);properties=properties||{}; // Essential properties
 this.title=properties.title||'New issue';this.description=properties.description||''; // Optional params
-this.column=properties.column||0;this.type=properties.type||0;this.priority=properties.priority||0;this.estimate=properties.estimate||0;this.version=properties.version||0;this.milestone=properties.milestone||0;this.comments=properties.comments||[];this.assignee=properties.assignee;} /**
+this.column=properties.column||0;this.type=properties.type||0;this.priority=properties.priority||0;this.estimate=properties.estimate||0;this.version=properties.version;this.milestone=properties.milestone;this.comments=properties.comments||[];this.assignee=properties.assignee;} /**
      * Check if issue is closed
      *
      * @returns {Boolean} closed

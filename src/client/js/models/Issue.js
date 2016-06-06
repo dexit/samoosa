@@ -30,8 +30,8 @@ class Issue {
         this.type = properties.type || 0;
         this.priority = properties.priority || 0;
         this.estimate = properties.estimate || 0;
-        this.version = properties.version || 0;
-        this.milestone = properties.milestone || 0;
+        this.version = properties.version;
+        this.milestone = properties.milestone;
         this.comments = properties.comments || [];
         this.assignee = properties.assignee;
     }

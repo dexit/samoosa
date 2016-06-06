@@ -12,7 +12,14 @@ class SettingsHelper {
      * @param {String} value
      */
     static set(type, key, value) {
-        localStorage.setItem('settings:' + type + ':' + key, value);
+        let prefix = 'settings';
+
+        // Exceptions for types not managed on a project basis
+        if(type != 'projects') { 
+            prefix = localStorage.getItem('settings:projects:current') + prefix + ':';
+        }
+
+        localStorage.setItem(prefix + ':' + type + ':' + key, value);
     }
     
     /**
@@ -25,7 +32,14 @@ class SettingsHelper {
      * @returns {String} value
      */
     static get(type, key, defaultValue) {
-        let result = localStorage.getItem('settings:' + type + ':' + key);
+        let prefix = 'settings';
+
+        // Exceptions for types not managed on a project basis
+        if(type != 'projects') { 
+            prefix = localStorage.getItem('settings:projects:current') + prefix + ':';
+        }
+
+        let result = localStorage.getItem(prefix + ':' + type + ':' + key);
 
         if(
             result === 'null' ||

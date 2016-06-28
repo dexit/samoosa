@@ -384,7 +384,7 @@ body, html {
       .milestone-editor .columns .column > .header h4 {
         margin: 0px; }
 
-.board-container.list .milestone-editor > .header h4 {
+.board-container.list .milestone-editor > .header .btn-toggle {
   width: 900px;
   margin: 0px auto; }
 

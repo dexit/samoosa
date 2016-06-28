@@ -95,6 +95,25 @@ window.prettyName = function(name) {
     return prettyName;
 };
 
+// Pretty date
+window.prettyDate = function(date, separator) {
+    let prettyDate = '';
+
+    if(date) {
+        if(date.constructor === String) {
+            date = new Date(date);
+        }
+
+        date.floor();
+
+        separator = separator || '.';
+
+        prettyDate = date.getFullYear() + separator + (date.getMonth() + 1) + separator + date.getDate();
+    }
+
+    return prettyDate;
+}
+
 // Spinner
 window.spinner = function(active) {
     $('.spinner-backdrop').remove();

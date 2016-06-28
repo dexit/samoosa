@@ -282,10 +282,10 @@ body, html {
     .issue-editor .add-comment button {
       margin-top: 15px; }
 
-.milestone-editor.collapsed > .header .title .fa.fa-chevron-down {
+.milestone-editor.collapsed > .header .title .btn-toggle .fa.fa-chevron-down {
   display: none; }
 
-.milestone-editor.collapsed > .header .title .fa.fa-chevron-right {
+.milestone-editor.collapsed > .header .title .btn-toggle .fa.fa-chevron-right {
   display: inline-block; }
 
 .milestone-editor.collapsed .columns {
@@ -297,13 +297,27 @@ body, html {
   position: relative; }
   .milestone-editor > .header .title {
     margin: 0px; }
-    .milestone-editor > .header .title .fa {
-      width: 30px;
-      text-align: center; }
-      .milestone-editor > .header .title .fa.fa-chevron-down {
-        display: inline-block; }
-      .milestone-editor > .header .title .fa.fa-chevron-right {
-        display: none; }
+    .milestone-editor > .header .title .btn-toggle {
+      padding: 0px 0px 0px 30px;
+      display: block;
+      text-align: left;
+      position: relative;
+      width: 100%; }
+      .milestone-editor > .header .title .btn-toggle h4 {
+        margin-top: 0px; }
+      .milestone-editor > .header .title .btn-toggle p {
+        margin-bottom: 0px; }
+      .milestone-editor > .header .title .btn-toggle .fa {
+        width: 20px;
+        text-align: center;
+        position: absolute;
+        left: 0px;
+        top: 50%;
+        transform: translateY(-50%); }
+        .milestone-editor > .header .title .btn-toggle .fa.fa-chevron-down {
+          display: inline-block; }
+        .milestone-editor > .header .title .btn-toggle .fa.fa-chevron-right {
+          display: none; }
   .milestone-editor > .header .stats {
     position: absolute;
     top: 50%;
@@ -326,7 +340,14 @@ body, html {
       .milestone-editor > .header .stats > span .remaining {
         border-left: 1px solid #e0e0e0;
         padding-left: 5px;
-        margin-left: 5px; }
+        margin-left: 5px;
+        margin-right: 0px; }
+        .milestone-editor > .header .stats > span .remaining.warn-red {
+          color: #f44336; }
+        .milestone-editor > .header .stats > span .remaining.warn-yellow {
+          color: #ffeb3b; }
+        .milestone-editor > .header .stats > span .remaining.ok {
+          color: #4caf50; }
       .milestone-editor > .header .stats > span .remaining, .milestone-editor > .header .stats > span .total {
         font-weight: bold; }
   .milestone-editor > .header .progress-bar {
@@ -347,11 +368,6 @@ body, html {
       margin-right: 15px; }
       .milestone-editor > .header .toolbar > span:last-child, .milestone-editor > .header .toolbar > button:last-child {
         margin-right: 0px; }
-  .milestone-editor > .header .btn-toggle {
-    padding: 0px;
-    display: block;
-    width: 100%;
-    text-align: left; }
 
 .milestone-editor .columns {
   display: flex; }
@@ -567,6 +583,9 @@ body, html {
       background-color: #424242; }
       .plan-container .plan-editor .years button {
         color: #bdbdbd; }
+        .plan-container .plan-editor .years button.hovering {
+          outline: 2px solid #81c784;
+          background-color: 2px solid #c8e6c9; }
         .plan-container .plan-editor .years button.active {
           color: #e0e0e0;
           background-color: #616161; }
@@ -577,6 +596,9 @@ body, html {
       background-color: #616161; }
       .plan-container .plan-editor .months button {
         color: #e0e0e0; }
+        .plan-container .plan-editor .months button.hovering {
+          outline: 2px solid #81c784;
+          background-color: 2px solid #c8e6c9; }
         .plan-container .plan-editor .months button.active {
           color: #424242;
           background-color: #fff; }
@@ -593,7 +615,8 @@ body, html {
         height: 30px;
         text-align: center;
         line-height: 30px;
-        border-bottom: 1px solid #e0e0e0; }
+        border-bottom: 1px solid #e0e0e0;
+        text-transform: capitalize; }
     .plan-container .plan-editor .dates {
       height: calc(100% - 100px);
       position: absolute;

@@ -58,6 +58,54 @@ class MilestoneEditor extends View {
     }
 
     /**
+     * Gets remaining days
+     *
+     * @returns {Number} days
+     */
+    getRemainingDays() {
+        let endDate = this.model.endDate;
+        let nowDate = new Date();
+
+        if(!endDate) {
+            return 0;
+        }
+
+        if(endDate.constructor === String) {
+            endDate = new Date(endDate);
+        }
+
+        return Math.round((endDate-nowDate)/(1000*60*60*24)) + 1;
+    }
+
+    /**
+     * Get percent complete
+     *
+     * @returns {Number} percent
+     */
+    getPercentComplete() {
+        let total = this.getIssues();
+        let completed = this.getCompletedIssues();
+        let percentage = 0;
+
+        let totalHours = 0;
+        let completedHours = 0;
+
+        for(let issue of total) {
+             totalHours += issue.getEstimatedHours();
+        }
+        
+        for(let issue of completed) {
+             completedHours += issue.getEstimatedHours();
+        }
+
+        if(total.length > 0 && completed.length > 0) {
+            percentage = (completed.length / total.length) * 100;
+        }
+
+        return percentage;
+    }
+
+    /**
      * Update progress indicators
      */
     updateProgress() {

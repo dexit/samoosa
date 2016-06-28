@@ -137,10 +137,10 @@ class PlanItemEditor extends View {
         this.$element.find('button, input').removeAttr('style');
         
         // Find new target element
-        let $target = $('.plan-editor .dates .date.hovering .body').first();
-        
-        // Unregister column mouse events and unset hovering state
-        $('.plan-editor .dates .date')
+        let $target = $('.hovering').first();
+       
+        // Unregister hover mouse events and unset hovering state
+        $('.plan-editor .dates .date, .tab.year, .tab.month')
             .off('mouseenter')
             .off('mouseleave').
             toggleClass('hovering', false);
@@ -150,11 +150,51 @@ class PlanItemEditor extends View {
             this.openDialog();
 
         } else if($target.length > 0) {
-            // Place this element into the hovered date container
-            $target.prepend(this.$element);
+            // If the element was dropped onto a date
+            if($target.hasClass('date')) {
+                // Place this element into the hovered date container
+                $target.find('.body').prepend(this.$element);
+                
+                // Trigger the change event
+                this.onChange();
             
-            // Trigger the change event
-            this.onChange();
+            // Special logic for tabs
+            } else {
+                let endDate = this.model.endDate;
+
+                // Init a date from the current tabs if no date is present
+                if(!endDate) {
+                    endDate = new Date('1 ' + $('.tab.month.active').text() + ' ' + $('.tab.year.active').text());
+               
+                // Make sure the date is not a string 
+                } else if(endDate.constructor === String) {
+                    endDate = new Date(this.model.endDate);
+
+                }
+
+                // If the element was dropped onto a month tab
+                if($target.hasClass('month')) {
+                    endDate = new Date('1 ' + $target.text() + ' ' + endDate.getFullYear());
+
+                // If the element was dropped onto a year tab
+                } else if($target.hasClass('year')) {
+                    endDate = new Date('1 ' + $('.tab.month.active').text() + ' ' + $target.text());
+
+                }
+               
+                // Convert date to ISO string
+                this.model.endDate = endDate.floor().toISOString();
+
+                // Hide element
+                this.$element.hide();
+                
+                ResourceHelper.updateResource('milestones', this.model)
+                .then(() => {
+                    // Follow the tab destination
+                    $target.click();
+                }); 
+
+            }
         
             // Update the undated box
             ViewHelper.get('PlanEditor').updateUndatedBox();
@@ -214,7 +254,7 @@ class PlanItemEditor extends View {
         };
 
         // Date mouse hover events
-        $('.plan-editor .dates .date')
+        $('.plan-editor .dates .date, .tab.year, .tab.month')
             .on('mouseenter', function() {
                 $(this).toggleClass('hovering', true);
             })

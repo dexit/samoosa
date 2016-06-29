@@ -10,13 +10,18 @@ class SettingsHelper {
      * @param {String} type
      * @param {String} key
      * @param {String} value
+     * @param {Boolean} stringify
      */
-    static set(type, key, value) {
+    static set(type, key, value, stringify) {
         let prefix = 'settings';
 
         // Exceptions for types not managed on a project basis
         if(type != 'projects') { 
             prefix = localStorage.getItem('settings:projects:current') + prefix + ':';
+        }
+
+        if(stringify) {
+            value = JSON.stringify(value);
         }
 
         localStorage.setItem(prefix + ':' + type + ':' + key, value);
@@ -28,10 +33,11 @@ class SettingsHelper {
      * @param {String} type
      * @param {String} key
      * @param {String} defaultValue
+     * @param {Boolean} parse
      *
      * @returns {String} value
      */
-    static get(type, key, defaultValue) {
+    static get(type, key, defaultValue, parse) {
         let prefix = 'settings';
 
         // Exceptions for types not managed on a project basis
@@ -48,11 +54,15 @@ class SettingsHelper {
             result === 'undefined' ||
             typeof result === 'undefined'
         ) {
-            SettingsHelper.set(type, key, defaultValue);
+            SettingsHelper.set(type, key, defaultValue, parse);
 
             result = defaultValue || false;
         }
         
+        if(parse) {
+            result = JSON.parse(result);
+        }
+
         return result;
     }
 

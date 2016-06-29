@@ -83,6 +83,7 @@ Router.route('/:project/board/', () => {
 
             $('.app-container').append(
                 _.div({class: 'workspace board-container'},
+                    new FilterEditor().$element,
                     _.each(window.resources.milestones, (i, milestone) => {
                         return new MilestoneEditor({
                             model: milestone,
@@ -115,6 +116,7 @@ Router.route('/:project/list/', () => {
 
             $('.app-container').append(
                 _.div({class: 'workspace board-container list'},
+                    new FilterEditor().$element,
                     _.each(window.resources.milestones, (i, milestone) => {
                         return new MilestoneEditor({
                             model: milestone,

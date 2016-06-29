@@ -26,11 +26,9 @@ class MilestoneEditor extends View {
                 model: issue
             }); 
 
-            console.log(issue);
-
             let $issue = editor.$element;
 
-            $('.milestone-editor[data-index="' + issue.milestone + '"] .column[data-index="' + issue.column + '"]').append($issue);
+            $('.milestone-editor[data-index="' + issue.milestone + '"] .column[data-index="' + issue.column + '"] .btn-new-issue').before($issue);
            
             $issue.find('.header .btn-edit').click();
 

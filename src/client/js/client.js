@@ -24,6 +24,7 @@ window.ResourceEditor = require('./views/ResourceEditor');
 window.PlanItemEditor = require('./views/PlanItemEditor');
 window.PlanEditor = require('./views/PlanEditor');
 window.ProjectEditor = require('./views/ProjectEditor');
+window.FilterEditor = require('./views/FilterEditor');
 
 // Globals
 require('./globals');

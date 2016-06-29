@@ -38,6 +38,8 @@
 
                 h4 {
                     margin-top: 0px;
+                    margin-bottom: 0px;
+                    font-weight: bold;
                 }
 
                 p {
@@ -66,8 +68,8 @@
         .stats {
             position: absolute;
             top: 50%;
-            right: 15px;
             transform: translateY(-50%);
+            right: 15px;
 
             .fa {
                 margin-right: 5px;
@@ -124,20 +126,6 @@
             box-shadow: none;
         }
 
-        .toolbar {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-
-            >span, >button {
-                margin-right: 15px;
-
-                &:last-child {
-                    margin-right: 0px;
-                }
-            }
-        }
     }
 
     .columns {
@@ -149,6 +137,13 @@
             border-right: 1px solid material-color('grey', '400');
             border-bottom: 1px solid material-color('grey', '400');
             padding: 15px;
+            
+            .btn-new-issue {
+                border: 0px;
+                background-color: transparent;
+                padding: 10px 10px 10px 0px;
+                text-align: left;
+            }
 
             &:last-child {
                 border-right: 0px;
@@ -169,6 +164,9 @@
     &.list {
         .milestone-editor {
             >.header {
+                border-top: 1px solid material-color('grey', '400');
+                border-bottom: none;
+                
                 .btn-toggle {
                     width: 900px;
                     margin: 0px auto;
@@ -181,28 +179,38 @@
                     }
                 }
 
-                .stats {
+                .stats, .toolbar {
                     right: calc(50% - 450px);
                 }   
             }
 
             &:not(.collapsed) {
+                >.header {
+                    border-bottom: 1px solid material-color('grey', '400');
+                }
+
                 .columns {
                     display: block;
                 
                     .column {
                         border: 0px;
+                        width: 900px;
+                        margin-left: auto;
+                        margin-right: auto;
+
+                        &:last-of-type {
+                            margin-bottom: 15px;
+                        }
 
                         >.header {
-                            border-bottom: 1px solid material-color('grey', '400');
-                            width: 900px;
-                            margin: 0px auto;
+                            transform: translateX(-100%);
+                            display: inline;
+                            width: auto;
+                            position: absolute;
+                            padding-right: 30px;
                         }
 
                         .issue-editor {
-                            width: 900px;
-                            margin: 0px auto;
-                            
                             .header {
                                 padding: 5px 30px 5px 5px;
                                 position: relative;

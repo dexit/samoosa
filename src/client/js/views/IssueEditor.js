@@ -293,7 +293,10 @@ class IssueEditor extends View {
                 }
             }
         });
-        
+       
+        // Update filters
+        ViewHelper.get('FilterEditor').applyFilters();
+
         // Cancel multiselect
         IssueEditor.cancelMultiSelect();
 
@@ -313,6 +316,9 @@ class IssueEditor extends View {
             this.updateDOM();
             this.sync();
         
+            // Update filters
+            ViewHelper.get('FilterEditor').applyFilters();
+            
             for(let milestoneEditor of ViewHelper.getAll('MilestoneEditor')) {
                 if(milestoneEditor.model.index == this.model.milestone) {
                     milestoneEditor.updateProgress();
@@ -345,6 +351,9 @@ class IssueEditor extends View {
                 }
             }
         }
+        
+        // Update filters
+        ViewHelper.get('FilterEditor').applyFilters();
     }
     
     /**

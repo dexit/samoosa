@@ -53,11 +53,6 @@ module.exports = function render() {
                     _.span({class: 'total'}),
                     _.span({class: 'remaining'})
                 )
-            ),
-            _.div({class: 'toolbar'},
-                _.button({class: 'btn-new-issue'},
-                    'New issue'
-                ).click(() => { this.onClickNewIssue(); })
             )
         ),
         _.div({class: 'columns'},
@@ -73,7 +68,13 @@ module.exports = function render() {
                                     model: issue
                                 }).$element;      
                             }            
-                        })
+                        }),
+                        _.if(columnIndex == 0,
+                            _.button({class: 'btn-new-issue'},
+                                'New issue ',
+                                _.span({class: 'fa fa-plus'})
+                            ).click(() => { this.onClickNewIssue(); })
+                        )
                     )
                 );
             })

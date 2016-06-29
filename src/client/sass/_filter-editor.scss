@@ -41,7 +41,7 @@
                 }
             }
 
-            span, select, input, button {
+            span, select, button {
                 font-size: 12px;
                 line-height: 18px;
                 display: block;
@@ -57,26 +57,54 @@
             
             button {
                 text-align: center;
-                margin-right: 10px;
+                position: absolute;
+                right: 10px;
+                top: 0px;
+                z-index: 20;
             }
               
             .select-container { 
-                padding-left: 5px;
-                margin-right: 5px;
                 background-color: material-color('grey', '300');
-                border-top-left-radius: 15px;
-                border-bottom-left-radius: 15px;
-                width: 90px;
                 overflow-x: hidden;
                 line-height: 25px;
                 height: 25px;
+                width: 30px;
+
+                &:first-of-type {
+                    border-top-left-radius: 15px;
+                    border-bottom-left-radius: 15px;
+                    padding-left: 5px;
+                    border-right: 1px solid material-color('grey', '800');
+                    width: 90px;
+
+                    select {
+                        text-align: left;
+                    }
+                }
+                
+                &:last-of-type {
+                    border-top-right-radius: 15px;
+                    border-bottom-right-radius: 15px;
+                    padding-right: 5px;
+                    border-left: 1px solid material-color('grey', '800');
+                    width: 90px;
+                    
+                    select {
+                        text-align: left;
+                    }
+                }
 
                 select {
+                    text-align: center;
                     background-color: transparent;
                     line-height: 25px;
                     height: 25px;
-                    width: 110px;
+                    appearance: none;
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
                     cursor: pointer;
+                    display: block;
+                    width: 100%;
 
                     &:focusring, &:-moz-focusring {
                         color: transparent;

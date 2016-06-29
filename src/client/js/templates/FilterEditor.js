@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function render() {
-    let issueKeys = Object.keys(new Issue());
+    let issueKeys = Object.keys(new Issue().getBakedValues());
 
     return _.div({class: 'filter-editor'},
         _.div({class: 'title'},
@@ -9,20 +9,92 @@ module.exports = function render() {
         ),
         _.div({class: 'filters'},
             _.each(this.model, (i, filter) => {
-                return _.div({class: 'filter'},
-                    _.div({class: 'select-container'},
+                let resourceKey = filter.key;
+              
+                // Change assignee to collaborator
+                if(resourceKey == 'assignee') {
+                    resourceKey = 'collaborator';
+                }
+
+                // Append 's' for plural
+                resourceKey += 's';
+                
+                // Correct grammar
+                resourceKey = resourceKey.replace('ys', 'ies');
+
+                let resource = resources[resourceKey];
+
+                // If we didn't find the resource, it's likely that we just need to capitalise it and prepend 'issue'
+                // For example: 'type' should be 'issueType' when referring to the resource
+                if(!resource) {
+                    resourceKey = 'issue' + resourceKey.substring(0, 1).toUpperCase() + resourceKey.substring(1);
+
+                    resource = resources[resourceKey];
+                }
+
+                let $filter = _.div({class: 'filter'},
+                    _.div({class: 'select-container key'},
                         _.select({},
                             _.each(issueKeys, (i, key) => {
-                                return _.option({value: key}, key)
+                                return _.option({
+                                    value: key,
+                                    selected: key == filter.key
+                                }, key)
                             })
-                        ).val(filter.key).change(() => { this.onChange(i); })
+                        ).change((e) => {
+                            filter.key = $filter.find('.key select').val();
+                            filter.value = null;
+                            
+                            this.onChange(i);
+                        })
                     ),
-                    _.input({type: 'text', value: filter.query})
-                        .change(() => { this.onChange(i); }),
+                    _.div({class: 'select-container operator'},
+                        _.select({},
+                            _.each(this.getOperators(), (i, operator) => {
+                                return _.option({value: operator}, operator)
+                            })
+                        ).val(filter.operator || '!=').change((e) => {
+                            filter.operator = $filter.find('.operator select').val();
+
+                            this.onChange(i);
+                        })
+                    ),
+                    _.div({class: 'select-container value'},
+                        _.select({},
+                            _.each(resource, (i, value) => {
+                                let valueName = value;
+
+                                if(value.title) {
+                                    valueName = value.title;
+                                }
+
+                                if(value.name) {
+                                    valueName = value.name;
+                                }
+                                
+                                let isSelected = valueName == filter.value;
+
+                                if(!filter.value && i == 0) {
+                                    isSelected = true;
+                                }
+
+                                return _.option({
+                                    value: valueName,
+                                    selected: isSelected
+                                }, valueName)
+                            })
+                        ).change((e) => {
+                            filter.value = $filter.find('.value select').val();
+
+                            this.onChange(i);
+                        })
+                    ),
                     _.button({class: 'btn-remove btn-transparent'},
                         _.span({class: 'fa fa-remove'})
                     ).click(() => { this.onClickRemove(i); })
                 );
+
+                return $filter;
             })
         ),
         _.div({class: 'button-container'},

@@ -40,21 +40,39 @@ class GitHubApi extends ApiHelper {
      *
      * @param {String} url
      * @param {String} param
+     * @param {Boolean} recursePages
      *
      * @returns {Promise} promise
      */
-    get(url, param) {
-        return new Promise((callback) => {
-            $.ajax({
-                url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + 'access_token=' + this.getApiToken() + '&per_page=100',
-                type: 'GET',
-                success: (result) => {
-                    callback(result);
-                },
-                error: (e) => {
-                    this.error(e);
-                }
-            });
+    get(url, param, recursePages) {
+        let self = this;
+
+        return new Promise((resolve, reject) => {
+            let issues = [];
+
+            function getPage(page) {
+                $.ajax({
+                    url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + 'access_token=' + self.getApiToken() + '&per_page=100&page=' + page,
+                    type: 'GET',
+                    success: (result) => {
+                        issues = issues.concat(result);
+
+                        if(recursePages && result.length > 0) {
+                            getPage(page + 1);
+
+                        } else {
+                            resolve(issues);
+
+                        }
+                    },
+                    error: (e) => {
+                        self.error(e);
+                        reject(new Error(e));
+                    }
+                });
+            }
+
+            getPage(1);
         });
     }
     
@@ -281,7 +299,7 @@ class GitHubApi extends ApiHelper {
      */
     getIssues() {
         return new Promise((callback) => {
-            this.get('/repos/' + this.getOrg() + '/' + this.getRepo() + '/issues', 'state=all')
+            this.get('/repos/' + this.getOrg() + '/' + this.getRepo() + '/issues', 'state=all', true)
             .then((issues) => {
                 this.processIssues(issues);
 
@@ -847,8 +865,8 @@ class GitHubApi extends ApiHelper {
         }
         
         window.resources.milestones.sort((a, b) => {
-            a = new Date(a.due_on).floor();
-            b = new Date(b.due_on).floor();
+            a = new Date(a.endDate).floor();
+            b = new Date(b.endDate).floor();
 
             if(a < b) {
                 return -1;
@@ -1099,6 +1117,10 @@ class GitHubApi extends ApiHelper {
 
         if(assignee) {
             gitHubIssue.assignee = assignee.name;
+        
+        } else {
+            gitHubIssue.assignee = '';
+
         }
 
         // State

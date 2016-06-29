@@ -41,15 +41,11 @@ class Issue {
      */
     getBakedValues() {
         let baked = {
-            title: this.title,
-            description: this.description,
             column: resources.issueColumns[this.column],
             type: resources.issueTypes[this.type],
             priority: resources.issuePriorities[this.priority],
-            estimate: resources.issueEstimates[this.estimate],
             version: resources.versions[this.version],
             milestone: resources.milestones[this.milestone],
-            comments: this.comments,
             assignee: resources.collaborators[this.assignee]
         };
 

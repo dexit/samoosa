@@ -10,10 +10,17 @@ class FilterEditor extends View {
 
         this.defaultFilter = {
             key: 'column',
-            query: '!= \'done\''
+            operator: '!=',
+            value: 'done'
         };
 
-        this.model = SettingsHelper.get('filters', 'custom', [ { key: this.defaultFilter.key, query: this.defaultFilter.query } ], true);
+        this.model = SettingsHelper.get('filters', 'custom', [
+            {
+                key: this.defaultFilter.key,
+                operator: this.defaultFilter.operator,
+                value: this.defaultFilter.value
+            }
+        ], true);
 
         this.fetch();
 
@@ -28,14 +35,13 @@ class FilterEditor extends View {
      * @param {Number} index
      */
     onChange(index) {
-        let $filter = this.$element.find('.filter').eq(index);
-
-        this.model[index].key = $filter.find('select').val();
-        this.model[index].query = $filter.find('input').val();
-
-        SettingsHelper.set('filters', 'custom', this.model, true);
-
         this.render();
+
+        // Update value, just in case key was changed
+        this.model[index].value = this.$element.find('.filter').eq(index).find('.select-container.value select').val();
+
+        // Update settings
+        SettingsHelper.set('filters', 'custom', this.model, true);
 
         this.applyFilters();
     }
@@ -48,11 +54,12 @@ class FilterEditor extends View {
     onClickRemove(index) {
         this.model.splice(index, 1);
         
+        // Update settings
         SettingsHelper.set('filters', 'custom', this.model, true);
 
-        this.applyFilters();
-
         this.render();
+
+        this.applyFilters();
     }
 
     /**
@@ -62,9 +69,11 @@ class FilterEditor extends View {
         if(this.model.length < this.MAX_FILTERS) {
             this.model.push({
                 key: this.defaultFilter.key,
-                query: this.defaultFilter.query
+                operator: this.defaultFilter.operator,
+                value: this.defaultFilter.value
             });
             
+            // Update settings
             SettingsHelper.set('filters', 'custom', this.model, true);
 
             this.applyFilters();
@@ -72,6 +81,19 @@ class FilterEditor extends View {
             this.render();
         }
     }
+
+    /**
+     * Gets all filtering operators
+     *
+     * @param {Array} operators
+     */
+    getOperators() {
+        return [
+            '!=',
+            '=='
+        ];
+    }
+
 
     /**
      * Applies selected filters
@@ -86,7 +108,13 @@ class FilterEditor extends View {
 
             for(let filter of this.model) {
                 try {
-                    let evalString = 'issue.' + filter.key + ' ' + filter.query;
+                    let value = filter.value;
+
+                    if(value && value.constructor === String) {
+                        value = '\'' + value + '\'';
+                    }
+
+                    let evalString = 'issue.' + filter.key + ' ' + filter.operator + ' ' + value;
                     let isValid = eval(evalString);
 
                     if(!isValid) {

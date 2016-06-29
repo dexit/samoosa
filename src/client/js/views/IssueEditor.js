@@ -61,6 +61,10 @@ class IssueEditor extends View {
 
         if(assignee) {
             return _.img({src: assignee.avatar});
+        } else {
+            return _.div({class: 'unassigned'},
+                _.span({class: 'fa fa-user'})
+            );
         }
     }
 

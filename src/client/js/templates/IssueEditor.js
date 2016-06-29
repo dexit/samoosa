@@ -57,6 +57,7 @@ module.exports = function render() {
             _.div({class: 'meta-field assignee'},
                 _.label('Assignee'),
                 _.select({'data-property': 'assignee'},
+                    _.option({value: null}, '(unassigned)'),
                     _.each(window.resources.collaborators, (i, collaborator) => {
                         return _.option({value: i}, collaborator.name);
                     })

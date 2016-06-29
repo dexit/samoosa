@@ -23,6 +23,14 @@
     &[data-type="improvement"], &[data-type="enhancement"] {
         >.header {
             &:before {
+                background-color: material-color('cyan', '500');
+            }
+        }
+    }
+    
+    &[data-type="feature"], &[data-type="new feature"] {
+        >.header {
+            &:before {
                 background-color: material-color('green', '500');
             }
         }
@@ -31,7 +39,7 @@
     &[data-type="task"] {
         >.header {
             &:before {
-                background-color: material-color('blue', '500');
+                background-color: material-color('blue', '700');
             }
         }
     }
@@ -139,11 +147,20 @@
             top: 0px;
         }
 
-        img {
+        img, .unassigned {
             float: left;
             margin-right: 10px;
             width: 30px;
             height: 30px;
+        }
+
+        .unassigned {
+            background-color: material-color('grey', '500');
+            text-align: center;
+
+            .fa {
+                font-size: 24px;
+            }
         }
 
         .issue-index {

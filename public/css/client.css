@@ -130,9 +130,11 @@ body, html {
   .issue-editor[data-type="bug"] > .header:before {
     background-color: #f44336; }
   .issue-editor[data-type="improvement"] > .header:before, .issue-editor[data-type="enhancement"] > .header:before {
+    background-color: #00bcd4; }
+  .issue-editor[data-type="feature"] > .header:before, .issue-editor[data-type="new feature"] > .header:before {
     background-color: #4caf50; }
   .issue-editor[data-type="task"] > .header:before {
-    background-color: #2196f3; }
+    background-color: #1976d2; }
   .issue-editor[data-type="question"] > .header:before {
     background-color: #ffeb3b; }
   .issue-editor.selected {
@@ -186,11 +188,16 @@ body, html {
       position: absolute;
       left: 0px;
       top: 0px; }
-    .issue-editor > .header img {
+    .issue-editor > .header img, .issue-editor > .header .unassigned {
       float: left;
       margin-right: 10px;
       width: 30px;
       height: 30px; }
+    .issue-editor > .header .unassigned {
+      background-color: #9e9e9e;
+      text-align: center; }
+      .issue-editor > .header .unassigned .fa {
+        font-size: 24px; }
     .issue-editor > .header .issue-index {
       position: absolute;
       top: 0px;
@@ -312,7 +319,7 @@ body, html {
         margin-right: 10px; }
         .filter-editor .filters .filter:last-of-type:after {
           content: none; }
-      .filter-editor .filters .filter span, .filter-editor .filters .filter select, .filter-editor .filters .filter input, .filter-editor .filters .filter button {
+      .filter-editor .filters .filter span, .filter-editor .filters .filter select, .filter-editor .filters .filter button {
         font-size: 12px;
         line-height: 18px;
         display: block;
@@ -324,23 +331,43 @@ body, html {
         width: 80px; }
       .filter-editor .filters .filter button {
         text-align: center;
-        margin-right: 10px; }
+        position: absolute;
+        right: 10px;
+        top: 0px;
+        z-index: 20; }
       .filter-editor .filters .filter .select-container {
-        padding-left: 5px;
-        margin-right: 5px;
         background-color: #e0e0e0;
-        border-top-left-radius: 15px;
-        border-bottom-left-radius: 15px;
-        width: 90px;
         overflow-x: hidden;
         line-height: 25px;
-        height: 25px; }
+        height: 25px;
+        width: 30px; }
+        .filter-editor .filters .filter .select-container:first-of-type {
+          border-top-left-radius: 15px;
+          border-bottom-left-radius: 15px;
+          padding-left: 5px;
+          border-right: 1px solid #424242;
+          width: 90px; }
+          .filter-editor .filters .filter .select-container:first-of-type select {
+            text-align: left; }
+        .filter-editor .filters .filter .select-container:last-of-type {
+          border-top-right-radius: 15px;
+          border-bottom-right-radius: 15px;
+          padding-right: 5px;
+          border-left: 1px solid #424242;
+          width: 90px; }
+          .filter-editor .filters .filter .select-container:last-of-type select {
+            text-align: left; }
         .filter-editor .filters .filter .select-container select {
+          text-align: center;
           background-color: transparent;
           line-height: 25px;
           height: 25px;
-          width: 110px;
-          cursor: pointer; }
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          cursor: pointer;
+          display: block;
+          width: 100%; }
           .filter-editor .filters .filter .select-container select:focusring, .filter-editor .filters .filter .select-container select:-moz-focusring {
             color: transparent;
             text-shadow: 0 0 0 #000; }

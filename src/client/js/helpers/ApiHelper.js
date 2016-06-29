@@ -711,48 +711,41 @@ class ApiHelper {
         
         spinner(true);
 
-        return new Promise((callback) => {
-            let loaded = {};
-            
-            function check(resource) {
-                loaded[resource] = true;
-           
-                for(let resource in loaded) {
-                    if(!loaded[resource]) {
-                        return;
-                    }
-                }
-
-                callback();
-
-                spinner(false);
-            }
-
+        return new Promise((resolve, reject) => {
             function get(resource) {
-                if(!resources[resource] || resources[resource].length < 1) {
-                    loaded[resource] = false;
-                    
-                    window.resources[resource] = [];
+                window.resources[resource] = [];
+              
+                debug.log('Getting ' + resource + '...', helper);
 
-                    helper.getResource(resource)
-                    .then(() => {
-                        check(resource);
-                    });
-                
-                } else {
-                    check(resource);
-
-                }
+                return helper.getResource(resource);
             }
 
-            get('issueTypes');
-            get('issuePriorities');
-            get('issueEstimates');
-            get('issueColumns');
-            get('collaborators');
-            get('milestones');
-            get('versions');
-            get('issues');
+            get('issueTypes')
+            .then(() => {
+                return get('issuePriorities');
+            })
+            .then(() => {
+                return get('issueEstimates');
+            })
+            .then(() => {
+                return get('issueColumns');
+            })
+            .then(() => {
+                return get('collaborators');
+            })
+            .then(() => {
+                return get('milestones');
+            })
+            .then(() => {
+                return get('versions');
+            })
+            .then(() => {
+                return get('issues');
+            })
+            .then(() => {
+                spinner(false);
+                resolve();  
+            });
         });
     }
 }

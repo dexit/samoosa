@@ -88,12 +88,12 @@ class MilestoneEditor extends View {
         let totalHours = 0;
         let completedHours = 0;
 
-        for(let issue of total) {
-             totalHours += issue.getEstimatedHours();
+        for(let i in total) {
+            totalHours += total[i].getEstimatedHours();
         }
         
-        for(let issue of completed) {
-             completedHours += issue.getEstimatedHours();
+        for(let i in completed) {
+             completedHours += completed[i].getEstimatedHours();
         }
 
         if(total.length > 0 && completed.length > 0) {

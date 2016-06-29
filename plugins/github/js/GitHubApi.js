@@ -1049,10 +1049,9 @@ class GitHubApi extends ApiHelper {
                 
                 } else if(estimateIndex > -1) {
                     let name = label.name.replace('estimate:', '');
-                    
+                   
                     issue.estimate = ResourceHelper.getIssueEstimate(name);
 
-                    
                 } else if(priorityIndex > -1) {
                     let name = label.name.replace('priority:', '');
                     

@@ -25,9 +25,9 @@ class ResourceHelper {
     
     static getIssueEstimate(name) {
         for(let i in window.resources.issueEstimates) {
-            let type = window.resources.issueEstimates[i];
-            
-            if(type == name) {
+            let estimate = window.resources.issueEstimates[i];
+
+            if(estimate == name) {
                 return i;
             }
         }

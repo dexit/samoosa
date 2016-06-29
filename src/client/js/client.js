@@ -9,6 +9,9 @@ window.marked = require('marked');
 window.ResourceHelper = require('./helpers/ResourceHelper');
 window.SettingsHelper = require('./helpers/SettingsHelper');
 window.InputHelper = require('./helpers/InputHelper');
+window.DebugHelper = require('./helpers/DebugHelper');
+window.debug = window.DebugHelper;
+window.debug.verbosity = 1;
 
 let GitHubApi = require('../../../plugins/github/js/GitHubApi');
 window.ApiHelper = new GitHubApi();

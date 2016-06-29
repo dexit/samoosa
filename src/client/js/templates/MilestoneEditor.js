@@ -3,7 +3,7 @@
 module.exports = function render() {
     return _.div({class: 'milestone-editor ' + SettingsHelper.get('milestone', this.model.index), 'data-index': this.model.index},
         _.div({class: 'header'},
-            _.div({class: 'progress-bar', style: 'width: 0%'}),
+            _.div({class: 'progress-bar', style: 'width: ' + this.getPercentComplete() + '%'}),
             _.div({class: 'title'}, 
                 _.button({class: 'btn-toggle btn-transparent'},
                     _.span({class: 'fa fa-chevron-right'}),

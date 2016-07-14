@@ -238,6 +238,10 @@ class GitHubApi extends ApiHelper {
         return new Promise((callback) => {
             this.get('/user')
             .then((gitHubUser) => {
+                if(Array.isArray(gitHubUser)) {
+                    gitHubUser = gitHubUser[0];
+                }
+
                 let user = {
                     name: gitHubUser.login,
                     avatar: gitHubUser.avatar_url

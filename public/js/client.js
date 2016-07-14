@@ -686,7 +686,7 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * Gets the currently logged in user object
      *
      * @returns {Promise} promise
-     */},{key:"getUser",value:function getUser(){var _this9=this;return new Promise(function(callback){_this9.get('/user').then(function(gitHubUser){var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};callback(user);});});} /**
+     */},{key:"getUser",value:function getUser(){var _this9=this;return new Promise(function(callback){_this9.get('/user').then(function(gitHubUser){if(Array.isArray(gitHubUser)){gitHubUser=gitHubUser[0];}var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};callback(user);});});} /**
      * Logs out the currently logged in user and reloads
      */},{key:"logOut",value:function logOut(){localStorage.setItem('gitHubApiToken','');location.reload();} // ----------
 // Resource getters

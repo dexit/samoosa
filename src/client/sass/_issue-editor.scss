@@ -261,6 +261,9 @@
                 &[disabled] {
                     background-color: transparent;
                     border: 0px;
+                    appearance: none;
+                    -moz-appearance: none;
+                    -webkit-appearance: none;
                     clip-path: inset(0px 20px 0px 0px);
                     -webkit-clip-path: inset(0px 20px 0px 0px);
                     -moz-clip-path: inset(0px 20px 0px 0px);

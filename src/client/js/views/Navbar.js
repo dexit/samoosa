@@ -27,11 +27,13 @@ class Navbar extends View {
             });
         }
     
-        links.push({
-            url: '/projects/',
-            handler: this.toggleProjectsList,
-            icon: 'folder'
-        });
+        if(!ApiHelper.isSpectating()) {
+            links.push({
+                url: '/projects/',
+                handler: this.toggleProjectsList,
+                icon: 'folder'
+            });
+        }
         
         links.push({
             url: '/plan/',
@@ -48,11 +50,13 @@ class Navbar extends View {
             icon: 'list'
         });
         
-        links.push({
-            url: '/settings/',
-            icon: 'cog',
-            bottom: true
-        });
+        if(!ApiHelper.isSpectating()) {
+            links.push({
+                url: '/settings/',
+                icon: 'cog',
+                bottom: true
+            });
+        }
 
         return links;
     }

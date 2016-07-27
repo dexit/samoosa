@@ -92,6 +92,10 @@ class PlanEditor extends View {
     }
 
     onClickAddMilestone(date) {
+        if(ApiHelper.isSpectating()) {
+            return;
+        }
+        
         spinner(true);
 
         ResourceHelper.addResource('milestones', {

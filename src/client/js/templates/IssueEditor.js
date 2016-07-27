@@ -4,8 +4,10 @@ module.exports = function render() {
             _.div({class: 'drag-handle'},
                 _.span({class: 'fa fa-bars'})
             ).on('mousedown', (e) => { this.onClickDragHandle(e) }),
-            _.div({class: 'assignee-avatar'},
-                this.getAssigneeAvatar()
+            _.if(!ApiHelper.isSpectating(),
+                _.div({class: 'assignee-avatar'},
+                    this.getAssigneeAvatar()
+                )
             ),
             _.button({class: 'btn-toggle btn-transparent'},
                 _.span({class: 'fa fa-minus-circle'}),
@@ -36,7 +38,7 @@ module.exports = function render() {
             ),
             _.div({class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '')},
                 _.label('Type'),
-                _.select({'data-property': 'type'},
+                _.select({'data-property': 'type', disabled: ApiHelper.isSpectating()},
                     _.each(window.resources.issueTypes, (i, type) => {
                         return _.option({value: i}, type);
                     })
@@ -46,7 +48,7 @@ module.exports = function render() {
             ),
             _.div({class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '')},
                 _.label('Priority'),
-                _.select({'data-property': 'priority'},
+                _.select({'data-property': 'priority', disabled: ApiHelper.isSpectating()},
                     _.each(window.resources.issuePriorities, (i, priority) => {
                         return _.option({value: i}, priority);
                     })
@@ -54,20 +56,22 @@ module.exports = function render() {
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); })
             ),
-            _.div({class: 'meta-field assignee'},
-                _.label('Assignee'),
-                _.select({'data-property': 'assignee'},
-                    _.option({value: null}, '(unassigned)'),
-                    _.each(window.resources.collaborators, (i, collaborator) => {
-                        return _.option({value: i}, collaborator.name);
-                    })
-                ).change(() => { this.onChange(); }).val(this.model.assignee),
-                _.input({class: 'multi-edit-toggle', type: 'checkbox'})
-                    .change((e) => { this.onChangeCheckbox(e); })
+            _.if(window.resources.collaborators.length > 0,
+                _.div({class: 'meta-field assignee'},
+                    _.label('Assignee'),
+                    _.select({'data-property': 'assignee', disabled: ApiHelper.isSpectating()},
+                        _.option({value: null}, '(unassigned)'),
+                        _.each(window.resources.collaborators, (i, collaborator) => {
+                            return _.option({value: i}, collaborator.name);
+                        })
+                    ).change(() => { this.onChange(); }).val(this.model.assignee),
+                    _.input({class: 'multi-edit-toggle', type: 'checkbox'})
+                        .change((e) => { this.onChangeCheckbox(e); })
+                )
             ),
             _.div({class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '')},
                 _.label('Version'),
-                _.select({'data-property': 'version'},
+                _.select({'data-property': 'version', disabled: ApiHelper.isSpectating()},
                     _.each(window.resources.versions, (i, version) => {
                         return _.option({value: i}, version);
                     })
@@ -77,7 +81,7 @@ module.exports = function render() {
             ),
             _.div({class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '')},
                 _.label('Estimate'),
-                _.select({'data-property': 'estimate'},
+                _.select({'data-property': 'estimate', disabled: ApiHelper.isSpectating()},
                     _.each(window.resources.issueEstimates, (i, estimate) => {
                         return _.option({value: i}, estimate);
                     })
@@ -108,11 +112,13 @@ module.exports = function render() {
             .blur(this.onBlur)
         ),
         _.div({class: 'comments'}),
-        _.div({class: 'add-comment'},
-            _.textarea({class: 'btn-transparent', placeholder: 'Add comment here...'}),
-            _.button({},
-                'Comment'
-            ).click(() => { this.onClickComment(); })
+        _.if(!ApiHelper.isSpectating(),
+            _.div({class: 'add-comment'},
+                _.textarea({class: 'btn-transparent', placeholder: 'Add comment here...'}),
+                _.button({},
+                    'Comment'
+                ).click(() => { this.onClickComment(); })
+            )
         )
     );
 };

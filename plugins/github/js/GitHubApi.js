@@ -6,26 +6,24 @@ let labelCache;
 
 class GitHubApi extends ApiHelper {
     // ----------
-    // Checkers
-    // ----------
-    /**
-     * Check whether the connection to the source has been made
-     */
-    checkConnection() {
-        return new Promise((callback) => {
-            if(!localStorage.getItem('gitHubOrg')) {
-                localStorage.setItem('gitHubOrg', prompt('Please input org name'));
-            }
-
-            callback();
-        });
-    }
-
-    // ----------
     // Settings methods
     // ----------
-    getOrg() {
-        return localStorage.getItem('gitHubOrg');
+    getUserName() {
+        let gitHubUser = localStorage.getItem('gitHubUser');
+
+        if(!gitHubUser) {
+            if(Router.query('gitHubUser')) {
+                gitHubUser = Router.query('gitHubUser');
+            } else {
+                gitHubUser = prompt('Please input user name');
+            }
+
+            if(gitHubUser) {
+                localStorage.setItem('gitHubUser', gitHubUser);
+            }
+        }
+
+        return gitHubUser;
     }
 
     getRepo() {
@@ -52,7 +50,7 @@ class GitHubApi extends ApiHelper {
 
             function getPage(page) {
                 $.ajax({
-                    url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + 'access_token=' + self.getApiToken() + '&per_page=100&page=' + page,
+                    url: 'https://api.github.com' + url + self.getApiTokenString(true) + 'per_page=100&page=' + page + (param ? '&' + param : ''),
                     type: 'GET',
                     success: (result) => {
                         issues = issues.concat(result);
@@ -85,15 +83,16 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     delete(url, param) {
-        return new Promise((callback) => {
+        return new Promise((reseolve, reject) => {
             $.ajax({
-                url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + 'access_token=' + this.getApiToken(),
+                url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + this.getApiTokenString(),
                 type: 'DELETE',
                 success: (result) => {
-                    callback(result);
+                    resolve(result);
                 },
                 error: (e) => {
                     this.error(e);
+                    reject(e);
                 }
             });
         });
@@ -112,16 +111,17 @@ class GitHubApi extends ApiHelper {
             data = JSON.stringify(data);
         }
 
-        return new Promise((callback) => {
+        return new Promise((resolve, reject) => {
             $.ajax({
-                url: 'https://api.github.com' + url + '?access_token=' + this.getApiToken(),
+                url: 'https://api.github.com' + url + this.getApiTokenString(),
                 type: 'PATCH',
                 data: data,
                 success: (result) => {
-                    callback(result);
+                    resolve(result);
                 },
                 error: (e) => {
                     this.error(e);
+                    reject(e);
                 }
             });
         });
@@ -140,16 +140,17 @@ class GitHubApi extends ApiHelper {
             data = JSON.stringify(data);
         }
 
-        return new Promise((callback) => {
+        return new Promise((resolve, reject) => {
             $.ajax({
-                url: 'https://api.github.com' + url + '?access_token=' + this.getApiToken(),
+                url: 'https://api.github.com' + url + this.getApiTokenString(),
                 type: 'POST',
                 data: data,
                 success: (result) => {
-                    callback(result);
+                    resolve(result);
                 },
                 error: (e) => {
                     this.error(e);
+                    reject(e);
                 }
             });
         });
@@ -163,15 +164,16 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     put(url) {
-        return new Promise((callback) => {
+        return new Promise((resolve, reject) => {
             $.ajax({
-                url: 'https://api.github.com' + url + '?access_token=' + this.getApiToken(),
+                url: 'https://api.github.com' + url + this.getApiTokenString(),
                 type: 'PUT',
                 success: (result) => {
-                    callback(result);
+                    resolve(result);
                 },
                 error: (e) => {
                     this.error(e);
+                    reject(e);
                 }
             });
         });
@@ -185,7 +187,7 @@ class GitHubApi extends ApiHelper {
     error(error) {
         if(error) {
             switch(error.status) {
-                case 401:
+                case 401: case 403:
                     this.resetApiToken();
                     break;
 
@@ -212,8 +214,6 @@ class GitHubApi extends ApiHelper {
         localStorage.setItem('gitHubApiToken', '');
 
         this.getApiToken();
-
-        location.reload();
     }
 
     /**
@@ -222,20 +222,53 @@ class GitHubApi extends ApiHelper {
      * @returns {String} token
      */
     getApiToken() {
-        if(!localStorage.getItem('gitHubApiToken')) {
-            localStorage.setItem('gitHubApiToken', prompt('Please input API token'));
-        }
+        let queryToken = Router.query('gitHubApiToken');
 
-        return localStorage.getItem('gitHubApiToken');
+        if(queryToken) {
+            return queryToken;
+
+        } else if(this.isSpectating()) {
+            return  '';
+
+        } else {
+            if(!localStorage.getItem('gitHubApiToken')) {
+                localStorage.setItem('gitHubApiToken', prompt('Please input API token'));
+            }
+
+            return localStorage.getItem('gitHubApiToken');
+        }
     }
     
+    /**
+     * Gets the API token string
+     *
+     * @param {Boolean} includeSuffix
+     *
+     * @returns {String} string
+     */
+    getApiTokenString(includeSuffix) {
+        let token = this.getApiToken();
+
+        if(!token) {
+            if(includeSuffix) {
+                return '?';
+            }
+        } else {
+            if(includeSuffix) {
+                token += '&';
+            }
+
+            return '?access_token=' + token;
+        }
+    }
+
     /**
      * Gets the currently logged in user object
      *
      * @returns {Promise} promise
      */
     getUser() {
-        return new Promise((callback) => {
+        return new Promise((resolve, reject) => {
             this.get('/user')
             .then((gitHubUser) => {
                 if(Array.isArray(gitHubUser)) {
@@ -247,7 +280,16 @@ class GitHubApi extends ApiHelper {
                     avatar: gitHubUser.avatar_url
                 };
 
-                callback(user);
+                resolve(user);
+            })
+            .catch((e) => {
+                if(this.isSpectating()) {
+                    resolve({name: '', avatar: ''});
+                
+                } else {
+                    reject(e);
+
+                }  
             });   
         });
     }
@@ -271,7 +313,7 @@ class GitHubApi extends ApiHelper {
      */
     getProjects() {
         return new Promise((callback) => {
-            this.get('/orgs/' + this.getOrg() + '/repos')
+            this.get('/users/' + this.getUserName() + '/repos')
             .then((repos) => {
                 this.processProjects(repos);
 
@@ -286,12 +328,21 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getCollaborators() {
-        return new Promise((callback) => {
-            this.get('/repos/' + this.getOrg() + '/' + this.getRepo() + '/collaborators')
+        return new Promise((resolve, reject) => {
+            this.get('/repos/' + this.getUserName() + '/' + this.getRepo() + '/collaborators')
             .then((collaborators) => {
                 this.processCollaborators(collaborators);
 
-                callback();
+                resolve();
+            })
+            .catch((e) => {
+                if(this.isSpectating()) {
+                    resolve([]);
+                
+                } else {
+                    reject(e);
+
+                }
             });
         });
     }
@@ -303,7 +354,7 @@ class GitHubApi extends ApiHelper {
      */
     getIssues() {
         return new Promise((callback) => {
-            this.get('/repos/' + this.getOrg() + '/' + this.getRepo() + '/issues', 'state=all', true)
+            this.get('/repos/' + this.getUserName() + '/' + this.getRepo() + '/issues', 'state=all', true)
             .then((issues) => {
                 this.processIssues(issues);
 
@@ -320,7 +371,7 @@ class GitHubApi extends ApiHelper {
     getLabels() {
         return new Promise((callback) => {
             if(!labelCache) {
-                this.get('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels')
+                this.get('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels')
                 .then((labels) => {
                     labelCache = labels;
 
@@ -421,7 +472,7 @@ class GitHubApi extends ApiHelper {
      */
     getMilestones() {
         return new Promise((callback) => {
-            this.get('/repos/' + this.getOrg() + '/' + this.getRepo() + '/milestones')
+            this.get('/repos/' + this.getUserName() + '/' + this.getRepo() + '/milestones')
             .then((milestones) => {
                 this.processMilestones(milestones);
                 
@@ -442,7 +493,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssue(issue) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getOrg() + '/' + this.getRepo() + '/issues', this.convertIssue(issue))
+            this.post('/repos/' + this.getUserName() + '/' + this.getRepo() + '/issues', this.convertIssue(issue))
             .then(() => {
                 callback(issue);
             });
@@ -458,7 +509,7 @@ class GitHubApi extends ApiHelper {
      */
     addCollaborator(collaborator) {
         return new Promise((callback) => {
-            this.put('/repos/' + this.getOrg() + '/' + this.getRepo() + '/collaborators/' + collaborator)
+            this.put('/repos/' + this.getUserName() + '/' + this.getRepo() + '/collaborators/' + collaborator)
             .then(() => {
                 callback();
             });    
@@ -474,7 +525,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueType(type) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels', {
+            this.post('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels', {
                 name: 'type:' + type,
                 color: 'ffffff'
             })
@@ -493,7 +544,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssuePriority(priority) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels', {
+            this.post('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels', {
                 name: 'priority:' + priority,
                 color: 'ffffff'
             })
@@ -512,7 +563,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueEstimate(estimate) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels', {
+            this.post('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels', {
                 name: 'estimate:' + estimate,
                 color: 'ffffff'
             })
@@ -531,7 +582,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueColumn(column) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels', {
+            this.post('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels', {
                 name: 'column:' + column,
                 color: 'ffffff'
             })
@@ -550,7 +601,7 @@ class GitHubApi extends ApiHelper {
      */
     addMilestone(milestone) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getOrg() + '/' + this.getRepo() + '/milestones', this.convertMilestone(milestone))
+            this.post('/repos/' + this.getUserName() + '/' + this.getRepo() + '/milestones', this.convertMilestone(milestone))
             .then(() => {
                 callback();
             });
@@ -566,7 +617,7 @@ class GitHubApi extends ApiHelper {
      */
     addVersion(version) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels', {
+            this.post('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels', {
                 name: 'version:' + version,
                 color: 'ffffff'
             })
@@ -588,7 +639,7 @@ class GitHubApi extends ApiHelper {
      */
     removeCollaborator(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getOrg() + '/' + this.getRepo() + '/collaborators/' + window.resources.collaborators[index])
+            this.delete('/repos/' + this.getUserName() + '/' + this.getRepo() + '/collaborators/' + window.resources.collaborators[index])
             .then(() => {
                 callback();
             });
@@ -604,7 +655,7 @@ class GitHubApi extends ApiHelper {
      */
     removeIssueType(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/type:' + window.resources.issueTypes[index])
+            this.delete('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels/type:' + window.resources.issueTypes[index])
             .then(() => {
                 callback();
             });
@@ -620,7 +671,7 @@ class GitHubApi extends ApiHelper {
      */
     removeIssuePriority(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/priority:' + window.resources.issuePriorities[index])
+            this.delete('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels/priority:' + window.resources.issuePriorities[index])
             .then(() => {
                 callback();
             });
@@ -636,7 +687,7 @@ class GitHubApi extends ApiHelper {
      */
     removeIssueEstimate(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/estimate:' + window.resources.issueEstimates[index])
+            this.delete('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels/estimate:' + window.resources.issueEstimates[index])
             .then(() => {
                 callback();
             });
@@ -652,7 +703,7 @@ class GitHubApi extends ApiHelper {
      */
     removeIssueColumn(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/column:' + window.resources.issueColumns[index])
+            this.delete('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels/column:' + window.resources.issueColumns[index])
             .then(() => {
                 callback();
             });
@@ -668,7 +719,7 @@ class GitHubApi extends ApiHelper {
      */
     removeMilestone(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getOrg() + '/' + this.getRepo() + '/milestones/' + (parseInt(index) + 1))
+            this.delete('/repos/' + this.getUserName() + '/' + this.getRepo() + '/milestones/' + (parseInt(index) + 1))
             .then(() => {
                 callback();
             });
@@ -684,7 +735,7 @@ class GitHubApi extends ApiHelper {
      */
     removeVersion(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/version:' + window.resources.versions[index])
+            this.delete('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels/version:' + window.resources.versions[index])
             .then(() => {
                 callback();
             });
@@ -701,7 +752,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssue(issue) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/issues/' + (issue.index + 1), this.convertIssue(issue))
+            this.patch('/repos/' + this.getUserName() + '/' + this.getRepo() + '/issues/' + (issue.index + 1), this.convertIssue(issue))
             .then(() => {
                 callback();
             });
@@ -717,7 +768,7 @@ class GitHubApi extends ApiHelper {
      */
     updateMilestone(milestone) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/milestones/' + (parseInt(milestone.index) + 1), this.convertMilestone(milestone))
+            this.patch('/repos/' + this.getUserName() + '/' + this.getRepo() + '/milestones/' + (parseInt(milestone.index) + 1), this.convertMilestone(milestone))
             .then(() => {
                 callback();
             });
@@ -734,7 +785,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssueType(type, previousName) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/type:' + previousName, {
+            this.patch('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels/type:' + previousName, {
                 name: 'type:' + type,
                 color: 'ffffff'
             })
@@ -754,7 +805,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssuePriority(priority, previousName) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/priority:' + previousName, {
+            this.patch('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels/priority:' + previousName, {
                 name: 'priority:' + priority,
                 color: 'ffffff'
             })
@@ -774,7 +825,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssueEstimate(estimate, previousName) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/estimate:' + previousName, {
+            this.patch('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels/estimate:' + previousName, {
                 name: 'estimate:' + estimate,
                 color: 'ffffff'
             })
@@ -794,7 +845,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssueColumn(column, previousName) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/column:' + previousName, {
+            this.patch('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels/column:' + previousName, {
                 name: 'column:' + column,
                 color: 'ffffff'
             })
@@ -814,7 +865,7 @@ class GitHubApi extends ApiHelper {
      */
     updateVersion(version, previousName) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/labels/version:' + previousName, {
+            this.patch('/repos/' + this.getUserName() + '/' + this.getRepo() + '/labels/version:' + previousName, {
                 name: 'version:' + version,
                 color: 'ffffff'
             })
@@ -1183,7 +1234,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueComment(issue, text) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getOrg() + '/' + this.getRepo() + '/issues/' + (issue.index + 1) + '/comments', {
+            this.post('/repos/' + this.getUserName() + '/' + this.getRepo() + '/issues/' + (issue.index + 1) + '/comments', {
                 body: text
             })
             .then(() => {
@@ -1200,7 +1251,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssueComment(issue, comment) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getOrg() + '/' + this.getRepo() + '/issues/comments/' + comment.index, {
+            this.patch('/repos/' + this.getUserName() + '/' + this.getRepo() + '/issues/comments/' + comment.index, {
                 body: comment.text
             })
             .then(() => {
@@ -1218,7 +1269,7 @@ class GitHubApi extends ApiHelper {
      */
     getIssueComments(issue) {
         return new Promise((callback) => {
-            this.get('/repos/' + this.getOrg() + '/' + this.getRepo() + '/issues/' + (issue.index + 1) + '/comments')
+            this.get('/repos/' + this.getUserName() + '/' + this.getRepo() + '/issues/' + (issue.index + 1) + '/comments')
             .then((gitHubComments) => {
                 let comments = [];
 

@@ -167,6 +167,10 @@ class IssueEditor extends View {
      * Event: Click the dragging handle
      */
     onClickDragHandle(e) {
+        if(ApiHelper.isSpectating()) {
+            return;
+        }
+        
         if(!InputHelper.isShiftDown) {
             // Set class on board container
             $('.board-container').toggleClass('dragging', true);
@@ -258,6 +262,10 @@ class IssueEditor extends View {
      * Event: Release the dragging handle
      */
     onReleaseDragHandle(e) {
+        if(ApiHelper.isSpectating()) {
+            return;
+        }
+        
         // Unregister mouse events
         $(document)
             .off('mouseup')
@@ -314,6 +322,10 @@ class IssueEditor extends View {
      * Event: Fires on every change to a property
      */
     onChange() {
+        if(ApiHelper.isSpectating()) {
+            return;
+        }
+
         // Only update values if we're not using multi edit
         if(!this.usingMultiEdit()) {
             this.updateModel();
@@ -336,6 +348,10 @@ class IssueEditor extends View {
      * Event: Click multi edit apply button
      */
     onClickMultiEditApply() {
+        if(ApiHelper.isSpectating()) {
+            return;
+        }
+        
         this.updateModel();
         this.updateDOM();
         this.sync();
@@ -364,6 +380,10 @@ class IssueEditor extends View {
      * Event: Click multi edit cancel button
      */
     onClickMultiEditCancel() {
+        if(ApiHelper.isSpectating()) {
+            return;
+        }
+        
         this.$element.toggleClass('expanded', false);
 
         IssueEditor.cancelMultiSelect();
@@ -373,6 +393,10 @@ class IssueEditor extends View {
      * Event: Fires on changing a checkbox
      */
     onChangeCheckbox(e) {
+        if(ApiHelper.isSpectating()) {
+            return;
+        }
+        
         e.preventDefault();
         e.stopPropagation();
 
@@ -389,6 +413,10 @@ class IssueEditor extends View {
      * Event: Click the edit button of a field
      */
     onClickEdit($btn) {
+        if(ApiHelper.isSpectating()) {
+            return;
+        }
+        
         if(!InputHelper.isShiftDown && !$(this).parents('.issue-editor').hasClass('selected')) {
             $(this)
             .toggleClass('hidden', true)
@@ -403,6 +431,10 @@ class IssueEditor extends View {
      * Event: Click the comment button
      */
     onClickComment() {
+        if(ApiHelper.isSpectating()) {
+            return;
+        }
+        
         let text = this.$element.find('.add-comment textarea').val();
 
         this.$element.toggleClass('loading', true);
@@ -417,6 +449,10 @@ class IssueEditor extends View {
      * Event: Remove focus from input fields
      */
     onBlur() {
+        if(ApiHelper.isSpectating()) {
+            return;
+        }
+        
         $(this)
             .toggleClass('hidden', true)
             .siblings('.btn-edit')
@@ -429,6 +465,10 @@ class IssueEditor extends View {
      * @param {Object} event
      */
     onClickElement(e) {
+        if(ApiHelper.isSpectating()) {
+            return;
+        }
+        
         // Check for shift key
         if(InputHelper.isShiftDown) {
             e.preventDefault();

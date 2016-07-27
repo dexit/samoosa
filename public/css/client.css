@@ -221,6 +221,8 @@ body, html {
       width: 30px;
       height: 30px;
       display: block; }
+      .issue-editor > .header .btn-toggle, .issue-editor > .header .btn-toggle:focus, .issue-editor > .header .btn-toggle:hover, .issue-editor > .header .btn-toggle:active {
+        outline: none; }
     .issue-editor > .header .priority-indicator {
       font-size: 10px; }
       .issue-editor > .header .priority-indicator.low, .issue-editor > .header .priority-indicator.trival {
@@ -254,6 +256,12 @@ body, html {
     .issue-editor .meta .meta-field select {
       float: right;
       width: 200px; }
+      .issue-editor .meta .meta-field select[disabled] {
+        background-color: transparent;
+        border: 0px;
+        clip-path: inset(0px 20px 0px 0px);
+        -webkit-clip-path: inset(0px 20px 0px 0px);
+        -moz-clip-path: inset(0px 20px 0px 0px); }
   .issue-editor .body textarea, .issue-editor .body .btn-edit {
     resize: none;
     display: block;
@@ -482,13 +490,10 @@ body, html {
   border-top: 1px solid #bdbdbd;
   border-bottom: none; }
   .board-container.list .milestone-editor > .header .btn-toggle {
-    width: 900px;
     margin: 0px auto; }
   .board-container.list .milestone-editor > .header .title .fa {
     width: 18px;
     margin-right: 5px; }
-  .board-container.list .milestone-editor > .header .stats, .board-container.list .milestone-editor > .header .toolbar {
-    right: calc(50% - 450px); }
 
 .board-container.list .milestone-editor:not(.collapsed) > .header {
   border-bottom: 1px solid #bdbdbd; }
@@ -497,7 +502,7 @@ body, html {
   display: block; }
   .board-container.list .milestone-editor:not(.collapsed) .columns .column {
     border: 0px;
-    width: 900px;
+    width: 600px;
     margin-left: auto;
     margin-right: auto; }
     .board-container.list .milestone-editor:not(.collapsed) .columns .column:last-of-type {
@@ -509,7 +514,7 @@ body, html {
       position: absolute;
       padding-right: 30px; }
     .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header {
-      padding: 5px 30px 5px 5px;
+      padding: 5px 30px 5px 15px;
       position: relative; }
       .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header .drag-handle {
         position: absolute;

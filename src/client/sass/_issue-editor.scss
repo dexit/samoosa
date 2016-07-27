@@ -11,6 +11,8 @@
 .issue-editor {
     border: 1px solid material-color('grey', '400');
 
+    
+
     // Type indicators
     &[data-type="bug"] {
         >.header {
@@ -192,6 +194,10 @@
             width: 30px;
             height: 30px;
             display: block;
+
+            &, &:focus, &:hover, &:active {
+                outline: none;
+            }
         }
 
         .priority-indicator {
@@ -252,6 +258,14 @@
             clear: both;
 
             select {
+                &[disabled] {
+                    background-color: transparent;
+                    border: 0px;
+                    clip-path: inset(0px 20px 0px 0px);
+                    -webkit-clip-path: inset(0px 20px 0px 0px);
+                    -moz-clip-path: inset(0px 20px 0px 0px);
+                }
+
                 float: right;
                 width: 200px;
             }

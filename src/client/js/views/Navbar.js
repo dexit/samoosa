@@ -18,34 +18,43 @@ class Navbar extends View {
      * Gets a list of links
      */
     getLinks() {
-        return [
-            {
+        let links = [];
+
+        if(!ApiHelper.isSpectating()) {
+            links.push({
                 url: '/user/',
                 icon: 'user'
-            },
-            {
-                url: '/projects/',
-                handler: this.toggleProjectsList,
-                icon: 'folder'
-            },
-            {
-                url: '/plan/',
-                icon: 'calendar'
-            },
-            {
-                url: '/board/',
-                icon: 'columns'
-            },
-            {
-                url: '/list/',
-                icon: 'list'
-            },
-            {
-                url: '/settings/',
-                icon: 'cog',
-                bottom: true
-            }
-        ];
+            });
+        }
+    
+        links.push({
+            url: '/projects/',
+            handler: this.toggleProjectsList,
+            icon: 'folder'
+        });
+        
+        links.push({
+            url: '/plan/',
+            icon: 'calendar'
+        });
+        
+        links.push({
+            url: '/board/',
+            icon: 'columns'
+        });
+
+        links.push({
+            url: '/list/',
+            icon: 'list'
+        });
+        
+        links.push({
+            url: '/settings/',
+            icon: 'cog',
+            bottom: true
+        });
+
+        return links;
     }
 
     /**

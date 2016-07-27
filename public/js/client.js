@@ -623,15 +623,10 @@ route+=strict&&endsWithSlash?'':'(?=\\/|$)';}return new RegExp('^'+route,flags(o
  */function pathToRegexp(path,keys,options){keys=keys||[];if(!isarray(keys)){options= /** @type {!Object} */keys;keys=[];}else if(!options){options={};}if(path instanceof RegExp){return regexpToRegexp(path, /** @type {!Array} */keys);}if(isarray(path)){return arrayToRegexp( /** @type {!Array} */path, /** @type {!Array} */keys,options);}return stringToRegexp( /** @type {string} */path, /** @type {!Array} */keys,options);}},{"isarray":11}],11:[function(require,module,exports){module.exports=Array.isArray||function(arr){return Object.prototype.toString.call(arr)=='[object Array]';};},{}],12:[function(require,module,exports){ // shim for using process in browser
 var process=module.exports={};var queue=[];var draining=false;var currentQueue;var queueIndex=-1;function cleanUpNextTick(){if(!draining||!currentQueue){return;}draining=false;if(currentQueue.length){queue=currentQueue.concat(queue);}else {queueIndex=-1;}if(queue.length){drainQueue();}}function drainQueue(){if(draining){return;}var timeout=setTimeout(cleanUpNextTick);draining=true;var len=queue.length;while(len){currentQueue=queue;queue=[];while(++queueIndex<len){if(currentQueue){currentQueue[queueIndex].run();}}queueIndex=-1;len=queue.length;}currentQueue=null;draining=false;clearTimeout(timeout);}process.nextTick=function(fun){var args=new Array(arguments.length-1);if(arguments.length>1){for(var i=1;i<arguments.length;i++){args[i-1]=arguments[i];}}queue.push(new Item(fun,args));if(queue.length===1&&!draining){setTimeout(drainQueue,0);}}; // v8 likes predictible objects
 function Item(fun,array){this.fun=fun;this.array=array;}Item.prototype.run=function(){this.fun.apply(null,this.array);};process.title='browser';process.browser=true;process.env={};process.argv=[];process.version=''; // empty string to avoid regexp issues
-process.versions={};function noop(){}process.on=noop;process.addListener=noop;process.once=noop;process.off=noop;process.removeListener=noop;process.removeAllListeners=noop;process.emit=noop;process.binding=function(name){throw new Error('process.binding is not supported');};process.cwd=function(){return '/';};process.chdir=function(dir){throw new Error('process.chdir is not supported');};process.umask=function(){return 0;};},{}],13:[function(require,module,exports){'use strict';var ApiHelper=require('../../../src/client/js/helpers/ApiHelper');var labelCache=void 0;var GitHubApi=function(_ApiHelper){_inherits(GitHubApi,_ApiHelper);function GitHubApi(){_classCallCheck(this,GitHubApi);return _possibleConstructorReturn(this,Object.getPrototypeOf(GitHubApi).apply(this,arguments));}_createClass(GitHubApi,[{key:"checkConnection", // ----------
-// Checkers
-// ----------
-/**
-     * Check whether the connection to the source has been made
-     */value:function checkConnection(){return new Promise(function(callback){if(!localStorage.getItem('gitHubOrg')){localStorage.setItem('gitHubOrg',prompt('Please input org name'));}callback();});} // ----------
+process.versions={};function noop(){}process.on=noop;process.addListener=noop;process.once=noop;process.off=noop;process.removeListener=noop;process.removeAllListeners=noop;process.emit=noop;process.binding=function(name){throw new Error('process.binding is not supported');};process.cwd=function(){return '/';};process.chdir=function(dir){throw new Error('process.chdir is not supported');};process.umask=function(){return 0;};},{}],13:[function(require,module,exports){'use strict';var ApiHelper=require('../../../src/client/js/helpers/ApiHelper');var labelCache=void 0;var GitHubApi=function(_ApiHelper){_inherits(GitHubApi,_ApiHelper);function GitHubApi(){_classCallCheck(this,GitHubApi);return _possibleConstructorReturn(this,Object.getPrototypeOf(GitHubApi).apply(this,arguments));}_createClass(GitHubApi,[{key:"getUserName", // ----------
 // Settings methods
 // ----------
-},{key:"getOrg",value:function getOrg(){return localStorage.getItem('gitHubOrg');}},{key:"getRepo",value:function getRepo(){return SettingsHelper.get('projects','current');} // ----------
+value:function getUserName(){var gitHubUser=localStorage.getItem('gitHubUser');if(!gitHubUser){if(Router.query('gitHubUser')){gitHubUser=Router.query('gitHubUser');}else {gitHubUser=prompt('Please input user name');}if(gitHubUser){localStorage.setItem('gitHubUser',gitHubUser);}}return gitHubUser;}},{key:"getRepo",value:function getRepo(){return SettingsHelper.get('projects','current');} // ----------
 // Generic API methods
 // ----------
 /**
@@ -642,51 +637,57 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * @param {Boolean} recursePages
      *
      * @returns {Promise} promise
-     */},{key:"get",value:function get(url,param,recursePages){var self=this;return new Promise(function(resolve,reject){var issues=[];function getPage(page){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+'access_token='+self.getApiToken()+'&per_page=100&page='+page,type:'GET',success:function success(result){issues=issues.concat(result);if(recursePages&&result.length>0){getPage(page+1);}else {resolve(issues);}},error:function error(e){self.error(e);reject(new Error(e));}});}getPage(1);});} /**
+     */},{key:"get",value:function get(url,param,recursePages){var self=this;return new Promise(function(resolve,reject){var issues=[];function getPage(page){$.ajax({url:'https://api.github.com'+url+self.getApiTokenString(true)+'per_page=100&page='+page+(param?'&'+param:''),type:'GET',success:function success(result){issues=issues.concat(result);if(recursePages&&result.length>0){getPage(page+1);}else {resolve(issues);}},error:function error(e){self.error(e);reject(new Error(e));}});}getPage(1);});} /**
      * DELETE method
      *
      * @param {String} url
      * @param {String} param
      *
      * @returns {Promise} promise
-     */},{key:"delete",value:function _delete(url,param){var _this5=this;return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+'access_token='+_this5.getApiToken(),type:'DELETE',success:function success(result){callback(result);},error:function error(e){_this5.error(e);}});});} /**
+     */},{key:"delete",value:function _delete(url,param){var _this5=this;return new Promise(function(reseolve,reject){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+_this5.getApiTokenString(),type:'DELETE',success:function success(result){resolve(result);},error:function error(e){_this5.error(e);reject(e);}});});} /**
      * PATCH method
      *
      * @param {String} url
      * @param {Object} data
      *
      * @returns {Promise} promise
-     */},{key:"patch",value:function patch(url,data){var _this6=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this6.getApiToken(),type:'PATCH',data:data,success:function success(result){callback(result);},error:function error(e){_this6.error(e);}});});} /**
+     */},{key:"patch",value:function patch(url,data){var _this6=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this6.getApiTokenString(),type:'PATCH',data:data,success:function success(result){resolve(result);},error:function error(e){_this6.error(e);reject(e);}});});} /**
      * POST method
      *
      * @param {String} url
      * @param {Object} data
      *
      * @returns {Promise} promise
-     */},{key:"post",value:function post(url,data){var _this7=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this7.getApiToken(),type:'POST',data:data,success:function success(result){callback(result);},error:function error(e){_this7.error(e);}});});} /**
+     */},{key:"post",value:function post(url,data){var _this7=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this7.getApiTokenString(),type:'POST',data:data,success:function success(result){resolve(result);},error:function error(e){_this7.error(e);reject(e);}});});} /**
      * PUT method
      *
      * @param {String} url
      *
      * @returns {Promise} promise
-     */},{key:"put",value:function put(url){var _this8=this;return new Promise(function(callback){$.ajax({url:'https://api.github.com'+url+'?access_token='+_this8.getApiToken(),type:'PUT',success:function success(result){callback(result);},error:function error(e){_this8.error(e);}});});} /**
+     */},{key:"put",value:function put(url){var _this8=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this8.getApiTokenString(),type:'PUT',success:function success(result){resolve(result);},error:function error(e){_this8.error(e);reject(e);}});});} /**
      * Error message
      *
      * @param {Object} error
-     */},{key:"error",value:function error(_error){if(_error){switch(_error.status){case 401:this.resetApiToken();break;default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(_error.statusText);}break;}console.log(_error);}} // ----------
+     */},{key:"error",value:function error(_error){if(_error){switch(_error.status){case 401:case 403:this.resetApiToken();break;default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(_error.statusText);}break;}console.log(_error);}} // ----------
 // Session methods
 // ----------
 /**
      * Resets the API token and reloads
-     */},{key:"resetApiToken",value:function resetApiToken(){localStorage.setItem('gitHubApiToken','');this.getApiToken();location.reload();} /**
+     */},{key:"resetApiToken",value:function resetApiToken(){localStorage.setItem('gitHubApiToken','');this.getApiToken();} /**
      * Gets the API token and prompts for one if needed
      * 
      * @returns {String} token
-     */},{key:"getApiToken",value:function getApiToken(){if(!localStorage.getItem('gitHubApiToken')){localStorage.setItem('gitHubApiToken',prompt('Please input API token'));}return localStorage.getItem('gitHubApiToken');} /**
+     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('gitHubApiToken');if(queryToken){return queryToken;}else if(this.isSpectating()){return '';}else {if(!localStorage.getItem('gitHubApiToken')){localStorage.setItem('gitHubApiToken',prompt('Please input API token'));}return localStorage.getItem('gitHubApiToken');}} /**
+     * Gets the API token string
+     *
+     * @param {Boolean} includeSuffix
+     *
+     * @returns {String} string
+     */},{key:"getApiTokenString",value:function getApiTokenString(includeSuffix){var token=this.getApiToken();if(!token){if(includeSuffix){return '?';}}else {if(includeSuffix){token+='&';}return '?access_token='+token;}} /**
      * Gets the currently logged in user object
      *
      * @returns {Promise} promise
-     */},{key:"getUser",value:function getUser(){var _this9=this;return new Promise(function(callback){_this9.get('/user').then(function(gitHubUser){if(Array.isArray(gitHubUser)){gitHubUser=gitHubUser[0];}var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};callback(user);});});} /**
+     */},{key:"getUser",value:function getUser(){var _this9=this;return new Promise(function(resolve,reject){_this9.get('/user').then(function(gitHubUser){if(Array.isArray(gitHubUser)){gitHubUser=gitHubUser[0];}var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};resolve(user);}).catch(function(e){if(_this9.isSpectating()){resolve({name:'',avatar:''});}else {reject(e);}});});} /**
      * Logs out the currently logged in user and reloads
      */},{key:"logOut",value:function logOut(){localStorage.setItem('gitHubApiToken','');location.reload();} // ----------
 // Resource getters
@@ -695,19 +696,19 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * Gets projects
      *
      * @returns {Promise} promise
-     */},{key:"getProjects",value:function getProjects(){var _this10=this;return new Promise(function(callback){_this10.get('/orgs/'+_this10.getOrg()+'/repos').then(function(repos){_this10.processProjects(repos);callback();});});} /**
+     */},{key:"getProjects",value:function getProjects(){var _this10=this;return new Promise(function(callback){_this10.get('/users/'+_this10.getUserName()+'/repos').then(function(repos){_this10.processProjects(repos);callback();});});} /**
      * Gets collaborators
      *
      * @returns {Promise} promise
-     */},{key:"getCollaborators",value:function getCollaborators(){var _this11=this;return new Promise(function(callback){_this11.get('/repos/'+_this11.getOrg()+'/'+_this11.getRepo()+'/collaborators').then(function(collaborators){_this11.processCollaborators(collaborators);callback();});});} /**
+     */},{key:"getCollaborators",value:function getCollaborators(){var _this11=this;return new Promise(function(resolve,reject){_this11.get('/repos/'+_this11.getUserName()+'/'+_this11.getRepo()+'/collaborators').then(function(collaborators){_this11.processCollaborators(collaborators);resolve();}).catch(function(e){if(_this11.isSpectating()){resolve([]);}else {reject(e);}});});} /**
      * Gets issues
      *
      * @returns {Promise} promise
-     */},{key:"getIssues",value:function getIssues(){var _this12=this;return new Promise(function(callback){_this12.get('/repos/'+_this12.getOrg()+'/'+_this12.getRepo()+'/issues','state=all',true).then(function(issues){_this12.processIssues(issues);callback();});});} /**
+     */},{key:"getIssues",value:function getIssues(){var _this12=this;return new Promise(function(callback){_this12.get('/repos/'+_this12.getUserName()+'/'+_this12.getRepo()+'/issues','state=all',true).then(function(issues){_this12.processIssues(issues);callback();});});} /**
      * Gets labels and caches them
      *
      * @returns {Promise} promise
-     */},{key:"getLabels",value:function getLabels(){var _this13=this;return new Promise(function(callback){if(!labelCache){_this13.get('/repos/'+_this13.getOrg()+'/'+_this13.getRepo()+'/labels').then(function(labels){labelCache=labels;callback(labelCache);});}else {callback(labelCache);}});} /**
+     */},{key:"getLabels",value:function getLabels(){var _this13=this;return new Promise(function(callback){if(!labelCache){_this13.get('/repos/'+_this13.getUserName()+'/'+_this13.getRepo()+'/labels').then(function(labels){labelCache=labels;callback(labelCache);});}else {callback(labelCache);}});} /**
      * Gets issue types
      *
      * @returns {Promise} promise
@@ -731,7 +732,7 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * Gets milestones
      *
      * @returns {Promise} promise
-     */},{key:"getMilestones",value:function getMilestones(){var _this19=this;return new Promise(function(callback){_this19.get('/repos/'+_this19.getOrg()+'/'+_this19.getRepo()+'/milestones').then(function(milestones){_this19.processMilestones(milestones);callback();});});} // ----------
+     */},{key:"getMilestones",value:function getMilestones(){var _this19=this;return new Promise(function(callback){_this19.get('/repos/'+_this19.getUserName()+'/'+_this19.getRepo()+'/milestones').then(function(milestones){_this19.processMilestones(milestones);callback();});});} // ----------
 // Resource adders
 // ----------
 /**
@@ -740,49 +741,49 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * @param {Object} issue
      *
      * @returns {Promise} promise
-     */},{key:"addIssue",value:function addIssue(issue){var _this20=this;return new Promise(function(callback){_this20.post('/repos/'+_this20.getOrg()+'/'+_this20.getRepo()+'/issues',_this20.convertIssue(issue)).then(function(){callback(issue);});});} /**
+     */},{key:"addIssue",value:function addIssue(issue){var _this20=this;return new Promise(function(callback){_this20.post('/repos/'+_this20.getUserName()+'/'+_this20.getRepo()+'/issues',_this20.convertIssue(issue)).then(function(){callback(issue);});});} /**
      * Adds collaborator
      *
      * @param {String} collaborator
      *
      * @returns {Promise} promise
-     */},{key:"addCollaborator",value:function addCollaborator(collaborator){var _this21=this;return new Promise(function(callback){_this21.put('/repos/'+_this21.getOrg()+'/'+_this21.getRepo()+'/collaborators/'+collaborator).then(function(){callback();});});} /**
+     */},{key:"addCollaborator",value:function addCollaborator(collaborator){var _this21=this;return new Promise(function(callback){_this21.put('/repos/'+_this21.getUserName()+'/'+_this21.getRepo()+'/collaborators/'+collaborator).then(function(){callback();});});} /**
      * Adds issue type
      *
      * @param {String} type
      *
      * @returns {Promise} promise
-     */},{key:"addIssueType",value:function addIssueType(type){var _this22=this;return new Promise(function(callback){_this22.post('/repos/'+_this22.getOrg()+'/'+_this22.getRepo()+'/labels',{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssueType",value:function addIssueType(type){var _this22=this;return new Promise(function(callback){_this22.post('/repos/'+_this22.getUserName()+'/'+_this22.getRepo()+'/labels',{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds issue priority
      *
      * @param {String} priority
      *
      * @returns {Promise} promise
-     */},{key:"addIssuePriority",value:function addIssuePriority(priority){var _this23=this;return new Promise(function(callback){_this23.post('/repos/'+_this23.getOrg()+'/'+_this23.getRepo()+'/labels',{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssuePriority",value:function addIssuePriority(priority){var _this23=this;return new Promise(function(callback){_this23.post('/repos/'+_this23.getUserName()+'/'+_this23.getRepo()+'/labels',{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds issue estimate
      *
      * @param {String} estimate
      *
      * @returns {Promise} promise
-     */},{key:"addIssueEstimate",value:function addIssueEstimate(estimate){var _this24=this;return new Promise(function(callback){_this24.post('/repos/'+_this24.getOrg()+'/'+_this24.getRepo()+'/labels',{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssueEstimate",value:function addIssueEstimate(estimate){var _this24=this;return new Promise(function(callback){_this24.post('/repos/'+_this24.getUserName()+'/'+_this24.getRepo()+'/labels',{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds issue column
      *
      * @param {String} column
      *
      * @returns {Promise} promise
-     */},{key:"addIssueColumn",value:function addIssueColumn(column){var _this25=this;return new Promise(function(callback){_this25.post('/repos/'+_this25.getOrg()+'/'+_this25.getRepo()+'/labels',{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssueColumn",value:function addIssueColumn(column){var _this25=this;return new Promise(function(callback){_this25.post('/repos/'+_this25.getUserName()+'/'+_this25.getRepo()+'/labels',{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds milestone 
      *
      * @param {Object} milestone
      *
      * @returns {Promise} promise
-     */},{key:"addMilestone",value:function addMilestone(milestone){var _this26=this;return new Promise(function(callback){_this26.post('/repos/'+_this26.getOrg()+'/'+_this26.getRepo()+'/milestones',_this26.convertMilestone(milestone)).then(function(){callback();});});} /**
+     */},{key:"addMilestone",value:function addMilestone(milestone){var _this26=this;return new Promise(function(callback){_this26.post('/repos/'+_this26.getUserName()+'/'+_this26.getRepo()+'/milestones',_this26.convertMilestone(milestone)).then(function(){callback();});});} /**
      * Adds version
      *
      * @param {String} version
      *
      * @returns {Promise} promise
-     */},{key:"addVersion",value:function addVersion(version){var _this27=this;return new Promise(function(callback){_this27.post('/repos/'+_this27.getOrg()+'/'+_this27.getRepo()+'/labels',{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
+     */},{key:"addVersion",value:function addVersion(version){var _this27=this;return new Promise(function(callback){_this27.post('/repos/'+_this27.getUserName()+'/'+_this27.getRepo()+'/labels',{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
 // Resource removers
 // ----------
 /**
@@ -791,91 +792,91 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeCollaborator",value:function removeCollaborator(index){var _this28=this;return new Promise(function(callback){_this28.delete('/repos/'+_this28.getOrg()+'/'+_this28.getRepo()+'/collaborators/'+window.resources.collaborators[index]).then(function(){callback();});});} /**
+     */},{key:"removeCollaborator",value:function removeCollaborator(index){var _this28=this;return new Promise(function(callback){_this28.delete('/repos/'+_this28.getUserName()+'/'+_this28.getRepo()+'/collaborators/'+window.resources.collaborators[index]).then(function(){callback();});});} /**
      * Removes issue type
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssueType",value:function removeIssueType(index){var _this29=this;return new Promise(function(callback){_this29.delete('/repos/'+_this29.getOrg()+'/'+_this29.getRepo()+'/labels/type:'+window.resources.issueTypes[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssueType",value:function removeIssueType(index){var _this29=this;return new Promise(function(callback){_this29.delete('/repos/'+_this29.getUserName()+'/'+_this29.getRepo()+'/labels/type:'+window.resources.issueTypes[index]).then(function(){callback();});});} /**
      * Removes issue priority
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssuePriority",value:function removeIssuePriority(index){var _this30=this;return new Promise(function(callback){_this30.delete('/repos/'+_this30.getOrg()+'/'+_this30.getRepo()+'/labels/priority:'+window.resources.issuePriorities[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssuePriority",value:function removeIssuePriority(index){var _this30=this;return new Promise(function(callback){_this30.delete('/repos/'+_this30.getUserName()+'/'+_this30.getRepo()+'/labels/priority:'+window.resources.issuePriorities[index]).then(function(){callback();});});} /**
      * Removes issue estimate
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssueEstimate",value:function removeIssueEstimate(index){var _this31=this;return new Promise(function(callback){_this31.delete('/repos/'+_this31.getOrg()+'/'+_this31.getRepo()+'/labels/estimate:'+window.resources.issueEstimates[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssueEstimate",value:function removeIssueEstimate(index){var _this31=this;return new Promise(function(callback){_this31.delete('/repos/'+_this31.getUserName()+'/'+_this31.getRepo()+'/labels/estimate:'+window.resources.issueEstimates[index]).then(function(){callback();});});} /**
      * Removes issue column
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssueColumn",value:function removeIssueColumn(index){var _this32=this;return new Promise(function(callback){_this32.delete('/repos/'+_this32.getOrg()+'/'+_this32.getRepo()+'/labels/column:'+window.resources.issueColumns[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssueColumn",value:function removeIssueColumn(index){var _this32=this;return new Promise(function(callback){_this32.delete('/repos/'+_this32.getUserName()+'/'+_this32.getRepo()+'/labels/column:'+window.resources.issueColumns[index]).then(function(){callback();});});} /**
      * Removes milestone 
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeMilestone",value:function removeMilestone(index){var _this33=this;return new Promise(function(callback){_this33.delete('/repos/'+_this33.getOrg()+'/'+_this33.getRepo()+'/milestones/'+(parseInt(index)+1)).then(function(){callback();});});} /**
+     */},{key:"removeMilestone",value:function removeMilestone(index){var _this33=this;return new Promise(function(callback){_this33.delete('/repos/'+_this33.getUserName()+'/'+_this33.getRepo()+'/milestones/'+(parseInt(index)+1)).then(function(){callback();});});} /**
      * Removes version
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeVersion",value:function removeVersion(index){var _this34=this;return new Promise(function(callback){_this34.delete('/repos/'+_this34.getOrg()+'/'+_this34.getRepo()+'/labels/version:'+window.resources.versions[index]).then(function(){callback();});});} // ----------
+     */},{key:"removeVersion",value:function removeVersion(index){var _this34=this;return new Promise(function(callback){_this34.delete('/repos/'+_this34.getUserName()+'/'+_this34.getRepo()+'/labels/version:'+window.resources.versions[index]).then(function(){callback();});});} // ----------
 // Resource updaters
 // ----------
 /**
      * Update issue
      *
      * @param {Object} issue
-     */},{key:"updateIssue",value:function updateIssue(issue){var _this35=this;return new Promise(function(callback){_this35.patch('/repos/'+_this35.getOrg()+'/'+_this35.getRepo()+'/issues/'+(issue.index+1),_this35.convertIssue(issue)).then(function(){callback();});});} /**
+     */},{key:"updateIssue",value:function updateIssue(issue){var _this35=this;return new Promise(function(callback){_this35.patch('/repos/'+_this35.getUserName()+'/'+_this35.getRepo()+'/issues/'+(issue.index+1),_this35.convertIssue(issue)).then(function(){callback();});});} /**
      * Updates milestone 
      *
      * @param {Object} milestone
      *
      * @returns {Promise} promise
-     */},{key:"updateMilestone",value:function updateMilestone(milestone){var _this36=this;return new Promise(function(callback){_this36.patch('/repos/'+_this36.getOrg()+'/'+_this36.getRepo()+'/milestones/'+(parseInt(milestone.index)+1),_this36.convertMilestone(milestone)).then(function(){callback();});});} /**
+     */},{key:"updateMilestone",value:function updateMilestone(milestone){var _this36=this;return new Promise(function(callback){_this36.patch('/repos/'+_this36.getUserName()+'/'+_this36.getRepo()+'/milestones/'+(parseInt(milestone.index)+1),_this36.convertMilestone(milestone)).then(function(){callback();});});} /**
      * Updates issue type
      *
      * @param {String} type
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssueType",value:function updateIssueType(type,previousName){var _this37=this;return new Promise(function(callback){_this37.patch('/repos/'+_this37.getOrg()+'/'+_this37.getRepo()+'/labels/type:'+previousName,{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssueType",value:function updateIssueType(type,previousName){var _this37=this;return new Promise(function(callback){_this37.patch('/repos/'+_this37.getUserName()+'/'+_this37.getRepo()+'/labels/type:'+previousName,{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates issue priority
      *
      * @param {String} priority
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssuePriority",value:function updateIssuePriority(priority,previousName){var _this38=this;return new Promise(function(callback){_this38.patch('/repos/'+_this38.getOrg()+'/'+_this38.getRepo()+'/labels/priority:'+previousName,{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssuePriority",value:function updateIssuePriority(priority,previousName){var _this38=this;return new Promise(function(callback){_this38.patch('/repos/'+_this38.getUserName()+'/'+_this38.getRepo()+'/labels/priority:'+previousName,{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates issue estimate
      *
      * @param {String} estimate
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssueEstimate",value:function updateIssueEstimate(estimate,previousName){var _this39=this;return new Promise(function(callback){_this39.patch('/repos/'+_this39.getOrg()+'/'+_this39.getRepo()+'/labels/estimate:'+previousName,{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssueEstimate",value:function updateIssueEstimate(estimate,previousName){var _this39=this;return new Promise(function(callback){_this39.patch('/repos/'+_this39.getUserName()+'/'+_this39.getRepo()+'/labels/estimate:'+previousName,{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates issue column
      *
      * @param {String} column
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssueColumn",value:function updateIssueColumn(column,previousName){var _this40=this;return new Promise(function(callback){_this40.patch('/repos/'+_this40.getOrg()+'/'+_this40.getRepo()+'/labels/column:'+previousName,{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssueColumn",value:function updateIssueColumn(column,previousName){var _this40=this;return new Promise(function(callback){_this40.patch('/repos/'+_this40.getUserName()+'/'+_this40.getRepo()+'/labels/column:'+previousName,{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates version
      *
      * @param {String} version
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateVersion",value:function updateVersion(version,previousName){var _this41=this;return new Promise(function(callback){_this41.patch('/repos/'+_this41.getOrg()+'/'+_this41.getRepo()+'/labels/version:'+previousName,{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
+     */},{key:"updateVersion",value:function updateVersion(version,previousName){var _this41=this;return new Promise(function(callback){_this41.patch('/repos/'+_this41.getUserName()+'/'+_this41.getRepo()+'/labels/version:'+previousName,{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
 // Resource processing methods
 // ----------
 /**
@@ -937,18 +938,18 @@ if(issueColumn&&issueColumn!='to do'&&issueColumn!='done'){gitHubIssue.labels.pu
      *
      * @param {Issue} issue
      * @param {String} text
-     */},{key:"addIssueComment",value:function addIssueComment(issue,text){var _this42=this;return new Promise(function(callback){_this42.post('/repos/'+_this42.getOrg()+'/'+_this42.getRepo()+'/issues/'+(issue.index+1)+'/comments',{body:text}).then(function(){callback();});});} /**
+     */},{key:"addIssueComment",value:function addIssueComment(issue,text){var _this42=this;return new Promise(function(callback){_this42.post('/repos/'+_this42.getUserName()+'/'+_this42.getRepo()+'/issues/'+(issue.index+1)+'/comments',{body:text}).then(function(){callback();});});} /**
      * Update issue comment
      *
      * @param {Issue} issue
      * @param {Object} comment
-     */},{key:"updateIssueComment",value:function updateIssueComment(issue,comment){var _this43=this;return new Promise(function(callback){_this43.patch('/repos/'+_this43.getOrg()+'/'+_this43.getRepo()+'/issues/comments/'+comment.index,{body:comment.text}).then(function(){callback();});});} /**
+     */},{key:"updateIssueComment",value:function updateIssueComment(issue,comment){var _this43=this;return new Promise(function(callback){_this43.patch('/repos/'+_this43.getUserName()+'/'+_this43.getRepo()+'/issues/comments/'+comment.index,{body:comment.text}).then(function(){callback();});});} /**
      * Get issue comments
      *
      * @param {Object} issue
      *
      * @returns {Promise} promise
-     */},{key:"getIssueComments",value:function getIssueComments(issue){var _this44=this;return new Promise(function(callback){_this44.get('/repos/'+_this44.getOrg()+'/'+_this44.getRepo()+'/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion13=true;var _didIteratorError13=false;var _iteratorError13=undefined;try{for(var _iterator13=gitHubComments[Symbol.iterator](),_step13;!(_iteratorNormalCompletion13=(_step13=_iterator13.next()).done);_iteratorNormalCompletion13=true){var gitHubComment=_step13.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body,index:gitHubComment.id};comments.push(comment);}}catch(err){_didIteratorError13=true;_iteratorError13=err;}finally {try{if(!_iteratorNormalCompletion13&&_iterator13.return){_iterator13.return();}}finally {if(_didIteratorError13){throw _iteratorError13;}}}callback(comments);});});}}]);return GitHubApi;}(ApiHelper);module.exports=GitHubApi;},{"../../../src/client/js/helpers/ApiHelper":16}],14:[function(require,module,exports){'use strict'; // Libs
+     */},{key:"getIssueComments",value:function getIssueComments(issue){var _this44=this;return new Promise(function(callback){_this44.get('/repos/'+_this44.getUserName()+'/'+_this44.getRepo()+'/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion13=true;var _didIteratorError13=false;var _iteratorError13=undefined;try{for(var _iterator13=gitHubComments[Symbol.iterator](),_step13;!(_iteratorNormalCompletion13=(_step13=_iterator13.next()).done);_iteratorNormalCompletion13=true){var gitHubComment=_step13.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body,index:gitHubComment.id};comments.push(comment);}}catch(err){_didIteratorError13=true;_iteratorError13=err;}finally {try{if(!_iteratorNormalCompletion13&&_iterator13.return){_iterator13.return();}}finally {if(_didIteratorError13){throw _iteratorError13;}}}callback(comments);});});}}]);return GitHubApi;}(ApiHelper);module.exports=GitHubApi;},{"../../../src/client/js/helpers/ApiHelper":16}],14:[function(require,module,exports){'use strict'; // Libs
 require('exomon');window.Promise=require('bluebird');window.marked=require('marked'); // Helpers
 window.ResourceHelper=require('./helpers/ResourceHelper');window.SettingsHelper=require('./helpers/SettingsHelper');window.InputHelper=require('./helpers/InputHelper');window.DebugHelper=require('./helpers/DebugHelper');window.debug=window.DebugHelper;window.debug.verbosity=1;var GitHubApi=require('../../../plugins/github/js/GitHubApi');window.ApiHelper=new GitHubApi(); // Models
 window.Issue=require('./models/Issue'); // Views
@@ -965,12 +966,14 @@ Date.prototype.getMonthName=function(){var month=['January','February','March','
 window.prettyName=function(name){var prettyName=name;for(var i in prettyName){if(i==0){prettyName=prettyName.substring(0,1).toUpperCase()+prettyName.substring(1);}else if(prettyName[i]==prettyName[i].toUpperCase()){prettyName=prettyName.substring(0,i)+' '+prettyName.substring(i);}}return prettyName;}; // Pretty date
 window.prettyDate=function(date,separator){var prettyDate='';if(date){if(date.constructor===String){date=new Date(date);}date.floor();separator=separator||'.';prettyDate=date.getFullYear()+separator+(date.getMonth()+1)+separator+date.getDate();}return prettyDate;}; // Spinner
 window.spinner=function(active){$('.spinner-backdrop').remove();if(active){$('body').append(_.div({class:'spinner-backdrop'},_.div({class:'spinner-container'},_.span({class:'spinner-icon fa fa-refresh'}))));}}; // Scroll on page
-window.scroll=function(amount){var current=$(document).scrollTop();$(document).scrollTop(current+amount);};},{}],16:[function(require,module,exports){'use strict';var ApiHelper=function(){function ApiHelper(){_classCallCheck(this,ApiHelper);}_createClass(ApiHelper,[{key:"checkConnection", // ----------
+window.scroll=function(amount){var current=$(document).scrollTop();$(document).scrollTop(current+amount);};},{}],16:[function(require,module,exports){'use strict';var ApiHelper=function(){function ApiHelper(){_classCallCheck(this,ApiHelper);}_createClass(ApiHelper,[{key:"isSpectating", // ----------
 // Checkers
 // ----------
 /**
+     * Gets whether we're in spectator mode
+     */value:function isSpectating(){return Router.query('spectate')=='true';} /**
      * Check whether the connection to the source has been made
-     */value:function checkConnection(){return new Promise(function(callback){callback();});} // ----------
+     */},{key:"checkConnection",value:function checkConnection(){return new Promise(function(callback){callback();});} // ----------
 // Resource getters
 // ----------
 /**
@@ -1305,7 +1308,7 @@ if(type!='projects'){prefix=localStorage.getItem('settings:projects:current')+pr
      *
      * @returns {String} value
      */},{key:"get",value:function get(type,key,defaultValue,parse){var prefix='settings'; // Exceptions for types not managed on a project basis
-if(type!='projects'){prefix=localStorage.getItem('settings:projects:current')+prefix+':';}var result=localStorage.getItem(prefix+':'+type+':'+key);if(result==='null'||result===null||result===undefined||result==='undefined'||typeof result==='undefined'){SettingsHelper.set(type,key,defaultValue,parse);result=defaultValue||false;}if(parse){result=JSON.parse(result);}return result;} /**
+if(type!='projects'){prefix=localStorage.getItem('settings:projects:current')+prefix+':';}var result=localStorage.getItem(prefix+':'+type+':'+key);if(result==='null'||result===null||result===undefined||result==='undefined'||typeof result==='undefined'){SettingsHelper.set(type,key,defaultValue,parse);result=defaultValue||false;}if(parse){try{result=JSON.parse(result);}catch(e){debug.warning(e.message,this);}}return result;} /**
      * Sanity check
      *
      * @returns {Boolean} isValid
@@ -1342,7 +1345,7 @@ if(resourceKey=='assignee'){resourceKey='collaborator';} // Append 's' for plura
 resourceKey+='s'; // Correct grammar
 resourceKey=resourceKey.replace('ys','ies');var resource=resources[resourceKey]; // If we didn't find the resource, it's likely that we just need to capitalise it and prepend 'issue'
 // For example: 'type' should be 'issueType' when referring to the resource
-if(!resource){resourceKey='issue'+resourceKey.substring(0,1).toUpperCase()+resourceKey.substring(1);resource=resources[resourceKey];}var $filter=_.div({class:'filter'},_.div({class:'select-container key'},_.select({},_.each(issueKeys,function(i,key){return _.option({value:key,selected:key==filter.key},key);})).change(function(e){filter.key=$filter.find('.key select').val();filter.value=null;_this46.onChange(i);})),_.div({class:'select-container operator'},_.select({},_.each(_this46.getOperators(),function(i,operator){return _.option({value:operator},operator);})).val(filter.operator||'!=').change(function(e){filter.operator=$filter.find('.operator select').val();_this46.onChange(i);})),_.div({class:'select-container value'},_.select({},_.each(resource,function(i,value){var valueName=value;if(value.title){valueName=value.title;}if(value.name){valueName=value.name;}var isSelected=valueName==filter.value;if(!filter.value&&i==0){isSelected=true;}return _.option({value:valueName,selected:isSelected},valueName);})).change(function(e){filter.value=$filter.find('.value select').val();_this46.onChange(i);})),_.button({class:'btn-remove btn-transparent'},_.span({class:'fa fa-remove'})).click(function(){_this46.onClickRemove(i);}));return $filter;})),_.div({class:'button-container'},_.if(this.model.length<this.MAX_FILTERS,_.button({class:'btn-transparent'},_.span({class:'fa fa-plus'})).click(function(){_this46.onClickAdd();}))));};},{}],24:[function(require,module,exports){module.exports=function render(){var _this47=this;return _.div({class:'issue-editor','data-index':this.model.index,'data-type':resources.issueTypes[this.model.type]},_.div({class:'header'},_.div({class:'drag-handle'},_.span({class:'fa fa-bars'})).on('mousedown',function(e){_this47.onClickDragHandle(e);}),_.div({class:'assignee-avatar'},this.getAssigneeAvatar()),_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa fa-minus-circle'}),_.span({class:'fa fa-plus-circle'})).click(function(e){_this47.onClickToggle(e);}),_.div({class:'issue-index'},this.model.index.toString()),this.getPriorityIndicator(),_.h4({},_.span({class:'btn-edit'},this.model.title).click(this.onClickEdit),_.input({type:'text',class:'selectable edit hidden btn-transparent','data-property':'title',value:this.model.title}).change(function(){_this47.onChange();_this47.$element.find('.header .btn-edit').html(_this47.model.title);}).blur(this.onBlur))).click(function(e){_this47.onClickElement(e);}),_.div({class:'meta'},_.div({class:'multi-edit-notification'},'Now editing multiple issues'),_.div({class:'meta-field type'+(window.resources.issueTypes.length<1?' hidden':'')},_.label('Type'),_.select({'data-property':'type'},_.each(window.resources.issueTypes,function(i,type){return _.option({value:i},type);})).change(function(){_this47.onChange();}).val(this.model.type),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.div({class:'meta-field priority'+(window.resources.issuePriorities.length<1?' hidden':'')},_.label('Priority'),_.select({'data-property':'priority'},_.each(window.resources.issuePriorities,function(i,priority){return _.option({value:i},priority);})).change(function(){_this47.onChange();}).val(this.model.priority),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.div({class:'meta-field assignee'},_.label('Assignee'),_.select({'data-property':'assignee'},_.option({value:null},'(unassigned)'),_.each(window.resources.collaborators,function(i,collaborator){return _.option({value:i},collaborator.name);})).change(function(){_this47.onChange();}).val(this.model.assignee),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.div({class:'meta-field version'+(window.resources.versions.length<1?' hidden':'')},_.label('Version'),_.select({'data-property':'version'},_.each(window.resources.versions,function(i,version){return _.option({value:i},version);})).change(function(){_this47.onChange();}).val(this.model.version),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.div({class:'meta-field estimate'+(window.resources.issueEstimates.length<1?' hidden':'')},_.label('Estimate'),_.select({'data-property':'estimate'},_.each(window.resources.issueEstimates,function(i,estimate){return _.option({value:i},estimate);})).change(function(){_this47.onChange();}).val(this.model.estimate),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.div({class:'multi-edit-actions'},_.button('Cancel').click(function(){_this47.onClickMultiEditCancel();}),_.button('Apply').click(function(){_this47.onClickMultiEditApply();}))),_.div({class:'body'},_.div({class:'btn-edit'},markdownToHtml(this.model.description)).click(this.onClickEdit),_.textarea({class:'selectable edit hidden btn-transparent','data-property':'description'},this.model.description).change(function(){_this47.onChange();_this47.$element.find('.body .btn-edit').html(markdownToHtml(_this47.model.description)||'');}).blur(this.onBlur)),_.div({class:'comments'}),_.div({class:'add-comment'},_.textarea({class:'btn-transparent',placeholder:'Add comment here...'}),_.button({},'Comment').click(function(){_this47.onClickComment();})));};},{}],25:[function(require,module,exports){'use strict';module.exports=function render(){var _this48=this;return _.div({class:'milestone-editor '+SettingsHelper.get('milestone',this.model.index),'data-index':this.model.index},_.div({class:'header'},_.div({class:'progress-bar',style:'width: '+this.getPercentComplete()+'%'}),_.div({class:'title'},_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa fa-chevron-right'}),_.span({class:'fa fa-chevron-down'}),_.h4(this.model.title),_.p(this.model.description)).click(function(){_this48.onClickToggle();})),_.div({class:'stats'},_.if(this.model.endDate,_.span({class:'due-date'},_.span({class:'fa fa-calendar'}),_.span({class:'date'},prettyDate(this.model.endDate)), // No time left
+if(!resource){resourceKey='issue'+resourceKey.substring(0,1).toUpperCase()+resourceKey.substring(1);resource=resources[resourceKey];}var $filter=_.div({class:'filter'},_.div({class:'select-container key'},_.select({},_.each(issueKeys,function(i,key){return _.option({value:key,selected:key==filter.key},key);})).change(function(e){filter.key=$filter.find('.key select').val();filter.value=null;_this46.onChange(i);})),_.div({class:'select-container operator'},_.select({},_.each(_this46.getOperators(),function(i,operator){return _.option({value:operator},operator);})).val(filter.operator||'!=').change(function(e){filter.operator=$filter.find('.operator select').val();_this46.onChange(i);})),_.div({class:'select-container value'},_.select({},_.each(resource,function(i,value){var valueName=value;if(value.title){valueName=value.title;}if(value.name){valueName=value.name;}var isSelected=valueName==filter.value;if(!filter.value&&i==0){isSelected=true;}return _.option({value:valueName,selected:isSelected},valueName);})).change(function(e){filter.value=$filter.find('.value select').val();_this46.onChange(i);})),_.button({class:'btn-remove btn-transparent'},_.span({class:'fa fa-remove'})).click(function(){_this46.onClickRemove(i);}));return $filter;})),_.div({class:'button-container'},_.if(this.model.length<this.MAX_FILTERS,_.button({class:'btn-transparent'},_.span({class:'fa fa-plus'})).click(function(){_this46.onClickAdd();}))));};},{}],24:[function(require,module,exports){module.exports=function render(){var _this47=this;return _.div({class:'issue-editor','data-index':this.model.index,'data-type':resources.issueTypes[this.model.type]},_.div({class:'header'},_.div({class:'drag-handle'},_.span({class:'fa fa-bars'})).on('mousedown',function(e){_this47.onClickDragHandle(e);}),_.if(!ApiHelper.isSpectating(),_.div({class:'assignee-avatar'},this.getAssigneeAvatar())),_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa fa-minus-circle'}),_.span({class:'fa fa-plus-circle'})).click(function(e){_this47.onClickToggle(e);}),_.div({class:'issue-index'},this.model.index.toString()),this.getPriorityIndicator(),_.h4({},_.span({class:'btn-edit'},this.model.title).click(this.onClickEdit),_.input({type:'text',class:'selectable edit hidden btn-transparent','data-property':'title',value:this.model.title}).change(function(){_this47.onChange();_this47.$element.find('.header .btn-edit').html(_this47.model.title);}).blur(this.onBlur))).click(function(e){_this47.onClickElement(e);}),_.div({class:'meta'},_.div({class:'multi-edit-notification'},'Now editing multiple issues'),_.div({class:'meta-field type'+(window.resources.issueTypes.length<1?' hidden':'')},_.label('Type'),_.select({'data-property':'type',disabled:ApiHelper.isSpectating()},_.each(window.resources.issueTypes,function(i,type){return _.option({value:i},type);})).change(function(){_this47.onChange();}).val(this.model.type),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.div({class:'meta-field priority'+(window.resources.issuePriorities.length<1?' hidden':'')},_.label('Priority'),_.select({'data-property':'priority',disabled:ApiHelper.isSpectating()},_.each(window.resources.issuePriorities,function(i,priority){return _.option({value:i},priority);})).change(function(){_this47.onChange();}).val(this.model.priority),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.if(window.resources.collaborators.length>0,_.div({class:'meta-field assignee'},_.label('Assignee'),_.select({'data-property':'assignee',disabled:ApiHelper.isSpectating()},_.option({value:null},'(unassigned)'),_.each(window.resources.collaborators,function(i,collaborator){return _.option({value:i},collaborator.name);})).change(function(){_this47.onChange();}).val(this.model.assignee),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);}))),_.div({class:'meta-field version'+(window.resources.versions.length<1?' hidden':'')},_.label('Version'),_.select({'data-property':'version',disabled:ApiHelper.isSpectating()},_.each(window.resources.versions,function(i,version){return _.option({value:i},version);})).change(function(){_this47.onChange();}).val(this.model.version),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.div({class:'meta-field estimate'+(window.resources.issueEstimates.length<1?' hidden':'')},_.label('Estimate'),_.select({'data-property':'estimate',disabled:ApiHelper.isSpectating()},_.each(window.resources.issueEstimates,function(i,estimate){return _.option({value:i},estimate);})).change(function(){_this47.onChange();}).val(this.model.estimate),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.div({class:'multi-edit-actions'},_.button('Cancel').click(function(){_this47.onClickMultiEditCancel();}),_.button('Apply').click(function(){_this47.onClickMultiEditApply();}))),_.div({class:'body'},_.div({class:'btn-edit'},markdownToHtml(this.model.description)).click(this.onClickEdit),_.textarea({class:'selectable edit hidden btn-transparent','data-property':'description'},this.model.description).change(function(){_this47.onChange();_this47.$element.find('.body .btn-edit').html(markdownToHtml(_this47.model.description)||'');}).blur(this.onBlur)),_.div({class:'comments'}),_.if(!ApiHelper.isSpectating(),_.div({class:'add-comment'},_.textarea({class:'btn-transparent',placeholder:'Add comment here...'}),_.button({},'Comment').click(function(){_this47.onClickComment();}))));};},{}],25:[function(require,module,exports){'use strict';module.exports=function render(){var _this48=this;return _.div({class:'milestone-editor '+SettingsHelper.get('milestone',this.model.index),'data-index':this.model.index},_.div({class:'header'},_.div({class:'progress-bar',style:'width: '+this.getPercentComplete()+'%'}),_.div({class:'title'},_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa fa-chevron-right'}),_.span({class:'fa fa-chevron-down'}),_.h4(this.model.title),_.p(this.model.description)).click(function(){_this48.onClickToggle();})),_.div({class:'stats'},_.if(this.model.endDate,_.span({class:'due-date'},_.span({class:'fa fa-calendar'}),_.span({class:'date'},prettyDate(this.model.endDate)), // No time left
 _.if(this.getRemainingDays()<1&&this.getPercentComplete()<100,_.span({class:'remaining warn-red'},this.getRemainingDays()+'d')), // Little time left
 _.if(this.getRemainingDays()>=1&&this.getRemainingDays()<3&&this.getPercentComplete()<100,_.span({class:'remaining warn-yellow'},this.getRemainingDays()+'d')), // More time left
 _.if(this.getRemainingDays()>=3&&this.getPercentComplete()<100,_.span({class:'remaining'},this.getRemainingDays()+'d')), // Complete
@@ -1405,7 +1408,7 @@ this.$element.find('.priority-indicator').replaceWith(this.getPriorityIndicator(
 this.$element.toggleClass('loading',true); // Update the issue though the API
 ApiHelper.updateIssue(this.model).then(function(){_this56.$element.toggleClass('loading',false);});} /**
      * Event: Click the dragging handle
-     */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this57=this;if(!InputHelper.isShiftDown){(function(){ // Set class on board container
+     */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this57=this;if(ApiHelper.isSpectating()){return;}if(!InputHelper.isShiftDown){(function(){ // Set class on board container
 $('.board-container').toggleClass('dragging',true); // Set element
 var $element=_this57.$element;if(_this57.usingMultiEdit()){$element=$('.issue-editor.selected');}else {} //IssueEditor.cancelMultiSelect();
 // Apply temporary CSS properties
@@ -1420,7 +1423,7 @@ $element.css({top:current.y+offset.y,left:current.x+offset.x}); // Scroll page i
 var scrollSpeed=5;if(current.y>viewport.y+viewport.h-100){scroll(1*scrollSpeed);}else if(current.y<viewport.y+100){scroll(-1*scrollSpeed);}}); // Document pointer release mouse button logic
 $(document).off('mouseup').on('mouseup',function(e){_this57.onReleaseDragHandle(e);});})();}} /**
      * Event: Release the dragging handle
-     */},{key:"onReleaseDragHandle",value:function onReleaseDragHandle(e){ // Unregister mouse events
+     */},{key:"onReleaseDragHandle",value:function onReleaseDragHandle(e){if(ApiHelper.isSpectating()){return;} // Unregister mouse events
 $(document).off('mouseup').off('mousemove'); // Set element
 var $element=this.$element;if(this.usingMultiEdit()){$element=$('.issue-editor.selected');} // Unset temporary classes and styling
 $('.board-container').toggleClass('dragging',false);$element.removeAttr('style'); // Place this element into the hovered column
@@ -1432,27 +1435,27 @@ ViewHelper.get('FilterEditor').applyFilters(); // Cancel multiselect
 IssueEditor.cancelMultiSelect(); // Update milestones progress
 var _iteratorNormalCompletion17=true;var _didIteratorError17=false;var _iteratorError17=undefined;try{for(var _iterator17=ViewHelper.getAll('MilestoneEditor')[Symbol.iterator](),_step17;!(_iteratorNormalCompletion17=(_step17=_iterator17.next()).done);_iteratorNormalCompletion17=true){var milestoneEditor=_step17.value;milestoneEditor.updateProgress();}}catch(err){_didIteratorError17=true;_iteratorError17=err;}finally {try{if(!_iteratorNormalCompletion17&&_iterator17.return){_iterator17.return();}}finally {if(_didIteratorError17){throw _iteratorError17;}}}} /**
      * Event: Fires on every change to a property
-     */},{key:"onChange",value:function onChange(){ // Only update values if we're not using multi edit
+     */},{key:"onChange",value:function onChange(){if(ApiHelper.isSpectating()){return;} // Only update values if we're not using multi edit
 if(!this.usingMultiEdit()){this.updateModel();this.updateDOM();this.sync(); // Update filters
 ViewHelper.get('FilterEditor').applyFilters();var _iteratorNormalCompletion18=true;var _didIteratorError18=false;var _iteratorError18=undefined;try{for(var _iterator18=ViewHelper.getAll('MilestoneEditor')[Symbol.iterator](),_step18;!(_iteratorNormalCompletion18=(_step18=_iterator18.next()).done);_iteratorNormalCompletion18=true){var milestoneEditor=_step18.value;if(milestoneEditor.model.index==this.model.milestone){milestoneEditor.updateProgress();break;}}}catch(err){_didIteratorError18=true;_iteratorError18=err;}finally {try{if(!_iteratorNormalCompletion18&&_iterator18.return){_iterator18.return();}}finally {if(_didIteratorError18){throw _iteratorError18;}}}}} /**
      * Event: Click multi edit apply button
-     */},{key:"onClickMultiEditApply",value:function onClickMultiEditApply(){this.updateModel();this.updateDOM();this.sync(); // Look for other IssueEditor views and update them as needed
+     */},{key:"onClickMultiEditApply",value:function onClickMultiEditApply(){if(ApiHelper.isSpectating()){return;}this.updateModel();this.updateDOM();this.sync(); // Look for other IssueEditor views and update them as needed
 if(this.usingMultiEdit()){var _iteratorNormalCompletion19=true;var _didIteratorError19=false;var _iteratorError19=undefined;try{for(var _iterator19=ViewHelper.getAll('IssueEditor')[Symbol.iterator](),_step19;!(_iteratorNormalCompletion19=(_step19=_iterator19.next()).done);_iteratorNormalCompletion19=true){var view=_step19.value;if(view!=this&&view.$element.hasClass('selected')){view.model.type=this.getProperty('type',true)||view.model.type;view.model.priority=this.getProperty('priority',true)||view.model.priority;view.model.assignee=this.getProperty('assignee',true)||view.model.assignee;view.model.version=this.getProperty('version',true)||view.model.version;view.model.estimate=this.getProperty('estimate',true)||view.model.estimate;view.updateDOM();view.sync();}}}catch(err){_didIteratorError19=true;_iteratorError19=err;}finally {try{if(!_iteratorNormalCompletion19&&_iterator19.return){_iterator19.return();}}finally {if(_didIteratorError19){throw _iteratorError19;}}}} // Update filters
 ViewHelper.get('FilterEditor').applyFilters();} /**
      * Event: Click multi edit cancel button
-     */},{key:"onClickMultiEditCancel",value:function onClickMultiEditCancel(){this.$element.toggleClass('expanded',false);IssueEditor.cancelMultiSelect();} /**
+     */},{key:"onClickMultiEditCancel",value:function onClickMultiEditCancel(){if(ApiHelper.isSpectating()){return;}this.$element.toggleClass('expanded',false);IssueEditor.cancelMultiSelect();} /**
      * Event: Fires on changing a checkbox
-     */},{key:"onChangeCheckbox",value:function onChangeCheckbox(e){e.preventDefault();e.stopPropagation();if(this.$element.hasClass('selected')){this.$element.find('.multi-edit-toggle').each(function(i){var otherCheckbox=$('.issue-editor.selected .multi-edit-toggle')[i];otherCheckbox.checked=this.checked;});}} /**
+     */},{key:"onChangeCheckbox",value:function onChangeCheckbox(e){if(ApiHelper.isSpectating()){return;}e.preventDefault();e.stopPropagation();if(this.$element.hasClass('selected')){this.$element.find('.multi-edit-toggle').each(function(i){var otherCheckbox=$('.issue-editor.selected .multi-edit-toggle')[i];otherCheckbox.checked=this.checked;});}} /**
      * Event: Click the edit button of a field
-     */},{key:"onClickEdit",value:function onClickEdit($btn){if(!InputHelper.isShiftDown&&!$(this).parents('.issue-editor').hasClass('selected')){$(this).toggleClass('hidden',true).siblings('.edit').toggleClass('hidden',false).focus().select();}} /**
+     */},{key:"onClickEdit",value:function onClickEdit($btn){if(ApiHelper.isSpectating()){return;}if(!InputHelper.isShiftDown&&!$(this).parents('.issue-editor').hasClass('selected')){$(this).toggleClass('hidden',true).siblings('.edit').toggleClass('hidden',false).focus().select();}} /**
      * Event: Click the comment button
-     */},{key:"onClickComment",value:function onClickComment(){var _this58=this;var text=this.$element.find('.add-comment textarea').val();this.$element.toggleClass('loading',true);ApiHelper.addIssueComment(this.model,text).then(function(){_this58.getComments();});} /**
+     */},{key:"onClickComment",value:function onClickComment(){var _this58=this;if(ApiHelper.isSpectating()){return;}var text=this.$element.find('.add-comment textarea').val();this.$element.toggleClass('loading',true);ApiHelper.addIssueComment(this.model,text).then(function(){_this58.getComments();});} /**
      * Event: Remove focus from input fields
-     */},{key:"onBlur",value:function onBlur(){$(this).toggleClass('hidden',true).siblings('.btn-edit').toggleClass('hidden',false);} /**
+     */},{key:"onBlur",value:function onBlur(){if(ApiHelper.isSpectating()){return;}$(this).toggleClass('hidden',true).siblings('.btn-edit').toggleClass('hidden',false);} /**
      * Event: Click entire container element
      *
      * @param {Object} event
-     */},{key:"onClickElement",value:function onClickElement(e){ // Check for shift key
+     */},{key:"onClickElement",value:function onClickElement(e){if(ApiHelper.isSpectating()){return;} // Check for shift key
 if(InputHelper.isShiftDown){e.preventDefault();e.stopPropagation();this.$element.toggleClass('selected');if(this.$element.hasClass('selected')){this.$element.toggleClass('expanded',false);} // If not trying to edit the title, allow select of one issue
 }else {if($(e.target).parents('.btn-edit').length<1){$('.issue-editor.selected').removeClass('selected');this.$element.toggleClass('selected',true);}}this.$element.toggleClass('expanded',false);} /**
      * Gets priority icon
@@ -1486,7 +1489,7 @@ if(InputHelper.isShiftDown){e.preventDefault();e.stopPropagation();this.$element
  * @class View Navbar
  */var Navbar=function(_View5){_inherits(Navbar,_View5);function Navbar(params){_classCallCheck(this,Navbar);var _this62=_possibleConstructorReturn(this,Object.getPrototypeOf(Navbar).call(this,params));_this62.template=require('../templates/Navbar');_this62.fetch();return _this62;} /**
      * Gets a list of links
-     */_createClass(Navbar,[{key:"getLinks",value:function getLinks(){return [{url:'/user/',icon:'user'},{url:'/projects/',handler:this.toggleProjectsList,icon:'folder'},{url:'/plan/',icon:'calendar'},{url:'/board/',icon:'columns'},{url:'/list/',icon:'list'},{url:'/settings/',icon:'cog',bottom:true}];} /**
+     */_createClass(Navbar,[{key:"getLinks",value:function getLinks(){var links=[];if(!ApiHelper.isSpectating()){links.push({url:'/user/',icon:'user'});}links.push({url:'/projects/',handler:this.toggleProjectsList,icon:'folder'});links.push({url:'/plan/',icon:'calendar'});links.push({url:'/board/',icon:'columns'});links.push({url:'/list/',icon:'list'});links.push({url:'/settings/',icon:'cog',bottom:true});return links;} /**
      * Toggles the projects list
      */},{key:"toggleProjectsList",value:function toggleProjectsList(){var $button=this.$element.find('.buttons button[data-url="/projects/"]');var $content=this.$element.find('.obscure .content');$button.toggleClass('active');var isActive=$button.hasClass('active');this.$element.toggleClass('out',isActive);$button.children('.fa').toggleClass('fa-folder-open',isActive).toggleClass('fa-folder',!isActive);if(isActive){ApiHelper.getProjects().then(function(){$content.empty().append(_.each(window.resources.projects,function(i,project){return new ProjectEditor({model:project}).$element;}));});}else {$content.empty();}} /**
      * Gets the full router URL
@@ -1500,7 +1503,7 @@ if(InputHelper.isShiftDown){e.preventDefault();e.stopPropagation();this.$element
      * @param {String} url
      */},{key:"onClickLink",value:function onClickLink(url){url=this.getFullUrl(url);if(url!=Router.url){this.$element.toggleClass('out',true);setTimeout(function(){location.hash=url;},400);}} /**
      * Slide navbar in
-     */},{key:"slideIn",value:function slideIn(){var url=Router.url.replace('/'+SettingsHelper.get('projects','current'),'');this.$element.find('button.active').removeClass('active');this.$element.find('button[data-url="'+url+'"]').toggleClass('active',true);this.$element.toggleClass('out',false);$('.navbar .obscure .content').empty();}}]);return Navbar;}(View);module.exports=Navbar;},{"../templates/Navbar":26}],35:[function(require,module,exports){'use strict';var PlanEditor=function(_View6){_inherits(PlanEditor,_View6);function PlanEditor(params){_classCallCheck(this,PlanEditor);var _this63=_possibleConstructorReturn(this,Object.getPrototypeOf(PlanEditor).call(this,params));_this63.currentYear=new Date().getFullYear();_this63.currentMonth=new Date().getMonth()+1;if(_this63.currentMonth.length==1){_this63.currentMonth='0'+_this63.currentMonth;}_this63.template=require('../templates/PlanEditor');_this63.init();return _this63;}_createClass(PlanEditor,[{key:"onClickYear",value:function onClickYear(year){this.currentYear=parseInt(year);this.render();}},{key:"onClickMonth",value:function onClickMonth(month){this.currentMonth=parseInt(month);this.render();}},{key:"updateUndatedBox",value:function updateUndatedBox(){if(this.getUndatedMilestones().length<1){$('.plan-editor .undated').remove();}}},{key:"getUndatedMilestones",value:function getUndatedMilestones(){var milestones=[];var _iteratorNormalCompletion24=true;var _didIteratorError24=false;var _iteratorError24=undefined;try{for(var _iterator24=resources.milestones[Symbol.iterator](),_step24;!(_iteratorNormalCompletion24=(_step24=_iterator24.next()).done);_iteratorNormalCompletion24=true){var milestone=_step24.value;if(!milestone.endDate){milestones.push(milestone);}}}catch(err){_didIteratorError24=true;_iteratorError24=err;}finally {try{if(!_iteratorNormalCompletion24&&_iterator24.return){_iterator24.return();}}finally {if(_didIteratorError24){throw _iteratorError24;}}}return milestones;}},{key:"getYears",value:function getYears(){var years=[];for(var i=new Date().getFullYear()-2;i<new Date().getFullYear()+4;i++){years.push({number:i});}return years;}},{key:"getMonths",value:function getMonths(){var months=[];for(var i=1;i<=12;i++){var num=i.toString();if(num.length==1){num='0'+num;}months.push({name:new Date('2016-'+num+'-01').getMonthName(),number:i});}return months;}},{key:"getWeekDays",value:function getWeekDays(){var weekdays=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];return weekdays;}},{key:"onClickAddMilestone",value:function onClickAddMilestone(date){var _this64=this;spinner(true);ResourceHelper.addResource('milestones',{title:'New milestone',endDate:date.toISOString()}).then(function(){_this64.render();spinner(false);});}},{key:"getWeeks",value:function getWeeks(){var weeks=[];var firstDay=new Date(this.currentYear,this.currentMonth,1);var firstWeek=firstDay.getWeek();var _iteratorNormalCompletion25=true;var _didIteratorError25=false;var _iteratorError25=undefined;try{for(var _iterator25=this.getDates()[Symbol.iterator](),_step25;!(_iteratorNormalCompletion25=(_step25=_iterator25.next()).done);_iteratorNormalCompletion25=true){var date=_step25.value;if(weeks.indexOf(date.getWeek())<0){weeks.push(date.getWeek());}}}catch(err){_didIteratorError25=true;_iteratorError25=err;}finally {try{if(!_iteratorNormalCompletion25&&_iterator25.return){_iterator25.return();}}finally {if(_didIteratorError25){throw _iteratorError25;}}}return weeks;}},{key:"getDates",value:function getDates(){var year=this.currentYear;var month=this.currentMonth;var dates=[];for(var i=1;i<=new Date(year,month,0).getDate();i++){var day=i.toString();if(day.length==1){day='0'+day;}if(month.toString().length==1){month='0'+month;}var date=new Date(year+'-'+month+'-'+day).floor();dates.push(date);}return dates;}},{key:"getDate",value:function getDate(week,weekday){var _iteratorNormalCompletion26=true;var _didIteratorError26=false;var _iteratorError26=undefined;try{for(var _iterator26=this.getDates()[Symbol.iterator](),_step26;!(_iteratorNormalCompletion26=(_step26=_iterator26.next()).done);_iteratorNormalCompletion26=true){var date=_step26.value;if(date.getWeek()==week&&date.getISODay()==weekday){return date;}}}catch(err){_didIteratorError26=true;_iteratorError26=err;}finally {try{if(!_iteratorNormalCompletion26&&_iterator26.return){_iterator26.return();}}finally {if(_didIteratorError26){throw _iteratorError26;}}}}},{key:"iterateDates",value:function iterateDates(renderFunction){var weekdays=this.getWeekDays();var weeks=this.getWeeks();var renders=[];for(var y=0;y<6;y++){for(var x=0;x<7;x++){var weekday=weekdays[x];var week=weeks[y];if(week&&weekday){var date=this.getDate(week,x);renders.push(renderFunction(date));}else {renders.push(renderFunction());}}}return renders;}}]);return PlanEditor;}(View);module.exports=PlanEditor;},{"../templates/PlanEditor":27}],36:[function(require,module,exports){'use strict';var PlanItemEditor=function(_View7){_inherits(PlanItemEditor,_View7);function PlanItemEditor(params){_classCallCheck(this,PlanItemEditor);var _this65=_possibleConstructorReturn(this,Object.getPrototypeOf(PlanItemEditor).call(this,params));_this65.template=require('../templates/PlanItemEditor');_this65.fetch();return _this65;} /**
+     */},{key:"slideIn",value:function slideIn(){var url=Router.url.replace('/'+SettingsHelper.get('projects','current'),'');this.$element.find('button.active').removeClass('active');this.$element.find('button[data-url="'+url+'"]').toggleClass('active',true);this.$element.toggleClass('out',false);$('.navbar .obscure .content').empty();}}]);return Navbar;}(View);module.exports=Navbar;},{"../templates/Navbar":26}],35:[function(require,module,exports){'use strict';var PlanEditor=function(_View6){_inherits(PlanEditor,_View6);function PlanEditor(params){_classCallCheck(this,PlanEditor);var _this63=_possibleConstructorReturn(this,Object.getPrototypeOf(PlanEditor).call(this,params));_this63.currentYear=new Date().getFullYear();_this63.currentMonth=new Date().getMonth()+1;if(_this63.currentMonth.length==1){_this63.currentMonth='0'+_this63.currentMonth;}_this63.template=require('../templates/PlanEditor');_this63.init();return _this63;}_createClass(PlanEditor,[{key:"onClickYear",value:function onClickYear(year){this.currentYear=parseInt(year);this.render();}},{key:"onClickMonth",value:function onClickMonth(month){this.currentMonth=parseInt(month);this.render();}},{key:"updateUndatedBox",value:function updateUndatedBox(){if(this.getUndatedMilestones().length<1){$('.plan-editor .undated').remove();}}},{key:"getUndatedMilestones",value:function getUndatedMilestones(){var milestones=[];var _iteratorNormalCompletion24=true;var _didIteratorError24=false;var _iteratorError24=undefined;try{for(var _iterator24=resources.milestones[Symbol.iterator](),_step24;!(_iteratorNormalCompletion24=(_step24=_iterator24.next()).done);_iteratorNormalCompletion24=true){var milestone=_step24.value;if(!milestone.endDate){milestones.push(milestone);}}}catch(err){_didIteratorError24=true;_iteratorError24=err;}finally {try{if(!_iteratorNormalCompletion24&&_iterator24.return){_iterator24.return();}}finally {if(_didIteratorError24){throw _iteratorError24;}}}return milestones;}},{key:"getYears",value:function getYears(){var years=[];for(var i=new Date().getFullYear()-2;i<new Date().getFullYear()+4;i++){years.push({number:i});}return years;}},{key:"getMonths",value:function getMonths(){var months=[];for(var i=1;i<=12;i++){var num=i.toString();if(num.length==1){num='0'+num;}months.push({name:new Date('2016-'+num+'-01').getMonthName(),number:i});}return months;}},{key:"getWeekDays",value:function getWeekDays(){var weekdays=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];return weekdays;}},{key:"onClickAddMilestone",value:function onClickAddMilestone(date){var _this64=this;if(ApiHelper.isSpectating()){return;}spinner(true);ResourceHelper.addResource('milestones',{title:'New milestone',endDate:date.toISOString()}).then(function(){_this64.render();spinner(false);});}},{key:"getWeeks",value:function getWeeks(){var weeks=[];var firstDay=new Date(this.currentYear,this.currentMonth,1);var firstWeek=firstDay.getWeek();var _iteratorNormalCompletion25=true;var _didIteratorError25=false;var _iteratorError25=undefined;try{for(var _iterator25=this.getDates()[Symbol.iterator](),_step25;!(_iteratorNormalCompletion25=(_step25=_iterator25.next()).done);_iteratorNormalCompletion25=true){var date=_step25.value;if(weeks.indexOf(date.getWeek())<0){weeks.push(date.getWeek());}}}catch(err){_didIteratorError25=true;_iteratorError25=err;}finally {try{if(!_iteratorNormalCompletion25&&_iterator25.return){_iterator25.return();}}finally {if(_didIteratorError25){throw _iteratorError25;}}}return weeks;}},{key:"getDates",value:function getDates(){var year=this.currentYear;var month=this.currentMonth;var dates=[];for(var i=1;i<=new Date(year,month,0).getDate();i++){var day=i.toString();if(day.length==1){day='0'+day;}if(month.toString().length==1){month='0'+month;}var date=new Date(year+'-'+month+'-'+day).floor();dates.push(date);}return dates;}},{key:"getDate",value:function getDate(week,weekday){var _iteratorNormalCompletion26=true;var _didIteratorError26=false;var _iteratorError26=undefined;try{for(var _iterator26=this.getDates()[Symbol.iterator](),_step26;!(_iteratorNormalCompletion26=(_step26=_iterator26.next()).done);_iteratorNormalCompletion26=true){var date=_step26.value;if(date.getWeek()==week&&date.getISODay()==weekday){return date;}}}catch(err){_didIteratorError26=true;_iteratorError26=err;}finally {try{if(!_iteratorNormalCompletion26&&_iterator26.return){_iterator26.return();}}finally {if(_didIteratorError26){throw _iteratorError26;}}}}},{key:"iterateDates",value:function iterateDates(renderFunction){var weekdays=this.getWeekDays();var weeks=this.getWeeks();var renders=[];for(var y=0;y<6;y++){for(var x=0;x<7;x++){var weekday=weekdays[x];var week=weeks[y];if(week&&weekday){var date=this.getDate(week,x);renders.push(renderFunction(date));}else {renders.push(renderFunction());}}}return renders;}}]);return PlanEditor;}(View);module.exports=PlanEditor;},{"../templates/PlanEditor":27}],36:[function(require,module,exports){'use strict';var PlanItemEditor=function(_View7){_inherits(PlanItemEditor,_View7);function PlanItemEditor(params){_classCallCheck(this,PlanItemEditor);var _this65=_possibleConstructorReturn(this,Object.getPrototypeOf(PlanItemEditor).call(this,params));_this65.template=require('../templates/PlanItemEditor');_this65.fetch();return _this65;} /**
      * Opens this milestone as a dialog
      */_createClass(PlanItemEditor,[{key:"openDialog",value:function openDialog(){var _this66=this;var prev={x:this.$element.offset().left,y:this.$element.offset().top,w:this.$element.width(),h:this.$element.height(),$parent:this.$element.parent()};this.positionBuffer=prev;$('body').append(this.$element);this.$element.css({position:'absolute',left:prev.x,top:prev.y,width:prev.w,height:prev.h,transition:'all 0.5s ease',overflow:'hidden'});setTimeout(function(){_this66.$element.removeAttr('style');_this66.$element.css({position:'absolute',left:'50%',top:'100px',transform:'translateX(-50%)',transition:'all 0.5s ease'});},1);} /**
      * Event: Change

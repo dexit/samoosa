@@ -5,6 +5,13 @@ class ApiHelper {
     // Checkers
     // ----------
     /**
+     * Gets whether we're in spectator mode
+     */
+    isSpectating() {
+        return Router.query('spectate') == 'true';
+    }
+    
+    /**
      * Check whether the connection to the source has been made
      */
     checkConnection() {

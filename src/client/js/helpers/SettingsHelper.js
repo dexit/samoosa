@@ -60,7 +60,11 @@ class SettingsHelper {
         }
         
         if(parse) {
-            result = JSON.parse(result);
+            try {
+                result = JSON.parse(result);
+            } catch(e) {
+                debug.warning(e.message, this);
+            }
         }
 
         return result;

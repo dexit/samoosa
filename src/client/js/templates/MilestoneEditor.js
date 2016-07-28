@@ -69,7 +69,7 @@ module.exports = function render() {
                                 }).$element;      
                             }            
                         }),
-                        _.if(columnIndex == 0,
+                        _.if(columnIndex == 0 && !ApiHelper.isSpectating(),
                             _.button({class: 'btn-new-issue'},
                                 'New issue ',
                                 _.span({class: 'fa fa-plus'})

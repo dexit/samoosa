@@ -65,7 +65,7 @@ class GitHubApi extends ApiHelper {
                     },
                     error: (e) => {
                         self.error(e);
-                        reject(new Error(e));
+                        reject(new Error(e.responseJSON.message));
                     }
                 });
             }
@@ -199,8 +199,6 @@ class GitHubApi extends ApiHelper {
                     } 
                     break;
             }
-
-            console.log(error);
         }
     }
 
@@ -232,7 +230,11 @@ class GitHubApi extends ApiHelper {
 
         } else {
             if(!localStorage.getItem('gitHubApiToken')) {
-                localStorage.setItem('gitHubApiToken', prompt('Please input API token'));
+                let token = prompt('Please input API token');
+
+                alert(token);
+
+                localStorage.setItem('gitHubApiToken', token);
             }
 
             return localStorage.getItem('gitHubApiToken');
@@ -312,13 +314,14 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getProjects() {
-        return new Promise((callback) => {
+        return new Promise((resolve, reject) => {
             this.get('/users/' + this.getUserName() + '/repos')
             .then((repos) => {
                 this.processProjects(repos);
 
-                callback();
-            });
+                resolve();
+            })
+            .catch(reject);
         });
     }
     

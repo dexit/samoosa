@@ -5,10 +5,15 @@ require('exomon');
 window.Promise = require('bluebird');
 window.marked = require('marked');
 
+Promise.onPossiblyUnhandledRejection((error, promise) => {
+    debug.warning(error, Promise);
+});
+
 // Helpers
 window.ResourceHelper = require('./helpers/ResourceHelper');
 window.SettingsHelper = require('./helpers/SettingsHelper');
 window.InputHelper = require('./helpers/InputHelper');
+window.IssueHelper = require('./helpers/IssueHelper');
 window.DebugHelper = require('./helpers/DebugHelper');
 window.debug = window.DebugHelper;
 window.debug.verbosity = 1;

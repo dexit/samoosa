@@ -921,21 +921,6 @@ class GitHubApi extends ApiHelper {
 
             window.resources.milestones[index] = milestone;
         }
-        
-        window.resources.milestones.sort((a, b) => {
-            a = new Date(a.endDate).floor();
-            b = new Date(b.endDate).floor();
-
-            if(a < b) {
-                return -1;
-            }
-            
-            if(a > b) {
-                return 1;
-            }
-
-            return 0;
-        });
     }
 
     /**

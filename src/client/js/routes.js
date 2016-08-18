@@ -70,7 +70,7 @@ Router.route('/:project/plan/', () => {
 });
 
 // Board
-Router.route('/:project/board/', () => {
+Router.route('/:project/board/:mode', () => {
     if(!SettingsHelper.check()) {
         return;
     }
@@ -81,55 +81,44 @@ Router.route('/:project/board/', () => {
         .then(() => {
             $('.workspace').remove();
 
+            // Append all milestones
             $('.app-container').append(
-                _.div({class: 'workspace board-container'},
+                _.div({class: 'workspace board-container ' + Router.params.mode},
                     new FilterEditor().$element,
                     _.each(window.resources.milestones, (i, milestone) => {
                         return new MilestoneEditor({
                             model: milestone,
                         }).$element;
-                    }),
-                    new MilestoneEditor({
-                        model: {
-                            title: 'Backlog',
-                        }
-                    }).$element
+                    })
                 )
             );
             
-            navbar.slideIn();
-        });
-    });
-});
+            // Sort milestones by end date
+            $('.app-container .board-container .milestone-editor').sort((a, b) => {
+                let aDate = new Date(a.getAttribute('data-end-date'));
+                let bDate = new Date(b.getAttribute('data-end-date'));
 
-// List
-Router.route('/:project/list/', () => {
-    if(!SettingsHelper.check()) {
-        return;
-    }
+                if(aDate < bDate) {
+                    return -1;
+                }
+                
+                if(aDate > bDate) {
+                    return 1;
+                }
 
-    ApiHelper.checkConnection()
-    .then(() => {
-        ApiHelper.getResources()
-        .then(() => {
-            $('.workspace').remove();
+                return 0;
+            }).detach().appendTo('.app-container .board-container');
 
-            $('.app-container').append(
-                _.div({class: 'workspace board-container list'},
-                    new FilterEditor().$element,
-                    _.each(window.resources.milestones, (i, milestone) => {
-                        return new MilestoneEditor({
-                            model: milestone,
-                        }).$element;
-                    }),
-                    new MilestoneEditor({
-                        model: {
-                            title: 'Backlog',
-                        }
-                    }).$element
-                )
+            // Append the unassigned items
+            $('.app-container .board-container').append(
+                new MilestoneEditor({
+                    model: {
+                        title: 'Unassigned',
+                        description: 'These issues have yet to be assigned to a milestone'
+                    }
+                }).$element
             );
-            
+
             navbar.slideIn();
         });
     });

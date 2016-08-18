@@ -136,3 +136,20 @@ window.scroll = function(amount) {
     $(document).scrollTop(current + amount);
 }
 
+// Sort array by date
+window.sortByDate = function(array, key) {
+    return array.concat().sort((a, b) => {
+        a = new Date(a[key]).floor();
+        b = new Date(b[key]).floor();
+
+        if(a < b) {
+            return -1;
+        }
+        
+        if(a > b) {
+            return 1;
+        }
+
+        return 0;
+    });
+}

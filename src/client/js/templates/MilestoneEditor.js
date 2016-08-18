@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function render() {
-    return _.div({class: 'milestone-editor ' + SettingsHelper.get('milestone', this.model.index), 'data-index': this.model.index},
+    return _.div({class: 'milestone-editor ' + (SettingsHelper.get('milestone', this.model.index) || ''), 'data-index': this.model.index, 'data-end-date': this.model.endDate},
         _.div({class: 'header'},
             _.div({class: 'progress-bar', style: 'width: ' + this.getPercentComplete() + '%'}),
             _.div({class: 'title'}, 

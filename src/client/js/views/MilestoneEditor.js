@@ -140,7 +140,13 @@ class MilestoneEditor extends View {
 
         // Due date
         if(this.model.endDate) {
-            _.append(this.$element.find('.header .due-date').empty(),
+            let $dueDate = this.$element.find('.header .due-date');
+
+            if($dueDate.length < 1) {
+                $dueDate = _.span({class: 'due-date'}).prependTo(this.$element.find('.header .stats'));
+            }
+
+            _.append($dueDate.empty(),
                 _.span({class: 'fa fa-calendar'}),
                 _.span({class: 'date'},
                     prettyDate(this.model.endDate)

@@ -19,7 +19,6 @@ module.exports = function render() {
                 ).click(() => { this.onClickToggle(); })
             ),
             _.div({class: 'stats'},
-                _.span({class: 'due-date'}),
                 _.span({class: 'progress-amounts'},
                     _.span({class: 'fa fa-exclamation-circle'}),
                     _.span({class: 'total'}),

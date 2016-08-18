@@ -100,7 +100,7 @@ class SettingsHelper {
         SettingsHelper.set('projects', 'current', Router.params.project);
         
         // Set head title tag
-        $('head title').html(Router.params.project + ' - Mondai');
+        $('head title').html(Router.params.project + ' - Samoosa');
 
         return true;
     }

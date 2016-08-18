@@ -9,7 +9,7 @@ Router.route('/', () => {
         $('.app-container').append(
             _.div({class: 'workspace root-container'},
                 _.div({class: 'content'},
-                    _.h1('Mondai'),
+                    _.h1('Samoosa'),
                     _.p('The pluggable issue tracker')
                 )
             )

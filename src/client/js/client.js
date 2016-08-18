@@ -43,4 +43,4 @@ require('./routes');
 // Title
 let currentProject = SettingsHelper.get('projects', 'current');
 
-$('head title').html((currentProject ? currentProject +  ' - ' : '') + 'Mondai');
+$('head title').html((currentProject ? currentProject +  ' - ' : '') + 'Samoosa');

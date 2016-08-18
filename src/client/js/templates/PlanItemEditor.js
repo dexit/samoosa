@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function render() {
-    return _.div({class: 'plan-item-editor'},
+    return _.div({class: 'plan-item-editor', 'data-date': this.model.endDate},
         _.div({class: 'drag-handle'},
             this.model.title
         ).on('mousedown', (e) => { this.onClickDragHandle(e); }),

@@ -4,13 +4,23 @@
 window.markdownToHtml = function(string) {
     if(string) {
         try {
-            return marked(string);
+            let html = marked(string);
+
+            html = html.replace(/\[ \]/g, '<input type="checkbox" disabled readonly>');
+            html = html.replace(/\[x\]/g, '<input type="checkbox" checked="checked" disabled readonly>');
+
+            return html;
 
         } catch(e) {
             console.log(e);
         
         }
     }
+};
+
+// Simple date string
+Date.prototype.getSimpleString = function() {
+    return this.getFullYear() + '-' + (this.getMonth() + 1) + '-' + this.getDate();
 };
 
 // Floor date extension

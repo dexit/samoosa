@@ -1,7 +1,13 @@
 'use strict';
 
 module.exports = function render() {
-    return _.div({class: 'milestone-editor ' + (SettingsHelper.get('milestone', this.model.index) || ''), 'data-index': this.model.index, 'data-end-date': this.model.endDate},
+    let state = SettingsHelper.get('milestone', this.model.index) || '';
+    
+    if(!state && this.getPercentComplete() >= 100) {
+        state = 'collapsed';
+    }
+
+    return _.div({class: 'milestone-editor ' + state, 'data-index': this.model.index, 'data-end-date': this.model.endDate},
         _.div({class: 'header'},
             _.div({class: 'progress-bar', style: 'width: ' + this.getPercentComplete() + '%'}),
             _.div({class: 'title'}, 
@@ -13,36 +19,7 @@ module.exports = function render() {
                 ).click(() => { this.onClickToggle(); })
             ),
             _.div({class: 'stats'},
-                _.if(this.model.endDate,
-                    _.span({class: 'due-date'},
-                        _.span({class: 'fa fa-calendar'}),
-                        _.span({class: 'date'},
-                            prettyDate(this.model.endDate)
-                        ),
-                        // No time left
-                        _.if(this.getRemainingDays() < 1 && this.getPercentComplete() < 100,
-                            _.span({class: 'remaining warn-red'},
-                                this.getRemainingDays() + 'd'
-                            )
-                        ),
-                        // Little time left
-                        _.if(this.getRemainingDays() >= 1 && this.getRemainingDays() < 3 && this.getPercentComplete() < 100,
-                            _.span({class: 'remaining warn-yellow'},
-                                this.getRemainingDays() + 'd'
-                            )
-                        ),
-                        // More time left
-                        _.if(this.getRemainingDays() >= 3 && this.getPercentComplete() < 100,
-                            _.span({class: 'remaining'},
-                                this.getRemainingDays() + 'd'
-                            )
-                        ),
-                        // Complete
-                        _.if(this.getPercentComplete() == 100,
-                            _.span({class: 'remaining ok fa fa-check'})
-                        )
-                    )
-                ),
+                _.span({class: 'due-date'}),
                 _.span({class: 'progress-amounts'},
                     _.span({class: 'fa fa-exclamation-circle'}),
                     _.span({class: 'total'}),

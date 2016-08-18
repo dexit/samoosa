@@ -52,6 +52,7 @@ class GitHubApi extends ApiHelper {
                 $.ajax({
                     url: 'https://api.github.com' + url + self.getApiTokenString(true) + 'per_page=100&page=' + page + (param ? '&' + param : ''),
                     type: 'GET',
+                    cache: false,
                     success: (result) => {
                         issues = issues.concat(result);
 
@@ -87,6 +88,7 @@ class GitHubApi extends ApiHelper {
             $.ajax({
                 url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + this.getApiTokenString(),
                 type: 'DELETE',
+                cache: false,
                 success: (result) => {
                     resolve(result);
                 },
@@ -116,6 +118,7 @@ class GitHubApi extends ApiHelper {
                 url: 'https://api.github.com' + url + this.getApiTokenString(),
                 type: 'PATCH',
                 data: data,
+                cache: false,
                 success: (result) => {
                     resolve(result);
                 },
@@ -145,6 +148,7 @@ class GitHubApi extends ApiHelper {
                 url: 'https://api.github.com' + url + this.getApiTokenString(),
                 type: 'POST',
                 data: data,
+                cache: false,
                 success: (result) => {
                     resolve(result);
                 },
@@ -168,6 +172,7 @@ class GitHubApi extends ApiHelper {
             $.ajax({
                 url: 'https://api.github.com' + url + this.getApiTokenString(),
                 type: 'PUT',
+                cache: false,
                 success: (result) => {
                     resolve(result);
                 },
@@ -231,8 +236,6 @@ class GitHubApi extends ApiHelper {
         } else {
             if(!localStorage.getItem('gitHubApiToken')) {
                 let token = prompt('Please input API token');
-
-                alert(token);
 
                 localStorage.setItem('gitHubApiToken', token);
             }

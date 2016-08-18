@@ -59,11 +59,15 @@ class PlanItemEditor extends View {
         this.model.description = this.$element.find('.body input').val();
         
         if(dateString) {
-            this.model.endDate = new Date(dateString).floor().toISOString();
+            let date = new Date(dateString);
+
+            this.model.endDate = date.getSimpleString();
         }
 
         // Update DOM elements to match model
         this.$element.find('.drag-handle').text(this.model.title);
+
+        console.log(dateString, this.model.endDate);
 
         // Start loading
         this.$element.toggleClass('loading', true);

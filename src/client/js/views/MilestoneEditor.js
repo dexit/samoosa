@@ -32,6 +32,8 @@ class MilestoneEditor extends View {
            
             $issue.find('.header .btn-edit').click();
 
+            $issue.toggleClass('expanded', true);
+
             this.updateProgress();
 
             spinner(false);
@@ -135,6 +137,38 @@ class MilestoneEditor extends View {
         
         this.$element.find('.header .progress-amounts .remaining').html(total.length - completed.length);
         this.$element.find('.header .progress-hours .remaining').html((totalHours - completedHours) + 'h');
+
+        // Due date
+        if(this.model.endDate) {
+            _.append(this.$element.find('.header .due-date').empty(),
+                _.span({class: 'fa fa-calendar'}),
+                _.span({class: 'date'},
+                    prettyDate(this.model.endDate)
+                ),
+                // No time left
+                _.if(this.getRemainingDays() < 1 && this.getPercentComplete() < 100,
+                    _.span({class: 'remaining warn-red'},
+                        this.getRemainingDays() + 'd'
+                    )
+                ),
+                // Little time left
+                _.if(this.getRemainingDays() >= 1 && this.getRemainingDays() < 3 && this.getPercentComplete() < 100,
+                    _.span({class: 'remaining warn-yellow'},
+                        this.getRemainingDays() + 'd'
+                    )
+                ),
+                // More time left
+                _.if(this.getRemainingDays() >= 3 && this.getPercentComplete() < 100,
+                    _.span({class: 'remaining'},
+                        this.getRemainingDays() + 'd'
+                    )
+                ),
+                // Complete
+                _.if(this.getPercentComplete() == 100,
+                    _.span({class: 'remaining ok fa fa-check'})
+                )
+            )
+        }
     }
 
     /**

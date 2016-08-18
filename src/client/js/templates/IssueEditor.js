@@ -30,6 +30,11 @@ module.exports = function render() {
                         );
                     })
                     .blur(this.onBlur)
+                    .keyup((e) => {
+                        if(e.which == 13) {
+                            this.onBlur(e);
+                        }
+                    })
             )
         ).click((e) => { this.onClickElement(e); }),
         _.div({class: 'meta'},

@@ -26,7 +26,7 @@ module.exports = function render() {
                 if(!date) {
                     return _.div({class: 'date-placeholder'});
                 } else {
-                    return _.div({class: 'date', 'data-date': date},
+                    return _.div({class: 'date', 'data-date': date.getSimpleString()},
                         _.div({class: 'header'},
                             _.span({class: 'datenumber'}, date.getDate()),
                             _.span({class: 'weeknumber'}, 'w ' + date.getWeek())
@@ -40,7 +40,11 @@ module.exports = function render() {
                                     dueDate.setMinutes(0);
                                     dueDate.setSeconds(0);
 
-                                    if(dueDate.valueOf() == date.valueOf()) {
+                                    if(
+                                        dueDate.getFullYear() == date.getFullYear() &&
+                                        dueDate.getMonth() == date.getMonth() &&
+                                        dueDate.getDate() == date.getDate()
+                                    ) {
                                         return new PlanItemEditor({
                                             model: milestone,
                                         }).$element;

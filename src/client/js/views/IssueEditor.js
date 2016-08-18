@@ -447,13 +447,15 @@ class IssueEditor extends View {
 
     /**
      * Event: Remove focus from input fields
+     *
+     * @param {Event} e
      */
-    onBlur() {
+    onBlur(e) {
         if(ApiHelper.isSpectating()) {
             return;
         }
         
-        $(this)
+        $(e.target)
             .toggleClass('hidden', true)
             .siblings('.btn-edit')
             .toggleClass('hidden', false); 

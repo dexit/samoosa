@@ -14,13 +14,7 @@ class FilterEditor extends View {
             value: 'done'
         };
 
-        this.model = SettingsHelper.get('filters', 'custom', [
-            {
-                key: this.defaultFilter.key,
-                operator: this.defaultFilter.operator,
-                value: this.defaultFilter.value
-            }
-        ], true);
+        this.model = SettingsHelper.get('filters', 'custom', [], true);
 
         this.fetch();
 

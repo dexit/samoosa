@@ -4,7 +4,7 @@ module.exports = function render() {
     let issueKeys = Object.keys(new Issue().getBakedValues());
 
     return _.div({class: 'filter-editor'},
-        _.div({class: 'title'},
+        _.h4({class: 'title'},
             'Filters'
         ),
         _.div({class: 'filters'},

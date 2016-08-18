@@ -93,3 +93,7 @@ button {
         outline: 0;
     }
 }
+textarea {
+    resize: none;
+    box-sizing: border-box;
+}

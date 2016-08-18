@@ -103,6 +103,13 @@ body, html {
 }
 
 /**
+ * Layout helper classes
+ */
+.hidden {
+    display: none !important;
+}
+
+/**
  * Spinner for AJAX operations
  */
 @keyframes spinner-icon {

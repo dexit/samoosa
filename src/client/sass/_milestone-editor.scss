@@ -39,7 +39,6 @@
                 h4 {
                     margin-top: 0px;
                     margin-bottom: 0px;
-                    font-weight: bold;
                 }
 
                 p {
@@ -138,13 +137,6 @@
             border-bottom: 1px solid material-color('grey', '400');
             padding: 15px;
             
-            .btn-new-issue {
-                border: 0px;
-                background-color: transparent;
-                padding: 10px 10px 10px 0px;
-                text-align: left;
-            }
-
             &:last-child {
                 border-right: 0px;
             }
@@ -154,6 +146,8 @@
 
                 h4 {
                     margin: 0px;
+                    text-transform: uppercase;
+                    opacity: 0.5;
                 }
             }
         }

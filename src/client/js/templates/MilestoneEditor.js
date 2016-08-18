@@ -46,7 +46,7 @@ module.exports = function render() {
                             }            
                         }),
                         _.if(columnIndex == 0 && !ApiHelper.isSpectating(),
-                            _.button({class: 'btn-new-issue'},
+                            _.button({class: 'btn btn-new-issue'},
                                 'New issue ',
                                 _.span({class: 'fa fa-plus'})
                             ).click(() => { this.onClickNewIssue(); })

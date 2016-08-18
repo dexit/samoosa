@@ -1,9 +1,25 @@
+@import 'https://fonts.googleapis.com/css?family=Open+Sans:400,700';
+@import 'https://fonts.googleapis.com/css?family=Bree+Serif';
+
+/**
+ * Colours
+ */
+$teal-dark: #21303B;
+
+$pink-medium: #E70D3B;
+
+$white: #fff;
+
+/**
+ * Typography
+ */
 body {
-    font-family: sans-serif;
+    font-family: 'Open Sans';
+    font-size: 12px;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-weight: bold;
+    font-family: 'Bree Serif';
 }
 
 h1 {
@@ -28,4 +44,45 @@ h5 {
 
 h6 {
     font-size: 1rem;
+}
+
+/**
+ * Main layout elements
+ */
+.navbar {
+    &, .obscure {
+        background-color: $teal-dark;
+    }
+    
+    &:not(.out) {
+        .buttons {
+            button {
+                &.active {
+                    .fa {
+                        color: $teal-dark;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.filter-editor {
+    background-color: $teal-dark;
+}
+
+/**
+ * Widgets
+ */
+.btn {
+    padding: 10px 15px;
+    font-size: 1em;
+    text-transform: uppercase;
+    color: $white;
+    font-family: 'Bree Serif';
+    background-color: $pink-medium;
+
+    .fa {
+        margin-left: 0.5em;
+    }
 }

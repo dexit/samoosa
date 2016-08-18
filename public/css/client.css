@@ -1,3 +1,99 @@
+@import 'https://fonts.googleapis.com/css?family=Open+Sans:400,700';
+@import 'https://fonts.googleapis.com/css?family=Bree+Serif';
+[role="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+button {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box; }
+
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+button {
+  background: none;
+  border: 0;
+  border-radius: 0px;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  line-height: normal;
+  overflow: visible;
+  padding: 0;
+  -webkit-appearance: button;
+  /* for input */
+  -webkit-user-select: none;
+  /* for button */
+  -moz-user-select: none;
+  -ms-user-select: none; }
+
+input::-moz-focus-inner,
+button::-moz-focus-inner {
+  border: 0;
+  padding: 0; }
+
+[role="button"] {
+  color: inherit;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  white-space: pre;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; }
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+  box-sizing: border-box; }
+
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+body {
+  line-height: 1; }
+
+ol, ul {
+  list-style: none; }
+
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+button, button:hover, button:focus, button:active {
+  outline: 0; }
+
+textarea {
+  resize: none;
+  box-sizing: border-box; }
+
 /**
  * Retrieves a color value from the $material-colors Sass map
  * Inspired by https://github.com/nilskaspersson/Google-Material-UI-Color-Palette/
@@ -81,6 +177,12 @@ body, html {
   display: none; }
   .tabbed-container .panes .pane.active {
     display: block; }
+
+/**
+ * Layout helper classes
+ */
+.hidden {
+  display: none !important; }
 
 /**
  * Spinner for AJAX operations
@@ -412,8 +514,7 @@ body, html {
       width: 100%; }
       .milestone-editor > .header .title .btn-toggle h4 {
         margin-top: 0px;
-        margin-bottom: 0px;
-        font-weight: bold; }
+        margin-bottom: 0px; }
       .milestone-editor > .header .title .btn-toggle p {
         margin-bottom: 0px; }
       .milestone-editor > .header .title .btn-toggle .fa {
@@ -477,17 +578,14 @@ body, html {
     border-right: 1px solid #bdbdbd;
     border-bottom: 1px solid #bdbdbd;
     padding: 15px; }
-    .milestone-editor .columns .column .btn-new-issue {
-      border: 0px;
-      background-color: transparent;
-      padding: 10px 10px 10px 0px;
-      text-align: left; }
     .milestone-editor .columns .column:last-child {
       border-right: 0px; }
     .milestone-editor .columns .column > .header {
       margin-bottom: 15px; }
       .milestone-editor .columns .column > .header h4 {
-        margin: 0px; }
+        margin: 0px;
+        text-transform: uppercase;
+        opacity: 0.5; }
 
 .board-container.list .milestone-editor > .header {
   border-top: 1px solid #bdbdbd;
@@ -835,5 +933,61 @@ body > .plan-item-editor {
         background-color: #e0e0e0;
         padding: 0px 5px;
         font-family: monospace; }
+
+/**
+ * Colours
+ */
+/**
+ * Typography
+ */
+body {
+  font-family: 'Open Sans';
+  font-size: 12px; }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Bree Serif'; }
+
+h1 {
+  font-size: 2.5rem; }
+
+h2 {
+  font-size: 2rem; }
+
+h3 {
+  font-size: 1.75rem; }
+
+h4 {
+  font-size: 1.5rem; }
+
+h5 {
+  font-size: 1.25rem; }
+
+h6 {
+  font-size: 1rem; }
+
+/**
+ * Main layout elements
+ */
+.navbar, .navbar .obscure {
+  background-color: #21303B; }
+
+.navbar:not(.out) .buttons button.active .fa {
+  color: #21303B; }
+
+.filter-editor {
+  background-color: #21303B; }
+
+/**
+ * Widgets
+ */
+.btn {
+  padding: 10px 15px;
+  font-size: 1em;
+  text-transform: uppercase;
+  color: #fff;
+  font-family: 'Bree Serif';
+  background-color: #E70D3B; }
+  .btn .fa {
+    margin-left: 0.5em; }
 
 /*# sourceMappingURL=client.css.map */

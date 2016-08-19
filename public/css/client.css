@@ -586,6 +586,8 @@ body, html {
         margin: 0px;
         text-transform: uppercase;
         opacity: 0.5; }
+    .milestone-editor .columns .column .btn-new-issue {
+      margin-top: 1em; }
 
 .board-container.list .milestone-editor > .header {
   border-top: 1px solid #bdbdbd;

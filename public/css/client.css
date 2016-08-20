@@ -216,13 +216,10 @@ body, html {
       font-size: 32px;
       animation: spinner-icon 2s linear infinite; }
 
-.root-container .content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -80px); }
-  .root-container .content h1, .root-container .content p {
-    text-align: center; }
+.workspace.readme-container {
+  text-align: left;
+  margin: 2em;
+  max-width: 40rem; }
 
 .board-container.multi-edit .issue-editor:not(.selected) {
   opacity: 0.5; }
@@ -408,9 +405,6 @@ body, html {
   width: 100%;
   background-color: #424242;
   color: #eeeeee; }
-  .filter-editor .title {
-    line-height: 25px;
-    margin-right: 15px; }
   .filter-editor .button-container {
     line-height: 25px; }
   .filter-editor .filters {
@@ -640,6 +634,10 @@ body, html {
   border-radius: 0px;
   border: 0px;
   background-color: #212121; }
+  .navbar.out.source-panel .obscure {
+    width: 20rem; }
+  .navbar.out.project-list .obscure {
+    width: 40rem; }
   .navbar.out .obscure {
     width: 100%;
     transition-delay: 0.05s; }
@@ -709,9 +707,12 @@ body, html {
         transition: color 0.25s ease;
         transition-delay: 0.2s; }
 
-.user-container .profile {
-  padding: 15px; }
-  .user-container .profile img {
+.source-panel .obscure .content .btn {
+  margin-top: 1em; }
+
+.source-panel .obscure .content > div {
+  padding-top: 1em; }
+  .source-panel .obscure .content > div img {
     width: 60px;
     height: 60px; }
 
@@ -947,7 +948,9 @@ body {
   font-size: 12px; }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Bree Serif'; }
+  font-family: 'Bree Serif';
+  margin-top: 0.3em;
+  margin-bottom: 0.2em; }
 
 h1 {
   font-size: 2.5rem; }
@@ -971,13 +974,39 @@ h6 {
  * Main layout elements
  */
 .navbar, .navbar .obscure {
-  background-color: #21303B; }
+  background-color: #21303B;
+  color: #fff; }
+  .navbar .content .project-editor, .navbar .obscure .content .project-editor {
+    background-color: #171e23;
+    border: 0px; }
+    .navbar .content .project-editor .content .header h4, .navbar .obscure .content .project-editor .content .header h4 {
+      font-weight: normal; }
+
+.navbar.out:before {
+  content: '';
+  background-color: rgba(255, 255, 255, 0.5);
+  display: block;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 5; }
 
 .navbar:not(.out) .buttons button.active .fa {
   color: #21303B; }
 
+.board-container {
+  padding-top: 56px; }
+
 .filter-editor {
-  background-color: #21303B; }
+  background-color: #21303B;
+  position: fixed;
+  top: 0px;
+  z-index: 500; }
+  .filter-editor .title {
+    line-height: 36px;
+    margin: 0px 15px 0px 5px; }
 
 /**
  * Widgets

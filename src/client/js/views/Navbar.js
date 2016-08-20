@@ -19,11 +19,12 @@ class Navbar extends View {
      */
     getLinks() {
         let links = [];
-
+        
         if(!ApiHelper.isSpectating()) {
             links.push({
-                url: '/user/',
-                icon: 'user'
+                url: '/source/',
+                handler: this.toggleSourcePanel,
+                icon: 'puzzle-piece'
             });
         }
     
@@ -35,6 +36,13 @@ class Navbar extends View {
             });
         }
         
+        if(!ApiHelper.isSpectating()) {
+            links.push({
+                url: '/settings/',
+                icon: 'cog'
+            });
+        }
+
         links.push({
             url: '/plan/',
             icon: 'calendar'
@@ -50,15 +58,60 @@ class Navbar extends View {
             icon: 'list'
         });
         
-        if(!ApiHelper.isSpectating()) {
-            links.push({
-                url: '/settings/',
-                icon: 'cog',
-                bottom: true
-            });
-        }
-
         return links;
+    }
+
+    /**
+     * Cleans up extra added classes
+     */
+    cleanUpClasses() {
+        this.$element.toggleClass('project-list', false);
+        this.$element.toggleClass('source-panel', false);
+    }
+
+    /**
+     * Toggles the source panel
+     */
+    toggleSourcePanel() {
+        let $button = this.$element.find('.buttons button[data-url="/projects/"]');
+        let $content = this.$element.find('.obscure .content');
+
+        $button.toggleClass('active');
+
+        let isActive = $button.hasClass('active');
+
+        this.$element.toggleClass('out', isActive);
+        this.$element.toggleClass('source-panel', isActive);
+        $button.children('.fa')
+            .toggleClass('fa-folder-open', isActive)
+            .toggleClass('fa-folder', !isActive);
+      
+        if(isActive) { 
+            ApiHelper.getUser()
+            .then((user) => {
+                $content
+                .empty()
+                .append([
+                    _.div({class: 'plugin'},
+                        _.h4('Current plugin'),
+                        _.p('GitHub'),
+                        _.button({class: 'btn'}, 'Change plugin').click(() => {
+                            console.log('TODO: Change plugin');
+                        })
+                    ), 
+                    _.div({class: 'current-user'},
+                        _.h4('Current user'),
+                        _.img({src: user.avatar}),
+                        _.p(user.name),
+                        _.button({class: 'btn'}, 'Change account').click(() => {
+                            ApiHelper.logOut();
+                        })
+                    ) 
+                ]);
+            });
+        } else {
+            $content.empty();
+        }
     }
 
     /**
@@ -73,6 +126,7 @@ class Navbar extends View {
         let isActive = $button.hasClass('active');
 
         this.$element.toggleClass('out', isActive);
+        this.$element.toggleClass('project-list', isActive);
         $button.children('.fa')
             .toggleClass('fa-folder-open', isActive)
             .toggleClass('fa-folder', !isActive);
@@ -103,7 +157,7 @@ class Navbar extends View {
      * @returns {String} url
      */
     getFullUrl(url) {
-        if(url != '/user/' && url != '/projects/') {
+        if(url != '/' && url != '/source/' && url != '/projects/') {
             url = '/' + SettingsHelper.get('projects', 'current') + url;
         } else {
             url = url;

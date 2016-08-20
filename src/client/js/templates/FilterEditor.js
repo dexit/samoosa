@@ -99,7 +99,8 @@ module.exports = function render() {
         ),
         _.div({class: 'button-container'},
             _.if(this.model.length < this.MAX_FILTERS,
-                _.button({class: 'btn-transparent'},
+                _.button({class: 'btn'},
+                    'Add filter',
                     _.span({class: 'fa fa-plus'})
                 ).click(() => { this.onClickAdd(); })
             )

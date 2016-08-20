@@ -1,4 +1,4 @@
-# Mondai
+# Samoosa
 The pluggable issue tracker
 
 ## It's client-side

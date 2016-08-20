@@ -6,43 +6,18 @@ Router.route('/', () => {
     .then(() => {
         $('.workspace').remove();
 
-        $('.app-container').append(
-            _.div({class: 'workspace root-container'},
-                _.div({class: 'content'},
-                    _.h1('Samoosa'),
-                    _.p('The pluggable issue tracker')
-                )
-            )
-        );
-       
-        navbar.slideIn();
-    });
-});
-
-// User
-Router.route('/user/', () => {
-    ApiHelper.checkConnection()
-    .then(() => {
-        ApiHelper.getUser()
-        .then((user) => {
-            $('.workspace').remove();
-
+        $.get('./README.md', (txt) => {
             $('.app-container').append(
-                _.div({class: 'workspace user-container'},
-                    _.div({class: 'profile'},
-                        _.h4('Current user'),
-                        _.img({src: user.avatar}),
-                        _.p(user.name),
-                        _.h4('Session'),
-                        _.button('Change account').click(() => {
-                            ApiHelper.logOut();
-                        })
-                    ) 
+                _.div({class: 'workspace readme-container'},
+                    _.div({class: 'content'},
+                        _.p('v' + app.version),
+                        markdownToHtml(txt)
+                    )
                 )
             );
-
-            navbar.slideIn();
         });
+
+        navbar.slideIn();
     });
 });
 

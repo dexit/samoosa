@@ -6,6 +6,18 @@
     background-color: material-color('grey', '900');
 
     &.out {
+        &.source-panel {
+            .obscure {
+                width: 20rem;
+            }
+        }
+
+        &.project-list {
+            .obscure {
+                width: 40rem;
+            }
+        }
+        
         .obscure {
             width: 100%;
             transition-delay: 0.05s;

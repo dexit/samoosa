@@ -1,5 +1,8 @@
 'use strict';
 
+// Package
+window.app = require('../../../package.json');
+
 // Libs
 require('exomon');
 window.Promise = require('bluebird');

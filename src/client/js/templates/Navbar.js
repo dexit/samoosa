@@ -10,6 +10,8 @@ module.exports = function Navbar() {
                 return _.button({'data-url': link.url, class: (Router.url.indexOf(link.url) > -1 ? 'active' : '') + (link.bottom ? ' bottom' : '')},
                     _.span({class: 'fa fa-' + link.icon})
                 ).click(() => {
+                    this.cleanUpClasses();
+
                     if(link.handler) {
                         link.handler.call(this);
 

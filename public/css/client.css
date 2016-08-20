@@ -1014,6 +1014,23 @@ h6 {
   line-height: 36px;
   height: 36px; }
 
+.issue-editor .meta .meta-field {
+  margin-bottom: 0.5rem;
+  height: 2rem; }
+  .issue-editor .meta .meta-field label {
+    line-height: 2rem;
+    height: 2rem; }
+  .issue-editor .meta .meta-field select {
+    background-color: #E70D3B;
+    padding-left: 0.5rem;
+    color: #fff;
+    line-height: 2rem;
+    border: 0px;
+    height: 2rem; }
+    .issue-editor .meta .meta-field select option {
+      line-height: 2rem;
+      height: 2rem; }
+
 /**
  * Widgets
  */

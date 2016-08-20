@@ -15,8 +15,8 @@ module.exports = function render() {
             _.input({class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description})
         ),
         _.div({class: 'footer'},
-            _.button('Delete').click(() => { this.onClickDelete(); }),
-            _.button('OK').click(() => { this.onClickOK(); })
+            _.button({class: 'btn'}, 'Delete', _.span({class: 'fa fa-remove'})).click(() => { this.onClickDelete(); }),
+            _.button({class: 'btn'}, 'OK', _.span({class: 'fa fa-check'})).click(() => { this.onClickOK(); })
         )
     );
 };

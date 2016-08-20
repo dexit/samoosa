@@ -10,8 +10,8 @@ module.exports = function render() {
                 )
             ),
             _.button({class: 'btn-toggle btn-transparent'},
-                _.span({class: 'fa fa-minus-circle'}),
-                _.span({class: 'fa fa-plus-circle'})
+                _.span({class: 'fa icon-close fa-chevron-down'}),
+                _.span({class: 'fa icon-open fa-chevron-right'})
             ).click((e) => { this.onClickToggle(e); }),
             _.div({class: 'issue-index'},
                 this.model.index.toString()

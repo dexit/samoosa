@@ -68,11 +68,11 @@
         .header {
             >button {
                 span {
-                    &.fa-minus-circle {
+                    &.icon-close {
                         display: inline;
                     }
                     
-                    &.fa-plus-circle {
+                    &.icon-open {
                         display: none;
                     }
                 }
@@ -234,11 +234,11 @@
         span, input, h4 {
             line-height: 30px;
             
-            &.fa-minus-circle {
+            &.icon-close {
                 display: none;
             }
             
-            &.fa-plus-circle {
+            &.icon-open {
                 display: inline;
             }
         }

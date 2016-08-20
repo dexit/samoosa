@@ -17,7 +17,7 @@ module.exports = function render() {
                     _.if(typeof item !== 'string',
                         _.label(item.title || item.name)
                     ),
-                    _.button(
+                    _.button({class: 'btn-remove'},
                         _.span({class: 'fa fa-remove'})
                     ).click(() => { this.onClickRemove(i); })
                 );
@@ -25,7 +25,8 @@ module.exports = function render() {
         ),
         _.div({class: 'footer'},
             _.input({type: 'text'}),
-            _.button(
+            _.button({class: 'btn btn-add'},
+                'Add',
                 _.span({class: 'fa fa-plus'})
             ).click(() => {
                 this.onClickAdd(this.$element.find('.footer input').val());

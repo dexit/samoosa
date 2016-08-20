@@ -4,10 +4,16 @@
 /**
  * Colours
  */
+$teal-light: #5b84a2;
+$teal-medium: #3e586b;
 $teal-dark: #21303B;
 $teal-darker: #171e23;
 
 $pink-medium: #E70D3B;
+
+$grey-lighter: #efefef;
+$grey-light: #cccccc;
+$grey-medium: #888888;
 
 $white: #fff;
 
@@ -116,12 +122,20 @@ h6 {
     }
 }
 
+.resource-editor {
+    input {
+        line-height: 36px;
+        height: 36px;
+    }
+}
+
 /**
  * Widgets
  */
 .btn {
     padding: 10px 15px;
     font-size: 1em;
+    height: 36px;
     text-transform: uppercase;
     color: $white;
     font-family: 'Bree Serif';
@@ -129,5 +143,75 @@ h6 {
 
     .fa {
         margin-left: 0.5em;
+    }
+}
+
+.tabbed-container {
+    &.vertical {
+        .tabs {
+            padding-top: 0rem;
+            background-color: $grey-lighter;
+            border-right: 1px solid $grey-light;
+                
+            .tab {
+                padding: 0rem 1rem;
+                height: 4rem;
+                background-color: transparent;
+                line-height: 4rem;
+                min-width: 12rem;
+                text-align: left;
+
+                &, &.active {
+                    color: $grey-medium;
+                    border-bottom: 1px solid $grey-light;
+                }
+            
+                &:not(.active) {
+                    &:last-of-type {
+                        border-bottom: 0px;
+                    }
+                }
+
+                &.active {
+                    position: relative;
+                    background-color: $white;
+                    
+                    &:after {
+                        position: absolute;
+                        right: -1px;
+                        top: 0px;
+                        height: 100%;
+                        width: 1px;
+                        content: '';
+                        display: block;
+                        background-color: $white;
+                    }
+                }
+            }
+        }
+    }
+
+    .tabs {
+        padding-top: 1rem;
+        background-image: none;
+        background-color: $teal-dark;
+    
+        .tab {
+            font-family: 'Bree Serif';
+            text-transform: uppercase;
+            border-radius: 0px;
+            color: $teal-light; 
+            height: 2rem;
+            line-height: 2rem;
+                
+            &.active {
+                color: $teal-dark; 
+            }
+
+            &, &.active {
+                border: 0px;
+                box-shadow: none;
+            }
+        }
     }
 }

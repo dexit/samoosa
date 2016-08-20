@@ -54,7 +54,6 @@ body, html {
  * Generic tabs
  */
 .tab {
-    background-image: linear-gradient(to top, rgba(0, 0, 0, 0.5), 5%, rgba(0, 0, 0, 0));
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
     line-height: 30px;
@@ -62,11 +61,20 @@ body, html {
 
     &.active {
         background-image: none;
-        box-shadow: -5px 0px 5px -5px rgba(0, 0, 0, 0.5), 0px -5px 5px -5px rgba(0, 0, 0, 0.5), 5px 0px 5px -5px rgba(0, 0, 0, 0.5);
     }
 }
 
 .tabbed-container {
+    &.vertical {
+        display: flex;
+        height: 100%;
+
+        .tabs {
+            flex-shrink: 0;
+            display: block;
+        }
+    }
+
     .tabs {
         display: flex;
         background-color: material-color('grey', '700');

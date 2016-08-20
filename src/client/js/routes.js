@@ -113,7 +113,7 @@ Router.route('/:project/settings/', () => {
 
             $('.app-container').append(
                 _.div({class: 'workspace settings-container'},
-                    _.div({class: 'tabbed-container'},
+                    _.div({class: 'tabbed-container vertical'},
                         _.div({class: 'tabs'},
                             _.each(window.resources, (name, resource) => {
                                 if(name != 'issues' && name != 'milestones' && name != 'projects') {

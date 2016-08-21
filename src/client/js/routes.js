@@ -2,22 +2,7 @@
 
 // Root
 Router.route('/', () => {
-    setTimeout(() => {
-        $('.workspace').remove();
-
-        $.get('./README.md', (txt) => {
-            $('.app-container').append(
-                _.div({class: 'workspace readme-container'},
-                    _.div({class: 'content'},
-                        _.p('v' + app.version),
-                        markdownToHtml(txt)
-                    )
-                )
-            );
-        });
-
-        navbar.slideIn();
-    }, 10);
+    ApiHelper.getUserName();
 });
 
 // User
@@ -31,7 +16,7 @@ Router.route('/:user', () => {
             )
         );
 
-        navbar.toggleProjectsList();
+        navbar.toggleProjectsList(true);
     }, 10);
 });
 

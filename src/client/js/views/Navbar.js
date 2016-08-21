@@ -109,13 +109,15 @@ class Navbar extends View {
     /**
      * Toggles the projects list
      */
-    toggleProjectsList() {
+    toggleProjectsList(isActive) {
         let $button = this.$element.find('.buttons button[data-url="/projects/"]');
         let $content = this.$element.find('.obscure .content');
 
-        $button.toggleClass('active');
+        if(isActive != true && isActive != false) {
+            isActive = !$button.hasClass('active');
+        }
 
-        let isActive = $button.hasClass('active');
+        $button.toggleClass('active', isActive);
 
         this.$element.toggleClass('out', isActive);
         this.$element.toggleClass('project-list', isActive);
@@ -192,7 +194,7 @@ class Navbar extends View {
         if(Router.url) {
             let url = Router.url
                 .replace('/' + ApiHelper.getProjectName(), '')
-                .replace('/' + ApiHelper.getUserName, '');
+                .replace('/' + ApiHelper.getUserName(), '');
 
             this.$element.find('button.active').removeClass('active');
             this.$element.find('button[data-url="' + url + '"]').toggleClass('active', true);

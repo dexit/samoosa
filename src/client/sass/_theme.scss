@@ -125,6 +125,17 @@ ul {
         line-height: 36px;
         margin: 0px 15px 0px 5px;
     }
+    
+    .filters {
+        .filter {
+            &:after {
+                line-height: 36px;
+                color: $white;
+                font-family: 'Bree Serif';
+                font-size: 16px;
+            }
+        }
+    }
 }
 
 .resource-editor {

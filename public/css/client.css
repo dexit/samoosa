@@ -442,18 +442,21 @@ body, html {
       .filter-editor .filters .filter input {
         flex-grow: 1;
         width: 80px; }
-      .filter-editor .filters .filter button {
+      .filter-editor .filters .filter .btn-remove {
         text-align: center;
         position: absolute;
         right: 10px;
-        top: 0px;
+        top: 50%;
+        transform: translateY(-50%);
         z-index: 20; }
       .filter-editor .filters .filter .select-container {
         background-color: #e0e0e0;
         overflow-x: hidden;
-        line-height: 25px;
-        height: 25px;
-        width: 30px; }
+        height: 100%;
+        width: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center; }
         .filter-editor .filters .filter .select-container:first-of-type {
           border-top-left-radius: 15px;
           border-bottom-left-radius: 15px;
@@ -993,6 +996,11 @@ ul {
   .filter-editor .title {
     line-height: 36px;
     margin: 0px 15px 0px 5px; }
+  .filter-editor .filters .filter:after {
+    line-height: 36px;
+    color: #fff;
+    font-family: 'Bree Serif';
+    font-size: 16px; }
 
 .resource-editor input {
   line-height: 36px;

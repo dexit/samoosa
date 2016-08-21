@@ -21,6 +21,70 @@ class ApiHelper {
     }
 
     // ----------
+    // Session methods
+    // ----------
+    /**
+     * Get user name
+     */
+    getUserName() {
+        let user = localStorage.getItem('user');
+
+        if(!user) {
+            if(Router.params.user) {
+                user = Router.params.user;
+            } else {
+                user = prompt('Please input user name');
+            }
+
+            if(user) {
+                localStorage.setItem('user', user);
+            }
+        }
+
+        return user;
+    }
+
+    /**
+     * Gets project name
+     */    
+    getProjectName() {
+        let project = localStorage.getItem('project');
+
+        if(!project) {
+            if(Router.params.project) {
+                project = Router.params.project;
+            } else {
+                project = prompt('Please input project name');
+            }
+
+            if(project) {
+                localStorage.setItem('project', project);
+            }
+        }
+
+        return project;
+    }
+
+    /**
+     * Resets the API token and reloads
+     */
+    resetApiToken() {
+        localStorage.setItem('token', '');
+
+        this.getApiToken();
+    }
+    
+    /**
+     * Logs out the currently logged in user and reloads
+     */
+    logOut() {
+        localStorage.setItem('token', '');
+        
+        location.reload();
+    }
+
+
+    // ----------
     // Resource getters
     // ----------
     /**
@@ -711,9 +775,11 @@ class ApiHelper {
     /**
      * Gets all resources
      *
+     * @param {Array} excludeResources
+     *
      * @returns {Promise} promise
      */
-    getResources() {
+    getResources(excludeResources) {
         let helper = this;
         
         spinner(true);
@@ -724,7 +790,16 @@ class ApiHelper {
               
                 debug.log('Getting ' + resource + '...', helper);
 
-                return helper.getResource(resource);
+                // If this resource is excluded, just proceed
+                if(excludeResources && Array.isArray(excludeResources) && excludeResources.indexOf(resource) > -1) {
+                    return new Promise((resolve) => {
+                        resolve();
+                    });
+
+                // If not, fetch it normally
+                } else {
+                    return helper.getResource(resource);
+                }
             }
 
             get('issueTypes')

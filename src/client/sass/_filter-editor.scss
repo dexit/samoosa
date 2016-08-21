@@ -50,20 +50,23 @@
                 width: 80px;
             }
             
-            button {
+            .btn-remove {
                 text-align: center;
                 position: absolute;
                 right: 10px;
-                top: 0px;
+                top: 50%;
+                transform: translateY(-50%);
                 z-index: 20;
             }
               
             .select-container { 
                 background-color: material-color('grey', '300');
                 overflow-x: hidden;
-                line-height: 25px;
-                height: 25px;
+                height: 100%;
                 width: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
 
                 &:first-of-type {
                     border-top-left-radius: 15px;

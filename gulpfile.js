@@ -8,7 +8,7 @@ var buffer = require('vinyl-buffer');
 var browserify = require('browserify');
 
 /**
- * Compile native SASS
+ * Compile SASS
  */
 gulp.task('sass', function() {
     gulp.src('./src/client/sass/client.scss')
@@ -24,7 +24,7 @@ gulp.task('sass', function() {
 });
 
 /**
- * Compile native JS
+ * Compile JS
  */
 gulp.task('js', function() {
     return browserify('./src/client/js/client.js')
@@ -45,15 +45,54 @@ gulp.task('js', function() {
 });
 
 /**
- * Watch native code
+ * Compile readonly SASS
+ */
+gulp.task('readonly-sass', function() {
+    gulp.src('./src/client/sass/readonly/readonly.scss')
+        .pipe(plumber())
+        .pipe(sass({
+            includePaths: [
+                './node_modules/sass-material-colors/sass/'
+            ]
+        }))
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest('./public/css'));
+});
+
+/**
+ * Compile readonly JS
+ */
+gulp.task('readonly-js', function() {
+    return browserify('./src/client/js/readonly/readonly.js')
+        .on('error', function(err) {
+            console.log(err);
+            this.emit('end');
+        })
+        .bundle()
+        .pipe(plumber())
+        .pipe(source('readonly.js'))
+        .pipe(buffer())
+        .pipe(babel({
+            presets: [ 'es2015' ]
+        }))
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(sourcemaps.write('./public/js/maps/'))
+        .pipe(gulp.dest('./public/js/'));
+});
+
+/**
+ * Watch code
  */
 gulp.task('watch', function() {
     gulp.watch('./plugins/**/*.js', [ 'js' ]);
     gulp.watch('./src/client/js/**/*.js', [ 'js' ]);
     gulp.watch('./src/client/sass/**/*.scss', [ 'sass' ]);
+    gulp.watch('./src/client/js/readonly/**/*.js', [ 'readonly-js' ]);
+    gulp.watch('./src/client/sass/readonly/**/*.scss', [ 'readonly-sass' ]);
 });
 
 // ----------
 // Default tasks
 // ----------
-gulp.task('default', [ 'sass', 'js', 'watch' ]);
+gulp.task('default', [ 'sass', 'js', 'readonly-sass', 'readonly-js', 'watch' ]);

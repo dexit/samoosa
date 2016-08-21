@@ -154,51 +154,6 @@ Router.route('/:project/settings/', () => {
     });
 });
 
-// -----------
-// Prints
-// -----------
-// Scope
-Router.route('/:project/print/scope', () => {
-    if(!SettingsHelper.check()) {
-        return;
-    }
-
-    ApiHelper.checkConnection()
-    .then(() => {
-        ApiHelper.getResources()
-        .then(() => {
-            $('.workspace').remove();
-
-            $('.app-container').append(
-                _.div({class: 'workspace print-container'},
-                    _.each(window.resources.milestones, (milestoneIndex, milestone) => {
-                        return _.div({class: 'print-milestone'},
-                            _.h2({class: 'print-milestone-title'}, milestone.title),
-                            _.each(window.resources.issues, (issueIndex, issue) => {
-                                if(issue.milestone == milestoneIndex) {
-                                    return _.div({class: 'print-issue'},
-                                        _.h3({class: 'print-issue-title'},
-                                            issue.title
-                                        ),
-                                        _.p({class: 'print-issue-estimate'},
-                                            window.resources.issueEstimates[issue.estimate]
-                                        ),
-                                        _.p({class: 'print-issue-description'},
-                                            markdownToHtml(issue.description)
-                                        )
-                                    );
-                                }            
-                            })
-                        );
-                    })
-                )
-            );
-            
-            navbar.slideIn();
-        });
-    });
-});
-
 Router.init();
 
 // Navbar

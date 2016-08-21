@@ -92,18 +92,10 @@ class Navbar extends View {
                 $content
                 .empty()
                 .append([
-                    _.div({class: 'plugin'},
-                        _.h4('Current plugin'),
-                        _.p('GitHub'),
-                        _.button({class: 'btn'}, 'Change plugin').click(() => {
-                            console.log('TODO: Change plugin');
-                        })
-                    ), 
                     _.div({class: 'current-user'},
-                        _.h4('Current user'),
                         _.img({src: user.avatar}),
                         _.p(user.name),
-                        _.button({class: 'btn'}, 'Change account').click(() => {
+                        _.button({class: 'btn'}, 'Log out').click(() => {
                             ApiHelper.logOut();
                         })
                     ) 
@@ -157,12 +149,20 @@ class Navbar extends View {
      * @returns {String} url
      */
     getFullUrl(url) {
-        if(url != '/' && url != '/source/' && url != '/projects/') {
-            url = '/' + SettingsHelper.get('projects', 'current') + url;
-        } else {
-            url = url;
-        }
+        let project = Router.params ? Router.params.project : null;
 
+        // Prepend project
+        if(url != '/' && url != '/source/' && url != '/projects/') {
+            if(!project) {
+                return null;
+            }
+            
+            url = '/' + project + url;
+        }
+        
+        // Prepend user
+        url = '/' + ApiHelper.getUserName() + url;
+        
         return url;
     }
 
@@ -174,8 +174,10 @@ class Navbar extends View {
     onClickLink(url) {
         url = this.getFullUrl(url);
         
-        if(url != Router.url) {
+        if(url && url != Router.url) {
             this.$element.toggleClass('out', true);
+            
+            resources = {};
 
             setTimeout(() => {
                 location.hash = url;
@@ -187,14 +189,18 @@ class Navbar extends View {
      * Slide navbar in
      */
     slideIn() {
-        let url = Router.url.replace('/' + SettingsHelper.get('projects', 'current'), '');
+        if(Router.url) {
+            let url = Router.url
+                .replace('/' + ApiHelper.getProjectName(), '')
+                .replace('/' + ApiHelper.getUserName, '');
 
-        this.$element.find('button.active').removeClass('active');
-        this.$element.find('button[data-url="' + url + '"]').toggleClass('active', true);
+            this.$element.find('button.active').removeClass('active');
+            this.$element.find('button[data-url="' + url + '"]').toggleClass('active', true);
 
-        this.$element.toggleClass('out', false);
+            this.$element.toggleClass('out', false);
 
-        $('.navbar .obscure .content').empty();
+            $('.navbar .obscure .content').empty();
+        }
     }
 }
 

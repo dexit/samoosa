@@ -9,11 +9,18 @@ $teal-medium: #3e586b;
 $teal-dark: #21303B;
 $teal-darker: #171e23;
 
+$pink-light: #E70D3B;
 $pink-medium: #E70D3B;
 
-$grey-lighter: #efefef;
+$grey-lightest: #efefef;
+$grey-lighter: #e8e8e8;
 $grey-light: #cccccc;
 $grey-medium: #888888;
+$grey-dark: #666666;
+$grey-darker: #343434;
+$grey-darkest: #222222;
+
+$black: #000;
 
 $white: #fff;
 
@@ -278,9 +285,9 @@ body >.plan-item-editor {
                 line-height: 4rem;
                 min-width: 12rem;
                 text-align: left;
-                color: $grey-medium;
 
                 &, &.active {
+                    color: $grey-darker;
                     border-bottom: 1px solid $grey-light;
                 }
             

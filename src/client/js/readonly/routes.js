@@ -9,10 +9,6 @@ Router.route('/', () => {
 
 // Plan
 Router.route('/:project/plan/', () => {
-    if(!SettingsHelper.check()) {
-        return;
-    }
-
     ApiHelper.checkConnection()
     .then(() => {
         ApiHelper.getResources()
@@ -23,10 +19,6 @@ Router.route('/:project/plan/', () => {
 
 // Scope
 Router.route('/:user/:project/scope', () => {
-    if(!SettingsHelper.check()) {
-        return;
-    }
-
     ApiHelper.checkConnection()
     .then(() => {
         ApiHelper.getResources(['collaborators'])

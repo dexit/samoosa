@@ -1011,7 +1011,7 @@ ul {
   .milestone-editor > .header .fa {
     color: #888888; }
   .milestone-editor > .header .progress-bar {
-    background-color: #efefef; }
+    background-color: #e8e8e8; }
 
 .issue-editor {
   border: 0px;
@@ -1086,7 +1086,7 @@ body > .plan-item-editor {
 
 .tabbed-container.vertical .tabs {
   padding-top: 0rem;
-  background-color: #efefef;
+  background-color: #e8e8e8;
   border-right: 1px solid #cccccc; }
   .tabbed-container.vertical .tabs .tab {
     padding: 0rem 1rem;
@@ -1094,9 +1094,9 @@ body > .plan-item-editor {
     background-color: transparent;
     line-height: 4rem;
     min-width: 12rem;
-    text-align: left;
-    color: #888888; }
+    text-align: left; }
     .tabbed-container.vertical .tabs .tab, .tabbed-container.vertical .tabs .tab.active {
+      color: #343434;
       border-bottom: 1px solid #cccccc; }
     .tabbed-container.vertical .tabs .tab:not(.active):last-of-type {
       border-bottom: 0px; }

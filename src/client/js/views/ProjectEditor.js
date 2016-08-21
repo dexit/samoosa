@@ -10,7 +10,13 @@ class ProjectEditor extends View {
     }
 
     onClick() {
-        location.hash = '/' + this.model.title + (SettingsHelper.get('views', 'default') || '/board/kanban/');
+        if(Router.params.project) {
+            location.hash = location.hash.replace('#', '').replace(Router.params.project, this.model.title);
+        
+        } else {
+            location.hash = '/' + ApiHelper.getUserName() + '/' + this.model.title + '/board/kanban/';
+        
+        }
     }   
 }
 

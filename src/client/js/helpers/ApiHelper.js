@@ -24,22 +24,48 @@ class ApiHelper {
     // Session methods
     // ----------
     /**
+     * Gets the API token and prompts for one if needed
+     * 
+     * @returns {String} token
+     */
+    getApiToken() {
+        let queryToken = Router.query('token');
+
+        if(queryToken) {
+            localStorage.setItem('token', queryToken);
+            
+            return queryToken;
+
+        } else {
+            if(!localStorage.getItem('token')) {
+                let token = prompt('Please input API token');
+
+                localStorage.setItem('token', token);
+            }
+
+            return localStorage.getItem('token');
+        }
+    }
+    
+    /**
      * Get user name
      */
     getUserName() {
-        let user = localStorage.getItem('user');
+        let user = Router.params ? Router.params.user : null;
+        
+        if(!user) {
+            user = localStorage.getItem('user');
+           
+            location.hash = '/' + user;
+        }
 
         if(!user) {
-            if(Router.params.user) {
-                user = Router.params.user;
-            } else {
-                user = prompt('Please input user name');
-            }
+            user = prompt('Please input user name');
 
-            if(user) {
-                localStorage.setItem('user', user);
-            }
+            location.hash = '/' + user;
         }
+        
+        localStorage.setItem('user', user)
 
         return user;
     }
@@ -48,19 +74,23 @@ class ApiHelper {
      * Gets project name
      */    
     getProjectName() {
-        let project = localStorage.getItem('project');
+        let project = Router.params ? Router.params.project : null;
+        
+        if(!project) {
+            project = localStorage.getItem('project');
+            resources = {};
+            
+            location.hash = '/' + this.getUserName() + '/' + project + '/board/kanban';
+        }
 
         if(!project) {
-            if(Router.params.project) {
-                project = Router.params.project;
-            } else {
-                project = prompt('Please input project name');
-            }
+            project = prompt('Please input project name');
+            resources = {};
 
-            if(project) {
-                localStorage.setItem('project', project);
-            }
+            location.hash = '/' + this.getUserName() + '/' + project + '/board/kanban';
         }
+        
+        localStorage.setItem('project', project)
 
         return project;
     }

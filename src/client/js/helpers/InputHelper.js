@@ -62,7 +62,7 @@ class InputHelper {
         idleTimer++;
 
         if(idleTimer >= IDLE_TIMEOUT) {
-            location.reload();
+            // Do something after idle timeout
         }
     }
     

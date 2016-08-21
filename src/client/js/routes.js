@@ -2,8 +2,7 @@
 
 // Root
 Router.route('/', () => {
-    ApiHelper.checkConnection()
-    .then(() => {
+    setTimeout(() => {
         $('.workspace').remove();
 
         $.get('./README.md', (txt) => {
@@ -18,15 +17,26 @@ Router.route('/', () => {
         });
 
         navbar.slideIn();
-    });
+    }, 10);
+});
+
+// User
+Router.route('/:user', () => {
+    setTimeout(() => {
+        $('.workspace').remove();
+
+        $('.app-container').append(
+            _.div({class: 'workspace user-container'},
+                _.h1(this.user)
+            )
+        );
+
+        navbar.toggleProjectsList();
+    }, 10);
 });
 
 // Plan
-Router.route('/:project/plan/', () => {
-    if(!SettingsHelper.check()) {
-        return;
-    }
-
+Router.route('/:user/:project/plan/', () => {
     ApiHelper.checkConnection()
     .then(() => {
         ApiHelper.getResources()
@@ -45,11 +55,7 @@ Router.route('/:project/plan/', () => {
 });
 
 // Board
-Router.route('/:project/board/:mode', () => {
-    if(!SettingsHelper.check()) {
-        return;
-    }
-
+Router.route('/:user/:project/board/:mode', () => {
     ApiHelper.checkConnection()
     .then(() => {
         ApiHelper.getResources()
@@ -100,11 +106,7 @@ Router.route('/:project/board/:mode', () => {
 });
 
 // Settings
-Router.route('/:project/settings/', () => {
-    if(!SettingsHelper.check()) {
-        return;
-    }
-
+Router.route('/:user/:project/settings/', () => {
     ApiHelper.checkConnection()
     .then(() => {
         ApiHelper.getResources()
@@ -154,6 +156,7 @@ Router.route('/:project/settings/', () => {
     });
 });
 
+// Init router
 Router.init();
 
 // Navbar
@@ -162,4 +165,3 @@ let navbar = new Navbar();
 $('.app-container').html(
     navbar.$element
 );
-

@@ -669,10 +669,6 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
 // Session methods
 // ----------
 /**
-     * Gets the API token and prompts for one if needed
-     * 
-     * @returns {String} token
-     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){return queryToken;}else if(this.isSpectating()){return '';}else {if(!localStorage.getItem('token')){var token=prompt('Please input API token');localStorage.setItem('token',token);}return localStorage.getItem('token');}} /**
      * Gets the API token string
      *
      * @param {Boolean} includeSuffix
@@ -965,10 +961,14 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
 // Session methods
 // ----------
 /**
+     * Gets the API token and prompts for one if needed
+     * 
+     * @returns {String} token
+     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){var token=prompt('Please input API token');localStorage.setItem('token',token);}return localStorage.getItem('token');}} /**
      * Get user name
-     */},{key:"getUserName",value:function getUserName(){var user=localStorage.getItem('user');if(!user){if(Router.params.user){user=Router.params.user;}else {user=prompt('Please input user name');}if(user){localStorage.setItem('user',user);}}return user;} /**
+     */},{key:"getUserName",value:function getUserName(){var user=Router.params?Router.params.user:localStorage.getItem('user');if(!user){user=prompt('Please input user name');location.hash='/'+user;}localStorage.setItem('user',user);return user;} /**
      * Gets project name
-     */},{key:"getProjectName",value:function getProjectName(){var project=localStorage.getItem('project');if(!project){if(Router.params.project){project=Router.params.project;}else {project=prompt('Please input project name');}if(project){localStorage.setItem('project',project);}}return project;} /**
+     */},{key:"getProjectName",value:function getProjectName(){var project=Router.params?Router.params.project:localStorage.getItem('project');if(!project){project=prompt('Please input project name');location.hash='/'+this.getUserName()+'/'+project+'/board/kanban';resources={};}localStorage.setItem('project',project);return project;} /**
      * Resets the API token and reloads
      */},{key:"resetApiToken",value:function resetApiToken(){localStorage.setItem('token','');this.getApiToken();} /**
      * Logs out the currently logged in user and reloads
@@ -1292,16 +1292,7 @@ if(type!='projects'){prefix=localStorage.getItem('settings:projects:current')+pr
      *
      * @returns {String} value
      */},{key:"get",value:function get(type,key,defaultValue,parse){var prefix='settings'; // Exceptions for types not managed on a project basis
-if(type!='projects'){prefix=localStorage.getItem('settings:projects:current')+prefix+':';}var result=localStorage.getItem(prefix+':'+type+':'+key);if(result==='null'||result===null||result===undefined||result==='undefined'||typeof result==='undefined'){SettingsHelper.set(type,key,defaultValue,parse);result=defaultValue||false;}if(parse){try{result=JSON.parse(result);}catch(e){debug.warning(e.message,this);}}return result;} /**
-     * Sanity check
-     *
-     * @returns {Boolean} isValid
-     */},{key:"check",value:function check(){ // If for some reason no project is specified, return to the projects panel
-if(!SettingsHelper.get('projects','current')&&!Router.params.project){location.hash='/projects/';return false;} // Set current view to preferred
-SettingsHelper.set('view','default',location.hash.replace('/'+Router.params.project,'').replace('#','')); // Clear resource cache if needed
-if(SettingsHelper.get('projects','current')!=Router.params.project){resources={};} // Set current project setting
-SettingsHelper.set('projects','current',Router.params.project); // Set head title tag
-$('head title').html(Router.params.project+' - Samoosa');return true;}}]);return SettingsHelper;}();module.exports=SettingsHelper;},{}],19:[function(require,module,exports){'use strict'; /**
+if(type!='projects'){prefix=localStorage.getItem('settings:projects:current')+prefix+':';}var result=localStorage.getItem(prefix+':'+type+':'+key);if(result==='null'||result===null||result===undefined||result==='undefined'||typeof result==='undefined'){SettingsHelper.set(type,key,defaultValue,parse);result=defaultValue||false;}if(parse){try{result=JSON.parse(result);}catch(e){debug.log(e.message,this);}}return result;}}]);return SettingsHelper;}();module.exports=SettingsHelper;},{}],19:[function(require,module,exports){'use strict'; /**
  * The data model for issues
  */var Issue=function(){_createClass(Issue,null,[{key:"create", /**
      * Create a new issue and push it to the remote source
@@ -1326,6 +1317,6 @@ require('../globals'); // Routes
 require('./routes'); // Title
 $('head title').html('Samoosa');},{"../../../../plugins/github/js/GitHubApi":13,"../globals":14,"../helpers/DebugHelper":16,"../helpers/ResourceHelper":17,"../helpers/SettingsHelper":18,"../models/Issue":19,"./routes":21,"bluebird":1,"exomon":8,"marked":9}],21:[function(require,module,exports){'use strict'; // Root
 Router.route('/',function(){ApiHelper.checkConnection().then(function(){});}); // Plan
-Router.route('/:project/plan/',function(){if(!SettingsHelper.check()){return;}ApiHelper.checkConnection().then(function(){ApiHelper.getResources().then(function(){});});}); // Scope
-Router.route('/:user/:project/scope',function(){if(!SettingsHelper.check()){return;}ApiHelper.checkConnection().then(function(){ApiHelper.getResources(['collaborators']).then(function(){$('.app-container').empty();$('.app-container').append(_.div({class:'workspace scope-container'},_.h1('Scope of work'),_.each(window.resources.milestones,function(milestoneIndex,milestone){return _.div({class:'print-milestone'},_.h2({class:'print-milestone-title'},milestone.title),_.each(window.resources.issues,function(issueIndex,issue){if(issue.milestone==milestoneIndex){return _.div({class:'print-issue'},_.h3({class:'print-issue-title'},issue.title),_.p({class:'print-issue-estimate'},window.resources.issueEstimates[issue.estimate]),_.p({class:'print-issue-description'},markdownToHtml(issue.description)));}}));})));});});});Router.init();},{}]},{},[20]);
+Router.route('/:project/plan/',function(){ApiHelper.checkConnection().then(function(){ApiHelper.getResources().then(function(){});});}); // Scope
+Router.route('/:user/:project/scope',function(){ApiHelper.checkConnection().then(function(){ApiHelper.getResources(['collaborators']).then(function(){$('.app-container').empty();$('.app-container').append(_.div({class:'workspace scope-container'},_.h1('Scope of work'),_.each(window.resources.milestones,function(milestoneIndex,milestone){return _.div({class:'print-milestone'},_.h2({class:'print-milestone-title'},milestone.title),_.each(window.resources.issues,function(issueIndex,issue){if(issue.milestone==milestoneIndex){return _.div({class:'print-issue'},_.h3({class:'print-issue-title'},issue.title),_.p({class:'print-issue-estimate'},window.resources.issueEstimates[issue.estimate]),_.p({class:'print-issue-description'},markdownToHtml(issue.description)));}}));})));});});});Router.init();},{}]},{},[20]);
 //# sourceMappingURL=public/js/maps/readonly.js.map

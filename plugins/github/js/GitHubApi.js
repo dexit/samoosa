@@ -186,31 +186,6 @@ class GitHubApi extends ApiHelper {
     // Session methods
     // ----------
     /**
-     * Gets the API token and prompts for one if needed
-     * 
-     * @returns {String} token
-     */
-    getApiToken() {
-        let queryToken = Router.query('token');
-
-        if(queryToken) {
-            return queryToken;
-
-        } else if(this.isSpectating()) {
-            return  '';
-
-        } else {
-            if(!localStorage.getItem('token')) {
-                let token = prompt('Please input API token');
-
-                localStorage.setItem('token', token);
-            }
-
-            return localStorage.getItem('token');
-        }
-    }
-    
-    /**
      * Gets the API token string
      *
      * @param {Boolean} includeSuffix

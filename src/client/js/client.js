@@ -44,6 +44,4 @@ require('./globals');
 require('./routes');
 
 // Title
-let currentProject = SettingsHelper.get('projects', 'current');
-
-$('head title').html((currentProject ? currentProject +  ' - ' : '') + 'Samoosa');
+$('head title').html((Router.params.project ? Router.params.project +  ' - ' : '') + 'Samoosa');

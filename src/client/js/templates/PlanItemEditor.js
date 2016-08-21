@@ -5,13 +5,15 @@ module.exports = function render() {
         _.div({class: 'drag-handle'},
             this.model.title
         ).on('mousedown', (e) => { this.onClickDragHandle(e); }),
+        _.button({class: 'btn-close btn-transparent'},
+            _.span({class: 'fa fa-remove'})
+        ).click(() => { this.onClickClose(); }),
         _.div({class: 'header'},
-            _.button({class: 'btn-transparent'},
-                _.span({class: 'fa fa-remove'})
-            ).click(() => { this.onClickClose(); }),
+            _.h4('Title'),
             _.input({class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title})
         ),
         _.div({class: 'body'},
+            _.h4('Description'),
             _.input({class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description})
         ),
         _.div({class: 'footer'},

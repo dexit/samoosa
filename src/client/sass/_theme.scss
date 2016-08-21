@@ -208,6 +208,30 @@ ul {
     }
 }
 
+.plan-container .plan-item-editor {
+    background-color: $teal-dark;
+
+    .drag-handle {
+        padding: 0.5rem 1rem 0.9em 1em;
+        font-family: 'Bree Serif';
+    }
+}
+
+body >.plan-item-editor {
+    border: 0px;
+    border-radius: 0px;
+    background-color: $teal-dark;
+    color: $white;
+
+    .body {
+        position: relative;
+    }
+
+    .btn-close {
+        color: $white;
+    }
+}
+
 /**
  * Widgets
  */

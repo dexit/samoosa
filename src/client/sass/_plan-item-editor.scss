@@ -6,6 +6,12 @@ body {
         border-radius: 5px;
         width: 600px;
 
+        .btn-close, .header, .body, .footer {
+            height: auto;
+            opacity: 1;
+            transition-delay: 1s;
+        }
+
         .drag-handle {
             display: none;
         }
@@ -18,16 +24,15 @@ body {
             width: 100%;
             padding: 0px 5px;
         }
-        
+       
+        .btn-close {
+            float: right;
+            line-height: 0px;
+        }
+
         .header {
-            margin-bottom: 15px;
-
             input {
-                width: 60%;
-            }
-
-            button {
-                float: right;
+                width: 100%;
             }
         }
 
@@ -61,8 +66,17 @@ body {
             padding: 5px 10px;
         }
 
-        .header, .body, .footer {
-            display: none;    
+        .btn-close, .header, .body, .footer {
+            display: none;
+            overflow: hidden;
+            height: 0px;
+            opacity: 0;
         }
+    }
+}
+
+.plan-item-editor {
+    .btn-close, .header, .body, .footer {
+        transition: opacity 0.25s ease;  
     }
 }

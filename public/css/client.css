@@ -1,6 +1,7 @@
 @import 'https://fonts.googleapis.com/css?family=Open+Sans:400,700';
 @import 'https://fonts.googleapis.com/css?family=Bree+Serif';
 [role="button"],
+input[type="text"],
 input[type="submit"],
 input[type="reset"],
 input[type="button"],
@@ -846,6 +847,10 @@ body > .plan-item-editor {
   padding: 15px;
   border-radius: 5px;
   width: 600px; }
+  body > .plan-item-editor .btn-close, body > .plan-item-editor .header, body > .plan-item-editor .body, body > .plan-item-editor .footer {
+    height: auto;
+    opacity: 1;
+    transition-delay: 1s; }
   body > .plan-item-editor .drag-handle {
     display: none; }
   body > .plan-item-editor input {
@@ -855,12 +860,11 @@ body > .plan-item-editor {
     line-height: 30px;
     width: 100%;
     padding: 0px 5px; }
-  body > .plan-item-editor .header {
-    margin-bottom: 15px; }
-    body > .plan-item-editor .header input {
-      width: 60%; }
-    body > .plan-item-editor .header button {
-      float: right; }
+  body > .plan-item-editor .btn-close {
+    float: right;
+    line-height: 0px; }
+  body > .plan-item-editor .header input {
+    width: 100%; }
   body > .plan-item-editor .footer {
     margin-top: 15px;
     text-align: right; }
@@ -882,8 +886,14 @@ body > .plan-item-editor {
     display: block;
     cursor: move;
     padding: 5px 10px; }
-  .plan-container .plan-item-editor .header, .plan-container .plan-item-editor .body, .plan-container .plan-item-editor .footer {
-    display: none; }
+  .plan-container .plan-item-editor .btn-close, .plan-container .plan-item-editor .header, .plan-container .plan-item-editor .body, .plan-container .plan-item-editor .footer {
+    display: none;
+    overflow: hidden;
+    height: 0px;
+    opacity: 0; }
+
+.plan-item-editor .btn-close, .plan-item-editor .header, .plan-item-editor .body, .plan-item-editor .footer {
+  transition: opacity 0.25s ease; }
 
 .project-editor {
   padding: 15px;
@@ -1033,6 +1043,22 @@ ul {
     background-color: transparent; }
     .issue-editor .comments textarea, .issue-editor .add-comment textarea {
       border-radius: 0px; }
+
+.plan-container .plan-item-editor {
+  background-color: #21303B; }
+  .plan-container .plan-item-editor .drag-handle {
+    padding: 0.5rem 1rem 0.9em 1em;
+    font-family: 'Bree Serif'; }
+
+body > .plan-item-editor {
+  border: 0px;
+  border-radius: 0px;
+  background-color: #21303B;
+  color: #fff; }
+  body > .plan-item-editor .body {
+    position: relative; }
+  body > .plan-item-editor .btn-close {
+    color: #fff; }
 
 /**
  * Widgets

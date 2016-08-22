@@ -233,9 +233,10 @@ body, textarea, label, input, option, select {
   font-size: 12px; }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Bree Serif';
   margin-top: 0.3em;
   margin-bottom: 0.2em; }
+  h1, h1 input, h1 a, h1 span, h2, h2 input, h2 a, h2 span, h3, h3 input, h3 a, h3 span, h4, h4 input, h4 a, h4 span, h5, h5 input, h5 a, h5 span, h6, h6 input, h6 a, h6 span {
+    font-family: 'Bree Serif'; }
 
 h1 {
   font-size: 2.5rem; }
@@ -246,14 +247,14 @@ h2 {
 h3 {
   font-size: 1.6rem; }
 
-h4 {
-  font-size: 1.5rem; }
+h4, h4 input, h4 a, h4 span {
+  font-size: 1.1rem; }
 
 h5 {
-  font-size: 1.25rem; }
+  font-size: 1rem; }
 
 h6 {
-  font-size: 1rem; }
+  font-size: 0.8rem; }
 
 ul {
   padding-left: 1.2em;
@@ -328,6 +329,8 @@ ul {
   margin-bottom: 0.5rem; }
   .issue-editor > .header {
     background-color: transparent; }
+    .issue-editor > .header h4, .issue-editor > .header h4 input {
+      color: #fff; }
     .issue-editor > .header .issue-index {
       font-family: 'Bree Serif';
       padding: 4px 8px;

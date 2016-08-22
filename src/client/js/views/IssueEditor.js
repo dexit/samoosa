@@ -384,8 +384,6 @@ class IssueEditor extends View {
             return;
         }
         
-        this.$element.toggleClass('expanded', false);
-
         IssueEditor.cancelMultiSelect();
     }
 
@@ -412,7 +410,10 @@ class IssueEditor extends View {
     /**
      * Event: Click the edit button of a field
      */
-    onClickEdit($btn) {
+    onClickEdit(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         if(ApiHelper.isSpectating()) {
             return;
         }
@@ -490,8 +491,6 @@ class IssueEditor extends View {
             }
 
         }
-
-        this.$element.toggleClass('expanded', false);
     }
 
     /**

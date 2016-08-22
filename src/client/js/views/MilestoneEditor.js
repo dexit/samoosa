@@ -30,9 +30,8 @@ class MilestoneEditor extends View {
 
             $('.milestone-editor[data-index="' + issue.milestone + '"] .column[data-index="' + issue.column + '"] .btn-new-issue').before($issue);
            
-            $issue.find('.header .btn-edit').click();
-
             $issue.toggleClass('expanded', true);
+            $issue.toggleClass('selected', false);
 
             this.updateProgress();
 

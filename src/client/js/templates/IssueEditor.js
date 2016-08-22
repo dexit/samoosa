@@ -95,10 +95,12 @@ module.exports = function render() {
                     .change((e) => { this.onChangeCheckbox(e); })
             ),
             _.div({class: 'multi-edit-actions'}, 
-                _.button('Cancel')
-                    .click(() => { this.onClickMultiEditCancel(); }),
-                _.button('Apply')
-                    .click(() => { this.onClickMultiEditApply(); })
+                _.button({class: 'btn'},
+                    'Cancel'
+                ).click(() => { this.onClickMultiEditCancel(); }),
+                _.button({class: 'btn'},
+                    'Apply'
+                ).click(() => { this.onClickMultiEditApply(); })
             )
         ),
         _.div({class: 'body'},

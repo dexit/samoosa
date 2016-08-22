@@ -55,8 +55,6 @@ class ApiHelper {
         
         if(!user) {
             user = localStorage.getItem('user');
-           
-            location.hash = '/' + user;
         }
 
         if(!user) {
@@ -75,25 +73,7 @@ class ApiHelper {
      * Gets project name
      */    
     getProjectName() {
-        let project = Router.params ? Router.params.project : null;
-        
-        if(!project) {
-            project = localStorage.getItem('project');
-            resources = {};
-            
-            location.hash = '/' + this.getUserName() + '/' + project + '/board/kanban';
-        }
-
-        if(!project) {
-            project = prompt('Please input project name');
-            resources = {};
-
-            location.hash = '/' + this.getUserName() + '/' + project + '/board/kanban';
-        }
-        
-        localStorage.setItem('project', project)
-
-        return project;
+        return Router.params ? Router.params.project : null;
     }
 
     /**

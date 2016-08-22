@@ -229,12 +229,17 @@ body, html {
 
 .login-form {
   display: block;
-  max-width: 320px;
+  max-width: 400px;
+  width: 100%;
   margin: 0px auto;
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%); }
+  .login-form .logo {
+    display: block;
+    width: 6rem;
+    margin: 0rem auto 2rem auto; }
   .login-form ul {
     list-style-type: none;
     padding: 0px; }
@@ -248,7 +253,7 @@ body, html {
         width: 40%;
         flex-shrink: 0; }
       .login-form ul li input, .login-form ul li select {
-        width: 60%; }
+        flex-grow: 1; }
       .login-form ul li input[type="text"], .login-form ul li input[type="password"] {
         padding: 0em 0.4em; }
       .login-form ul li input[type="submit"] {
@@ -1018,7 +1023,9 @@ ul {
   background-color: #21303B;
   color: #fff;
   padding: 2rem; }
-  .login-form input[type="text"], .login-form label {
+  .login-form ul li input[type="password"], .login-form ul li input[type="text"] {
+    padding: 0rem 0.75rem; }
+  .login-form ul li input[type="password"], .login-form ul li input[type="text"], .login-form ul li label {
     line-height: 27px;
     border: 0px; }
 
@@ -1101,6 +1108,10 @@ body > .plan-item-editor {
  * Widgets
  */
 select {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   background-color: #E70D3B;
   padding-left: 0.5rem;
   color: #fff;
@@ -1108,8 +1119,7 @@ select {
   border: 0px;
   height: 2rem; }
   select option {
-    line-height: 2rem;
-    height: 2rem; }
+    padding: 0.5em; }
 
 button.btn, input[type="submit"].btn {
   padding: 10px 15px;

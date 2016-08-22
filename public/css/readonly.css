@@ -291,7 +291,9 @@ ul {
   background-color: #21303B;
   color: #fff;
   padding: 2rem; }
-  .login-form input[type="text"], .login-form label {
+  .login-form ul li input[type="password"], .login-form ul li input[type="text"] {
+    padding: 0rem 0.75rem; }
+  .login-form ul li input[type="password"], .login-form ul li input[type="text"], .login-form ul li label {
     line-height: 27px;
     border: 0px; }
 
@@ -374,6 +376,10 @@ body > .plan-item-editor {
  * Widgets
  */
 select {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   background-color: #E70D3B;
   padding-left: 0.5rem;
   color: #fff;
@@ -381,8 +387,7 @@ select {
   border: 0px;
   height: 2rem; }
   select option {
-    line-height: 2rem;
-    height: 2rem; }
+    padding: 0.5em; }
 
 button.btn, input[type="submit"].btn {
   padding: 10px 15px;

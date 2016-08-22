@@ -129,9 +129,17 @@ ul {
     color: $white;
     padding: 2rem;
 
-    input[type="text"], label {
-        line-height: 27px;
-        border: 0px;
+    ul {
+        li {
+            input[type="password"], input[type="text"] {
+                padding: 0rem 0.75rem;
+            }
+
+            input[type="password"], input[type="text"], label {
+                line-height: 27px;
+                border: 0px;
+            }
+        }
     }
 }
 
@@ -263,6 +271,10 @@ body >.plan-item-editor {
  * Widgets
  */
 select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
     background-color: $pink-medium;
     padding-left: 0.5rem;
     color: $white;
@@ -271,8 +283,7 @@ select {
     height: 2rem;
 
     option {
-        line-height: 2rem;
-        height: 2rem;
+        padding: 0.5em;
     }
 }
 

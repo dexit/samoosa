@@ -2,7 +2,19 @@
 
 // Root
 Router.route('/', () => {
-    ApiHelper.getUserName();
+    setTimeout(() => {
+        $('.workspace').remove();
+
+        $.get('/README.md', (res) => {
+            $('.app-container').append(
+                _.div({class: 'workspace readme-container'},
+                    markdownToHtml(res)        
+                )
+            );
+        });
+
+        navbar.slideIn();
+    }, 10);
 });
 
 // User

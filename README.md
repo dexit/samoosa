@@ -1,3 +1,5 @@
+<img src="https://cdn.rawgit.com/Putaitu/samoosa/master/public/svg/logo.svg" />
+
 # Samoosa
 A free and open-source issue tracker frontend
 

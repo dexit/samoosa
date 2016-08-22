@@ -8,7 +8,7 @@ Router.route('/', () => {
         $.get('/README.md', (res) => {
             $('.app-container').append(
                 _.div({class: 'workspace readme-container'},
-                    markdownToHtml(res)        
+                    markdownToHtml(res) 
                 )
             );
         });

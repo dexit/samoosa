@@ -33,7 +33,10 @@ body, textarea, label, input, option, select {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Bree Serif';
+    &, input, a, span {
+        font-family: 'Bree Serif';
+    }
+    
     margin-top: 0.3em;
     margin-bottom: 0.2em;
 }
@@ -51,15 +54,17 @@ h3 {
 }
 
 h4 {
-    font-size: 1.5rem;
+    &, input, a, span {
+        font-size: 1.1rem;
+    }
 }
 
 h5 {
-    font-size: 1.25rem;
+    font-size: 1rem;
 }
 
 h6 {
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 
 ul {
@@ -79,6 +84,7 @@ ul {
             .project-editor {
                 background-color: $teal-darker;
                 border: 0px;
+                box-shadow: none;
 
                 .content {
                     .header {
@@ -115,6 +121,17 @@ ul {
                 }
             }
         }
+    }
+}
+
+.login-form {
+    background-color: $teal-dark;
+    color: $white;
+    padding: 2rem;
+
+    input[type="text"], label {
+        line-height: 27px;
+        border: 0px;
     }
 }
 
@@ -173,6 +190,12 @@ ul {
 
     >.header {
         background-color: transparent;
+
+        h4 {
+            &, input {
+                color: $white;
+            }
+        }
         
         .issue-index {
             font-family: 'Bree Serif';
@@ -199,20 +222,6 @@ ul {
             label {
                 line-height: 2rem;
                 height: 2rem;
-            }
-
-            select {
-                background-color: $pink-medium;
-                padding-left: 0.5rem;
-                color: $white;
-                line-height: 2rem;
-                border: 0px;
-                height: 2rem;
-
-                option {
-                    line-height: 2rem;
-                    height: 2rem;
-                }
             }
         }
     }
@@ -253,7 +262,21 @@ body >.plan-item-editor {
 /**
  * Widgets
  */
-.btn {
+select {
+    background-color: $pink-medium;
+    padding-left: 0.5rem;
+    color: $white;
+    line-height: 2rem;
+    border: 0px;
+    height: 2rem;
+
+    option {
+        line-height: 2rem;
+        height: 2rem;
+    }
+}
+
+button.btn, input[type="submit"].btn {
     padding: 10px 15px;
     font-size: 1em;
     height: 36px;

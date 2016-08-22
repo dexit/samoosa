@@ -972,9 +972,9 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
      * Gets the API token and prompts for one if needed
      * 
      * @returns {String} token
-     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){var token=prompt('Please input API token');localStorage.setItem('token',token);}return localStorage.getItem('token');}} /**
+     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){location='/login';throw new Error('Not logged in');}return localStorage.getItem('token');}} /**
      * Get user name
-     */},{key:"getUserName",value:function getUserName(){var user=Router.params?Router.params.user:null;if(!user){user=localStorage.getItem('user');location.hash='/'+user;}if(!user){user=prompt('Please input user name');location.hash='/'+user;}localStorage.setItem('user',user);return user;} /**
+     */},{key:"getUserName",value:function getUserName(){var user=Router.params?Router.params.user:null;if(!user){user=localStorage.getItem('user');location.hash='/'+user;}if(!user){location='/login';throw new Error('Not logged in');}else {localStorage.setItem('user',user);return user;}} /**
      * Gets project name
      */},{key:"getProjectName",value:function getProjectName(){var project=Router.params?Router.params.project:null;if(!project){project=localStorage.getItem('project');resources={};location.hash='/'+this.getUserName()+'/'+project+'/board/kanban';}if(!project){project=prompt('Please input project name');resources={};location.hash='/'+this.getUserName()+'/'+project+'/board/kanban';}localStorage.setItem('project',project);return project;} /**
      * Resets the API token and reloads
@@ -1195,9 +1195,7 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
      * Gets the current user object
      *
      * @returns {Promise}
-     */},{key:"getUser",value:function getUser(){return new Promise(function(callback){callback();});} /**
-     * Logs out the current user and reloads
-     */},{key:"logOut",value:function logOut(){location.reload();} // ----------
+     */},{key:"getUser",value:function getUser(){return new Promise(function(callback){callback();});} // ----------
 // Issue methods
 // ---------- 
 /** 
@@ -1507,11 +1505,11 @@ _.if(this.getPercentComplete()==100,_.span({class:'remaining ok fa fa-check'})))
  * @class View Navbar
  */var Navbar=function(_View5){_inherits(Navbar,_View5);function Navbar(params){_classCallCheck(this,Navbar);var _this63=_possibleConstructorReturn(this,Object.getPrototypeOf(Navbar).call(this,params));_this63.template=require('../templates/Navbar');_this63.fetch();return _this63;} /**
      * Gets a list of links
-     */_createClass(Navbar,[{key:"getLinks",value:function getLinks(){var links=[];if(!ApiHelper.isSpectating()){links.push({url:'/source/',handler:this.toggleSourcePanel,icon:'puzzle-piece'});}if(!ApiHelper.isSpectating()){links.push({url:'/projects/',handler:this.toggleProjectsList,icon:'folder'});}if(!ApiHelper.isSpectating()){links.push({url:'/settings/',icon:'cog'});}links.push({url:'/plan/',icon:'calendar'});links.push({url:'/board/kanban/',icon:'columns'});links.push({url:'/board/list/',icon:'list'});return links;} /**
+     */_createClass(Navbar,[{key:"getLinks",value:function getLinks(){var links=[];if(!ApiHelper.isSpectating()){links.push({url:'/source/',handler:this.toggleSourcePanel,icon:'user'});}if(!ApiHelper.isSpectating()){links.push({url:'/projects/',handler:this.toggleProjectsList,icon:'folder'});}if(!ApiHelper.isSpectating()){links.push({url:'/settings/',icon:'cog'});}links.push({url:'/plan/',icon:'calendar'});links.push({url:'/board/kanban/',icon:'columns'});links.push({url:'/board/list/',icon:'list'});return links;} /**
      * Cleans up extra added classes
      */},{key:"cleanUpClasses",value:function cleanUpClasses(){this.$element.toggleClass('project-list',false);this.$element.toggleClass('source-panel',false);} /**
      * Toggles the source panel
-     */},{key:"toggleSourcePanel",value:function toggleSourcePanel(){var $button=this.$element.find('.buttons button[data-url="/projects/"]');var $content=this.$element.find('.obscure .content');$button.toggleClass('active');var isActive=$button.hasClass('active');this.$element.toggleClass('out',isActive);this.$element.toggleClass('source-panel',isActive);$button.children('.fa').toggleClass('fa-folder-open',isActive).toggleClass('fa-folder',!isActive);if(isActive){ApiHelper.getUser().then(function(user){$content.empty().append([_.div({class:'current-user'},_.img({src:user.avatar}),_.p(user.name),_.button({class:'btn'},'Log out').click(function(){ApiHelper.logOut();}))]);});}else {$content.empty();}} /**
+     */},{key:"toggleSourcePanel",value:function toggleSourcePanel(){var $button=this.$element.find('.buttons button[data-url="/projects/"]');var $content=this.$element.find('.obscure .content');$button.toggleClass('active');var isActive=$button.hasClass('active');this.$element.toggleClass('out',isActive);this.$element.toggleClass('source-panel',isActive);$button.children('.fa').toggleClass('fa-folder-open',isActive).toggleClass('fa-folder',!isActive);if(isActive){ApiHelper.getUser().then(function(user){$content.empty().append([_.div({class:'current-user'},_.img({src:user.avatar}),_.p(user.name),_.button({class:'btn'},'Log out').click(function(e){e.preventDefault();ApiHelper.logOut();}))]);});}else {$content.empty();}} /**
      * Toggles the projects list
      */},{key:"toggleProjectsList",value:function toggleProjectsList(isActive){var $button=this.$element.find('.buttons button[data-url="/projects/"]');var $content=this.$element.find('.obscure .content');if(isActive!=true&&isActive!=false){isActive=!$button.hasClass('active');}$button.toggleClass('active',isActive);this.$element.toggleClass('out',isActive);this.$element.toggleClass('project-list',isActive);$button.children('.fa').toggleClass('fa-folder-open',isActive).toggleClass('fa-folder',!isActive);if(isActive){ApiHelper.getProjects().then(function(){$content.empty().append(_.each(window.resources.projects,function(i,project){return new ProjectEditor({model:project}).$element;}));});}else {$content.empty();}} /**
      * Gets the full router URL

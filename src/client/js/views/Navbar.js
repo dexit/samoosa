@@ -24,7 +24,7 @@ class Navbar extends View {
             links.push({
                 url: '/source/',
                 handler: this.toggleSourcePanel,
-                icon: 'puzzle-piece'
+                icon: 'user'
             });
         }
     
@@ -95,7 +95,9 @@ class Navbar extends View {
                     _.div({class: 'current-user'},
                         _.img({src: user.avatar}),
                         _.p(user.name),
-                        _.button({class: 'btn'}, 'Log out').click(() => {
+                        _.button({class: 'btn'}, 'Log out').click((e) => {
+                            e.preventDefault();
+
                             ApiHelper.logOut();
                         })
                     ) 

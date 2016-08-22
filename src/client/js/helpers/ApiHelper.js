@@ -38,9 +38,9 @@ class ApiHelper {
 
         } else {
             if(!localStorage.getItem('token')) {
-                let token = prompt('Please input API token');
+                location = '/login';
 
-                localStorage.setItem('token', token);
+                throw new Error('Not logged in');
             }
 
             return localStorage.getItem('token');
@@ -60,14 +60,15 @@ class ApiHelper {
         }
 
         if(!user) {
-            user = prompt('Please input user name');
+            location = '/login';
 
-            location.hash = '/' + user;
-        }
+            throw new Error('Not logged in');
         
-        localStorage.setItem('user', user)
+        } else {
+            localStorage.setItem('user', user)
 
-        return user;
+            return user;
+        }
     }
 
     /**
@@ -109,7 +110,7 @@ class ApiHelper {
      */
     logOut() {
         localStorage.setItem('token', '');
-        
+
         location.reload();
     }
 
@@ -591,12 +592,6 @@ class ApiHelper {
         });
     }
 
-    /**
-     * Logs out the current user and reloads
-     */
-    logOut() {
-        location.reload();
-    }
    
     // ----------
     // Issue methods

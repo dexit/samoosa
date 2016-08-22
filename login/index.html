@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width initial-scale=1"/>
+        <meta name="description" content="The Mondai issue tracker"/>
+
+        <link href="../public/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+        <link href="../public/css/client.css" rel="stylesheet"/>
+
+        <title>Samoosa</title>
+    </head>
+    <body>
+        <div class="app-container">
+            <form class="login-form">
+                <ul>
+                    <li>
+                        <label for="input-source">Source</label>
+                        <select id="input-source" name="source">
+                            <option value="github">GitHub</option>
+                            <option value="bitbucket">BitBucket</option>
+                        </select>
+                    </li>
+                    <li> 
+                        <label for="input-username">Username</label>
+                        <input id="input-username" type="text" name="user"/>
+                    </li>
+                    <li> 
+                        <label for="input-token">API token</label>
+                        <input id=input-token" type="password" name="token" />
+                    </li>
+                    <li> 
+                        <input type="submit" class="btn" value="Log in"/>
+                    </li>
+                </ul>
+            </form>
+        </div>
+
+        <script src="../public/lib/jquery/jquery.min.js"></script>
+        <script>
+            $('.login-form input:not([type="submit"]), .login-form select').each(function() {
+                $(this).on('change', function() {
+                    localStorage.setItem($(this).attr('name'), $(this).val());
+                });
+            });
+            
+            $('.login-form').on('submit', function(e) {
+                e.preventDefault();
+
+                location = '/#/' + localStorage.getItem('user');
+            });
+        </script>
+    </body>
+</html>

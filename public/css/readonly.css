@@ -267,7 +267,8 @@ ul {
   color: #fff; }
   .navbar .content .project-editor, .navbar .obscure .content .project-editor {
     background-color: #171e23;
-    border: 0px; }
+    border: 0px;
+    box-shadow: none; }
     .navbar .content .project-editor .content .header h4, .navbar .obscure .content .project-editor .content .header h4 {
       font-weight: normal; }
 
@@ -284,6 +285,14 @@ ul {
 
 .navbar:not(.out) .buttons button.active .fa {
   color: #21303B; }
+
+.login-form {
+  background-color: #21303B;
+  color: #fff;
+  padding: 2rem; }
+  .login-form input[type="text"], .login-form label {
+    line-height: 27px;
+    border: 0px; }
 
 .board-container {
   padding-top: 56px; }
@@ -311,7 +320,7 @@ ul {
   .milestone-editor > .header .fa {
     color: #888888; }
   .milestone-editor > .header .progress-bar {
-    background-color: #efefef; }
+    background-color: #e8e8e8; }
 
 .issue-editor {
   border: 0px;
@@ -337,16 +346,6 @@ ul {
       .issue-editor .meta .meta-field label {
         line-height: 2rem;
         height: 2rem; }
-      .issue-editor .meta .meta-field select {
-        background-color: #E70D3B;
-        padding-left: 0.5rem;
-        color: #fff;
-        line-height: 2rem;
-        border: 0px;
-        height: 2rem; }
-        .issue-editor .meta .meta-field select option {
-          line-height: 2rem;
-          height: 2rem; }
   .issue-editor .comments, .issue-editor .add-comment {
     background-color: transparent; }
     .issue-editor .comments textarea, .issue-editor .add-comment textarea {
@@ -371,7 +370,18 @@ body > .plan-item-editor {
 /**
  * Widgets
  */
-.btn {
+select {
+  background-color: #E70D3B;
+  padding-left: 0.5rem;
+  color: #fff;
+  line-height: 2rem;
+  border: 0px;
+  height: 2rem; }
+  select option {
+    line-height: 2rem;
+    height: 2rem; }
+
+button.btn, input[type="submit"].btn {
   padding: 10px 15px;
   font-size: 1em;
   height: 36px;
@@ -379,14 +389,14 @@ body > .plan-item-editor {
   color: #fff;
   font-family: 'Bree Serif';
   background-color: #E70D3B; }
-  .btn + .btn {
+  button.btn + .btn, input[type="submit"].btn + .btn {
     margin-left: 0.5rem; }
-  .btn .fa {
+  button.btn .fa, input[type="submit"].btn .fa {
     margin-left: 0.5em; }
 
 .tabbed-container.vertical .tabs {
   padding-top: 0rem;
-  background-color: #efefef;
+  background-color: #e8e8e8;
   border-right: 1px solid #cccccc; }
   .tabbed-container.vertical .tabs .tab {
     padding: 0rem 1rem;
@@ -394,9 +404,9 @@ body > .plan-item-editor {
     background-color: transparent;
     line-height: 4rem;
     min-width: 12rem;
-    text-align: left;
-    color: #888888; }
+    text-align: left; }
     .tabbed-container.vertical .tabs .tab, .tabbed-container.vertical .tabs .tab.active {
+      color: #343434;
       border-bottom: 1px solid #cccccc; }
     .tabbed-container.vertical .tabs .tab:not(.active):last-of-type {
       border-bottom: 0px; }

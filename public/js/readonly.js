@@ -964,11 +964,11 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
      * Gets the API token and prompts for one if needed
      * 
      * @returns {String} token
-     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){var token=prompt('Please input API token');localStorage.setItem('token',token);}return localStorage.getItem('token');}} /**
+     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){location='/login';throw new Error('Not logged in');}return localStorage.getItem('token');}} /**
      * Get user name
-     */},{key:"getUserName",value:function getUserName(){var user=Router.params?Router.params.user:localStorage.getItem('user');if(!user){user=prompt('Please input user name');location.hash='/'+user;}localStorage.setItem('user',user);return user;} /**
+     */},{key:"getUserName",value:function getUserName(){var user=Router.params?Router.params.user:null;if(!user){user=localStorage.getItem('user');location.hash='/'+user;}if(!user){location='/login';throw new Error('Not logged in');}else {localStorage.setItem('user',user);return user;}} /**
      * Gets project name
-     */},{key:"getProjectName",value:function getProjectName(){var project=Router.params?Router.params.project:localStorage.getItem('project');if(!project){project=prompt('Please input project name');location.hash='/'+this.getUserName()+'/'+project+'/board/kanban';resources={};}localStorage.setItem('project',project);return project;} /**
+     */},{key:"getProjectName",value:function getProjectName(){var project=Router.params?Router.params.project:null;if(!project){project=localStorage.getItem('project');resources={};location.hash='/'+this.getUserName()+'/'+project+'/board/kanban';}if(!project){project=prompt('Please input project name');resources={};location.hash='/'+this.getUserName()+'/'+project+'/board/kanban';}localStorage.setItem('project',project);return project;} /**
      * Resets the API token and reloads
      */},{key:"resetApiToken",value:function resetApiToken(){localStorage.setItem('token','');this.getApiToken();} /**
      * Logs out the currently logged in user and reloads
@@ -1187,9 +1187,7 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
      * Gets the current user object
      *
      * @returns {Promise}
-     */},{key:"getUser",value:function getUser(){return new Promise(function(callback){callback();});} /**
-     * Logs out the current user and reloads
-     */},{key:"logOut",value:function logOut(){location.reload();} // ----------
+     */},{key:"getUser",value:function getUser(){return new Promise(function(callback){callback();});} // ----------
 // Issue methods
 // ---------- 
 /** 

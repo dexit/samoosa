@@ -69,12 +69,12 @@ class ApiHelper {
      * Gets project name
      */    
     getProjectName() {
-        let project = Router.params && Router.params.project ? Router.params.project : localStorage.getItem('project');
-    
-        if(!project) {
-            debug.error('No project is defined', this);
+        let project = null;
+        
+        if(Router.params && Router.params.project) {
+            project = Router.params.project;
         }
-
+   
         return project;
     }
 

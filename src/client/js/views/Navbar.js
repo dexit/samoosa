@@ -141,7 +141,7 @@ class Navbar extends View {
     /**
      * Toggles the projects list
      */
-    toggleProjectsList(isActive) {
+    toggleProjectsList(isActive, overrideUrl) {
         this.togglePanel('/projects/', 'project-list', ($content) => {
             ApiHelper.getProjects()
             .then(() => {
@@ -150,7 +150,8 @@ class Navbar extends View {
                 .append(
                     _.each(window.resources.projects, (i, project) => {
                         return new ProjectEditor({
-                            model: project
+                            model: project,
+                            overrideUrl: overrideUrl
                         }).$element;
                     })
                 );
@@ -166,10 +167,6 @@ class Navbar extends View {
      * @returns {String} url
      */
     getFullUrl(url) {
-        if(url == '/') {
-            return url;
-        }
-
         // Prepend project
         url = '/' + ApiHelper.getProjectName() + url;
         
@@ -188,16 +185,21 @@ class Navbar extends View {
         this.cleanUpClasses();
         this.$element.find('.obscure .content').empty();
         
-        url = this.getFullUrl(url);
-        
-        if(url && url != Router.url) {
-            this.$element.toggleClass('out', true);
-            
-            resources = {};
+        if(!ApiHelper.getProjectName()) {
+            ViewHelper.get('Navbar').toggleProjectsList(true, url);
 
-            setTimeout(() => {
-                location.hash = url;
-            }, 400);
+        } else {
+            url = this.getFullUrl(url);
+
+            if(url != Router.url) {
+                this.$element.toggleClass('out', true);
+                
+                resources = {};
+
+                setTimeout(() => {
+                    location.hash = url;
+                }, 400);
+            }
         }
     }
 

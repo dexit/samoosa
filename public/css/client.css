@@ -680,7 +680,13 @@ body, html {
   border: 0px;
   background-color: #212121; }
   .navbar.out.about-panel .obscure {
-    max-width: 50rem; }
+    overflow-y: auto; }
+    .navbar.out.about-panel .obscure .content {
+      max-width: 50rem;
+      left: 50%;
+      top: 10%;
+      height: auto;
+      transform: translateX(-50%); }
   .navbar.out.source-panel .obscure {
     max-width: 20rem; }
   .navbar.out.project-list .obscure {
@@ -705,7 +711,8 @@ body, html {
     background-color: #212121;
     transition: width 0.25s ease, max-width 0.25s ease;
     transition-delay: 0s;
-    z-index: 1000; }
+    z-index: 1000;
+    max-width: 100%; }
     .navbar .obscure > .content {
       padding: 15px;
       position: absolute;

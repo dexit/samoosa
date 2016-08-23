@@ -1510,7 +1510,7 @@ _.if(this.getPercentComplete()==100,_.span({class:'remaining ok fa fa-check'})))
      * Cleans up extra added classes
      */},{key:"cleanUpClasses",value:function cleanUpClasses(){this.$element.toggleClass('project-list',false);this.$element.toggleClass('source-panel',false);this.$element.toggleClass('about-panel',false);} /**
      * Toggles a panel
-     */},{key:"togglePanel",value:function togglePanel(url,className,onActive,isActive){var $button=this.$element.find('.buttons button[data-url="'+url+'"]');var $content=this.$element.find('.obscure .content');if(isActive!=true&&isActive!=false){isActive=!$button.hasClass('active');}$content.empty();$button.toggleClass('active');this.$element.find('.buttons button.handler').toggleClass('active',false);this.$element.toggleClass('out',isActive);this.$element.toggleClass(className,isActive);if(isActive){onActive($content);}else {$content.empty();}} /**
+     */},{key:"togglePanel",value:function togglePanel(url,className,onActive,isActive){var $button=this.$element.find('.buttons button[data-url="'+url+'"]');var $content=this.$element.find('.obscure .content');if(isActive!=true&&isActive!=false){isActive=!$button.hasClass('active');}$content.empty();this.$element.find('.buttons button.handler').toggleClass('active',false);$button.toggleClass('active',isActive);this.$element.toggleClass('out',isActive);this.$element.toggleClass(className,isActive);if(isActive){onActive($content);}else {$content.empty();}} /**
      * Toggles the about panel
      */},{key:"toggleAboutPanel",value:function toggleAboutPanel(isActive){this.togglePanel('/','about-panel',function($content){$.get('/README.md',function(res){$content.append(markdownToHtml(res));});},isActive);} /**
      * Toggles the source panel

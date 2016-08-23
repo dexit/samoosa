@@ -86,9 +86,10 @@ class Navbar extends View {
         }
 
         $content.empty();
-        $button.toggleClass('active');
 
         this.$element.find('.buttons button.handler').toggleClass('active', false);
+
+        $button.toggleClass('active', isActive);
 
         this.$element.toggleClass('out', isActive);
         this.$element.toggleClass(className, isActive);

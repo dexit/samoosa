@@ -30,6 +30,7 @@ $white: #fff;
 body, textarea, label, input, option, select {
     font-family: 'Open Sans';
     font-size: 12px;
+    line-height: 1.5em;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -37,8 +38,8 @@ h1, h2, h3, h4, h5, h6 {
         font-family: 'Bree Serif';
     }
     
-    margin-top: 0.3em;
-    margin-bottom: 0.2em;
+    margin-top: 0.4em;
+    margin-bottom: 0.3em;
 }
 
 h1 {
@@ -109,6 +110,15 @@ ul {
             height: 100%;
             z-index: 5;
         }
+        
+        button {
+            &.active.handler {
+                &:before {
+                    width: 80%;
+                    height: 80%;
+                }
+            }
+        }
     }
 
     &:not(.out) {
@@ -118,6 +128,27 @@ ul {
                     .fa {
                         color: $teal-dark;
                     }
+                }
+            }
+        }
+    }
+
+    .buttons {
+        .separator {
+            background-color: $teal-darker;
+        }
+
+        button {
+            &.handler {
+                &:before {
+                    width: 0%;
+                    height: 0%;
+                    transition: width 0.1s ease, height 0.1s ease;
+                    background-color: $teal-darker;
+                    border-radius: 50%;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
                 }
             }
         }

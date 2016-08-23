@@ -118,7 +118,7 @@ var _this=_possibleConstructorReturn(this,Object.getPrototypeOf(ContextMenu).cal
 $('body').click(function(e){if($(e.target).parents('.context-menu').length<1){$('.context-menu-target-element').removeClass('context-menu-target-element');ViewHelper.removeAll('ContextMenu');}});}},{}],3:[function(require,module,exports){'use strict'; // ----------
 // Event handlers
 // ----------
-function dragHandler(e){DragDrop.current.onDrag(e);}function releaseHandler(e){DragDrop.current.onReleaseDragHandle(e);} // ----------
+function hoverDropContainerHandler(e){DragDrop.current.onHoverDropContainer(this,e);}function leaveDropContainerHandler(e){DragDrop.current.onLeaveDropContainer(this,e);}function dragHandler(e){DragDrop.current.onDrag(e);}function releaseHandler(e){DragDrop.current.onReleaseDragHandle(e);} // ----------
 // Registered DragDrop instances
 // ----------
 var instances=[]; /**
@@ -132,28 +132,6 @@ var instances=[]; /**
      *
      * @param {HTMLelement} element
      */},{key:"destroy",value:function destroy(element){for(var i in instances){var instance=instances[i];if(instance.element==element){instance.removeListeners();instances.splice(i,1);break;}}} /**
-     * Checks whether 2 rects intersect
-     *
-     * @param {Rect} r1
-     * @param {Rect} r2
-     *
-     * @returns {Boolean} intersects
-     */},{key:"intersectsRect",value:function intersectsRect(r1,r2){return r1.left<r2.right&&r1.right>r2.left&&r1.top<r2.bottom&&r1.bottom>r2.top;} /**
-     * Gets elements stack by position
-     *
-     * @param {Number} x
-     * @param {Number} y
-     *
-     * @returns {Array} stack
-     */},{key:"getElementStack",value:function getElementStack(x,y){var stack=[];var el=document.elementFromPoint(x,y);var handbrake=0;while(el&&el!=document.body&&handbrake<20){stack[stack.length]=el;el.style.display='none';handbrake++;el=document.elementFromPoint(x,y);}for(var i in stack){stack[i].style.display=null;}return stack;} /**
-     * Sorts an array on elements by z proximity to the cursor
-     *
-     * @param {Array} elements
-     * @param {Number} x
-     * @paraa {Number} y
-     *
-     * @return {Array} ranking
-     */},{key:"sortByZProximity",value:function sortByZProximity(elements,x,y){var result=[];var stack=DragDrop.getElementStack(x,y);for(var i in stack){if(elements.indexOf(stack[i])>-1){result[result.length]=stack[i];}}return result;} /**
      * Constructs a new instance
      *
      * @param {HTMLElement} element
@@ -162,8 +140,8 @@ var instances=[]; /**
 instances.push(instance); // Init element
 this.element=element;this.element.setAttribute('data-dragdrop-enabled','true'); // Init listener array
 this.listeners=[]; // Adopt config
-config=config||{};this.config={dragThreshold:2,dragScrollSpeed:5,dropContainerSelector:'',dropContainers:[],lockY:false,lockX:false,onDrag:function onDrag(){},onBeginDrag:function onBeginDrag(){},onEndDrag:function onEndDrag(){}};for(var k in config){this.config[k]=config[k];} // Detect initial click
-function downHandler(mousedownEvent){mousedownEvent.stopPropagation();if(mousedownEvent.which==1){(function(){ // Detect initial move
+config=config||{};this.config={dragThreshold:2,dragScrollSpeed:5,dropContainerClass:'',dropContainers:[],lockY:false,lockX:false,onDrag:function onDrag(){},onBeginDrag:function onBeginDrag(){},onEndDrag:function onEndDrag(){}};for(var k in config){this.config[k]=config[k];} // Detect initial click
+function downHandler(mousedownEvent){if(mousedownEvent.which==1){(function(){ // Detect initial move
 var moveHandler=function moveHandler(mousemoveEvent){dragFrames++;if(dragFrames>=instance.config.dragThreshold){instance.onMoveDragHandle(mousemoveEvent);instance.off(instance.element,'mousemove',moveHandler);instance.off(document,'mouseup',upHandler);}}; // Detect immediate pointer release
 var upHandler=function upHandler(upEvent){instance.off(instance.element,'mousemove',moveHandler);instance.off(document,'mouseup',upHandler);};mousedownEvent.preventDefault();var dragFrames=0;instance.on(instance.element,'mousemove',moveHandler);instance.on(document,'mouseup',upHandler);})();}} // Add pointer event
 this.on(this.element,'mousedown',downHandler);} /**
@@ -184,10 +162,10 @@ this.on(this.element,'mousedown',downHandler);} /**
      * Gets all drop containers
      *
      * @returns {Array} containers
-     */},{key:"updateDropContainers",value:function updateDropContainers(){var _this2=this;DragDrop.currentDropContainers=[]; // An array of elements are specified
+     */},{key:"updateDropContainers",value:function updateDropContainers(){DragDrop.currentDropContainers=[]; // An array of elements are specified
 if(this.config.dropContainers&&this.config.dropContainers.length>0){DragDrop.currentDropContainers=this.config.dropContainers; // A selector is specified
-}else if(this.config.dropContainerSelector){DragDrop.currentDropContainers=[].slice.call(document.querySelectorAll(this.config.dropContainerSelector)); // If the element itself was found, filter it out
-DragDrop.currentDropContainers=DragDrop.currentDropContainers.filter(function(dropContainer){var isSelf=dropContainer==_this2.element||dropContainer.parentElement==_this2.element;if(isSelf){return false;}else {dropContainer.dataset.dragdropDropContainer=true;return true;}});}} /**
+}else if(this.config.dropContainerClass){DragDrop.currentDropContainers=document.querySelectorAll(this.config.dropContainerClass); // Nothing is specified, look for similar containers
+}else {var dragDropItems=document.querySelectorAll('*[data-dragdrop-enabled="true"]')||[];for(var i=0;i<dragDropItems.length;i++){var dragDropItem=dragDropItems[i];var dropContainer=dragDropItem.parentElement;if(DragDrop.currentDropContainers.indexOf(dropContainer)<0){DragDrop.currentDropContainers[DragDrop.currentDropContainers.length]=dropContainer;}}}} /**
      * Event: Move drag handle
      *
      * @param {Event} e
@@ -200,8 +178,8 @@ var computedStyle=window.getComputedStyle(this.element); // Calculate pointer of
 var pointerOffset={top:elementOffset.top-e.pageY,left:elementOffset.left-e.pageX}; // Cache the pointer offset
 this.pointerOffset=pointerOffset; // Cache the previous parent element
 this.previousParent=this.element.parentElement; // Set temporary styling
-this.element.style.position='absolute';this.element.style.top=elementOffset.top;this.element.style.left=elementOffset.left;this.element.style.width=elementRect.width;this.element.style.height=elementRect.height;this.element.style.zIndex=999; // Cache drop containers
-this.updateDropContainers(); // Insert placeholder
+this.element.style.position='absolute';this.element.style.top=elementOffset.top;this.element.style.left=elementOffset.left;this.element.style.width=elementRect.width;this.element.style.height=elementRect.height;this.element.style.zIndex=999; // Add events on drop containers
+this.updateDropContainers();for(var i=0;i<DragDrop.currentDropContainers.length;i++){var dropContainer=DragDrop.currentDropContainers[i];this.on(dropContainer,'mousemove',hoverDropContainerHandler);this.on(dropContainer,'mouseleave',leaveDropContainerHandler);} // Insert placeholder
 var placeholder=document.createElement('DIV');placeholder.id='dragdrop-placeholder';placeholder.style.height=computedStyle.height;placeholder.style.width=computedStyle.width;this.element.parentElement.insertBefore(placeholder,this.element); // Add pointer movement logic
 this.on(document,'mousemove',dragHandler); // Add pointer release logic
 this.on(document,'mouseup',releaseHandler); // Fire begin drag event
@@ -216,40 +194,30 @@ var viewport={x:document.scrollLeft,y:document.scrollTop,w:window.width,h:window
 if(e.pageY>viewport.y+viewport.h-100){ //   scroll(1 * this.dragScrollSpeed);
 }else if(e.pageY<viewport.y+100){} //  scroll(-1 * this.dragScrollSpeed);
 // Fire drag event
-if(typeof this.config.onDrag==='function'){this.config.onDrag(this);} // Scan for drop containers
-var elementRect=this.element.getBoundingClientRect();elementRect.center=elementRect.left+elementRect.width/2;elementRect.middle=elementRect.top+elementRect.height/2; // Use array of drop containers sorted by their "proximity" to the pointer on the Z axis
-var hoveredDropContainers=DragDrop.sortByZProximity(DragDrop.currentDropContainers,elementRect.center,elementRect.middle);var foundDropContainer=void 0; // We only need the first index, as that is the closest to the cursor
-if(hoveredDropContainers.length>0){foundDropContainer=hoveredDropContainers[0];this.onHoverDropContainer(foundDropContainer);} // Make sure to trigger the leave event on any other drop containers, if they were previously hovered
-for(var i=0;i<DragDrop.currentDropContainers.length;i++){var dropContainer=DragDrop.currentDropContainers[i];if(dropContainer!=foundDropContainer&&dropContainer.dataset.dragdropHovering){this.onLeaveDropContainer(dropContainer,e);}}} /**
+if(typeof this.config.onDrag==='function'){this.config.onDrag(this);}} /**
      * Event: On release drag handle
      *
      * @param {Event} e
      */},{key:"onReleaseDragHandle",value:function onReleaseDragHandle(e){e.preventDefault();e.stopPropagation();DragDrop.current=null; // Remove pointer events
-this.off(document,'mousemove',dragHandler);this.off(document,'mouseup',releaseHandler); // Grab hovered drop container
-var hoveredDropContainer=document.querySelector('*[data-dragdrop-drop-container="true"][data-dragdrop-hovering="true"]'); // Remove drop container events
-for(var i=0;i<DragDrop.currentDropContainers.length;i++){var dropContainer=DragDrop.currentDropContainers[i];delete dropContainer.dataset.dragdropDropContainer;delete dropContainer.dataset.dragdropHovering;} // Get placeholder
+this.off(document,'mousemove',dragHandler);this.off(document,'mouseup',releaseHandler); // Remove drop container events
+for(var i=0;i<DragDrop.currentDropContainers.length;i++){var dropContainer=DragDrop.currentDropContainers[i];delete dropContainer.dataset.dragdropHovering;this.off(dropContainer,'mousemove',hoverDropContainerHandler);this.off(dropContainer,'mouseleave',leaveDropContainerHandler);;} // Get placeholder
 var placeholder=document.getElementById('dragdrop-placeholder'); // Set new parent
 placeholder.parentElement.insertBefore(this.element,placeholder); // Remove placeholder
 placeholder.parentElement.removeChild(placeholder); // Remove temporary styling
 document.body.removeAttribute('style');this.element.removeAttribute('style'); // Add back the grab cursor style
 this.element.style.cursor='grab'; // Remove cached variables
 this.pointerOffset=null;this.previousParent=null;this.dragHandler=null; // Fire end drag event
-if(typeof this.config.onEndDrag==='function'){this.config.onEndDrag(this,hoveredDropContainer);}} /**
+if(typeof this.config.onEndDrag==='function'){this.config.onEndDrag(this);}} /**
      * Event: Hover drop container
      *
      * @param {HTMLElement} dropContainer
      * @param {Event} e
-     */},{key:"onHoverDropContainer",value:function onHoverDropContainer(dropContainer,e){dropContainer.dataset.dragdropHovering=true;var elementRect=this.element.getBoundingClientRect();var placeholder=document.getElementById('dragdrop-placeholder');var childNodes=dropContainer.querySelectorAll('*[data-dragdrop-enabled="true"]');if(dropContainer.dataset.dragdropUnsorted){ // Do nothing so far
-}else if(childNodes.length<1){dropContainer.appendChild(placeholder);}else {for(var i=0;i<childNodes.length;i++){var child=childNodes[i];var childRect=child.getBoundingClientRect(); // If we're dropping onto a new parent drop container,
-// set pointer events of children to none,
-// so they don't interfere with drop container selection
-if(dropContainer!=this.previousParent){child.style.pointerEvents='none';}childRect.center=childRect.left+childRect.width/2;childRect.middle=childRect.top+childRect.height/2;if(this.config.lockX){if(elementRect.top>childRect.top&&elementRect.top<childRect.bottom){child.parentElement.insertBefore(placeholder,child.nextSibling);break;}else if(elementRect.top<childRect.top&&elementRect.bottom>childRect.top){child.parentElement.insertBefore(placeholder,child);break;}}else if(this.config.lockY){if(elementRect.left>childRect.left&&elementRect.left<childRect.right){child.parentElement.insertBefore(placeholder,child.nextSibling);break;}else if(elementRect.left<childRect.left&&elementRect.right>childRect.left){child.parentElement.insertBefore(placeholder,child);break;}}else {if(DragDrop.intersectsRect(elementRect,childRect)&&child.nextSibling){child.parentElement.insertBefore(placeholder,child.nextSibling);break;}}}}} /**
+     */},{key:"onHoverDropContainer",value:function onHoverDropContainer(dropContainer,e){dropContainer.dataset.dragdropHovering=true;function intersectRect(r1,r2){return r1.left<r2.right&&r1.right>r2.left&&r1.top<r2.bottom&&r1.bottom>r2.top;}var elementRect=this.element.getBoundingClientRect();var placeholder=document.getElementById('dragdrop-placeholder');var childNodes=dropContainer.querySelectorAll('*[data-dragdrop-enabled="true"]');for(var i=0;i<childNodes.length;i++){var child=childNodes[i];var childRect=child.getBoundingClientRect();childRect.center=childRect.left+childRect.width/2;childRect.middle=childRect.top+childRect.height/2;if(this.config.lockX){if(elementRect.top>childRect.top&&elementRect.top<childRect.bottom){dropContainer.insertBefore(placeholder,child.nextSibling);break;}else if(elementRect.top<childRect.top&&elementRect.bottom>childRect.top){dropContainer.insertBefore(placeholder,child);break;}}else if(this.config.lockY){if(elementRect.left>childRect.left&&elementRect.left<childRect.right){dropContainer.insertBefore(placeholder,child.nextSibling);break;}else if(elementRect.left<childRect.left&&elementRect.right>childRect.left){dropContainer.insertBefore(placeholder,child);break;}}else {if(intersectRect(elementRect,childRect)){dropContainer.insertBefore(placeholder,child.nextSibling);break;}}}} /**
      * Event: Leave drop container
      *
      * @param {HTMLElement} dropContainer
      * @param {Event} e
-     */},{key:"onLeaveDropContainer",value:function onLeaveDropContainer(dropContainer,e){dropContainer.removeAttribute('data-dragdrop-hovering');var childNodes=dropContainer.querySelectorAll('*[data-dragdrop-enabled="true"]');for(var i=0;i<childNodes.length;i++){var child=childNodes[i]; //  Remove custom pointer events style
-child.style.pointerEvents=null;}}}]);return DragDrop;}();window.DragDrop=DragDrop;if(typeof jQuery!=='undefined'){jQuery.fn.extend({exodragdrop:function exodragdrop(config){return this.each(function(){if(config=='destroy'){DragDrop.destroy(this);}else {new DragDrop(this,config);}});}});}},{}],4:[function(require,module,exports){'use strict';var FunctionTemplating={}; /**
+     */},{key:"onLeaveDropContainer",value:function onLeaveDropContainer(dropContainer,e){dropContainer.dataset.dragdropHovering=true;}}]);return DragDrop;}();window.DragDrop=DragDrop;if(typeof jQuery!=='undefined'){jQuery.fn.extend({exodragdrop:function exodragdrop(config){return this.each(function(){if(config=='destroy'){DragDrop.destroy(this);}else {new DragDrop(this,config);}});}});}},{}],4:[function(require,module,exports){'use strict';var FunctionTemplating={}; /**
  * Appends content to an element
  *
  * @param {HTMLElement} element
@@ -382,9 +350,9 @@ route.url=url;var counter=1;var _iteratorNormalCompletion3=true;var _didIterator
      * Gets the name of this View
      */_createClass(View,[{key:"getName",value:function getName(){var name=this.constructor.toString();name=name.substring('function '.length);name=name.substring(0,name.indexOf('('));return name;} /**
      * Init
-     */},{key:"init",value:function init(){var _this3=this;this.prerender();this.render();this.postrender(); // jQuery
-if(typeof jQuery!=='undefined'&&this.$element){this.element=this.$element[0];this.$element.on('remove',function(){_this3.remove();}); // Native JavaScript
-}else if(this.element){this.addEventListener('DOMNodeRemoved',function(){_this3.remove();});}this.trigger('ready',this);this.isReady=true;} /**
+     */},{key:"init",value:function init(){var _this2=this;this.prerender();this.render();this.postrender(); // jQuery
+if(typeof jQuery!=='undefined'&&this.$element){this.element=this.$element[0];this.$element.on('remove',function(){_this2.remove();}); // Native JavaScript
+}else if(this.element){this.addEventListener('DOMNodeRemoved',function(){_this2.remove();});}this.trigger('ready',this);this.isReady=true;} /**
      * Shorthand for .on('ready')
      */},{key:"ready",value:function ready(callback){if(this.isReady){callback(this);}else {this.on('ready',callback);}} /**
      * Adopts values
@@ -400,9 +368,9 @@ if(typeof jQuery!=='undefined'){if(this.$element){this.$element.html(output.chil
      * Runs after render
      */},{key:"postrender",value:function postrender(){} /**
      * Removes the view from DOM and memory
-     */},{key:"remove",value:function remove(timeout){var _this4=this;if(!this.destroyed){this.destroyed=true;setTimeout(function(){_this4.trigger('remove'); // jQuery
-if(typeof jQuery!=='undefined'&&_this4.$element&&_this4.$element.length>0){_this4.$element.remove(); // Native JavaScript
-}else if(_this4.element){_this4.element.parentElement.removeChild(_this4.element);}delete instances[_this4.guid];},timeout||0);}} /**
+     */},{key:"remove",value:function remove(timeout){var _this3=this;if(!this.destroyed){this.destroyed=true;setTimeout(function(){_this3.trigger('remove'); // jQuery
+if(typeof jQuery!=='undefined'&&_this3.$element&&_this3.$element.length>0){_this3.$element.remove(); // Native JavaScript
+}else if(_this3.element){_this3.element.parentElement.removeChild(_this3.element);}instances.splice(_this3.guid,1);},timeout||0);}} /**
      * Call an event (for internal use)
      */},{key:"call",value:function call(callback,data,ui){callback(data,ui,this);} /**
      * Trigger an event
@@ -673,27 +641,27 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * @param {String} param
      *
      * @returns {Promise} promise
-     */},{key:"delete",value:function _delete(url,param){var _this6=this;return new Promise(function(reseolve,reject){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+_this6.getApiTokenString(),type:'DELETE',cache:false,success:function success(result){resolve(result);},error:function error(e){_this6.error(e);reject(e);}});});} /**
+     */},{key:"delete",value:function _delete(url,param){var _this5=this;return new Promise(function(reseolve,reject){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+_this5.getApiTokenString(),type:'DELETE',cache:false,success:function success(result){resolve(result);},error:function error(e){_this5.error(e);reject(e);}});});} /**
      * PATCH method
      *
      * @param {String} url
      * @param {Object} data
      *
      * @returns {Promise} promise
-     */},{key:"patch",value:function patch(url,data){var _this7=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this7.getApiTokenString(),type:'PATCH',data:data,cache:false,success:function success(result){resolve(result);},error:function error(e){_this7.error(e);reject(e);}});});} /**
+     */},{key:"patch",value:function patch(url,data){var _this6=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this6.getApiTokenString(),type:'PATCH',data:data,cache:false,success:function success(result){resolve(result);},error:function error(e){_this6.error(e);reject(e);}});});} /**
      * POST method
      *
      * @param {String} url
      * @param {Object} data
      *
      * @returns {Promise} promise
-     */},{key:"post",value:function post(url,data){var _this8=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this8.getApiTokenString(),type:'POST',data:data,cache:false,success:function success(result){resolve(result);},error:function error(e){_this8.error(e);reject(e);}});});} /**
+     */},{key:"post",value:function post(url,data){var _this7=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this7.getApiTokenString(),type:'POST',data:data,cache:false,success:function success(result){resolve(result);},error:function error(e){_this7.error(e);reject(e);}});});} /**
      * PUT method
      *
      * @param {String} url
      *
      * @returns {Promise} promise
-     */},{key:"put",value:function put(url){var _this9=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this9.getApiTokenString(),type:'PUT',cache:false,success:function success(result){resolve(result);},error:function error(e){_this9.error(e);reject(e);}});});} /**
+     */},{key:"put",value:function put(url){var _this8=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this8.getApiTokenString(),type:'PUT',cache:false,success:function success(result){resolve(result);},error:function error(e){_this8.error(e);reject(e);}});});} /**
      * Error message
      *
      * @param {Object} error
@@ -710,50 +678,50 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * Gets the currently logged in user object
      *
      * @returns {Promise} promise
-     */},{key:"getUser",value:function getUser(){var _this10=this;return new Promise(function(resolve,reject){_this10.get('/user').then(function(gitHubUser){if(Array.isArray(gitHubUser)){gitHubUser=gitHubUser[0];}var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};resolve(user);}).catch(function(e){if(_this10.isSpectating()){resolve({name:'',avatar:''});}else {reject(e);}});});} // ----------
+     */},{key:"getUser",value:function getUser(){var _this9=this;return new Promise(function(resolve,reject){_this9.get('/user').then(function(gitHubUser){if(Array.isArray(gitHubUser)){gitHubUser=gitHubUser[0];}var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};resolve(user);}).catch(function(e){if(_this9.isSpectating()){resolve({name:'',avatar:''});}else {reject(e);}});});} // ----------
 // Resource getters
 // ----------
 /**
      * Gets projects
      *
      * @returns {Promise} promise
-     */},{key:"getProjects",value:function getProjects(){var _this11=this;return new Promise(function(resolve,reject){_this11.get('/users/'+_this11.getUserName()+'/repos').then(function(repos){_this11.processProjects(repos);resolve();}).catch(reject);});} /**
+     */},{key:"getProjects",value:function getProjects(){var _this10=this;return new Promise(function(resolve,reject){_this10.get('/users/'+_this10.getUserName()+'/repos').then(function(repos){_this10.processProjects(repos);resolve();}).catch(reject);});} /**
      * Gets collaborators
      *
      * @returns {Promise} promise
-     */},{key:"getCollaborators",value:function getCollaborators(){var _this12=this;return new Promise(function(resolve,reject){_this12.get('/repos/'+_this12.getUserName()+'/'+_this12.getProjectName()+'/collaborators').then(function(collaborators){_this12.processCollaborators(collaborators);resolve();}).catch(function(e){if(_this12.isSpectating()){resolve([]);}else {reject(e);}});});} /**
+     */},{key:"getCollaborators",value:function getCollaborators(){var _this11=this;return new Promise(function(resolve,reject){_this11.get('/repos/'+_this11.getUserName()+'/'+_this11.getProjectName()+'/collaborators').then(function(collaborators){_this11.processCollaborators(collaborators);resolve();}).catch(function(e){if(_this11.isSpectating()){resolve([]);}else {reject(e);}});});} /**
      * Gets issues
      *
      * @returns {Promise} promise
-     */},{key:"getIssues",value:function getIssues(){var _this13=this;return new Promise(function(callback){_this13.get('/repos/'+_this13.getUserName()+'/'+_this13.getProjectName()+'/issues','state=all',true).then(function(issues){_this13.processIssues(issues);callback();});});} /**
+     */},{key:"getIssues",value:function getIssues(){var _this12=this;return new Promise(function(callback){_this12.get('/repos/'+_this12.getUserName()+'/'+_this12.getProjectName()+'/issues','state=all',true).then(function(issues){_this12.processIssues(issues);callback();});});} /**
      * Gets labels and caches them
      *
      * @returns {Promise} promise
-     */},{key:"getLabels",value:function getLabels(){var _this14=this;return new Promise(function(callback){if(!labelCache){_this14.get('/repos/'+_this14.getUserName()+'/'+_this14.getProjectName()+'/labels').then(function(labels){labelCache=labels;callback(labelCache);});}else {callback(labelCache);}});} /**
+     */},{key:"getLabels",value:function getLabels(){var _this13=this;return new Promise(function(callback){if(!labelCache){_this13.get('/repos/'+_this13.getUserName()+'/'+_this13.getProjectName()+'/labels').then(function(labels){labelCache=labels;callback(labelCache);});}else {callback(labelCache);}});} /**
      * Gets issue types
      *
      * @returns {Promise} promise
-     */},{key:"getIssueTypes",value:function getIssueTypes(){var _this15=this;return new Promise(function(callback){_this15.getLabels().then(function(labels){_this15.processIssueTypes(labels);callback();});});} /**
+     */},{key:"getIssueTypes",value:function getIssueTypes(){var _this14=this;return new Promise(function(callback){_this14.getLabels().then(function(labels){_this14.processIssueTypes(labels);callback();});});} /**
      * Gets issue columns
      *
      * @returns {Promise} promise
-     */},{key:"getIssueColumns",value:function getIssueColumns(){var _this16=this;return new Promise(function(callback){_this16.getLabels().then(function(labels){_this16.processIssueColumns(labels);callback();});});} /**
+     */},{key:"getIssueColumns",value:function getIssueColumns(){var _this15=this;return new Promise(function(callback){_this15.getLabels().then(function(labels){_this15.processIssueColumns(labels);callback();});});} /**
      * Gets issue priorities
      *
      * @returns {Promise} promise
-     */},{key:"getIssuePriorities",value:function getIssuePriorities(){var _this17=this;return new Promise(function(callback){_this17.getLabels().then(function(labels){_this17.processIssuePriorities(labels);callback();});});} /**
+     */},{key:"getIssuePriorities",value:function getIssuePriorities(){var _this16=this;return new Promise(function(callback){_this16.getLabels().then(function(labels){_this16.processIssuePriorities(labels);callback();});});} /**
      * Gets issue estimates
      *
      * @returns {Promise} promise
-     */},{key:"getIssueEstimates",value:function getIssueEstimates(){var _this18=this;return new Promise(function(callback){_this18.getLabels().then(function(labels){_this18.processIssueEstimates(labels);callback();});});} /**
+     */},{key:"getIssueEstimates",value:function getIssueEstimates(){var _this17=this;return new Promise(function(callback){_this17.getLabels().then(function(labels){_this17.processIssueEstimates(labels);callback();});});} /**
      * Gets versions
      *
      * @returns {Promise} promise
-     */},{key:"getVersions",value:function getVersions(){var _this19=this;return new Promise(function(callback){_this19.getLabels().then(function(labels){_this19.processVersions(labels);callback();});});} /**
+     */},{key:"getVersions",value:function getVersions(){var _this18=this;return new Promise(function(callback){_this18.getLabels().then(function(labels){_this18.processVersions(labels);callback();});});} /**
      * Gets milestones
      *
      * @returns {Promise} promise
-     */},{key:"getMilestones",value:function getMilestones(){var _this20=this;return new Promise(function(callback){_this20.get('/repos/'+_this20.getUserName()+'/'+_this20.getProjectName()+'/milestones').then(function(milestones){_this20.processMilestones(milestones);callback();});});} // ----------
+     */},{key:"getMilestones",value:function getMilestones(){var _this19=this;return new Promise(function(callback){_this19.get('/repos/'+_this19.getUserName()+'/'+_this19.getProjectName()+'/milestones').then(function(milestones){_this19.processMilestones(milestones);callback();});});} // ----------
 // Resource adders
 // ----------
 /**
@@ -762,49 +730,49 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * @param {Object} issue
      *
      * @returns {Promise} promise
-     */},{key:"addIssue",value:function addIssue(issue){var _this21=this;return new Promise(function(callback){_this21.post('/repos/'+_this21.getUserName()+'/'+_this21.getProjectName()+'/issues',_this21.convertIssue(issue)).then(function(){callback(issue);});});} /**
+     */},{key:"addIssue",value:function addIssue(issue){var _this20=this;return new Promise(function(callback){_this20.post('/repos/'+_this20.getUserName()+'/'+_this20.getProjectName()+'/issues',_this20.convertIssue(issue)).then(function(){callback(issue);});});} /**
      * Adds collaborator
      *
      * @param {String} collaborator
      *
      * @returns {Promise} promise
-     */},{key:"addCollaborator",value:function addCollaborator(collaborator){var _this22=this;return new Promise(function(callback){_this22.put('/repos/'+_this22.getUserName()+'/'+_this22.getProjectName()+'/collaborators/'+collaborator).then(function(){callback();});});} /**
+     */},{key:"addCollaborator",value:function addCollaborator(collaborator){var _this21=this;return new Promise(function(callback){_this21.put('/repos/'+_this21.getUserName()+'/'+_this21.getProjectName()+'/collaborators/'+collaborator).then(function(){callback();});});} /**
      * Adds issue type
      *
      * @param {String} type
      *
      * @returns {Promise} promise
-     */},{key:"addIssueType",value:function addIssueType(type){var _this23=this;return new Promise(function(callback){_this23.post('/repos/'+_this23.getUserName()+'/'+_this23.getProjectName()+'/labels',{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssueType",value:function addIssueType(type){var _this22=this;return new Promise(function(callback){_this22.post('/repos/'+_this22.getUserName()+'/'+_this22.getProjectName()+'/labels',{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds issue priority
      *
      * @param {String} priority
      *
      * @returns {Promise} promise
-     */},{key:"addIssuePriority",value:function addIssuePriority(priority){var _this24=this;return new Promise(function(callback){_this24.post('/repos/'+_this24.getUserName()+'/'+_this24.getProjectName()+'/labels',{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssuePriority",value:function addIssuePriority(priority){var _this23=this;return new Promise(function(callback){_this23.post('/repos/'+_this23.getUserName()+'/'+_this23.getProjectName()+'/labels',{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds issue estimate
      *
      * @param {String} estimate
      *
      * @returns {Promise} promise
-     */},{key:"addIssueEstimate",value:function addIssueEstimate(estimate){var _this25=this;return new Promise(function(callback){_this25.post('/repos/'+_this25.getUserName()+'/'+_this25.getProjectName()+'/labels',{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssueEstimate",value:function addIssueEstimate(estimate){var _this24=this;return new Promise(function(callback){_this24.post('/repos/'+_this24.getUserName()+'/'+_this24.getProjectName()+'/labels',{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds issue column
      *
      * @param {String} column
      *
      * @returns {Promise} promise
-     */},{key:"addIssueColumn",value:function addIssueColumn(column){var _this26=this;return new Promise(function(callback){_this26.post('/repos/'+_this26.getUserName()+'/'+_this26.getProjectName()+'/labels',{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssueColumn",value:function addIssueColumn(column){var _this25=this;return new Promise(function(callback){_this25.post('/repos/'+_this25.getUserName()+'/'+_this25.getProjectName()+'/labels',{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds milestone 
      *
      * @param {Object} milestone
      *
      * @returns {Promise} promise
-     */},{key:"addMilestone",value:function addMilestone(milestone){var _this27=this;return new Promise(function(callback){_this27.post('/repos/'+_this27.getUserName()+'/'+_this27.getProjectName()+'/milestones',_this27.convertMilestone(milestone)).then(function(){callback();});});} /**
+     */},{key:"addMilestone",value:function addMilestone(milestone){var _this26=this;return new Promise(function(callback){_this26.post('/repos/'+_this26.getUserName()+'/'+_this26.getProjectName()+'/milestones',_this26.convertMilestone(milestone)).then(function(){callback();});});} /**
      * Adds version
      *
      * @param {String} version
      *
      * @returns {Promise} promise
-     */},{key:"addVersion",value:function addVersion(version){var _this28=this;return new Promise(function(callback){_this28.post('/repos/'+_this28.getUserName()+'/'+_this28.getProjectName()+'/labels',{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
+     */},{key:"addVersion",value:function addVersion(version){var _this27=this;return new Promise(function(callback){_this27.post('/repos/'+_this27.getUserName()+'/'+_this27.getProjectName()+'/labels',{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
 // Resource removers
 // ----------
 /**
@@ -813,91 +781,91 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeCollaborator",value:function removeCollaborator(index){var _this29=this;return new Promise(function(callback){_this29.delete('/repos/'+_this29.getUserName()+'/'+_this29.getProjectName()+'/collaborators/'+window.resources.collaborators[index]).then(function(){callback();});});} /**
+     */},{key:"removeCollaborator",value:function removeCollaborator(index){var _this28=this;return new Promise(function(callback){_this28.delete('/repos/'+_this28.getUserName()+'/'+_this28.getProjectName()+'/collaborators/'+window.resources.collaborators[index]).then(function(){callback();});});} /**
      * Removes issue type
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssueType",value:function removeIssueType(index){var _this30=this;return new Promise(function(callback){_this30.delete('/repos/'+_this30.getUserName()+'/'+_this30.getProjectName()+'/labels/type:'+window.resources.issueTypes[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssueType",value:function removeIssueType(index){var _this29=this;return new Promise(function(callback){_this29.delete('/repos/'+_this29.getUserName()+'/'+_this29.getProjectName()+'/labels/type:'+window.resources.issueTypes[index]).then(function(){callback();});});} /**
      * Removes issue priority
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssuePriority",value:function removeIssuePriority(index){var _this31=this;return new Promise(function(callback){_this31.delete('/repos/'+_this31.getUserName()+'/'+_this31.getProjectName()+'/labels/priority:'+window.resources.issuePriorities[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssuePriority",value:function removeIssuePriority(index){var _this30=this;return new Promise(function(callback){_this30.delete('/repos/'+_this30.getUserName()+'/'+_this30.getProjectName()+'/labels/priority:'+window.resources.issuePriorities[index]).then(function(){callback();});});} /**
      * Removes issue estimate
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssueEstimate",value:function removeIssueEstimate(index){var _this32=this;return new Promise(function(callback){_this32.delete('/repos/'+_this32.getUserName()+'/'+_this32.getProjectName()+'/labels/estimate:'+window.resources.issueEstimates[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssueEstimate",value:function removeIssueEstimate(index){var _this31=this;return new Promise(function(callback){_this31.delete('/repos/'+_this31.getUserName()+'/'+_this31.getProjectName()+'/labels/estimate:'+window.resources.issueEstimates[index]).then(function(){callback();});});} /**
      * Removes issue column
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssueColumn",value:function removeIssueColumn(index){var _this33=this;return new Promise(function(callback){_this33.delete('/repos/'+_this33.getUserName()+'/'+_this33.getProjectName()+'/labels/column:'+window.resources.issueColumns[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssueColumn",value:function removeIssueColumn(index){var _this32=this;return new Promise(function(callback){_this32.delete('/repos/'+_this32.getUserName()+'/'+_this32.getProjectName()+'/labels/column:'+window.resources.issueColumns[index]).then(function(){callback();});});} /**
      * Removes milestone 
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeMilestone",value:function removeMilestone(index){var _this34=this;return new Promise(function(callback){_this34.delete('/repos/'+_this34.getUserName()+'/'+_this34.getProjectName()+'/milestones/'+(parseInt(index)+1)).then(function(){callback();});});} /**
+     */},{key:"removeMilestone",value:function removeMilestone(index){var _this33=this;return new Promise(function(callback){_this33.delete('/repos/'+_this33.getUserName()+'/'+_this33.getProjectName()+'/milestones/'+(parseInt(index)+1)).then(function(){callback();});});} /**
      * Removes version
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeVersion",value:function removeVersion(index){var _this35=this;return new Promise(function(callback){_this35.delete('/repos/'+_this35.getUserName()+'/'+_this35.getProjectName()+'/labels/version:'+window.resources.versions[index]).then(function(){callback();});});} // ----------
+     */},{key:"removeVersion",value:function removeVersion(index){var _this34=this;return new Promise(function(callback){_this34.delete('/repos/'+_this34.getUserName()+'/'+_this34.getProjectName()+'/labels/version:'+window.resources.versions[index]).then(function(){callback();});});} // ----------
 // Resource updaters
 // ----------
 /**
      * Update issue
      *
      * @param {Object} issue
-     */},{key:"updateIssue",value:function updateIssue(issue){var _this36=this;return new Promise(function(callback){_this36.patch('/repos/'+_this36.getUserName()+'/'+_this36.getProjectName()+'/issues/'+(issue.index+1),_this36.convertIssue(issue)).then(function(){callback();});});} /**
+     */},{key:"updateIssue",value:function updateIssue(issue){var _this35=this;return new Promise(function(callback){_this35.patch('/repos/'+_this35.getUserName()+'/'+_this35.getProjectName()+'/issues/'+(issue.index+1),_this35.convertIssue(issue)).then(function(){callback();});});} /**
      * Updates milestone 
      *
      * @param {Object} milestone
      *
      * @returns {Promise} promise
-     */},{key:"updateMilestone",value:function updateMilestone(milestone){var _this37=this;return new Promise(function(callback){_this37.patch('/repos/'+_this37.getUserName()+'/'+_this37.getProjectName()+'/milestones/'+(parseInt(milestone.index)+1),_this37.convertMilestone(milestone)).then(function(){callback();});});} /**
+     */},{key:"updateMilestone",value:function updateMilestone(milestone){var _this36=this;return new Promise(function(callback){_this36.patch('/repos/'+_this36.getUserName()+'/'+_this36.getProjectName()+'/milestones/'+(parseInt(milestone.index)+1),_this36.convertMilestone(milestone)).then(function(){callback();});});} /**
      * Updates issue type
      *
      * @param {String} type
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssueType",value:function updateIssueType(type,previousName){var _this38=this;return new Promise(function(callback){_this38.patch('/repos/'+_this38.getUserName()+'/'+_this38.getProjectName()+'/labels/type:'+previousName,{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssueType",value:function updateIssueType(type,previousName){var _this37=this;return new Promise(function(callback){_this37.patch('/repos/'+_this37.getUserName()+'/'+_this37.getProjectName()+'/labels/type:'+previousName,{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates issue priority
      *
      * @param {String} priority
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssuePriority",value:function updateIssuePriority(priority,previousName){var _this39=this;return new Promise(function(callback){_this39.patch('/repos/'+_this39.getUserName()+'/'+_this39.getProjectName()+'/labels/priority:'+previousName,{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssuePriority",value:function updateIssuePriority(priority,previousName){var _this38=this;return new Promise(function(callback){_this38.patch('/repos/'+_this38.getUserName()+'/'+_this38.getProjectName()+'/labels/priority:'+previousName,{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates issue estimate
      *
      * @param {String} estimate
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssueEstimate",value:function updateIssueEstimate(estimate,previousName){var _this40=this;return new Promise(function(callback){_this40.patch('/repos/'+_this40.getUserName()+'/'+_this40.getProjectName()+'/labels/estimate:'+previousName,{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssueEstimate",value:function updateIssueEstimate(estimate,previousName){var _this39=this;return new Promise(function(callback){_this39.patch('/repos/'+_this39.getUserName()+'/'+_this39.getProjectName()+'/labels/estimate:'+previousName,{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates issue column
      *
      * @param {String} column
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssueColumn",value:function updateIssueColumn(column,previousName){var _this41=this;return new Promise(function(callback){_this41.patch('/repos/'+_this41.getUserName()+'/'+_this41.getProjectName()+'/labels/column:'+previousName,{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssueColumn",value:function updateIssueColumn(column,previousName){var _this40=this;return new Promise(function(callback){_this40.patch('/repos/'+_this40.getUserName()+'/'+_this40.getProjectName()+'/labels/column:'+previousName,{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates version
      *
      * @param {String} version
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateVersion",value:function updateVersion(version,previousName){var _this42=this;return new Promise(function(callback){_this42.patch('/repos/'+_this42.getUserName()+'/'+_this42.getProjectName()+'/labels/version:'+previousName,{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
+     */},{key:"updateVersion",value:function updateVersion(version,previousName){var _this41=this;return new Promise(function(callback){_this41.patch('/repos/'+_this41.getUserName()+'/'+_this41.getProjectName()+'/labels/version:'+previousName,{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
 // Resource processing methods
 // ----------
 /**
@@ -959,18 +927,18 @@ if(issueColumn&&issueColumn!='to do'&&issueColumn!='done'){gitHubIssue.labels.pu
      *
      * @param {Issue} issue
      * @param {String} text
-     */},{key:"addIssueComment",value:function addIssueComment(issue,text){var _this43=this;return new Promise(function(callback){_this43.post('/repos/'+_this43.getUserName()+'/'+_this43.getProjectName()+'/issues/'+(issue.index+1)+'/comments',{body:text}).then(function(){callback();});});} /**
+     */},{key:"addIssueComment",value:function addIssueComment(issue,text){var _this42=this;return new Promise(function(callback){_this42.post('/repos/'+_this42.getUserName()+'/'+_this42.getProjectName()+'/issues/'+(issue.index+1)+'/comments',{body:text}).then(function(){callback();});});} /**
      * Update issue comment
      *
      * @param {Issue} issue
      * @param {Object} comment
-     */},{key:"updateIssueComment",value:function updateIssueComment(issue,comment){var _this44=this;return new Promise(function(callback){_this44.patch('/repos/'+_this44.getUserName()+'/'+_this44.getProjectName()+'/issues/comments/'+comment.index,{body:comment.text}).then(function(){callback();});});} /**
+     */},{key:"updateIssueComment",value:function updateIssueComment(issue,comment){var _this43=this;return new Promise(function(callback){_this43.patch('/repos/'+_this43.getUserName()+'/'+_this43.getProjectName()+'/issues/comments/'+comment.index,{body:comment.text}).then(function(){callback();});});} /**
      * Get issue comments
      *
      * @param {Object} issue
      *
      * @returns {Promise} promise
-     */},{key:"getIssueComments",value:function getIssueComments(issue){var _this45=this;return new Promise(function(callback){_this45.get('/repos/'+_this45.getUserName()+'/'+_this45.getProjectName()+'/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion13=true;var _didIteratorError13=false;var _iteratorError13=undefined;try{for(var _iterator13=gitHubComments[Symbol.iterator](),_step13;!(_iteratorNormalCompletion13=(_step13=_iterator13.next()).done);_iteratorNormalCompletion13=true){var gitHubComment=_step13.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body,index:gitHubComment.id};comments.push(comment);}}catch(err){_didIteratorError13=true;_iteratorError13=err;}finally {try{if(!_iteratorNormalCompletion13&&_iterator13.return){_iterator13.return();}}finally {if(_didIteratorError13){throw _iteratorError13;}}}callback(comments);});});}}]);return GitHubApi;}(ApiHelper);module.exports=GitHubApi;},{"../../../src/client/js/helpers/ApiHelper":17}],15:[function(require,module,exports){'use strict'; // Package
+     */},{key:"getIssueComments",value:function getIssueComments(issue){var _this44=this;return new Promise(function(callback){_this44.get('/repos/'+_this44.getUserName()+'/'+_this44.getProjectName()+'/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion13=true;var _didIteratorError13=false;var _iteratorError13=undefined;try{for(var _iterator13=gitHubComments[Symbol.iterator](),_step13;!(_iteratorNormalCompletion13=(_step13=_iterator13.next()).done);_iteratorNormalCompletion13=true){var gitHubComment=_step13.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body,index:gitHubComment.id};comments.push(comment);}}catch(err){_didIteratorError13=true;_iteratorError13=err;}finally {try{if(!_iteratorNormalCompletion13&&_iterator13.return){_iterator13.return();}}finally {if(_didIteratorError13){throw _iteratorError13;}}}callback(comments);});});}}]);return GitHubApi;}(ApiHelper);module.exports=GitHubApi;},{"../../../src/client/js/helpers/ApiHelper":17}],15:[function(require,module,exports){'use strict'; // Package
 window.app=require('../../../package.json'); // Libs
 require('exomon');window.Promise=require('bluebird');window.marked=require('marked');Promise.onPossiblyUnhandledRejection(function(error,promise){debug.warning(error,Promise);}); // Helpers
 window.ResourceHelper=require('./helpers/ResourceHelper');window.SettingsHelper=require('./helpers/SettingsHelper');window.InputHelper=require('./helpers/InputHelper');window.IssueHelper=require('./helpers/IssueHelper');window.DebugHelper=require('./helpers/DebugHelper');window.debug=window.DebugHelper;window.debug.verbosity=1;var GitHubApi=require('../../../plugins/github/js/GitHubApi');window.ApiHelper=new GitHubApi(); // Models
@@ -1315,13 +1283,13 @@ var IDLE_TIMEOUT=600;var idleTimer=0; /**
  * A helper module for input events
  *
  * @class InputHelper
- */var InputHelper=function(){function InputHelper(){_classCallCheck(this,InputHelper);}_createClass(InputHelper,null,[{key:"init",value:function init(){var _this46=this; // Register keydown events
-$(document).keydown(function(e){switch(e.which){case 16:_this46.isShiftDown=true;break;}InputHelper.poke();}); // Register keyup events
-$(document).keyup(function(e){switch(e.which){case 16:_this46.isShiftDown=false;break;case 27:IssueEditor.cancelMultiSelect();break;}}); // Register mousedown event
+ */var InputHelper=function(){function InputHelper(){_classCallCheck(this,InputHelper);}_createClass(InputHelper,null,[{key:"init",value:function init(){var _this45=this; // Register keydown events
+$(document).keydown(function(e){switch(e.which){case 16:_this45.isShiftDown=true;break;}InputHelper.poke();}); // Register keyup events
+$(document).keyup(function(e){switch(e.which){case 16:_this45.isShiftDown=false;break;case 27:IssueEditor.cancelMultiSelect();break;}}); // Register mousedown event
 $(document).mousedown(function(e){var $target=$(e.target); // Handle multi-select cancel event
 if($target.parents('.issue-editor').length<1&&!$target.hasClass('issue-editor')){IssueEditor.cancelMultiSelect();} // Reset the idle timer
 InputHelper.poke();}); // Register idle timer
-setInterval(function(){_this46.incrementIdleTimer();},1000);} /**
+setInterval(function(){_this45.incrementIdleTimer();},1000);} /**
      * Increments the idle timer
      */},{key:"incrementIdleTimer",value:function incrementIdleTimer(){idleTimer++;if(idleTimer>=IDLE_TIMEOUT){ // Do something after idle timeout
 }} /**
@@ -1376,8 +1344,8 @@ this.column=properties.column||0;this.type=properties.type||0;this.priority=prop
      *
      * @returns {Number} hours
      */},{key:"getEstimatedHours",value:function getEstimatedHours(){var estimate=window.resources.issueEstimates[this.estimate];if(estimate){return parseFloat(estimate);}else {return 0;}}}]);return Issue;}();module.exports=Issue;},{}],24:[function(require,module,exports){'use strict'; // Root
-var _this47=this;Router.route('/',function(){setTimeout(function(){$('.workspace').remove();$.get('/README.md',function(res){$('.app-container').append(_.div({class:'workspace readme-container'},markdownToHtml(res)));});navbar.slideIn();},10);}); // User
-Router.route('/:user',function(){setTimeout(function(){$('.workspace').remove();$('.app-container').append(_.div({class:'workspace user-container'},_.h1(_this47.user)));navbar.toggleProjectsList(true);},10);}); // Plan
+var _this46=this;Router.route('/',function(){setTimeout(function(){$('.workspace').remove();$.get('/README.md',function(res){$('.app-container').append(_.div({class:'workspace readme-container'},markdownToHtml(res)));});navbar.slideIn();},10);}); // User
+Router.route('/:user',function(){setTimeout(function(){$('.workspace').remove();$('.app-container').append(_.div({class:'workspace user-container'},_.h1(_this46.user)));navbar.toggleProjectsList(true);},10);}); // Plan
 Router.route('/:user/:project/plan/',function(){ApiHelper.checkConnection().then(function(){ApiHelper.getResources().then(function(){$('.workspace').remove();$('.app-container').append(_.div({class:'workspace plan-container'},new PlanEditor().$element));navbar.slideIn();});});}); // Board
 Router.route('/:user/:project/board/:mode',function(){ApiHelper.checkConnection().then(function(){ApiHelper.getResources().then(function(){$('.workspace').remove(); // Append all milestones
 $('.app-container').append(_.div({class:'workspace board-container '+Router.params.mode},new FilterEditor().$element,_.each(window.resources.milestones,function(i,milestone){return new MilestoneEditor({model:milestone}).$element;}))); // Sort milestones by end date
@@ -1385,13 +1353,13 @@ $('.app-container .board-container .milestone-editor').sort(function(a,b){var aD
 $('.app-container .board-container').append(new MilestoneEditor({model:{title:'Unassigned',description:'These issues have yet to be assigned to a milestone'}}).$element);navbar.slideIn();});});}); // Settings
 Router.route('/:user/:project/settings/',function(){ApiHelper.checkConnection().then(function(){ApiHelper.getResources().then(function(){$('.workspace').remove();$('.app-container').append(_.div({class:'workspace settings-container'},_.div({class:'tabbed-container vertical'},_.div({class:'tabs'},_.each(window.resources,function(name,resource){if(name!='issues'&&name!='milestones'&&name!='projects'){return _.button({class:'tab'+(name=='issueTypes'?' active':'')},prettyName(name)).click(function(){var index=$(this).index();$(this).parent().children().each(function(i){$(this).toggleClass('active',i==index);});$(this).parents('.tabbed-container').find('.panes .pane').each(function(i){$(this).toggleClass('active',i==index);});});}})),_.div({class:'panes'},_.each(window.resources,function(name,resource){if(name!='issues'&&name!='milestones'&&name!='projects'){return _.div({class:'pane'+(name=='issueTypes'?' active':'')},new ResourceEditor({name:name,model:resource}).$element);}})))));navbar.slideIn();});});}); // Init router
 Router.init(); // Navbar
-var navbar=new Navbar();$('.app-container').html(navbar.$element);},{}],25:[function(require,module,exports){'use strict';module.exports=function render(){var _this48=this;var issueKeys=Object.keys(new Issue().getBakedValues());return _.div({class:'filter-editor'},_.h4({class:'title'},'Filters'),_.div({class:'filters'},_.each(this.model,function(i,filter){var resourceKey=filter.key; // Change assignee to collaborator
+var navbar=new Navbar();$('.app-container').html(navbar.$element);},{}],25:[function(require,module,exports){'use strict';module.exports=function render(){var _this47=this;var issueKeys=Object.keys(new Issue().getBakedValues());return _.div({class:'filter-editor'},_.h4({class:'title'},'Filters'),_.div({class:'filters'},_.each(this.model,function(i,filter){var resourceKey=filter.key; // Change assignee to collaborator
 if(resourceKey=='assignee'){resourceKey='collaborator';} // Append 's' for plural
 resourceKey+='s'; // Correct grammar
 resourceKey=resourceKey.replace('ys','ies');var resource=resources[resourceKey]; // If we didn't find the resource, it's likely that we just need to capitalise it and prepend 'issue'
 // For example: 'type' should be 'issueType' when referring to the resource
-if(!resource){resourceKey='issue'+resourceKey.substring(0,1).toUpperCase()+resourceKey.substring(1);resource=resources[resourceKey];}var $filter=_.div({class:'filter'},_.div({class:'select-container key'},_.select({},_.each(issueKeys,function(i,key){return _.option({value:key,selected:key==filter.key},key);})).change(function(e){filter.key=$filter.find('.key select').val();filter.value=null;_this48.onChange(i);})),_.div({class:'select-container operator'},_.select({},_.each(_this48.getOperators(),function(i,operator){return _.option({value:operator},operator);})).val(filter.operator||'!=').change(function(e){filter.operator=$filter.find('.operator select').val();_this48.onChange(i);})),_.div({class:'select-container value'},_.select({},_.each(resource,function(i,value){var valueName=value;if(value.title){valueName=value.title;}if(value.name){valueName=value.name;}var isSelected=valueName==filter.value;if(!filter.value&&i==0){isSelected=true;}return _.option({value:valueName,selected:isSelected},valueName);})).change(function(e){filter.value=$filter.find('.value select').val();_this48.onChange(i);})),_.button({class:'btn-remove btn-transparent'},_.span({class:'fa fa-remove'})).click(function(){_this48.onClickRemove(i);}));return $filter;})),_.div({class:'button-container'},_.if(this.model.length<this.MAX_FILTERS,_.button({class:'btn'},'Add filter',_.span({class:'fa fa-plus'})).click(function(){_this48.onClickAdd();}))));};},{}],26:[function(require,module,exports){module.exports=function render(){var _this49=this;return _.div({class:'issue-editor','data-index':this.model.index,'data-type':resources.issueTypes[this.model.type]},_.div({class:'header'},_.div({class:'drag-handle'},_.span({class:'fa fa-bars'})).on('mousedown',function(e){_this49.onClickDragHandle(e);}),_.if(!ApiHelper.isSpectating(),_.div({class:'assignee-avatar'},this.getAssigneeAvatar())),_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa icon-close fa-chevron-down'}),_.span({class:'fa icon-open fa-chevron-right'})).click(function(e){_this49.onClickToggle(e);}),_.div({class:'issue-index'},this.model.index.toString()),this.getPriorityIndicator(),_.h4({},_.span({class:'btn-edit'},this.model.title).click(this.onClickEdit),_.input({type:'text',class:'selectable edit hidden btn-transparent','data-property':'title',value:this.model.title}).change(function(){_this49.onChange();_this49.$element.find('.header .btn-edit').html(_this49.model.title);}).blur(this.onBlur).keyup(function(e){if(e.which==13){_this49.onBlur(e);}}))).click(function(e){_this49.onClickElement(e);}),_.div({class:'meta'},_.div({class:'multi-edit-notification'},'Now editing multiple issues'),_.div({class:'meta-field type'+(window.resources.issueTypes.length<1?' hidden':'')},_.label('Type'),_.select({'data-property':'type',disabled:ApiHelper.isSpectating()},_.each(window.resources.issueTypes,function(i,type){return _.option({value:i},type);})).change(function(){_this49.onChange();}).val(this.model.type),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this49.onChangeCheckbox(e);})),_.div({class:'meta-field priority'+(window.resources.issuePriorities.length<1?' hidden':'')},_.label('Priority'),_.select({'data-property':'priority',disabled:ApiHelper.isSpectating()},_.each(window.resources.issuePriorities,function(i,priority){return _.option({value:i},priority);})).change(function(){_this49.onChange();}).val(this.model.priority),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this49.onChangeCheckbox(e);})),_.if(window.resources.collaborators.length>0,_.div({class:'meta-field assignee'},_.label('Assignee'),_.select({'data-property':'assignee',disabled:ApiHelper.isSpectating()},_.option({value:null},'(unassigned)'),_.each(window.resources.collaborators,function(i,collaborator){return _.option({value:i},collaborator.name);})).change(function(){_this49.onChange();}).val(this.model.assignee),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this49.onChangeCheckbox(e);}))),_.div({class:'meta-field version'+(window.resources.versions.length<1?' hidden':'')},_.label('Version'),_.select({'data-property':'version',disabled:ApiHelper.isSpectating()},_.each(window.resources.versions,function(i,version){return _.option({value:i},version);})).change(function(){_this49.onChange();}).val(this.model.version),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this49.onChangeCheckbox(e);})),_.div({class:'meta-field estimate'+(window.resources.issueEstimates.length<1?' hidden':'')},_.label('Estimate'),_.select({'data-property':'estimate',disabled:ApiHelper.isSpectating()},_.each(window.resources.issueEstimates,function(i,estimate){return _.option({value:i},estimate);})).change(function(){_this49.onChange();}).val(this.model.estimate),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this49.onChangeCheckbox(e);})),_.div({class:'multi-edit-actions'},_.button({class:'btn'},'Cancel').click(function(){_this49.onClickMultiEditCancel();}),_.button({class:'btn'},'Apply').click(function(){_this49.onClickMultiEditApply();}))),_.div({class:'body'},_.div({class:'btn-edit'},markdownToHtml(this.model.description)).click(this.onClickEdit),_.textarea({class:'selectable edit hidden btn-transparent','data-property':'description'},this.model.description).change(function(){_this49.onChange();_this49.$element.find('.body .btn-edit').html(markdownToHtml(_this49.model.description)||'');}).blur(this.onBlur)),_.div({class:'comments'}),_.if(!ApiHelper.isSpectating(),_.div({class:'add-comment'},_.textarea({class:'btn-transparent',placeholder:'Add comment here...'}),_.button({class:'btn'},'Comment').click(function(){_this49.onClickComment();}))));};},{}],27:[function(require,module,exports){'use strict';module.exports=function render(){var _this50=this;var state=SettingsHelper.get('milestone',this.model.index)||'';if(!state&&this.getPercentComplete()>=100){state='collapsed';}return _.div({class:'milestone-editor '+state,'data-index':this.model.index,'data-end-date':this.model.endDate},_.div({class:'header'},_.div({class:'progress-bar',style:'width: '+this.getPercentComplete()+'%'}),_.div({class:'title'},_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa fa-chevron-right'}),_.span({class:'fa fa-chevron-down'}),_.h4(this.model.title),_.p(this.model.description)).click(function(){_this50.onClickToggle();})),_.div({class:'stats'},_.span({class:'progress-amounts'},_.span({class:'fa fa-exclamation-circle'}),_.span({class:'total'}),_.span({class:'remaining'})),_.span({class:'progress-hours'},_.span({class:'fa fa-clock-o'}),_.span({class:'total'}),_.span({class:'remaining'})))),_.div({class:'columns'},_.each(window.resources.issueColumns,function(columnIndex,column){return _.div({class:'column','data-index':columnIndex},_.div({class:'header'},_.h4(column)),_.div({class:'body'},_.each(window.resources.issues,function(issueIndex,issue){if(issue.column==columnIndex&&issue.milestone==_this50.model.index){return new IssueEditor({model:issue}).$element;}}),_.if(columnIndex==0&&!ApiHelper.isSpectating(),_.button({class:'btn btn-new-issue'},'New issue ',_.span({class:'fa fa-plus'})).click(function(){_this50.onClickNewIssue();}))));})));};},{}],28:[function(require,module,exports){'use strict';module.exports=function Navbar(){var _this51=this;return _.div({class:'navbar'},_.div({class:'obscure'},_.div({class:'content'})),_.div({class:'buttons'},_.each(this.getLinks(),function(i,link){var fullUrl=_this51.getFullUrl(link.url);var isActive=fullUrl&&Router.url==fullUrl;return _.button({'data-url':link.url,class:(isActive?'active':'')+(link.bottom?' bottom':'')},_.span({class:'fa fa-'+link.icon})).click(function(){_this51.cleanUpClasses();if(link.handler){link.handler.call(_this51);}else if(link.url){_this51.onClickLink(link.url);}});})));};},{}],29:[function(require,module,exports){'use strict';module.exports=function render(){var _this52=this;return _.div({class:'plan-editor'},_.div({class:'tabbed-container'},_.div({class:'tabs years'},_.each(this.getYears(),function(i,year){return _.button({class:'tab year'+(_this52.currentYear==year.number?' active':'')},year.number).click(function(){_this52.onClickYear(year.number);});})),_.div({class:'tabs months'},_.each(this.getMonths(),function(i,month){return _.button({class:'tab month'+(_this52.currentMonth==month.number?' active':'')},month.name).click(function(){_this52.onClickMonth(month.number);});}))),_.div({class:'weekdays'},_.each(this.getWeekDays(),function(i,weekday){return _.div({class:'weekday'},weekday);})),_.div({class:'dates'},this.iterateDates(function(date){if(!date){return _.div({class:'date-placeholder'});}else {return _.div({class:'date','data-date':date.getSimpleString()},_.div({class:'header'},_.span({class:'datenumber'},date.getDate()),_.span({class:'weeknumber'},'w '+date.getWeek())),_.div({class:'body'},_.each(window.resources.milestones,function(i,milestone){if(milestone.endDate){var dueDate=new Date(milestone.endDate);dueDate.setHours(0);dueDate.setMinutes(0);dueDate.setSeconds(0);if(dueDate.getFullYear()==date.getFullYear()&&dueDate.getMonth()==date.getMonth()&&dueDate.getDate()==date.getDate()){return new PlanItemEditor({model:milestone}).$element;}}}),_.button({class:'btn-transparent'},_.span({class:'fa fa-plus'})).click(function(){_this52.onClickAddMilestone(date);})));}})),_.if(this.getUndatedMilestones().length>0,_.div({class:'undated'},_.h4('Undated'),_.each(this.getUndatedMilestones(),function(i,milestone){return new PlanItemEditor({model:milestone}).$element;}))));};},{}],30:[function(require,module,exports){'use strict';module.exports=function render(){var _this53=this;return _.div({class:'plan-item-editor','data-date':this.model.endDate},_.div({class:'drag-handle'},this.model.title).on('mousedown',function(e){_this53.onClickDragHandle(e);}),_.button({class:'btn-close btn-transparent'},_.span({class:'fa fa-remove'})).click(function(){_this53.onClickClose();}),_.div({class:'header'},_.h4('Title'),_.input({class:'selectable edit',placeholder:'Type milestone title here',type:'text',value:this.model.title})),_.div({class:'body'},_.h4('Description'),_.input({class:'selectable',placeholder:'Type milestone description here',type:'text',value:this.model.description})),_.div({class:'footer'},_.button({class:'btn'},'Delete',_.span({class:'fa fa-remove'})).click(function(){_this53.onClickDelete();}),_.button({class:'btn'},'OK',_.span({class:'fa fa-check'})).click(function(){_this53.onClickOK();})));};},{}],31:[function(require,module,exports){'use strict';module.exports=function render(){var _this54=this;return _.div({class:'project-editor'},_.div({class:'content'},_.div({class:'header'},_.h4(this.model.title)),_.div({class:'body'},this.model.description))).click(function(){_this54.onClick();});};},{}],32:[function(require,module,exports){'use strict';module.exports=function render(){var _this55=this;return _.div({class:'resource-editor'},_.div({class:'body'},_.each(this.model,function(i,item){ // Special cases
-if(_this55.name=='issueColumns'&&(item=='to do'||item=='done')){return;}return _.div({class:'item'},_.if(typeof item==='string',_.input({class:'selectable',value:item,placeholder:'Input name',type:'text'}).change(function(){_this55.onChange(i,item);})),_.if(typeof item!=='string',_.label(item.title||item.name)),_.button({class:'btn-remove'},_.span({class:'fa fa-remove'})).click(function(){_this55.onClickRemove(i);}));})),_.div({class:'footer'},_.input({type:'text'}),_.button({class:'btn btn-add'},'Add',_.span({class:'fa fa-plus'})).click(function(){_this55.onClickAdd(_this55.$element.find('.footer input').val());})));};},{}],33:[function(require,module,exports){'use strict';var FilterEditor=function(_View2){_inherits(FilterEditor,_View2);function FilterEditor(params){_classCallCheck(this,FilterEditor);var _this56=_possibleConstructorReturn(this,Object.getPrototypeOf(FilterEditor).call(this,params));_this56.MAX_FILTERS=5;_this56.template=require('../templates/FilterEditor');_this56.defaultFilter={key:'column',operator:'!=',value:'done'};_this56.model=SettingsHelper.get('filters','custom',[],true);_this56.fetch();setTimeout(function(){_this56.applyFilters();},2);return _this56;} /**
+if(!resource){resourceKey='issue'+resourceKey.substring(0,1).toUpperCase()+resourceKey.substring(1);resource=resources[resourceKey];}var $filter=_.div({class:'filter'},_.div({class:'select-container key'},_.select({},_.each(issueKeys,function(i,key){return _.option({value:key,selected:key==filter.key},key);})).change(function(e){filter.key=$filter.find('.key select').val();filter.value=null;_this47.onChange(i);})),_.div({class:'select-container operator'},_.select({},_.each(_this47.getOperators(),function(i,operator){return _.option({value:operator},operator);})).val(filter.operator||'!=').change(function(e){filter.operator=$filter.find('.operator select').val();_this47.onChange(i);})),_.div({class:'select-container value'},_.select({},_.each(resource,function(i,value){var valueName=value;if(value.title){valueName=value.title;}if(value.name){valueName=value.name;}var isSelected=valueName==filter.value;if(!filter.value&&i==0){isSelected=true;}return _.option({value:valueName,selected:isSelected},valueName);})).change(function(e){filter.value=$filter.find('.value select').val();_this47.onChange(i);})),_.button({class:'btn-remove btn-transparent'},_.span({class:'fa fa-remove'})).click(function(){_this47.onClickRemove(i);}));return $filter;})),_.div({class:'button-container'},_.if(this.model.length<this.MAX_FILTERS,_.button({class:'btn'},'Add filter',_.span({class:'fa fa-plus'})).click(function(){_this47.onClickAdd();}))));};},{}],26:[function(require,module,exports){module.exports=function render(){var _this48=this;return _.div({class:'issue-editor','data-index':this.model.index,'data-type':resources.issueTypes[this.model.type]},_.div({class:'header'},_.div({class:'drag-handle'},_.span({class:'fa fa-bars'})).on('mousedown',function(e){_this48.onClickDragHandle(e);}),_.if(!ApiHelper.isSpectating(),_.div({class:'assignee-avatar'},this.getAssigneeAvatar())),_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa icon-close fa-chevron-down'}),_.span({class:'fa icon-open fa-chevron-right'})).click(function(e){_this48.onClickToggle(e);}),_.div({class:'issue-index'},this.model.index.toString()),this.getPriorityIndicator(),_.h4({},_.span({class:'btn-edit'},this.model.title).click(this.onClickEdit),_.input({type:'text',class:'selectable edit hidden btn-transparent','data-property':'title',value:this.model.title}).change(function(){_this48.onChange();_this48.$element.find('.header .btn-edit').html(_this48.model.title);}).blur(this.onBlur).keyup(function(e){if(e.which==13){_this48.onBlur(e);}}))).click(function(e){_this48.onClickElement(e);}),_.div({class:'meta'},_.div({class:'multi-edit-notification'},'Now editing multiple issues'),_.div({class:'meta-field type'+(window.resources.issueTypes.length<1?' hidden':'')},_.label('Type'),_.select({'data-property':'type',disabled:ApiHelper.isSpectating()},_.each(window.resources.issueTypes,function(i,type){return _.option({value:i},type);})).change(function(){_this48.onChange();}).val(this.model.type),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this48.onChangeCheckbox(e);})),_.div({class:'meta-field priority'+(window.resources.issuePriorities.length<1?' hidden':'')},_.label('Priority'),_.select({'data-property':'priority',disabled:ApiHelper.isSpectating()},_.each(window.resources.issuePriorities,function(i,priority){return _.option({value:i},priority);})).change(function(){_this48.onChange();}).val(this.model.priority),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this48.onChangeCheckbox(e);})),_.if(window.resources.collaborators.length>0,_.div({class:'meta-field assignee'},_.label('Assignee'),_.select({'data-property':'assignee',disabled:ApiHelper.isSpectating()},_.option({value:null},'(unassigned)'),_.each(window.resources.collaborators,function(i,collaborator){return _.option({value:i},collaborator.name);})).change(function(){_this48.onChange();}).val(this.model.assignee),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this48.onChangeCheckbox(e);}))),_.div({class:'meta-field version'+(window.resources.versions.length<1?' hidden':'')},_.label('Version'),_.select({'data-property':'version',disabled:ApiHelper.isSpectating()},_.each(window.resources.versions,function(i,version){return _.option({value:i},version);})).change(function(){_this48.onChange();}).val(this.model.version),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this48.onChangeCheckbox(e);})),_.div({class:'meta-field estimate'+(window.resources.issueEstimates.length<1?' hidden':'')},_.label('Estimate'),_.select({'data-property':'estimate',disabled:ApiHelper.isSpectating()},_.each(window.resources.issueEstimates,function(i,estimate){return _.option({value:i},estimate);})).change(function(){_this48.onChange();}).val(this.model.estimate),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this48.onChangeCheckbox(e);})),_.div({class:'multi-edit-actions'},_.button({class:'btn'},'Cancel').click(function(){_this48.onClickMultiEditCancel();}),_.button({class:'btn'},'Apply').click(function(){_this48.onClickMultiEditApply();}))),_.div({class:'body'},_.div({class:'btn-edit'},markdownToHtml(this.model.description)).click(this.onClickEdit),_.textarea({class:'selectable edit hidden btn-transparent','data-property':'description'},this.model.description).change(function(){_this48.onChange();_this48.$element.find('.body .btn-edit').html(markdownToHtml(_this48.model.description)||'');}).blur(this.onBlur)),_.div({class:'comments'}),_.if(!ApiHelper.isSpectating(),_.div({class:'add-comment'},_.textarea({class:'btn-transparent',placeholder:'Add comment here...'}),_.button({class:'btn'},'Comment').click(function(){_this48.onClickComment();}))));};},{}],27:[function(require,module,exports){'use strict';module.exports=function render(){var _this49=this;var state=SettingsHelper.get('milestone',this.model.index)||'';if(!state&&this.getPercentComplete()>=100){state='collapsed';}return _.div({class:'milestone-editor '+state,'data-index':this.model.index,'data-end-date':this.model.endDate},_.div({class:'header'},_.div({class:'progress-bar',style:'width: '+this.getPercentComplete()+'%'}),_.div({class:'title'},_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa fa-chevron-right'}),_.span({class:'fa fa-chevron-down'}),_.h4(this.model.title),_.p(this.model.description)).click(function(){_this49.onClickToggle();})),_.div({class:'stats'},_.span({class:'progress-amounts'},_.span({class:'fa fa-exclamation-circle'}),_.span({class:'total'}),_.span({class:'remaining'})),_.span({class:'progress-hours'},_.span({class:'fa fa-clock-o'}),_.span({class:'total'}),_.span({class:'remaining'})))),_.div({class:'columns'},_.each(window.resources.issueColumns,function(columnIndex,column){return _.div({class:'column','data-index':columnIndex},_.div({class:'header'},_.h4(column)),_.div({class:'body'},_.each(window.resources.issues,function(issueIndex,issue){if(issue.column==columnIndex&&issue.milestone==_this49.model.index){return new IssueEditor({model:issue}).$element;}}),_.if(columnIndex==0&&!ApiHelper.isSpectating(),_.button({class:'btn btn-new-issue'},'New issue ',_.span({class:'fa fa-plus'})).click(function(){_this49.onClickNewIssue();}))));})));};},{}],28:[function(require,module,exports){'use strict';module.exports=function Navbar(){var _this50=this;return _.div({class:'navbar'},_.div({class:'obscure'},_.div({class:'content'})),_.div({class:'buttons'},_.each(this.getLinks(),function(i,link){var fullUrl=_this50.getFullUrl(link.url);var isActive=fullUrl&&Router.url==fullUrl;return _.button({'data-url':link.url,class:(isActive?'active':'')+(link.bottom?' bottom':'')},_.span({class:'fa fa-'+link.icon})).click(function(){_this50.cleanUpClasses();if(link.handler){link.handler.call(_this50);}else if(link.url){_this50.onClickLink(link.url);}});})));};},{}],29:[function(require,module,exports){'use strict';module.exports=function render(){var _this51=this;return _.div({class:'plan-editor'},_.div({class:'tabbed-container'},_.div({class:'tabs years'},_.each(this.getYears(),function(i,year){return _.button({class:'tab year'+(_this51.currentYear==year.number?' active':'')},year.number).click(function(){_this51.onClickYear(year.number);});})),_.div({class:'tabs months'},_.each(this.getMonths(),function(i,month){return _.button({class:'tab month'+(_this51.currentMonth==month.number?' active':'')},month.name).click(function(){_this51.onClickMonth(month.number);});}))),_.div({class:'weekdays'},_.each(this.getWeekDays(),function(i,weekday){return _.div({class:'weekday'},weekday);})),_.div({class:'dates'},this.iterateDates(function(date){if(!date){return _.div({class:'date-placeholder'});}else {return _.div({class:'date','data-date':date.getSimpleString()},_.div({class:'header'},_.span({class:'datenumber'},date.getDate()),_.span({class:'weeknumber'},'w '+date.getWeek())),_.div({class:'body'},_.each(window.resources.milestones,function(i,milestone){if(milestone.endDate){var dueDate=new Date(milestone.endDate);dueDate.setHours(0);dueDate.setMinutes(0);dueDate.setSeconds(0);if(dueDate.getFullYear()==date.getFullYear()&&dueDate.getMonth()==date.getMonth()&&dueDate.getDate()==date.getDate()){return new PlanItemEditor({model:milestone}).$element;}}}),_.button({class:'btn-transparent'},_.span({class:'fa fa-plus'})).click(function(){_this51.onClickAddMilestone(date);})));}})),_.if(this.getUndatedMilestones().length>0,_.div({class:'undated'},_.h4('Undated'),_.each(this.getUndatedMilestones(),function(i,milestone){return new PlanItemEditor({model:milestone}).$element;}))));};},{}],30:[function(require,module,exports){'use strict';module.exports=function render(){var _this52=this;return _.div({class:'plan-item-editor','data-date':this.model.endDate},_.div({class:'drag-handle'},this.model.title).on('mousedown',function(e){_this52.onClickDragHandle(e);}),_.button({class:'btn-close btn-transparent'},_.span({class:'fa fa-remove'})).click(function(){_this52.onClickClose();}),_.div({class:'header'},_.h4('Title'),_.input({class:'selectable edit',placeholder:'Type milestone title here',type:'text',value:this.model.title})),_.div({class:'body'},_.h4('Description'),_.input({class:'selectable',placeholder:'Type milestone description here',type:'text',value:this.model.description})),_.div({class:'footer'},_.button({class:'btn'},'Delete',_.span({class:'fa fa-remove'})).click(function(){_this52.onClickDelete();}),_.button({class:'btn'},'OK',_.span({class:'fa fa-check'})).click(function(){_this52.onClickOK();})));};},{}],31:[function(require,module,exports){'use strict';module.exports=function render(){var _this53=this;return _.div({class:'project-editor'},_.div({class:'content'},_.div({class:'header'},_.h4(this.model.title)),_.div({class:'body'},this.model.description))).click(function(){_this53.onClick();});};},{}],32:[function(require,module,exports){'use strict';module.exports=function render(){var _this54=this;return _.div({class:'resource-editor'},_.div({class:'body'},_.each(this.model,function(i,item){ // Special cases
+if(_this54.name=='issueColumns'&&(item=='to do'||item=='done')){return;}return _.div({class:'item'},_.if(typeof item==='string',_.input({class:'selectable',value:item,placeholder:'Input name',type:'text'}).change(function(){_this54.onChange(i,item);})),_.if(typeof item!=='string',_.label(item.title||item.name)),_.button({class:'btn-remove'},_.span({class:'fa fa-remove'})).click(function(){_this54.onClickRemove(i);}));})),_.div({class:'footer'},_.input({type:'text'}),_.button({class:'btn btn-add'},'Add',_.span({class:'fa fa-plus'})).click(function(){_this54.onClickAdd(_this54.$element.find('.footer input').val());})));};},{}],33:[function(require,module,exports){'use strict';var FilterEditor=function(_View2){_inherits(FilterEditor,_View2);function FilterEditor(params){_classCallCheck(this,FilterEditor);var _this55=_possibleConstructorReturn(this,Object.getPrototypeOf(FilterEditor).call(this,params));_this55.MAX_FILTERS=5;_this55.template=require('../templates/FilterEditor');_this55.defaultFilter={key:'column',operator:'!=',value:'done'};_this55.model=SettingsHelper.get('filters','custom',[],true);_this55.fetch();setTimeout(function(){_this55.applyFilters();},2);return _this55;} /**
      * Event: Change
      *
      * @param {Number} index
@@ -1411,7 +1379,7 @@ SettingsHelper.set('filters','custom',this.model,true);this.applyFilters();this.
      * @param {Array} operators
      */},{key:"getOperators",value:function getOperators(){return ['!=','=='];} /**
      * Applies selected filters
-     */},{key:"applyFilters",value:function applyFilters(){var issueViews=ViewHelper.getAll('IssueEditor');var _iteratorNormalCompletion14=true;var _didIteratorError14=false;var _iteratorError14=undefined;try{for(var _iterator14=issueViews[Symbol.iterator](),_step14;!(_iteratorNormalCompletion14=(_step14=_iterator14.next()).done);_iteratorNormalCompletion14=true){var issueView=_step14.value;issueView.$element.toggle(true);var issue=new Issue(issueView.model).getBakedValues();var _iteratorNormalCompletion15=true;var _didIteratorError15=false;var _iteratorError15=undefined;try{for(var _iterator15=this.model[Symbol.iterator](),_step15;!(_iteratorNormalCompletion15=(_step15=_iterator15.next()).done);_iteratorNormalCompletion15=true){var filter=_step15.value;try{var value=filter.value;if(value&&value.constructor===String){value='\''+value+'\'';}var evalString='issue.'+filter.key+' '+filter.operator+' '+value;var isValid=eval(evalString);if(!isValid){issueView.$element.toggle(false);break;}}catch(e){alert(e);return;}}}catch(err){_didIteratorError15=true;_iteratorError15=err;}finally {try{if(!_iteratorNormalCompletion15&&_iterator15.return){_iterator15.return();}}finally {if(_didIteratorError15){throw _iteratorError15;}}}}}catch(err){_didIteratorError14=true;_iteratorError14=err;}finally {try{if(!_iteratorNormalCompletion14&&_iterator14.return){_iterator14.return();}}finally {if(_didIteratorError14){throw _iteratorError14;}}}}}]);return FilterEditor;}(View);module.exports=FilterEditor;},{"../templates/FilterEditor":25}],34:[function(require,module,exports){'use strict';var IssueEditor=function(_View3){_inherits(IssueEditor,_View3);function IssueEditor(params){_classCallCheck(this,IssueEditor);var _this57=_possibleConstructorReturn(this,Object.getPrototypeOf(IssueEditor).call(this,params));_this57.template=require('../templates/IssueEditor');_this57.fetch();return _this57;} /**
+     */},{key:"applyFilters",value:function applyFilters(){var issueViews=ViewHelper.getAll('IssueEditor');var _iteratorNormalCompletion14=true;var _didIteratorError14=false;var _iteratorError14=undefined;try{for(var _iterator14=issueViews[Symbol.iterator](),_step14;!(_iteratorNormalCompletion14=(_step14=_iterator14.next()).done);_iteratorNormalCompletion14=true){var issueView=_step14.value;issueView.$element.toggle(true);var issue=new Issue(issueView.model).getBakedValues();var _iteratorNormalCompletion15=true;var _didIteratorError15=false;var _iteratorError15=undefined;try{for(var _iterator15=this.model[Symbol.iterator](),_step15;!(_iteratorNormalCompletion15=(_step15=_iterator15.next()).done);_iteratorNormalCompletion15=true){var filter=_step15.value;try{var value=filter.value;if(value&&value.constructor===String){value='\''+value+'\'';}var evalString='issue.'+filter.key+' '+filter.operator+' '+value;var isValid=eval(evalString);if(!isValid){issueView.$element.toggle(false);break;}}catch(e){alert(e);return;}}}catch(err){_didIteratorError15=true;_iteratorError15=err;}finally {try{if(!_iteratorNormalCompletion15&&_iterator15.return){_iterator15.return();}}finally {if(_didIteratorError15){throw _iteratorError15;}}}}}catch(err){_didIteratorError14=true;_iteratorError14=err;}finally {try{if(!_iteratorNormalCompletion14&&_iterator14.return){_iterator14.return();}}finally {if(_didIteratorError14){throw _iteratorError14;}}}}}]);return FilterEditor;}(View);module.exports=FilterEditor;},{"../templates/FilterEditor":25}],34:[function(require,module,exports){'use strict';var IssueEditor=function(_View3){_inherits(IssueEditor,_View3);function IssueEditor(params){_classCallCheck(this,IssueEditor);var _this56=_possibleConstructorReturn(this,Object.getPrototypeOf(IssueEditor).call(this,params));_this56.template=require('../templates/IssueEditor');_this56.fetch();return _this56;} /**
      * Cancels multi select
      */_createClass(IssueEditor,[{key:"onClickToggle", /**
      * Event: Click the toggle button
@@ -1445,16 +1413,16 @@ this.$element.find('.priority-indicator').replaceWith(this.getPriorityIndicator(
      * @returns {Boolean} active
      */},{key:"usingMultiEdit",value:function usingMultiEdit(){return this.$element.hasClass('selected')&&$('.issue-editor.selected').length>1;} /**
      * Synchronises the model data with the remote backend
-     */},{key:"sync",value:function sync(){var _this58=this; // Start loading
+     */},{key:"sync",value:function sync(){var _this57=this; // Start loading
 this.$element.toggleClass('loading',true); // Update the issue though the API
-ApiHelper.updateIssue(this.model).then(function(){_this58.$element.toggleClass('loading',false);});} /**
+ApiHelper.updateIssue(this.model).then(function(){_this57.$element.toggleClass('loading',false);});} /**
      * Event: Click the dragging handle
-     */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this59=this;if(ApiHelper.isSpectating()){return;}if(!InputHelper.isShiftDown){(function(){ // Set class on board container
+     */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this58=this;if(ApiHelper.isSpectating()){return;}if(!InputHelper.isShiftDown){(function(){ // Set class on board container
 $('.board-container').toggleClass('dragging',true); // Set element
-var $element=_this59.$element;if(_this59.usingMultiEdit()){$element=$('.issue-editor.selected');}else {} //IssueEditor.cancelMultiSelect();
+var $element=_this58.$element;if(_this58.usingMultiEdit()){$element=$('.issue-editor.selected');}else {} //IssueEditor.cancelMultiSelect();
 // Apply temporary CSS properties
-$element.each(function(i,element){$(element).css({top:_this59.$element.offset().top,left:_this59.$element.offset().left,width:_this59.$element.outerWidth(),height:_this59.$element.outerHeight(),'pointer-events':'none','z-index':999,'margin-top':i*15+'px'});}); // Buffer the offset between mouse cursor and element position
-var offset={x:_this59.$element.offset().left-e.pageX,y:_this59.$element.offset().top-e.pageY}; // Add absolute positioning afterwards to allow getting proper offset
+$element.each(function(i,element){$(element).css({top:_this58.$element.offset().top,left:_this58.$element.offset().left,width:_this58.$element.outerWidth(),height:_this58.$element.outerHeight(),'pointer-events':'none','z-index':999,'margin-top':i*15+'px'});}); // Buffer the offset between mouse cursor and element position
+var offset={x:_this58.$element.offset().left-e.pageX,y:_this58.$element.offset().top-e.pageY}; // Add absolute positioning afterwards to allow getting proper offset
 $element.css({position:'absolute'}); // Column mouse hover events
 $('.milestone-editor .columns .column').on('mouseenter',function(){$(this).toggleClass('hovering',true);}).on('mouseleave',function(){$(this).toggleClass('hovering',false);}); // Document pointer movement logic
 $(document).off('mousemove').on('mousemove',function(e){ // Get current pointer location
@@ -1462,7 +1430,7 @@ var current={x:e.pageX,y:e.pageY}; // Get current viewport
 var viewport={x:0,y:$(document).scrollTop(),w:$(window).width(),h:$(window).height()}; // Apply new CSS positioning values
 $element.css({top:current.y+offset.y,left:current.x+offset.x}); // Scroll page if dragging near the top or bottom
 var scrollSpeed=5;if(current.y>viewport.y+viewport.h-100){scroll(1*scrollSpeed);}else if(current.y<viewport.y+100){scroll(-1*scrollSpeed);}}); // Document pointer release mouse button logic
-$(document).off('mouseup').on('mouseup',function(e){_this59.onReleaseDragHandle(e);});})();}} /**
+$(document).off('mouseup').on('mouseup',function(e){_this58.onReleaseDragHandle(e);});})();}} /**
      * Event: Release the dragging handle
      */},{key:"onReleaseDragHandle",value:function onReleaseDragHandle(e){if(ApiHelper.isSpectating()){return;} // Unregister mouse events
 $(document).off('mouseup').off('mousemove'); // Set element
@@ -1490,7 +1458,7 @@ ViewHelper.get('FilterEditor').applyFilters();} /**
      * Event: Click the edit button of a field
      */},{key:"onClickEdit",value:function onClickEdit(e){e.preventDefault();e.stopPropagation();if(ApiHelper.isSpectating()){return;}if(!InputHelper.isShiftDown&&!$(this).parents('.issue-editor').hasClass('selected')){$(this).toggleClass('hidden',true).siblings('.edit').toggleClass('hidden',false).focus().select();}} /**
      * Event: Click the comment button
-     */},{key:"onClickComment",value:function onClickComment(){var _this60=this;if(ApiHelper.isSpectating()){return;}var text=this.$element.find('.add-comment textarea').val();this.$element.toggleClass('loading',true);ApiHelper.addIssueComment(this.model,text).then(function(){_this60.getComments();});} /**
+     */},{key:"onClickComment",value:function onClickComment(){var _this59=this;if(ApiHelper.isSpectating()){return;}var text=this.$element.find('.add-comment textarea').val();this.$element.toggleClass('loading',true);ApiHelper.addIssueComment(this.model,text).then(function(){_this59.getComments();});} /**
      * Event: Remove focus from input fields
      *
      * @param {Event} e
@@ -1506,11 +1474,11 @@ if(InputHelper.isShiftDown){e.preventDefault();e.stopPropagation();this.$element
      * @returns {String} icon
      */},{key:"getPriorityIndicator",value:function getPriorityIndicator(){var priority=resources.issuePriorities[this.model.priority];var icon='';switch(priority){case 'low':case 'trivial':icon='arrow-down';break;case 'medium':case 'minor':icon='arrow-up';break;case 'high':case 'critical':icon='arrow-up';break;case 'blocker':icon='arrow-up';break;}return _.span({class:'priority-indicator fa fa-'+icon+' '+priority});} /**
      * Lazy-load the comments
-     */},{key:"getComments",value:function getComments(){var _this61=this;var $comments=this.$element.find('.comments');ApiHelper.getUser().then(function(user){ApiHelper.getIssueComments(_this61.model).then(function(comments){_this61.$element.toggleClass('loading',false);$comments.html(_.each(comments,function(i,comment){var collaborator=window.resources.collaborators[comment.collaborator];var text=markdownToHtml(comment.text);var isUser=collaborator.name==user.name;return _.div({class:'comment','data-index':comment.index},_.div({class:'collaborator'},_.img({src:collaborator.avatar}),_.p(collaborator.name)),_.if(isUser,_.div({class:'btn-edit'},text).click(_this61.onClickEdit),_.textarea({class:'edit selectable hidden text btn-transparent'},comment.text).change(function(){_this61.$element.toggleClass('loading',true);comment.text=_this61.$element.find('.comments .comment[data-index="'+comment.index+'"] textarea').val();_this61.$element.find('.comments .comment[data-index="'+comment.index+'"] .btn-edit').html(markdownToHtml(comment.text)||'');ApiHelper.updateIssueComment(_this61.model,comment).then(function(){_this61.$element.toggleClass('loading',false);});}).blur(_this61.onBlur)),_.if(!isUser,_.div({class:'text'},text)));}));});});}}],[{key:"cancelMultiSelect",value:function cancelMultiSelect(){$('.issue-editor').toggleClass('selected',false);$('.issue-editor .multi-edit-toggle').each(function(){this.checked=false;});$('.board-container').toggleClass('multi-edit',false);}}]);return IssueEditor;}(View);module.exports=IssueEditor;},{"../templates/IssueEditor":26}],35:[function(require,module,exports){'use strict'; /**
+     */},{key:"getComments",value:function getComments(){var _this60=this;var $comments=this.$element.find('.comments');ApiHelper.getUser().then(function(user){ApiHelper.getIssueComments(_this60.model).then(function(comments){_this60.$element.toggleClass('loading',false);$comments.html(_.each(comments,function(i,comment){var collaborator=window.resources.collaborators[comment.collaborator];var text=markdownToHtml(comment.text);var isUser=collaborator.name==user.name;return _.div({class:'comment','data-index':comment.index},_.div({class:'collaborator'},_.img({src:collaborator.avatar}),_.p(collaborator.name)),_.if(isUser,_.div({class:'btn-edit'},text).click(_this60.onClickEdit),_.textarea({class:'edit selectable hidden text btn-transparent'},comment.text).change(function(){_this60.$element.toggleClass('loading',true);comment.text=_this60.$element.find('.comments .comment[data-index="'+comment.index+'"] textarea').val();_this60.$element.find('.comments .comment[data-index="'+comment.index+'"] .btn-edit').html(markdownToHtml(comment.text)||'');ApiHelper.updateIssueComment(_this60.model,comment).then(function(){_this60.$element.toggleClass('loading',false);});}).blur(_this60.onBlur)),_.if(!isUser,_.div({class:'text'},text)));}));});});}}],[{key:"cancelMultiSelect",value:function cancelMultiSelect(){$('.issue-editor').toggleClass('selected',false);$('.issue-editor .multi-edit-toggle').each(function(){this.checked=false;});$('.board-container').toggleClass('multi-edit',false);}}]);return IssueEditor;}(View);module.exports=IssueEditor;},{"../templates/IssueEditor":26}],35:[function(require,module,exports){'use strict'; /**
  * An editor for milestones, displaying issues in columns or rows
- */var MilestoneEditor=function(_View4){_inherits(MilestoneEditor,_View4);function MilestoneEditor(params){_classCallCheck(this,MilestoneEditor);var _this62=_possibleConstructorReturn(this,Object.getPrototypeOf(MilestoneEditor).call(this,params));_this62.template=require('../templates/MilestoneEditor');_this62.fetch();_this62.updateProgress();return _this62;} /**
+ */var MilestoneEditor=function(_View4){_inherits(MilestoneEditor,_View4);function MilestoneEditor(params){_classCallCheck(this,MilestoneEditor);var _this61=_possibleConstructorReturn(this,Object.getPrototypeOf(MilestoneEditor).call(this,params));_this61.template=require('../templates/MilestoneEditor');_this61.fetch();_this61.updateProgress();return _this61;} /**
      * Event: Click new issue button
-     */_createClass(MilestoneEditor,[{key:"onClickNewIssue",value:function onClickNewIssue(){var _this63=this;spinner(true);Issue.create({milestone:this.model.index}).then(function(issue){var editor=new IssueEditor({model:issue});var $issue=editor.$element;$('.milestone-editor[data-index="'+issue.milestone+'"] .column[data-index="'+issue.column+'"] .btn-new-issue').before($issue);$issue.toggleClass('expanded',true);$issue.toggleClass('selected',false);_this63.updateProgress();spinner(false);});if(this.$element.hasClass('collapsed')){this.onClickToggle();}} /**
+     */_createClass(MilestoneEditor,[{key:"onClickNewIssue",value:function onClickNewIssue(){var _this62=this;spinner(true);Issue.create({milestone:this.model.index}).then(function(issue){var editor=new IssueEditor({model:issue});var $issue=editor.$element;$('.milestone-editor[data-index="'+issue.milestone+'"] .column[data-index="'+issue.column+'"] .btn-new-issue').before($issue);$issue.toggleClass('expanded',true);$issue.toggleClass('selected',false);_this62.updateProgress();spinner(false);});if(this.$element.hasClass('collapsed')){this.onClickToggle();}} /**
      * Event: Click toggle button
      */},{key:"onClickToggle",value:function onClickToggle(){this.$element.toggleClass('collapsed');SettingsHelper.set('milestone',this.model.index,this.$element.hasClass('collapsed')?'collapsed':'');} /**
      * Gets remaining days
@@ -1535,7 +1503,7 @@ _.if(this.getPercentComplete()==100,_.span({class:'remaining ok fa fa-check'})))
  * The navbar view
  *
  * @class View Navbar
- */var Navbar=function(_View5){_inherits(Navbar,_View5);function Navbar(params){_classCallCheck(this,Navbar);var _this64=_possibleConstructorReturn(this,Object.getPrototypeOf(Navbar).call(this,params));_this64.template=require('../templates/Navbar');_this64.fetch();return _this64;} /**
+ */var Navbar=function(_View5){_inherits(Navbar,_View5);function Navbar(params){_classCallCheck(this,Navbar);var _this63=_possibleConstructorReturn(this,Object.getPrototypeOf(Navbar).call(this,params));_this63.template=require('../templates/Navbar');_this63.fetch();return _this63;} /**
      * Gets a list of links
      */_createClass(Navbar,[{key:"getLinks",value:function getLinks(){var links=[];if(!ApiHelper.isSpectating()){links.push({url:'/source/',handler:this.toggleSourcePanel,icon:'user'});}if(!ApiHelper.isSpectating()){links.push({url:'/projects/',handler:this.toggleProjectsList,icon:'folder'});}if(!ApiHelper.isSpectating()){links.push({url:'/settings/',icon:'cog'});}links.push({url:'/plan/',icon:'calendar'});links.push({url:'/board/kanban/',icon:'columns'});links.push({url:'/board/list/',icon:'list'});return links;} /**
      * Cleans up extra added classes
@@ -1557,18 +1525,18 @@ url='/'+ApiHelper.getUserName()+url;return url;} /**
      * @param {String} url
      */},{key:"onClickLink",value:function onClickLink(url){url=this.getFullUrl(url);if(url&&url!=Router.url){this.$element.toggleClass('out',true);resources={};setTimeout(function(){location.hash=url;},400);}} /**
      * Slide navbar in
-     */},{key:"slideIn",value:function slideIn(){if(Router.url){var url=Router.url.replace('/'+ApiHelper.getProjectName(),'').replace('/'+ApiHelper.getUserName(),'');this.$element.find('button.active').removeClass('active');this.$element.find('button[data-url="'+url+'"]').toggleClass('active',true);this.$element.toggleClass('out',false);$('.navbar .obscure .content').empty();}}}]);return Navbar;}(View);module.exports=Navbar;},{"../templates/Navbar":28}],37:[function(require,module,exports){'use strict';var PlanEditor=function(_View6){_inherits(PlanEditor,_View6);function PlanEditor(params){_classCallCheck(this,PlanEditor);var _this65=_possibleConstructorReturn(this,Object.getPrototypeOf(PlanEditor).call(this,params));_this65.currentYear=new Date().getFullYear();_this65.currentMonth=new Date().getMonth()+1;if(_this65.currentMonth.length==1){_this65.currentMonth='0'+_this65.currentMonth;}_this65.template=require('../templates/PlanEditor');_this65.init();return _this65;}_createClass(PlanEditor,[{key:"onClickYear",value:function onClickYear(year){this.currentYear=parseInt(year);this.render();}},{key:"onClickMonth",value:function onClickMonth(month){this.currentMonth=parseInt(month);this.render();}},{key:"updateUndatedBox",value:function updateUndatedBox(){if(this.getUndatedMilestones().length<1){$('.plan-editor .undated').remove();}}},{key:"getUndatedMilestones",value:function getUndatedMilestones(){var milestones=[];var _iteratorNormalCompletion24=true;var _didIteratorError24=false;var _iteratorError24=undefined;try{for(var _iterator24=resources.milestones[Symbol.iterator](),_step24;!(_iteratorNormalCompletion24=(_step24=_iterator24.next()).done);_iteratorNormalCompletion24=true){var milestone=_step24.value;if(!milestone.endDate){milestones.push(milestone);}}}catch(err){_didIteratorError24=true;_iteratorError24=err;}finally {try{if(!_iteratorNormalCompletion24&&_iterator24.return){_iterator24.return();}}finally {if(_didIteratorError24){throw _iteratorError24;}}}return milestones;}},{key:"getYears",value:function getYears(){var years=[];for(var i=new Date().getFullYear()-2;i<new Date().getFullYear()+4;i++){years.push({number:i});}return years;}},{key:"getMonths",value:function getMonths(){var months=[];for(var i=1;i<=12;i++){var num=i.toString();if(num.length==1){num='0'+num;}months.push({name:new Date('2016-'+num+'-01').getMonthName(),number:i});}return months;}},{key:"getWeekDays",value:function getWeekDays(){var weekdays=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];return weekdays;}},{key:"onClickAddMilestone",value:function onClickAddMilestone(date){var _this66=this;if(ApiHelper.isSpectating()){return;}spinner(true);ResourceHelper.addResource('milestones',{title:'New milestone',endDate:date.toISOString()}).then(function(){_this66.render();spinner(false);});}},{key:"getWeeks",value:function getWeeks(){var weeks=[];var firstDay=new Date(this.currentYear,this.currentMonth,1);var firstWeek=firstDay.getWeek();var _iteratorNormalCompletion25=true;var _didIteratorError25=false;var _iteratorError25=undefined;try{for(var _iterator25=this.getDates()[Symbol.iterator](),_step25;!(_iteratorNormalCompletion25=(_step25=_iterator25.next()).done);_iteratorNormalCompletion25=true){var date=_step25.value;if(weeks.indexOf(date.getWeek())<0){weeks.push(date.getWeek());}}}catch(err){_didIteratorError25=true;_iteratorError25=err;}finally {try{if(!_iteratorNormalCompletion25&&_iterator25.return){_iterator25.return();}}finally {if(_didIteratorError25){throw _iteratorError25;}}}return weeks;}},{key:"getDates",value:function getDates(){var year=this.currentYear;var month=this.currentMonth;var dates=[];for(var i=1;i<=new Date(year,month,0).getDate();i++){var day=i.toString();if(day.length==1){day='0'+day;}if(month.toString().length==1){month='0'+month;}var date=new Date(year+'-'+month+'-'+day).floor();dates.push(date);}return dates;}},{key:"getDate",value:function getDate(week,weekday){var _iteratorNormalCompletion26=true;var _didIteratorError26=false;var _iteratorError26=undefined;try{for(var _iterator26=this.getDates()[Symbol.iterator](),_step26;!(_iteratorNormalCompletion26=(_step26=_iterator26.next()).done);_iteratorNormalCompletion26=true){var date=_step26.value;if(date.getWeek()==week&&date.getISODay()==weekday){return date;}}}catch(err){_didIteratorError26=true;_iteratorError26=err;}finally {try{if(!_iteratorNormalCompletion26&&_iterator26.return){_iterator26.return();}}finally {if(_didIteratorError26){throw _iteratorError26;}}}}},{key:"iterateDates",value:function iterateDates(renderFunction){var weekdays=this.getWeekDays();var weeks=this.getWeeks();var renders=[];for(var y=0;y<6;y++){for(var x=0;x<7;x++){var weekday=weekdays[x];var week=weeks[y];if(week&&weekday){var date=this.getDate(week,x);renders.push(renderFunction(date));}else {renders.push(renderFunction());}}}return renders;}}]);return PlanEditor;}(View);module.exports=PlanEditor;},{"../templates/PlanEditor":29}],38:[function(require,module,exports){'use strict';var PlanItemEditor=function(_View7){_inherits(PlanItemEditor,_View7);function PlanItemEditor(params){_classCallCheck(this,PlanItemEditor);var _this67=_possibleConstructorReturn(this,Object.getPrototypeOf(PlanItemEditor).call(this,params));_this67.template=require('../templates/PlanItemEditor');_this67.fetch();return _this67;} /**
+     */},{key:"slideIn",value:function slideIn(){if(Router.url){var url=Router.url.replace('/'+ApiHelper.getProjectName(),'').replace('/'+ApiHelper.getUserName(),'');this.$element.find('button.active').removeClass('active');this.$element.find('button[data-url="'+url+'"]').toggleClass('active',true);this.$element.toggleClass('out',false);$('.navbar .obscure .content').empty();}}}]);return Navbar;}(View);module.exports=Navbar;},{"../templates/Navbar":28}],37:[function(require,module,exports){'use strict';var PlanEditor=function(_View6){_inherits(PlanEditor,_View6);function PlanEditor(params){_classCallCheck(this,PlanEditor);var _this64=_possibleConstructorReturn(this,Object.getPrototypeOf(PlanEditor).call(this,params));_this64.currentYear=new Date().getFullYear();_this64.currentMonth=new Date().getMonth()+1;if(_this64.currentMonth.length==1){_this64.currentMonth='0'+_this64.currentMonth;}_this64.template=require('../templates/PlanEditor');_this64.init();return _this64;}_createClass(PlanEditor,[{key:"onClickYear",value:function onClickYear(year){this.currentYear=parseInt(year);this.render();}},{key:"onClickMonth",value:function onClickMonth(month){this.currentMonth=parseInt(month);this.render();}},{key:"updateUndatedBox",value:function updateUndatedBox(){if(this.getUndatedMilestones().length<1){$('.plan-editor .undated').remove();}}},{key:"getUndatedMilestones",value:function getUndatedMilestones(){var milestones=[];var _iteratorNormalCompletion24=true;var _didIteratorError24=false;var _iteratorError24=undefined;try{for(var _iterator24=resources.milestones[Symbol.iterator](),_step24;!(_iteratorNormalCompletion24=(_step24=_iterator24.next()).done);_iteratorNormalCompletion24=true){var milestone=_step24.value;if(!milestone.endDate){milestones.push(milestone);}}}catch(err){_didIteratorError24=true;_iteratorError24=err;}finally {try{if(!_iteratorNormalCompletion24&&_iterator24.return){_iterator24.return();}}finally {if(_didIteratorError24){throw _iteratorError24;}}}return milestones;}},{key:"getYears",value:function getYears(){var years=[];for(var i=new Date().getFullYear()-2;i<new Date().getFullYear()+4;i++){years.push({number:i});}return years;}},{key:"getMonths",value:function getMonths(){var months=[];for(var i=1;i<=12;i++){var num=i.toString();if(num.length==1){num='0'+num;}months.push({name:new Date('2016-'+num+'-01').getMonthName(),number:i});}return months;}},{key:"getWeekDays",value:function getWeekDays(){var weekdays=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];return weekdays;}},{key:"onClickAddMilestone",value:function onClickAddMilestone(date){var _this65=this;if(ApiHelper.isSpectating()){return;}spinner(true);ResourceHelper.addResource('milestones',{title:'New milestone',endDate:date.toISOString()}).then(function(){_this65.render();spinner(false);});}},{key:"getWeeks",value:function getWeeks(){var weeks=[];var firstDay=new Date(this.currentYear,this.currentMonth,1);var firstWeek=firstDay.getWeek();var _iteratorNormalCompletion25=true;var _didIteratorError25=false;var _iteratorError25=undefined;try{for(var _iterator25=this.getDates()[Symbol.iterator](),_step25;!(_iteratorNormalCompletion25=(_step25=_iterator25.next()).done);_iteratorNormalCompletion25=true){var date=_step25.value;if(weeks.indexOf(date.getWeek())<0){weeks.push(date.getWeek());}}}catch(err){_didIteratorError25=true;_iteratorError25=err;}finally {try{if(!_iteratorNormalCompletion25&&_iterator25.return){_iterator25.return();}}finally {if(_didIteratorError25){throw _iteratorError25;}}}return weeks;}},{key:"getDates",value:function getDates(){var year=this.currentYear;var month=this.currentMonth;var dates=[];for(var i=1;i<=new Date(year,month,0).getDate();i++){var day=i.toString();if(day.length==1){day='0'+day;}if(month.toString().length==1){month='0'+month;}var date=new Date(year+'-'+month+'-'+day).floor();dates.push(date);}return dates;}},{key:"getDate",value:function getDate(week,weekday){var _iteratorNormalCompletion26=true;var _didIteratorError26=false;var _iteratorError26=undefined;try{for(var _iterator26=this.getDates()[Symbol.iterator](),_step26;!(_iteratorNormalCompletion26=(_step26=_iterator26.next()).done);_iteratorNormalCompletion26=true){var date=_step26.value;if(date.getWeek()==week&&date.getISODay()==weekday){return date;}}}catch(err){_didIteratorError26=true;_iteratorError26=err;}finally {try{if(!_iteratorNormalCompletion26&&_iterator26.return){_iterator26.return();}}finally {if(_didIteratorError26){throw _iteratorError26;}}}}},{key:"iterateDates",value:function iterateDates(renderFunction){var weekdays=this.getWeekDays();var weeks=this.getWeeks();var renders=[];for(var y=0;y<6;y++){for(var x=0;x<7;x++){var weekday=weekdays[x];var week=weeks[y];if(week&&weekday){var date=this.getDate(week,x);renders.push(renderFunction(date));}else {renders.push(renderFunction());}}}return renders;}}]);return PlanEditor;}(View);module.exports=PlanEditor;},{"../templates/PlanEditor":29}],38:[function(require,module,exports){'use strict';var PlanItemEditor=function(_View7){_inherits(PlanItemEditor,_View7);function PlanItemEditor(params){_classCallCheck(this,PlanItemEditor);var _this66=_possibleConstructorReturn(this,Object.getPrototypeOf(PlanItemEditor).call(this,params));_this66.template=require('../templates/PlanItemEditor');_this66.fetch();return _this66;} /**
      * Opens this milestone as a dialog
-     */_createClass(PlanItemEditor,[{key:"openDialog",value:function openDialog(){var _this68=this;var prev={x:this.$element.offset().left,y:this.$element.offset().top,w:this.$element.width(),h:this.$element.height(),$parent:this.$element.parent()};this.positionBuffer=prev;$('body').append(this.$element);this.$element.css({position:'absolute',left:prev.x,top:prev.y,width:prev.w,height:prev.h,transition:'all 0.5s ease',overflow:'hidden'});setTimeout(function(){_this68.$element.removeAttr('style');_this68.$element.css({position:'absolute',left:'50%',top:'100px',transform:'translateX(-50%)',transition:'all 0.5s ease'});},1);} /**
+     */_createClass(PlanItemEditor,[{key:"openDialog",value:function openDialog(){var _this67=this;var prev={x:this.$element.offset().left,y:this.$element.offset().top,w:this.$element.width(),h:this.$element.height(),$parent:this.$element.parent()};this.positionBuffer=prev;$('body').append(this.$element);this.$element.css({position:'absolute',left:prev.x,top:prev.y,width:prev.w,height:prev.h,transition:'all 0.5s ease',overflow:'hidden'});setTimeout(function(){_this67.$element.removeAttr('style');_this67.$element.css({position:'absolute',left:'50%',top:'100px',transform:'translateX(-50%)',transition:'all 0.5s ease'});},1);} /**
      * Event: Change
-     */},{key:"onChange",value:function onChange(){var _this69=this;var dateString=this.$element.parents('.date').attr('data-date'); // Update model data with new information based on DOM location
+     */},{key:"onChange",value:function onChange(){var _this68=this;var dateString=this.$element.parents('.date').attr('data-date'); // Update model data with new information based on DOM location
 this.model.title=this.$element.find('.header input').val();this.model.description=this.$element.find('.body input').val();if(dateString){var date=new Date(dateString);this.model.endDate=date.getSimpleString();} // Update DOM elements to match model
 this.$element.find('.drag-handle').text(this.model.title);console.log(dateString,this.model.endDate); // Start loading
-this.$element.toggleClass('loading',true);ResourceHelper.updateResource('milestones',this.model).then(function(){_this69.$element.toggleClass('loading',false);});} /**
+this.$element.toggleClass('loading',true);ResourceHelper.updateResource('milestones',this.model).then(function(){_this68.$element.toggleClass('loading',false);});} /**
      * Event: Click delete button
      */},{key:"onClickDelete",value:function onClickDelete(){spinner(true);ResourceHelper.removeResource('milestones',this.model.index).then(function(){ViewHelper.removeAll('PlanItemEditor');ViewHelper.get('PlanEditor').render();spinner(false);});} /**
      * Event: Click close button
-     */},{key:"onClickClose",value:function onClickClose(){var _this70=this;var prev=this.positionBuffer;this.$element.removeAttr('style');this.$element.css({position:'absolute',left:prev.x,top:prev.y,width:prev.w,height:prev.h,transition:'all 0.5s ease',overflow:'hidden'});setTimeout(function(){prev.$parent.prepend(_this70.$element);_this70.$element.removeAttr('style');},550);} /**
+     */},{key:"onClickClose",value:function onClickClose(){var _this69=this;var prev=this.positionBuffer;this.$element.removeAttr('style');this.$element.css({position:'absolute',left:prev.x,top:prev.y,width:prev.w,height:prev.h,transition:'all 0.5s ease',overflow:'hidden'});setTimeout(function(){prev.$parent.prepend(_this69.$element);_this69.$element.removeAttr('style');},550);} /**
      * Event: Click OK button
      */},{key:"onClickOK",value:function onClickOK(){this.onChange();this.onClickClose();} /**
      * Event: Release the dragging handle
@@ -1591,7 +1559,7 @@ this.$element.hide();ResourceHelper.updateResource('milestones',this.model).then
 $target.click();});} // Update the undated box
 ViewHelper.get('PlanEditor').updateUndatedBox();}} /**
      * Event: Click the dragging handle
-     */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this71=this; // Cache the previous click
+     */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this70=this; // Cache the previous click
 this.prevClick=Date.now(); // Set class on board container
 $('.plan-container').toggleClass('dragging',true); // Apply temporary CSS properties
 this.$element.css({top:this.$element.offset().top,left:this.$element.offset().left,width:this.$element.outerWidth(),height:this.$element.outerHeight(),'pointer-events':'none','z-index':999});this.$element.find('button, input').css({'pointer-events':'none'}); // Find the offset parent
@@ -1602,7 +1570,7 @@ var prev={x:e.pageX,y:e.pageY}; // Date mouse hover events
 $('.plan-editor .dates .date, .tab.year, .tab.month').on('mouseenter',function(){$(this).toggleClass('hovering',true);}).on('mouseleave',function(){$(this).toggleClass('hovering',false);}); // Document pointer movement logic
 $(document).off('mousemove').on('mousemove',function(e){ // Get current pointer location
 var current={x:e.pageX,y:e.pageY}; // Apply new CSS positioning values
-_this71.$element.css({top:current.y+offset.y,left:current.x+offset.x}); // Replace previous position buffer data
+_this70.$element.css({top:current.y+offset.y,left:current.x+offset.x}); // Replace previous position buffer data
 prev=current;}); // Document pointer release mouse button logic
-$(document).off('mouseup').on('mouseup',function(e){_this71.onReleaseDragHandle(e);});}}]);return PlanItemEditor;}(View);module.exports=PlanItemEditor;},{"../templates/PlanItemEditor":30}],39:[function(require,module,exports){'use strict';var ProjectEditor=function(_View8){_inherits(ProjectEditor,_View8);function ProjectEditor(params){_classCallCheck(this,ProjectEditor);var _this72=_possibleConstructorReturn(this,Object.getPrototypeOf(ProjectEditor).call(this,params));_this72.template=require('../templates/ProjectEditor');_this72.fetch();return _this72;}_createClass(ProjectEditor,[{key:"onClick",value:function onClick(){if(Router.params.project){location.hash=location.hash.replace('#','').replace(Router.params.project,this.model.title);}else {location.hash='/'+ApiHelper.getUserName()+'/'+this.model.title+'/board/kanban/';}}}]);return ProjectEditor;}(View);module.exports=ProjectEditor;},{"../templates/ProjectEditor":31}],40:[function(require,module,exports){'use strict';var ResourceEditor=function(_View9){_inherits(ResourceEditor,_View9);function ResourceEditor(params){_classCallCheck(this,ResourceEditor);var _this73=_possibleConstructorReturn(this,Object.getPrototypeOf(ResourceEditor).call(this,params));_this73.template=require('../templates/ResourceEditor');_this73.fetch();return _this73;}_createClass(ResourceEditor,[{key:"onClickRemove",value:function onClickRemove(index){var _this74=this;ResourceHelper.removeResource(this.name,index).then(function(){_this74.render();});}},{key:"onClickAdd",value:function onClickAdd(name){var _this75=this;if(name){ResourceHelper.addResource(this.name,name).then(function(){_this75.render();});}}},{key:"onChange",value:function onChange(index,identifier){var _this76=this;var value=this.$element.find('.item').eq(index).find('input').val();ResourceHelper.updateResource(this.name,value,index,identifier).then(function(){_this76.render();});}}]);return ResourceEditor;}(View);module.exports=ResourceEditor;},{"../templates/ResourceEditor":32}]},{},[15]);
+$(document).off('mouseup').on('mouseup',function(e){_this70.onReleaseDragHandle(e);});}}]);return PlanItemEditor;}(View);module.exports=PlanItemEditor;},{"../templates/PlanItemEditor":30}],39:[function(require,module,exports){'use strict';var ProjectEditor=function(_View8){_inherits(ProjectEditor,_View8);function ProjectEditor(params){_classCallCheck(this,ProjectEditor);var _this71=_possibleConstructorReturn(this,Object.getPrototypeOf(ProjectEditor).call(this,params));_this71.template=require('../templates/ProjectEditor');_this71.fetch();return _this71;}_createClass(ProjectEditor,[{key:"onClick",value:function onClick(){if(Router.params.project){location.hash=location.hash.replace('#','').replace(Router.params.project,this.model.title);}else {location.hash='/'+ApiHelper.getUserName()+'/'+this.model.title+'/board/kanban/';}}}]);return ProjectEditor;}(View);module.exports=ProjectEditor;},{"../templates/ProjectEditor":31}],40:[function(require,module,exports){'use strict';var ResourceEditor=function(_View9){_inherits(ResourceEditor,_View9);function ResourceEditor(params){_classCallCheck(this,ResourceEditor);var _this72=_possibleConstructorReturn(this,Object.getPrototypeOf(ResourceEditor).call(this,params));_this72.template=require('../templates/ResourceEditor');_this72.fetch();return _this72;}_createClass(ResourceEditor,[{key:"onClickRemove",value:function onClickRemove(index){var _this73=this;ResourceHelper.removeResource(this.name,index).then(function(){_this73.render();});}},{key:"onClickAdd",value:function onClickAdd(name){var _this74=this;if(name){ResourceHelper.addResource(this.name,name).then(function(){_this74.render();});}}},{key:"onChange",value:function onChange(index,identifier){var _this75=this;var value=this.$element.find('.item').eq(index).find('input').val();ResourceHelper.updateResource(this.name,value,index,identifier).then(function(){_this75.render();});}}]);return ResourceEditor;}(View);module.exports=ResourceEditor;},{"../templates/ResourceEditor":32}]},{},[15]);
 //# sourceMappingURL=public/js/maps/client.js.map

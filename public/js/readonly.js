@@ -118,7 +118,7 @@ var _this=_possibleConstructorReturn(this,Object.getPrototypeOf(ContextMenu).cal
 $('body').click(function(e){if($(e.target).parents('.context-menu').length<1){$('.context-menu-target-element').removeClass('context-menu-target-element');ViewHelper.removeAll('ContextMenu');}});}},{}],3:[function(require,module,exports){'use strict'; // ----------
 // Event handlers
 // ----------
-function dragHandler(e){DragDrop.current.onDrag(e);}function releaseHandler(e){DragDrop.current.onReleaseDragHandle(e);} // ----------
+function hoverDropContainerHandler(e){DragDrop.current.onHoverDropContainer(this,e);}function leaveDropContainerHandler(e){DragDrop.current.onLeaveDropContainer(this,e);}function dragHandler(e){DragDrop.current.onDrag(e);}function releaseHandler(e){DragDrop.current.onReleaseDragHandle(e);} // ----------
 // Registered DragDrop instances
 // ----------
 var instances=[]; /**
@@ -132,28 +132,6 @@ var instances=[]; /**
      *
      * @param {HTMLelement} element
      */},{key:"destroy",value:function destroy(element){for(var i in instances){var instance=instances[i];if(instance.element==element){instance.removeListeners();instances.splice(i,1);break;}}} /**
-     * Checks whether 2 rects intersect
-     *
-     * @param {Rect} r1
-     * @param {Rect} r2
-     *
-     * @returns {Boolean} intersects
-     */},{key:"intersectsRect",value:function intersectsRect(r1,r2){return r1.left<r2.right&&r1.right>r2.left&&r1.top<r2.bottom&&r1.bottom>r2.top;} /**
-     * Gets elements stack by position
-     *
-     * @param {Number} x
-     * @param {Number} y
-     *
-     * @returns {Array} stack
-     */},{key:"getElementStack",value:function getElementStack(x,y){var stack=[];var el=document.elementFromPoint(x,y);var handbrake=0;while(el&&el!=document.body&&handbrake<20){stack[stack.length]=el;el.style.display='none';handbrake++;el=document.elementFromPoint(x,y);}for(var i in stack){stack[i].style.display=null;}return stack;} /**
-     * Sorts an array on elements by z proximity to the cursor
-     *
-     * @param {Array} elements
-     * @param {Number} x
-     * @paraa {Number} y
-     *
-     * @return {Array} ranking
-     */},{key:"sortByZProximity",value:function sortByZProximity(elements,x,y){var result=[];var stack=DragDrop.getElementStack(x,y);for(var i in stack){if(elements.indexOf(stack[i])>-1){result[result.length]=stack[i];}}return result;} /**
      * Constructs a new instance
      *
      * @param {HTMLElement} element
@@ -162,8 +140,8 @@ var instances=[]; /**
 instances.push(instance); // Init element
 this.element=element;this.element.setAttribute('data-dragdrop-enabled','true'); // Init listener array
 this.listeners=[]; // Adopt config
-config=config||{};this.config={dragThreshold:2,dragScrollSpeed:5,dropContainerSelector:'',dropContainers:[],lockY:false,lockX:false,onDrag:function onDrag(){},onBeginDrag:function onBeginDrag(){},onEndDrag:function onEndDrag(){}};for(var k in config){this.config[k]=config[k];} // Detect initial click
-function downHandler(mousedownEvent){mousedownEvent.stopPropagation();if(mousedownEvent.which==1){(function(){ // Detect initial move
+config=config||{};this.config={dragThreshold:2,dragScrollSpeed:5,dropContainerClass:'',dropContainers:[],lockY:false,lockX:false,onDrag:function onDrag(){},onBeginDrag:function onBeginDrag(){},onEndDrag:function onEndDrag(){}};for(var k in config){this.config[k]=config[k];} // Detect initial click
+function downHandler(mousedownEvent){if(mousedownEvent.which==1){(function(){ // Detect initial move
 var moveHandler=function moveHandler(mousemoveEvent){dragFrames++;if(dragFrames>=instance.config.dragThreshold){instance.onMoveDragHandle(mousemoveEvent);instance.off(instance.element,'mousemove',moveHandler);instance.off(document,'mouseup',upHandler);}}; // Detect immediate pointer release
 var upHandler=function upHandler(upEvent){instance.off(instance.element,'mousemove',moveHandler);instance.off(document,'mouseup',upHandler);};mousedownEvent.preventDefault();var dragFrames=0;instance.on(instance.element,'mousemove',moveHandler);instance.on(document,'mouseup',upHandler);})();}} // Add pointer event
 this.on(this.element,'mousedown',downHandler);} /**
@@ -184,10 +162,10 @@ this.on(this.element,'mousedown',downHandler);} /**
      * Gets all drop containers
      *
      * @returns {Array} containers
-     */},{key:"updateDropContainers",value:function updateDropContainers(){var _this2=this;DragDrop.currentDropContainers=[]; // An array of elements are specified
+     */},{key:"updateDropContainers",value:function updateDropContainers(){DragDrop.currentDropContainers=[]; // An array of elements are specified
 if(this.config.dropContainers&&this.config.dropContainers.length>0){DragDrop.currentDropContainers=this.config.dropContainers; // A selector is specified
-}else if(this.config.dropContainerSelector){DragDrop.currentDropContainers=[].slice.call(document.querySelectorAll(this.config.dropContainerSelector)); // If the element itself was found, filter it out
-DragDrop.currentDropContainers=DragDrop.currentDropContainers.filter(function(dropContainer){var isSelf=dropContainer==_this2.element||dropContainer.parentElement==_this2.element;if(isSelf){return false;}else {dropContainer.dataset.dragdropDropContainer=true;return true;}});}} /**
+}else if(this.config.dropContainerClass){DragDrop.currentDropContainers=document.querySelectorAll(this.config.dropContainerClass); // Nothing is specified, look for similar containers
+}else {var dragDropItems=document.querySelectorAll('*[data-dragdrop-enabled="true"]')||[];for(var i=0;i<dragDropItems.length;i++){var dragDropItem=dragDropItems[i];var dropContainer=dragDropItem.parentElement;if(DragDrop.currentDropContainers.indexOf(dropContainer)<0){DragDrop.currentDropContainers[DragDrop.currentDropContainers.length]=dropContainer;}}}} /**
      * Event: Move drag handle
      *
      * @param {Event} e
@@ -200,8 +178,8 @@ var computedStyle=window.getComputedStyle(this.element); // Calculate pointer of
 var pointerOffset={top:elementOffset.top-e.pageY,left:elementOffset.left-e.pageX}; // Cache the pointer offset
 this.pointerOffset=pointerOffset; // Cache the previous parent element
 this.previousParent=this.element.parentElement; // Set temporary styling
-this.element.style.position='absolute';this.element.style.top=elementOffset.top;this.element.style.left=elementOffset.left;this.element.style.width=elementRect.width;this.element.style.height=elementRect.height;this.element.style.zIndex=999; // Cache drop containers
-this.updateDropContainers(); // Insert placeholder
+this.element.style.position='absolute';this.element.style.top=elementOffset.top;this.element.style.left=elementOffset.left;this.element.style.width=elementRect.width;this.element.style.height=elementRect.height;this.element.style.zIndex=999; // Add events on drop containers
+this.updateDropContainers();for(var i=0;i<DragDrop.currentDropContainers.length;i++){var dropContainer=DragDrop.currentDropContainers[i];this.on(dropContainer,'mousemove',hoverDropContainerHandler);this.on(dropContainer,'mouseleave',leaveDropContainerHandler);} // Insert placeholder
 var placeholder=document.createElement('DIV');placeholder.id='dragdrop-placeholder';placeholder.style.height=computedStyle.height;placeholder.style.width=computedStyle.width;this.element.parentElement.insertBefore(placeholder,this.element); // Add pointer movement logic
 this.on(document,'mousemove',dragHandler); // Add pointer release logic
 this.on(document,'mouseup',releaseHandler); // Fire begin drag event
@@ -216,40 +194,30 @@ var viewport={x:document.scrollLeft,y:document.scrollTop,w:window.width,h:window
 if(e.pageY>viewport.y+viewport.h-100){ //   scroll(1 * this.dragScrollSpeed);
 }else if(e.pageY<viewport.y+100){} //  scroll(-1 * this.dragScrollSpeed);
 // Fire drag event
-if(typeof this.config.onDrag==='function'){this.config.onDrag(this);} // Scan for drop containers
-var elementRect=this.element.getBoundingClientRect();elementRect.center=elementRect.left+elementRect.width/2;elementRect.middle=elementRect.top+elementRect.height/2; // Use array of drop containers sorted by their "proximity" to the pointer on the Z axis
-var hoveredDropContainers=DragDrop.sortByZProximity(DragDrop.currentDropContainers,elementRect.center,elementRect.middle);var foundDropContainer=void 0; // We only need the first index, as that is the closest to the cursor
-if(hoveredDropContainers.length>0){foundDropContainer=hoveredDropContainers[0];this.onHoverDropContainer(foundDropContainer);} // Make sure to trigger the leave event on any other drop containers, if they were previously hovered
-for(var i=0;i<DragDrop.currentDropContainers.length;i++){var dropContainer=DragDrop.currentDropContainers[i];if(dropContainer!=foundDropContainer&&dropContainer.dataset.dragdropHovering){this.onLeaveDropContainer(dropContainer,e);}}} /**
+if(typeof this.config.onDrag==='function'){this.config.onDrag(this);}} /**
      * Event: On release drag handle
      *
      * @param {Event} e
      */},{key:"onReleaseDragHandle",value:function onReleaseDragHandle(e){e.preventDefault();e.stopPropagation();DragDrop.current=null; // Remove pointer events
-this.off(document,'mousemove',dragHandler);this.off(document,'mouseup',releaseHandler); // Grab hovered drop container
-var hoveredDropContainer=document.querySelector('*[data-dragdrop-drop-container="true"][data-dragdrop-hovering="true"]'); // Remove drop container events
-for(var i=0;i<DragDrop.currentDropContainers.length;i++){var dropContainer=DragDrop.currentDropContainers[i];delete dropContainer.dataset.dragdropDropContainer;delete dropContainer.dataset.dragdropHovering;} // Get placeholder
+this.off(document,'mousemove',dragHandler);this.off(document,'mouseup',releaseHandler); // Remove drop container events
+for(var i=0;i<DragDrop.currentDropContainers.length;i++){var dropContainer=DragDrop.currentDropContainers[i];delete dropContainer.dataset.dragdropHovering;this.off(dropContainer,'mousemove',hoverDropContainerHandler);this.off(dropContainer,'mouseleave',leaveDropContainerHandler);;} // Get placeholder
 var placeholder=document.getElementById('dragdrop-placeholder'); // Set new parent
 placeholder.parentElement.insertBefore(this.element,placeholder); // Remove placeholder
 placeholder.parentElement.removeChild(placeholder); // Remove temporary styling
 document.body.removeAttribute('style');this.element.removeAttribute('style'); // Add back the grab cursor style
 this.element.style.cursor='grab'; // Remove cached variables
 this.pointerOffset=null;this.previousParent=null;this.dragHandler=null; // Fire end drag event
-if(typeof this.config.onEndDrag==='function'){this.config.onEndDrag(this,hoveredDropContainer);}} /**
+if(typeof this.config.onEndDrag==='function'){this.config.onEndDrag(this);}} /**
      * Event: Hover drop container
      *
      * @param {HTMLElement} dropContainer
      * @param {Event} e
-     */},{key:"onHoverDropContainer",value:function onHoverDropContainer(dropContainer,e){dropContainer.dataset.dragdropHovering=true;var elementRect=this.element.getBoundingClientRect();var placeholder=document.getElementById('dragdrop-placeholder');var childNodes=dropContainer.querySelectorAll('*[data-dragdrop-enabled="true"]');if(dropContainer.dataset.dragdropUnsorted){ // Do nothing so far
-}else if(childNodes.length<1){dropContainer.appendChild(placeholder);}else {for(var i=0;i<childNodes.length;i++){var child=childNodes[i];var childRect=child.getBoundingClientRect(); // If we're dropping onto a new parent drop container,
-// set pointer events of children to none,
-// so they don't interfere with drop container selection
-if(dropContainer!=this.previousParent){child.style.pointerEvents='none';}childRect.center=childRect.left+childRect.width/2;childRect.middle=childRect.top+childRect.height/2;if(this.config.lockX){if(elementRect.top>childRect.top&&elementRect.top<childRect.bottom){child.parentElement.insertBefore(placeholder,child.nextSibling);break;}else if(elementRect.top<childRect.top&&elementRect.bottom>childRect.top){child.parentElement.insertBefore(placeholder,child);break;}}else if(this.config.lockY){if(elementRect.left>childRect.left&&elementRect.left<childRect.right){child.parentElement.insertBefore(placeholder,child.nextSibling);break;}else if(elementRect.left<childRect.left&&elementRect.right>childRect.left){child.parentElement.insertBefore(placeholder,child);break;}}else {if(DragDrop.intersectsRect(elementRect,childRect)&&child.nextSibling){child.parentElement.insertBefore(placeholder,child.nextSibling);break;}}}}} /**
+     */},{key:"onHoverDropContainer",value:function onHoverDropContainer(dropContainer,e){dropContainer.dataset.dragdropHovering=true;function intersectRect(r1,r2){return r1.left<r2.right&&r1.right>r2.left&&r1.top<r2.bottom&&r1.bottom>r2.top;}var elementRect=this.element.getBoundingClientRect();var placeholder=document.getElementById('dragdrop-placeholder');var childNodes=dropContainer.querySelectorAll('*[data-dragdrop-enabled="true"]');for(var i=0;i<childNodes.length;i++){var child=childNodes[i];var childRect=child.getBoundingClientRect();childRect.center=childRect.left+childRect.width/2;childRect.middle=childRect.top+childRect.height/2;if(this.config.lockX){if(elementRect.top>childRect.top&&elementRect.top<childRect.bottom){dropContainer.insertBefore(placeholder,child.nextSibling);break;}else if(elementRect.top<childRect.top&&elementRect.bottom>childRect.top){dropContainer.insertBefore(placeholder,child);break;}}else if(this.config.lockY){if(elementRect.left>childRect.left&&elementRect.left<childRect.right){dropContainer.insertBefore(placeholder,child.nextSibling);break;}else if(elementRect.left<childRect.left&&elementRect.right>childRect.left){dropContainer.insertBefore(placeholder,child);break;}}else {if(intersectRect(elementRect,childRect)){dropContainer.insertBefore(placeholder,child.nextSibling);break;}}}} /**
      * Event: Leave drop container
      *
      * @param {HTMLElement} dropContainer
      * @param {Event} e
-     */},{key:"onLeaveDropContainer",value:function onLeaveDropContainer(dropContainer,e){dropContainer.removeAttribute('data-dragdrop-hovering');var childNodes=dropContainer.querySelectorAll('*[data-dragdrop-enabled="true"]');for(var i=0;i<childNodes.length;i++){var child=childNodes[i]; //  Remove custom pointer events style
-child.style.pointerEvents=null;}}}]);return DragDrop;}();window.DragDrop=DragDrop;if(typeof jQuery!=='undefined'){jQuery.fn.extend({exodragdrop:function exodragdrop(config){return this.each(function(){if(config=='destroy'){DragDrop.destroy(this);}else {new DragDrop(this,config);}});}});}},{}],4:[function(require,module,exports){'use strict';var FunctionTemplating={}; /**
+     */},{key:"onLeaveDropContainer",value:function onLeaveDropContainer(dropContainer,e){dropContainer.dataset.dragdropHovering=true;}}]);return DragDrop;}();window.DragDrop=DragDrop;if(typeof jQuery!=='undefined'){jQuery.fn.extend({exodragdrop:function exodragdrop(config){return this.each(function(){if(config=='destroy'){DragDrop.destroy(this);}else {new DragDrop(this,config);}});}});}},{}],4:[function(require,module,exports){'use strict';var FunctionTemplating={}; /**
  * Appends content to an element
  *
  * @param {HTMLElement} element
@@ -382,9 +350,9 @@ route.url=url;var counter=1;var _iteratorNormalCompletion3=true;var _didIterator
      * Gets the name of this View
      */_createClass(View,[{key:"getName",value:function getName(){var name=this.constructor.toString();name=name.substring('function '.length);name=name.substring(0,name.indexOf('('));return name;} /**
      * Init
-     */},{key:"init",value:function init(){var _this3=this;this.prerender();this.render();this.postrender(); // jQuery
-if(typeof jQuery!=='undefined'&&this.$element){this.element=this.$element[0];this.$element.on('remove',function(){_this3.remove();}); // Native JavaScript
-}else if(this.element){this.addEventListener('DOMNodeRemoved',function(){_this3.remove();});}this.trigger('ready',this);this.isReady=true;} /**
+     */},{key:"init",value:function init(){var _this2=this;this.prerender();this.render();this.postrender(); // jQuery
+if(typeof jQuery!=='undefined'&&this.$element){this.element=this.$element[0];this.$element.on('remove',function(){_this2.remove();}); // Native JavaScript
+}else if(this.element){this.addEventListener('DOMNodeRemoved',function(){_this2.remove();});}this.trigger('ready',this);this.isReady=true;} /**
      * Shorthand for .on('ready')
      */},{key:"ready",value:function ready(callback){if(this.isReady){callback(this);}else {this.on('ready',callback);}} /**
      * Adopts values
@@ -400,9 +368,9 @@ if(typeof jQuery!=='undefined'){if(this.$element){this.$element.html(output.chil
      * Runs after render
      */},{key:"postrender",value:function postrender(){} /**
      * Removes the view from DOM and memory
-     */},{key:"remove",value:function remove(timeout){var _this4=this;if(!this.destroyed){this.destroyed=true;setTimeout(function(){_this4.trigger('remove'); // jQuery
-if(typeof jQuery!=='undefined'&&_this4.$element&&_this4.$element.length>0){_this4.$element.remove(); // Native JavaScript
-}else if(_this4.element){_this4.element.parentElement.removeChild(_this4.element);}delete instances[_this4.guid];},timeout||0);}} /**
+     */},{key:"remove",value:function remove(timeout){var _this3=this;if(!this.destroyed){this.destroyed=true;setTimeout(function(){_this3.trigger('remove'); // jQuery
+if(typeof jQuery!=='undefined'&&_this3.$element&&_this3.$element.length>0){_this3.$element.remove(); // Native JavaScript
+}else if(_this3.element){_this3.element.parentElement.removeChild(_this3.element);}instances.splice(_this3.guid,1);},timeout||0);}} /**
      * Call an event (for internal use)
      */},{key:"call",value:function call(callback,data,ui){callback(data,ui,this);} /**
      * Trigger an event
@@ -673,27 +641,27 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * @param {String} param
      *
      * @returns {Promise} promise
-     */},{key:"delete",value:function _delete(url,param){var _this6=this;return new Promise(function(reseolve,reject){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+_this6.getApiTokenString(),type:'DELETE',cache:false,success:function success(result){resolve(result);},error:function error(e){_this6.error(e);reject(e);}});});} /**
+     */},{key:"delete",value:function _delete(url,param){var _this5=this;return new Promise(function(reseolve,reject){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+_this5.getApiTokenString(),type:'DELETE',cache:false,success:function success(result){resolve(result);},error:function error(e){_this5.error(e);reject(e);}});});} /**
      * PATCH method
      *
      * @param {String} url
      * @param {Object} data
      *
      * @returns {Promise} promise
-     */},{key:"patch",value:function patch(url,data){var _this7=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this7.getApiTokenString(),type:'PATCH',data:data,cache:false,success:function success(result){resolve(result);},error:function error(e){_this7.error(e);reject(e);}});});} /**
+     */},{key:"patch",value:function patch(url,data){var _this6=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this6.getApiTokenString(),type:'PATCH',data:data,cache:false,success:function success(result){resolve(result);},error:function error(e){_this6.error(e);reject(e);}});});} /**
      * POST method
      *
      * @param {String} url
      * @param {Object} data
      *
      * @returns {Promise} promise
-     */},{key:"post",value:function post(url,data){var _this8=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this8.getApiTokenString(),type:'POST',data:data,cache:false,success:function success(result){resolve(result);},error:function error(e){_this8.error(e);reject(e);}});});} /**
+     */},{key:"post",value:function post(url,data){var _this7=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this7.getApiTokenString(),type:'POST',data:data,cache:false,success:function success(result){resolve(result);},error:function error(e){_this7.error(e);reject(e);}});});} /**
      * PUT method
      *
      * @param {String} url
      *
      * @returns {Promise} promise
-     */},{key:"put",value:function put(url){var _this9=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this9.getApiTokenString(),type:'PUT',cache:false,success:function success(result){resolve(result);},error:function error(e){_this9.error(e);reject(e);}});});} /**
+     */},{key:"put",value:function put(url){var _this8=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this8.getApiTokenString(),type:'PUT',cache:false,success:function success(result){resolve(result);},error:function error(e){_this8.error(e);reject(e);}});});} /**
      * Error message
      *
      * @param {Object} error
@@ -710,50 +678,50 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * Gets the currently logged in user object
      *
      * @returns {Promise} promise
-     */},{key:"getUser",value:function getUser(){var _this10=this;return new Promise(function(resolve,reject){_this10.get('/user').then(function(gitHubUser){if(Array.isArray(gitHubUser)){gitHubUser=gitHubUser[0];}var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};resolve(user);}).catch(function(e){if(_this10.isSpectating()){resolve({name:'',avatar:''});}else {reject(e);}});});} // ----------
+     */},{key:"getUser",value:function getUser(){var _this9=this;return new Promise(function(resolve,reject){_this9.get('/user').then(function(gitHubUser){if(Array.isArray(gitHubUser)){gitHubUser=gitHubUser[0];}var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};resolve(user);}).catch(function(e){if(_this9.isSpectating()){resolve({name:'',avatar:''});}else {reject(e);}});});} // ----------
 // Resource getters
 // ----------
 /**
      * Gets projects
      *
      * @returns {Promise} promise
-     */},{key:"getProjects",value:function getProjects(){var _this11=this;return new Promise(function(resolve,reject){_this11.get('/users/'+_this11.getUserName()+'/repos').then(function(repos){_this11.processProjects(repos);resolve();}).catch(reject);});} /**
+     */},{key:"getProjects",value:function getProjects(){var _this10=this;return new Promise(function(resolve,reject){_this10.get('/users/'+_this10.getUserName()+'/repos').then(function(repos){_this10.processProjects(repos);resolve();}).catch(reject);});} /**
      * Gets collaborators
      *
      * @returns {Promise} promise
-     */},{key:"getCollaborators",value:function getCollaborators(){var _this12=this;return new Promise(function(resolve,reject){_this12.get('/repos/'+_this12.getUserName()+'/'+_this12.getProjectName()+'/collaborators').then(function(collaborators){_this12.processCollaborators(collaborators);resolve();}).catch(function(e){if(_this12.isSpectating()){resolve([]);}else {reject(e);}});});} /**
+     */},{key:"getCollaborators",value:function getCollaborators(){var _this11=this;return new Promise(function(resolve,reject){_this11.get('/repos/'+_this11.getUserName()+'/'+_this11.getProjectName()+'/collaborators').then(function(collaborators){_this11.processCollaborators(collaborators);resolve();}).catch(function(e){if(_this11.isSpectating()){resolve([]);}else {reject(e);}});});} /**
      * Gets issues
      *
      * @returns {Promise} promise
-     */},{key:"getIssues",value:function getIssues(){var _this13=this;return new Promise(function(callback){_this13.get('/repos/'+_this13.getUserName()+'/'+_this13.getProjectName()+'/issues','state=all',true).then(function(issues){_this13.processIssues(issues);callback();});});} /**
+     */},{key:"getIssues",value:function getIssues(){var _this12=this;return new Promise(function(callback){_this12.get('/repos/'+_this12.getUserName()+'/'+_this12.getProjectName()+'/issues','state=all',true).then(function(issues){_this12.processIssues(issues);callback();});});} /**
      * Gets labels and caches them
      *
      * @returns {Promise} promise
-     */},{key:"getLabels",value:function getLabels(){var _this14=this;return new Promise(function(callback){if(!labelCache){_this14.get('/repos/'+_this14.getUserName()+'/'+_this14.getProjectName()+'/labels').then(function(labels){labelCache=labels;callback(labelCache);});}else {callback(labelCache);}});} /**
+     */},{key:"getLabels",value:function getLabels(){var _this13=this;return new Promise(function(callback){if(!labelCache){_this13.get('/repos/'+_this13.getUserName()+'/'+_this13.getProjectName()+'/labels').then(function(labels){labelCache=labels;callback(labelCache);});}else {callback(labelCache);}});} /**
      * Gets issue types
      *
      * @returns {Promise} promise
-     */},{key:"getIssueTypes",value:function getIssueTypes(){var _this15=this;return new Promise(function(callback){_this15.getLabels().then(function(labels){_this15.processIssueTypes(labels);callback();});});} /**
+     */},{key:"getIssueTypes",value:function getIssueTypes(){var _this14=this;return new Promise(function(callback){_this14.getLabels().then(function(labels){_this14.processIssueTypes(labels);callback();});});} /**
      * Gets issue columns
      *
      * @returns {Promise} promise
-     */},{key:"getIssueColumns",value:function getIssueColumns(){var _this16=this;return new Promise(function(callback){_this16.getLabels().then(function(labels){_this16.processIssueColumns(labels);callback();});});} /**
+     */},{key:"getIssueColumns",value:function getIssueColumns(){var _this15=this;return new Promise(function(callback){_this15.getLabels().then(function(labels){_this15.processIssueColumns(labels);callback();});});} /**
      * Gets issue priorities
      *
      * @returns {Promise} promise
-     */},{key:"getIssuePriorities",value:function getIssuePriorities(){var _this17=this;return new Promise(function(callback){_this17.getLabels().then(function(labels){_this17.processIssuePriorities(labels);callback();});});} /**
+     */},{key:"getIssuePriorities",value:function getIssuePriorities(){var _this16=this;return new Promise(function(callback){_this16.getLabels().then(function(labels){_this16.processIssuePriorities(labels);callback();});});} /**
      * Gets issue estimates
      *
      * @returns {Promise} promise
-     */},{key:"getIssueEstimates",value:function getIssueEstimates(){var _this18=this;return new Promise(function(callback){_this18.getLabels().then(function(labels){_this18.processIssueEstimates(labels);callback();});});} /**
+     */},{key:"getIssueEstimates",value:function getIssueEstimates(){var _this17=this;return new Promise(function(callback){_this17.getLabels().then(function(labels){_this17.processIssueEstimates(labels);callback();});});} /**
      * Gets versions
      *
      * @returns {Promise} promise
-     */},{key:"getVersions",value:function getVersions(){var _this19=this;return new Promise(function(callback){_this19.getLabels().then(function(labels){_this19.processVersions(labels);callback();});});} /**
+     */},{key:"getVersions",value:function getVersions(){var _this18=this;return new Promise(function(callback){_this18.getLabels().then(function(labels){_this18.processVersions(labels);callback();});});} /**
      * Gets milestones
      *
      * @returns {Promise} promise
-     */},{key:"getMilestones",value:function getMilestones(){var _this20=this;return new Promise(function(callback){_this20.get('/repos/'+_this20.getUserName()+'/'+_this20.getProjectName()+'/milestones').then(function(milestones){_this20.processMilestones(milestones);callback();});});} // ----------
+     */},{key:"getMilestones",value:function getMilestones(){var _this19=this;return new Promise(function(callback){_this19.get('/repos/'+_this19.getUserName()+'/'+_this19.getProjectName()+'/milestones').then(function(milestones){_this19.processMilestones(milestones);callback();});});} // ----------
 // Resource adders
 // ----------
 /**
@@ -762,49 +730,49 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * @param {Object} issue
      *
      * @returns {Promise} promise
-     */},{key:"addIssue",value:function addIssue(issue){var _this21=this;return new Promise(function(callback){_this21.post('/repos/'+_this21.getUserName()+'/'+_this21.getProjectName()+'/issues',_this21.convertIssue(issue)).then(function(){callback(issue);});});} /**
+     */},{key:"addIssue",value:function addIssue(issue){var _this20=this;return new Promise(function(callback){_this20.post('/repos/'+_this20.getUserName()+'/'+_this20.getProjectName()+'/issues',_this20.convertIssue(issue)).then(function(){callback(issue);});});} /**
      * Adds collaborator
      *
      * @param {String} collaborator
      *
      * @returns {Promise} promise
-     */},{key:"addCollaborator",value:function addCollaborator(collaborator){var _this22=this;return new Promise(function(callback){_this22.put('/repos/'+_this22.getUserName()+'/'+_this22.getProjectName()+'/collaborators/'+collaborator).then(function(){callback();});});} /**
+     */},{key:"addCollaborator",value:function addCollaborator(collaborator){var _this21=this;return new Promise(function(callback){_this21.put('/repos/'+_this21.getUserName()+'/'+_this21.getProjectName()+'/collaborators/'+collaborator).then(function(){callback();});});} /**
      * Adds issue type
      *
      * @param {String} type
      *
      * @returns {Promise} promise
-     */},{key:"addIssueType",value:function addIssueType(type){var _this23=this;return new Promise(function(callback){_this23.post('/repos/'+_this23.getUserName()+'/'+_this23.getProjectName()+'/labels',{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssueType",value:function addIssueType(type){var _this22=this;return new Promise(function(callback){_this22.post('/repos/'+_this22.getUserName()+'/'+_this22.getProjectName()+'/labels',{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds issue priority
      *
      * @param {String} priority
      *
      * @returns {Promise} promise
-     */},{key:"addIssuePriority",value:function addIssuePriority(priority){var _this24=this;return new Promise(function(callback){_this24.post('/repos/'+_this24.getUserName()+'/'+_this24.getProjectName()+'/labels',{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssuePriority",value:function addIssuePriority(priority){var _this23=this;return new Promise(function(callback){_this23.post('/repos/'+_this23.getUserName()+'/'+_this23.getProjectName()+'/labels',{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds issue estimate
      *
      * @param {String} estimate
      *
      * @returns {Promise} promise
-     */},{key:"addIssueEstimate",value:function addIssueEstimate(estimate){var _this25=this;return new Promise(function(callback){_this25.post('/repos/'+_this25.getUserName()+'/'+_this25.getProjectName()+'/labels',{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssueEstimate",value:function addIssueEstimate(estimate){var _this24=this;return new Promise(function(callback){_this24.post('/repos/'+_this24.getUserName()+'/'+_this24.getProjectName()+'/labels',{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds issue column
      *
      * @param {String} column
      *
      * @returns {Promise} promise
-     */},{key:"addIssueColumn",value:function addIssueColumn(column){var _this26=this;return new Promise(function(callback){_this26.post('/repos/'+_this26.getUserName()+'/'+_this26.getProjectName()+'/labels',{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssueColumn",value:function addIssueColumn(column){var _this25=this;return new Promise(function(callback){_this25.post('/repos/'+_this25.getUserName()+'/'+_this25.getProjectName()+'/labels',{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds milestone 
      *
      * @param {Object} milestone
      *
      * @returns {Promise} promise
-     */},{key:"addMilestone",value:function addMilestone(milestone){var _this27=this;return new Promise(function(callback){_this27.post('/repos/'+_this27.getUserName()+'/'+_this27.getProjectName()+'/milestones',_this27.convertMilestone(milestone)).then(function(){callback();});});} /**
+     */},{key:"addMilestone",value:function addMilestone(milestone){var _this26=this;return new Promise(function(callback){_this26.post('/repos/'+_this26.getUserName()+'/'+_this26.getProjectName()+'/milestones',_this26.convertMilestone(milestone)).then(function(){callback();});});} /**
      * Adds version
      *
      * @param {String} version
      *
      * @returns {Promise} promise
-     */},{key:"addVersion",value:function addVersion(version){var _this28=this;return new Promise(function(callback){_this28.post('/repos/'+_this28.getUserName()+'/'+_this28.getProjectName()+'/labels',{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
+     */},{key:"addVersion",value:function addVersion(version){var _this27=this;return new Promise(function(callback){_this27.post('/repos/'+_this27.getUserName()+'/'+_this27.getProjectName()+'/labels',{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
 // Resource removers
 // ----------
 /**
@@ -813,91 +781,91 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeCollaborator",value:function removeCollaborator(index){var _this29=this;return new Promise(function(callback){_this29.delete('/repos/'+_this29.getUserName()+'/'+_this29.getProjectName()+'/collaborators/'+window.resources.collaborators[index]).then(function(){callback();});});} /**
+     */},{key:"removeCollaborator",value:function removeCollaborator(index){var _this28=this;return new Promise(function(callback){_this28.delete('/repos/'+_this28.getUserName()+'/'+_this28.getProjectName()+'/collaborators/'+window.resources.collaborators[index]).then(function(){callback();});});} /**
      * Removes issue type
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssueType",value:function removeIssueType(index){var _this30=this;return new Promise(function(callback){_this30.delete('/repos/'+_this30.getUserName()+'/'+_this30.getProjectName()+'/labels/type:'+window.resources.issueTypes[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssueType",value:function removeIssueType(index){var _this29=this;return new Promise(function(callback){_this29.delete('/repos/'+_this29.getUserName()+'/'+_this29.getProjectName()+'/labels/type:'+window.resources.issueTypes[index]).then(function(){callback();});});} /**
      * Removes issue priority
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssuePriority",value:function removeIssuePriority(index){var _this31=this;return new Promise(function(callback){_this31.delete('/repos/'+_this31.getUserName()+'/'+_this31.getProjectName()+'/labels/priority:'+window.resources.issuePriorities[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssuePriority",value:function removeIssuePriority(index){var _this30=this;return new Promise(function(callback){_this30.delete('/repos/'+_this30.getUserName()+'/'+_this30.getProjectName()+'/labels/priority:'+window.resources.issuePriorities[index]).then(function(){callback();});});} /**
      * Removes issue estimate
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssueEstimate",value:function removeIssueEstimate(index){var _this32=this;return new Promise(function(callback){_this32.delete('/repos/'+_this32.getUserName()+'/'+_this32.getProjectName()+'/labels/estimate:'+window.resources.issueEstimates[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssueEstimate",value:function removeIssueEstimate(index){var _this31=this;return new Promise(function(callback){_this31.delete('/repos/'+_this31.getUserName()+'/'+_this31.getProjectName()+'/labels/estimate:'+window.resources.issueEstimates[index]).then(function(){callback();});});} /**
      * Removes issue column
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssueColumn",value:function removeIssueColumn(index){var _this33=this;return new Promise(function(callback){_this33.delete('/repos/'+_this33.getUserName()+'/'+_this33.getProjectName()+'/labels/column:'+window.resources.issueColumns[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssueColumn",value:function removeIssueColumn(index){var _this32=this;return new Promise(function(callback){_this32.delete('/repos/'+_this32.getUserName()+'/'+_this32.getProjectName()+'/labels/column:'+window.resources.issueColumns[index]).then(function(){callback();});});} /**
      * Removes milestone 
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeMilestone",value:function removeMilestone(index){var _this34=this;return new Promise(function(callback){_this34.delete('/repos/'+_this34.getUserName()+'/'+_this34.getProjectName()+'/milestones/'+(parseInt(index)+1)).then(function(){callback();});});} /**
+     */},{key:"removeMilestone",value:function removeMilestone(index){var _this33=this;return new Promise(function(callback){_this33.delete('/repos/'+_this33.getUserName()+'/'+_this33.getProjectName()+'/milestones/'+(parseInt(index)+1)).then(function(){callback();});});} /**
      * Removes version
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeVersion",value:function removeVersion(index){var _this35=this;return new Promise(function(callback){_this35.delete('/repos/'+_this35.getUserName()+'/'+_this35.getProjectName()+'/labels/version:'+window.resources.versions[index]).then(function(){callback();});});} // ----------
+     */},{key:"removeVersion",value:function removeVersion(index){var _this34=this;return new Promise(function(callback){_this34.delete('/repos/'+_this34.getUserName()+'/'+_this34.getProjectName()+'/labels/version:'+window.resources.versions[index]).then(function(){callback();});});} // ----------
 // Resource updaters
 // ----------
 /**
      * Update issue
      *
      * @param {Object} issue
-     */},{key:"updateIssue",value:function updateIssue(issue){var _this36=this;return new Promise(function(callback){_this36.patch('/repos/'+_this36.getUserName()+'/'+_this36.getProjectName()+'/issues/'+(issue.index+1),_this36.convertIssue(issue)).then(function(){callback();});});} /**
+     */},{key:"updateIssue",value:function updateIssue(issue){var _this35=this;return new Promise(function(callback){_this35.patch('/repos/'+_this35.getUserName()+'/'+_this35.getProjectName()+'/issues/'+(issue.index+1),_this35.convertIssue(issue)).then(function(){callback();});});} /**
      * Updates milestone 
      *
      * @param {Object} milestone
      *
      * @returns {Promise} promise
-     */},{key:"updateMilestone",value:function updateMilestone(milestone){var _this37=this;return new Promise(function(callback){_this37.patch('/repos/'+_this37.getUserName()+'/'+_this37.getProjectName()+'/milestones/'+(parseInt(milestone.index)+1),_this37.convertMilestone(milestone)).then(function(){callback();});});} /**
+     */},{key:"updateMilestone",value:function updateMilestone(milestone){var _this36=this;return new Promise(function(callback){_this36.patch('/repos/'+_this36.getUserName()+'/'+_this36.getProjectName()+'/milestones/'+(parseInt(milestone.index)+1),_this36.convertMilestone(milestone)).then(function(){callback();});});} /**
      * Updates issue type
      *
      * @param {String} type
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssueType",value:function updateIssueType(type,previousName){var _this38=this;return new Promise(function(callback){_this38.patch('/repos/'+_this38.getUserName()+'/'+_this38.getProjectName()+'/labels/type:'+previousName,{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssueType",value:function updateIssueType(type,previousName){var _this37=this;return new Promise(function(callback){_this37.patch('/repos/'+_this37.getUserName()+'/'+_this37.getProjectName()+'/labels/type:'+previousName,{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates issue priority
      *
      * @param {String} priority
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssuePriority",value:function updateIssuePriority(priority,previousName){var _this39=this;return new Promise(function(callback){_this39.patch('/repos/'+_this39.getUserName()+'/'+_this39.getProjectName()+'/labels/priority:'+previousName,{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssuePriority",value:function updateIssuePriority(priority,previousName){var _this38=this;return new Promise(function(callback){_this38.patch('/repos/'+_this38.getUserName()+'/'+_this38.getProjectName()+'/labels/priority:'+previousName,{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates issue estimate
      *
      * @param {String} estimate
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssueEstimate",value:function updateIssueEstimate(estimate,previousName){var _this40=this;return new Promise(function(callback){_this40.patch('/repos/'+_this40.getUserName()+'/'+_this40.getProjectName()+'/labels/estimate:'+previousName,{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssueEstimate",value:function updateIssueEstimate(estimate,previousName){var _this39=this;return new Promise(function(callback){_this39.patch('/repos/'+_this39.getUserName()+'/'+_this39.getProjectName()+'/labels/estimate:'+previousName,{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates issue column
      *
      * @param {String} column
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssueColumn",value:function updateIssueColumn(column,previousName){var _this41=this;return new Promise(function(callback){_this41.patch('/repos/'+_this41.getUserName()+'/'+_this41.getProjectName()+'/labels/column:'+previousName,{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssueColumn",value:function updateIssueColumn(column,previousName){var _this40=this;return new Promise(function(callback){_this40.patch('/repos/'+_this40.getUserName()+'/'+_this40.getProjectName()+'/labels/column:'+previousName,{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates version
      *
      * @param {String} version
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateVersion",value:function updateVersion(version,previousName){var _this42=this;return new Promise(function(callback){_this42.patch('/repos/'+_this42.getUserName()+'/'+_this42.getProjectName()+'/labels/version:'+previousName,{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
+     */},{key:"updateVersion",value:function updateVersion(version,previousName){var _this41=this;return new Promise(function(callback){_this41.patch('/repos/'+_this41.getUserName()+'/'+_this41.getProjectName()+'/labels/version:'+previousName,{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
 // Resource processing methods
 // ----------
 /**
@@ -959,18 +927,18 @@ if(issueColumn&&issueColumn!='to do'&&issueColumn!='done'){gitHubIssue.labels.pu
      *
      * @param {Issue} issue
      * @param {String} text
-     */},{key:"addIssueComment",value:function addIssueComment(issue,text){var _this43=this;return new Promise(function(callback){_this43.post('/repos/'+_this43.getUserName()+'/'+_this43.getProjectName()+'/issues/'+(issue.index+1)+'/comments',{body:text}).then(function(){callback();});});} /**
+     */},{key:"addIssueComment",value:function addIssueComment(issue,text){var _this42=this;return new Promise(function(callback){_this42.post('/repos/'+_this42.getUserName()+'/'+_this42.getProjectName()+'/issues/'+(issue.index+1)+'/comments',{body:text}).then(function(){callback();});});} /**
      * Update issue comment
      *
      * @param {Issue} issue
      * @param {Object} comment
-     */},{key:"updateIssueComment",value:function updateIssueComment(issue,comment){var _this44=this;return new Promise(function(callback){_this44.patch('/repos/'+_this44.getUserName()+'/'+_this44.getProjectName()+'/issues/comments/'+comment.index,{body:comment.text}).then(function(){callback();});});} /**
+     */},{key:"updateIssueComment",value:function updateIssueComment(issue,comment){var _this43=this;return new Promise(function(callback){_this43.patch('/repos/'+_this43.getUserName()+'/'+_this43.getProjectName()+'/issues/comments/'+comment.index,{body:comment.text}).then(function(){callback();});});} /**
      * Get issue comments
      *
      * @param {Object} issue
      *
      * @returns {Promise} promise
-     */},{key:"getIssueComments",value:function getIssueComments(issue){var _this45=this;return new Promise(function(callback){_this45.get('/repos/'+_this45.getUserName()+'/'+_this45.getProjectName()+'/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion13=true;var _didIteratorError13=false;var _iteratorError13=undefined;try{for(var _iterator13=gitHubComments[Symbol.iterator](),_step13;!(_iteratorNormalCompletion13=(_step13=_iterator13.next()).done);_iteratorNormalCompletion13=true){var gitHubComment=_step13.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body,index:gitHubComment.id};comments.push(comment);}}catch(err){_didIteratorError13=true;_iteratorError13=err;}finally {try{if(!_iteratorNormalCompletion13&&_iterator13.return){_iterator13.return();}}finally {if(_didIteratorError13){throw _iteratorError13;}}}callback(comments);});});}}]);return GitHubApi;}(ApiHelper);module.exports=GitHubApi;},{"../../../src/client/js/helpers/ApiHelper":15}],14:[function(require,module,exports){'use strict'; // Convert to HTML from markdown
+     */},{key:"getIssueComments",value:function getIssueComments(issue){var _this44=this;return new Promise(function(callback){_this44.get('/repos/'+_this44.getUserName()+'/'+_this44.getProjectName()+'/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion13=true;var _didIteratorError13=false;var _iteratorError13=undefined;try{for(var _iterator13=gitHubComments[Symbol.iterator](),_step13;!(_iteratorNormalCompletion13=(_step13=_iterator13.next()).done);_iteratorNormalCompletion13=true){var gitHubComment=_step13.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body,index:gitHubComment.id};comments.push(comment);}}catch(err){_didIteratorError13=true;_iteratorError13=err;}finally {try{if(!_iteratorNormalCompletion13&&_iterator13.return){_iterator13.return();}}finally {if(_didIteratorError13){throw _iteratorError13;}}}callback(comments);});});}}]);return GitHubApi;}(ApiHelper);module.exports=GitHubApi;},{"../../../src/client/js/helpers/ApiHelper":15}],14:[function(require,module,exports){'use strict'; // Convert to HTML from markdown
 window.markdownToHtml=function(string){if(string){try{var html=marked(string);html=html.replace(/\[ \]/g,'<input type="checkbox" disabled readonly>');html=html.replace(/\[x\]/g,'<input type="checkbox" checked="checked" disabled readonly>');return html;}catch(e){console.log(e);}}}; // Simple date string
 Date.prototype.getSimpleString=function(){return this.getFullYear()+'-'+(this.getMonth()+1)+'-'+this.getDate();}; // Floor date extension
 Date.prototype.floor=function(){this.setHours(0,0,0,0);return this;}; // Get ISO day
@@ -998,9 +966,9 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
      * @returns {String} token
      */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){location='/login';throw new Error('Not logged in');}return localStorage.getItem('token');}} /**
      * Get user name
-     */},{key:"getUserName",value:function getUserName(){var user=Router.params?Router.params.user:null;if(!user){user=localStorage.getItem('user');location.hash='/'+user;}if(!user){location='/login';throw new Error('Not logged in');}else {localStorage.setItem('user',user);return user;}} /**
+     */},{key:"getUserName",value:function getUserName(){var user=Router.params?Router.params.user:null;if(!user){user=localStorage.getItem('user');}if(!user){location='/login';throw new Error('Not logged in');}else {localStorage.setItem('user',user);return user;}} /**
      * Gets project name
-     */},{key:"getProjectName",value:function getProjectName(){var project=Router.params?Router.params.project:null;if(!project){project=localStorage.getItem('project');resources={};location.hash='/'+this.getUserName()+'/'+project+'/board/kanban';}if(!project){project=prompt('Please input project name');resources={};location.hash='/'+this.getUserName()+'/'+project+'/board/kanban';}localStorage.setItem('project',project);return project;} /**
+     */},{key:"getProjectName",value:function getProjectName(){return Router.params?Router.params.project:null;} /**
      * Resets the API token and reloads
      */},{key:"resetApiToken",value:function resetApiToken(){localStorage.setItem('token','');this.getApiToken();} /**
      * Logs out the currently logged in user and reloads

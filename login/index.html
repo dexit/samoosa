@@ -31,6 +31,9 @@
                         <label for="input-token">API token</label>
                         <input id=input-token" type="password" name="token" />
                     </li>
+                    <li>
+                        <a target="_blank" id="link-new-token" href="#">Create new token</a>
+                    </li>
                     <li> 
                         <input type="submit" class="btn" value="Log in"/>
                     </li>
@@ -40,17 +43,43 @@
 
         <script src="../public/lib/jquery/jquery.min.js"></script>
         <script>
-            $('.login-form input:not([type="submit"]), .login-form select').each(function() {
-                $(this).on('change', function() {
+            // Change action
+            function onChangeSource() {
+                var source = $('#input-source').val();
+                var url = '';        
+
+                switch(source) {
+                    case 'github':
+                        url = 'https://github.com/settings/tokens/new';
+                        break;
+
+                    case 'bitbucket':
+                        url = 'https://bitbucket.org/account/user/jeppezapp/oauth-consumers/new';
+                        break;
+                }
+
+                $('#link-new-token').attr('href', url);
+            }
+
+            // Submit action
+            function onSubmit(e) {
+                e.preventDefault();
+                
+                // Update localStorage
+                $('.login-form input:not([type="submit"]), .login-form select').each(function() {
                     localStorage.setItem($(this).attr('name'), $(this).val());
                 });
-            });
-            
-            $('.login-form').on('submit', function(e) {
-                e.preventDefault();
 
+                // Change to default view
                 location = '/#/' + localStorage.getItem('user');
-            });
+            }
+
+            // Event hookups
+            $('.login-form').on('submit', onSubmit);
+            $('#input-source').on('change', onChangeSource);
+
+            // Init
+            onChangeSource();
         </script>
     </body>
 </html>

@@ -131,6 +131,10 @@ ul {
 
     ul {
         li {
+            a {
+                color: $white;
+            }
+
             input[type="password"], input[type="text"] {
                 padding: 0rem 0.75rem;
             }

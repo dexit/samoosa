@@ -40,7 +40,7 @@ class ApiHelper {
             if(!localStorage.getItem('token')) {
                 location = '/login';
 
-                debug.error('Not logged in', this);
+                debug.error('No API token found', this);
             }
 
             return localStorage.getItem('token');
@@ -56,7 +56,7 @@ class ApiHelper {
         if(!user) {
             location = '/login';
 
-            debug.error('Not logged in', this);
+            debug.error('No username found', this);
         
         } else {
             localStorage.setItem('user', user)

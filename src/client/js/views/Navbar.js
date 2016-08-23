@@ -135,6 +135,9 @@ class Navbar extends View {
                         })
                     ) 
                 ]);
+            })
+            .catch((e) => {
+                debug.error(e, this);  
             });
         }, isActive);
     }
@@ -156,6 +159,9 @@ class Navbar extends View {
                         }).$element;
                     })
                 );
+            })
+            .catch((e) => {
+                debug.error(e, this);  
             });
         }, isActive);
     }

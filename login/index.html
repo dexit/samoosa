@@ -32,7 +32,7 @@
                         <input id=input-token" type="text" name="token" />
                     </li>
                     <li>
-                        <a target="_blank" id="link-new-token" href="#">Create new token</a>
+                        <a id="link-new-token" href="#">Create new token</a>
                     </li>
                     <li> 
                         <input type="submit" class="btn" value="Log in"/>
@@ -65,7 +65,7 @@
 
                 switch(source) {
                     case 'github':
-                        url = 'https://github.com/settings/tokens/new';
+                        url = 'https://github.com/login/oauth/authorize?client_id=ae9aad1c2517280c0b3e';
                         break;
 
                     case 'bitbucket':

@@ -167,9 +167,9 @@ class GitHubApi extends ApiHelper {
     error(error) {
         if(error) {
             switch(error.status) {
-                case 401: case 403:
-                    this.resetApiToken();
-                    break;
+                //case 401: case 403:
+                //    this.resetApiToken();
+                //    break;
 
                 default:
                     if(error.responseJSON) {

@@ -665,7 +665,10 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * Error message
      *
      * @param {Object} error
-     */},{key:"error",value:function error(_error){if(_error){switch(_error.status){case 401:case 403:this.resetApiToken();break;default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(_error.statusText);}break;}}} // ----------
+     */},{key:"error",value:function error(_error){if(_error){switch(_error.status){ //case 401: case 403:
+//    this.resetApiToken();
+//    break;
+default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(_error.statusText);}break;}}} // ----------
 // Session methods
 // ----------
 /**

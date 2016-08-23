@@ -20,28 +20,27 @@ class Navbar extends View {
     getLinks() {
         let links = [];
         
-        if(!ApiHelper.isSpectating()) {
-            links.push({
-                url: '/source/',
-                handler: this.toggleSourcePanel,
-                icon: 'user'
-            });
-        }
-    
-        if(!ApiHelper.isSpectating()) {
-            links.push({
-                url: '/projects/',
-                handler: this.toggleProjectsList,
-                icon: 'folder'
-            });
-        }
+        links.push({
+            url: '/',
+            class: 'logo'
+        });
         
-        if(!ApiHelper.isSpectating()) {
-            links.push({
-                url: '/settings/',
-                icon: 'cog'
-            });
-        }
+        links.push({
+            url: '/source/',
+            handler: this.toggleSourcePanel,
+            icon: 'user'
+        });
+    
+        links.push({
+            url: '/projects/',
+            handler: this.toggleProjectsList,
+            icon: 'folder'
+        });
+        
+        links.push({
+            url: '/settings/',
+            icon: 'cog'
+        });
 
         links.push({
             url: '/plan/',
@@ -153,16 +152,12 @@ class Navbar extends View {
      * @returns {String} url
      */
     getFullUrl(url) {
-        let project = Router.params ? Router.params.project : null;
+        if(url == '/') {
+            return url;
+        }
 
         // Prepend project
-        if(url != '/' && url != '/source/' && url != '/projects/') {
-            if(!project) {
-                return null;
-            }
-            
-            url = '/' + project + url;
-        }
+        url = '/' + ApiHelper.getProjectName() + url;
         
         // Prepend user
         url = '/' + ApiHelper.getUserName() + url;
@@ -194,12 +189,10 @@ class Navbar extends View {
      */
     slideIn() {
         if(Router.url) {
-            let url = Router.url
-                .replace('/' + ApiHelper.getProjectName(), '')
-                .replace('/' + ApiHelper.getUserName(), '');
+            let url = Router.url;
 
             this.$element.find('button.active').removeClass('active');
-            this.$element.find('button[data-url="' + url + '"]').toggleClass('active', true);
+            this.$element.find('button[data-url*="' + url + '"]').toggleClass('active', true);
 
             this.$element.toggleClass('out', false);
 

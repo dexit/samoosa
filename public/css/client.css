@@ -688,6 +688,8 @@ body, html {
     transition-delay: 0s; }
   .navbar:not(.out) .buttons button.active .fa {
     color: #212121; }
+  .navbar:not(.out) .buttons button.active.logo {
+    background-image: url("/public/svg/logo-dark.svg"); }
   .navbar:not(.out) .buttons button.active:before {
     width: 100%; }
   .navbar .obscure {
@@ -723,7 +725,12 @@ body, html {
       margin-left: 10px;
       text-align: center;
       position: relative;
-      background-color: transparent; }
+      background-color: transparent;
+      background-size: 30px 30px;
+      background-position: center;
+      background-repeat: no-repeat; }
+      .navbar .buttons button.logo {
+        background-image: url("/public/svg/logo-light.svg"); }
       .navbar .buttons button:before {
         background-color: #fff;
         transition: width 0.05s ease;
@@ -841,7 +848,8 @@ body, html {
         text-transform: capitalize; }
     .plan-container .plan-editor .dates {
       height: calc(100% - 110px);
-      left: 0px; }
+      left: 0px;
+      position: relative; }
       .plan-container .plan-editor .dates .date-placeholder {
         display: block;
         width: calc(100% / 7);

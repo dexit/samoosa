@@ -22,7 +22,8 @@ class Navbar extends View {
         
         links.push({
             url: '/',
-            class: 'logo'
+            class: 'logo',
+            handler: this.toggleAboutPanel
         });
         
         links.push({
@@ -37,6 +38,10 @@ class Navbar extends View {
             icon: 'folder'
         });
         
+        links.push({
+            separator: true
+        });
+
         links.push({
             url: '/settings/',
             icon: 'cog'
@@ -66,30 +71,58 @@ class Navbar extends View {
     cleanUpClasses() {
         this.$element.toggleClass('project-list', false);
         this.$element.toggleClass('source-panel', false);
+        this.$element.toggleClass('about-panel', false);
     }
+   
+    /**
+     * Toggles a panel
+     */
+    togglePanel(url, className, onActive, isActive) {
+        let $button = this.$element.find('.buttons button[data-url="' + url + '"]');
+        let $content = this.$element.find('.obscure .content');
+
+        if(isActive != true && isActive != false) {
+            isActive = !$button.hasClass('active');
+        }
+
+        $content.empty();
+        $button.toggleClass('active');
+
+        this.$element.find('.buttons button.handler').toggleClass('active', false);
+
+        this.$element.toggleClass('out', isActive);
+        this.$element.toggleClass(className, isActive);
+      
+        if(isActive) { 
+            onActive($content);
+        } else {
+            $content.empty();
+        }
+    }
+
+    /**
+     * Toggles the about panel
+     */
+    toggleAboutPanel(isActive) {
+        this.togglePanel('/', 'about-panel', ($content) => {
+            $.get('/README.md', (res) => {
+                $content
+                .append(
+                        markdownToHtml(res) 
+                );
+            });
+        }, isActive);
+    }
+
 
     /**
      * Toggles the source panel
      */
-    toggleSourcePanel() {
-        let $button = this.$element.find('.buttons button[data-url="/projects/"]');
-        let $content = this.$element.find('.obscure .content');
-
-        $button.toggleClass('active');
-
-        let isActive = $button.hasClass('active');
-
-        this.$element.toggleClass('out', isActive);
-        this.$element.toggleClass('source-panel', isActive);
-        $button.children('.fa')
-            .toggleClass('fa-folder-open', isActive)
-            .toggleClass('fa-folder', !isActive);
-      
-        if(isActive) { 
+    toggleSourcePanel(isActive) {
+        this.togglePanel('/source/', 'source-panel', ($content) => {
             ApiHelper.getUser()
             .then((user) => {
                 $content
-                .empty()
                 .append([
                     _.div({class: 'current-user'},
                         _.img({src: user.avatar}),
@@ -102,31 +135,14 @@ class Navbar extends View {
                     ) 
                 ]);
             });
-        } else {
-            $content.empty();
-        }
+        }, isActive);
     }
 
     /**
      * Toggles the projects list
      */
     toggleProjectsList(isActive) {
-        let $button = this.$element.find('.buttons button[data-url="/projects/"]');
-        let $content = this.$element.find('.obscure .content');
-
-        if(isActive != true && isActive != false) {
-            isActive = !$button.hasClass('active');
-        }
-
-        $button.toggleClass('active', isActive);
-
-        this.$element.toggleClass('out', isActive);
-        this.$element.toggleClass('project-list', isActive);
-        $button.children('.fa')
-            .toggleClass('fa-folder-open', isActive)
-            .toggleClass('fa-folder', !isActive);
-      
-        if(isActive) { 
+        this.togglePanel('/projects/', 'project-list', ($content) => {
             ApiHelper.getProjects()
             .then(() => {
                 $content
@@ -139,9 +155,7 @@ class Navbar extends View {
                     })
                 );
             });
-        } else {
-            $content.empty();
-        }
+        }, isActive);
     }
 
     /**
@@ -171,6 +185,9 @@ class Navbar extends View {
      * @param {String} url
      */
     onClickLink(url) {
+        this.cleanUpClasses();
+        this.$element.find('.obscure .content').empty();
+        
         url = this.getFullUrl(url);
         
         if(url && url != Router.url) {
@@ -189,7 +206,9 @@ class Navbar extends View {
      */
     slideIn() {
         if(Router.url) {
-            let url = Router.url;
+            let url = Router.url
+                .replace('/' + ApiHelper.getUserName(), '')
+                .replace('/' + ApiHelper.getProjectName(), '');
 
             this.$element.find('button.active').removeClass('active');
             this.$element.find('button[data-url*="' + url + '"]').toggleClass('active', true);

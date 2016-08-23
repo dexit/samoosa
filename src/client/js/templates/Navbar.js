@@ -7,26 +7,36 @@ module.exports = function Navbar() {
         ),
         _.div({class: 'buttons'},
             _.each(this.getLinks(), (i, link) => {
-                let isActive = Router.url.indexOf(link.url) > -1;
+                if(link.separator) {
+                    return _.div({class: 'separator'});
 
-                return _.button({'data-url': link.url, class: (link.class || '') + (isActive ? ' active' : '') + (link.bottom ? ' bottom' : '')},
-                    _.if(link.icon,
-                        _.span({class: 'fa fa-' + link.icon})
-                    ),
-                    _.if(link.img,
-                        _.img({src: link.img})
-                    )
-                ).click(() => {
-                    this.cleanUpClasses();
+                } else {
+                    return _.button(
+                        {
+                            'data-url': link.url,
+                            class:
+                                (link.class || '') +
+                                (link.bottom ? ' bottom' : '') +
+                                (link.handler ? ' handler' : '')
+                        },
+                        _.if(link.icon,
+                            _.span({class: 'fa fa-' + link.icon})
+                        ),
+                        _.if(link.img,
+                            _.img({src: link.img})
+                        )
+                    ).click(() => {
+                        this.cleanUpClasses();
 
-                    if(link.handler) {
-                        link.handler.call(this);
+                        if(link.handler) {
+                            link.handler.call(this);
 
-                    } else if(link.url) {
-                        this.onClickLink(link.url);
-                    
-                    }
-                });
+                        } else if(link.url) {
+                            this.onClickLink(link.url);
+                        
+                        }
+                    });
+                }
             })
         )
     );

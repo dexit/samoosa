@@ -674,15 +674,17 @@ body, html {
     background-color: 2px solid #c8e6c9; }
 
 .navbar {
-  width: 70px;
+  width: 60px;
   margin: 0px;
   border-radius: 0px;
   border: 0px;
   background-color: #212121; }
+  .navbar.out.about-panel .obscure {
+    max-width: 50rem; }
   .navbar.out.source-panel .obscure {
-    width: 20rem; }
+    max-width: 20rem; }
   .navbar.out.project-list .obscure {
-    width: 40rem; }
+    max-width: 40rem; }
   .navbar.out .obscure {
     width: 100%;
     transition-delay: 0.05s; }
@@ -692,8 +694,6 @@ body, html {
     transition-delay: 0s; }
   .navbar:not(.out) .buttons button.active .fa {
     color: #212121; }
-  .navbar:not(.out) .buttons button.active.logo {
-    background-image: url("/public/svg/logo-dark.svg"); }
   .navbar:not(.out) .buttons button.active:before {
     width: 100%; }
   .navbar .obscure {
@@ -703,30 +703,34 @@ body, html {
     width: 0px;
     height: 100%;
     background-color: #212121;
-    transition: width 0.25s ease;
+    transition: width 0.25s ease, max-width 0.25s ease;
     transition-delay: 0s;
     z-index: 1000; }
     .navbar .obscure > .content {
+      padding: 15px;
       position: absolute;
       height: 100%;
       top: 0px;
-      left: 70px;
+      left: 60px;
       opacity: 0;
       transition: opacity 0.25s ease;
-      width: calc(100% - 70px);
+      width: calc(100% - 60px);
       overflow-y: auto; }
   .navbar .buttons {
     position: fixed;
     height: 100%;
     z-index: 10001; }
+    .navbar .buttons .separator {
+      height: 1px;
+      width: 100%;
+      margin: 1rem 0rem;
+      background-color: #f5f5f5; }
     .navbar .buttons button {
       border: 0px;
       padding: 0px;
-      margin-top: 5px;
       display: block;
       width: 60px;
       height: 60px;
-      margin-left: 10px;
       text-align: center;
       position: relative;
       background-color: transparent;
@@ -734,7 +738,7 @@ body, html {
       background-position: center;
       background-repeat: no-repeat; }
       .navbar .buttons button.logo {
-        background-image: url("/public/svg/logo-light.svg"); }
+        background-image: url("/public/svg/logo-medium.svg"); }
       .navbar .buttons button:before {
         background-color: #fff;
         transition: width 0.05s ease;
@@ -947,7 +951,7 @@ body > .plan-item-editor {
   border: 1px solid #e0e0e0;
   border-radius: 2px;
   box-shadow: 0px 5px 5px -5px rgba(0, 0, 0, 0.5);
-  margin: 15px;
+  margin-bottom: 15px;
   background-color: #fff;
   cursor: pointer; }
   .project-editor:hover {

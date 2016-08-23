@@ -3,33 +3,20 @@
 // Root
 Router.route('/', () => {
     setTimeout(() => {
-        $('.workspace').remove();
-
-        $.get('/README.md', (res) => {
-            $('.app-container').append(
-                _.div({class: 'workspace readme-container'},
-                    markdownToHtml(res) 
-                )
-            );
-        });
-
-        navbar.slideIn();
+        navbar.toggleAboutPanel(true);
     }, 10);
 });
 
 // User
 Router.route('/:user', () => {
     setTimeout(() => {
-        $('.workspace').remove();
-
-        $('.app-container').append(
-            _.div({class: 'workspace user-container'},
-                _.h1(this.user)
-            )
-        );
-
         navbar.toggleProjectsList(true);
     }, 10);
+});
+
+// Project
+Router.route('/:user/:project', () => {
+    location.hash = '/' + Router.params.user + '/' + Router.params.project + '/board/kanban';
 });
 
 // Plan

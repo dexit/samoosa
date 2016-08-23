@@ -40,7 +40,7 @@ class ApiHelper {
             if(!localStorage.getItem('token')) {
                 location = '/login';
 
-                throw new Error('Not logged in');
+                debug.error('Not logged in', this);
             }
 
             return localStorage.getItem('token');

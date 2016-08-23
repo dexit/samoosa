@@ -964,7 +964,7 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
      * Gets the API token and prompts for one if needed
      * 
      * @returns {String} token
-     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){location='/login';throw new Error('Not logged in');}return localStorage.getItem('token');}} /**
+     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){location='/login';debug.error('Not logged in',this);}return localStorage.getItem('token');}} /**
      * Get user name
      */},{key:"getUserName",value:function getUserName(){var user=Router.params&&Router.params.user?Router.params.user:localStorage.getItem('user');;if(!user){location='/login';debug.error('Not logged in',this);}else {localStorage.setItem('user',user);return user;}} /**
      * Gets project name

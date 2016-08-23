@@ -1,20 +1,26 @@
 .navbar {
-    width: 70px;
+    width: 60px;
     margin: 0px;
     border-radius: 0px;
     border: 0px;
     background-color: material-color('grey', '900');
 
     &.out {
+        &.about-panel {
+            .obscure {
+                max-width: 50rem;
+            }
+        }
+        
         &.source-panel {
             .obscure {
-                width: 20rem;
+                max-width: 20rem;
             }
         }
 
         &.project-list {
             .obscure {
-                width: 40rem;
+                max-width: 40rem;
             }
         }
         
@@ -44,10 +50,6 @@
                         color: material-color('grey', '900');
                     }
                     
-                    &.logo {
-                        background-image: url('/public/svg/logo-dark.svg');
-                    }
-
                     &:before {
                         width: 100%;
                     }
@@ -63,18 +65,19 @@
         width: 0px;
         height: 100%;
         background-color: material-color('grey', '900');
-        transition: width 0.25s ease;
+        transition: width 0.25s ease, max-width 0.25s ease;
         transition-delay: 0s;
         z-index: 1000;
 
         >.content {
+            padding: 15px;
             position: absolute;
             height: 100%;
             top: 0px;
-            left: 70px;
+            left: 60px;
             opacity: 0;
             transition: opacity 0.25s ease;
-            width: calc(100% - 70px);
+            width: calc(100% - 60px);
             overflow-y: auto;
         }
     }
@@ -84,14 +87,19 @@
         height: 100%;
         z-index: 10001;
 
+        .separator {
+            height: 1px;
+            width: 100%;
+            margin: 1rem 0rem;
+            background-color: material-color('grey', '100');
+        }
+
         button {
             border: 0px;
             padding: 0px;
-            margin-top: 5px;
             display: block;
             width: 60px;
             height: 60px;
-            margin-left: 10px;
             text-align: center;
             position: relative;
             background-color: transparent;
@@ -100,7 +108,7 @@
             background-repeat: no-repeat;
 
             &.logo {
-                background-image: url('/public/svg/logo-light.svg');
+                background-image: url('/public/svg/logo-medium.svg');
             }
 
             &:before {

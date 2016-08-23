@@ -291,6 +291,8 @@ ul {
   background-color: #21303B;
   color: #fff;
   padding: 2rem; }
+  .login-form ul li a {
+    color: #fff; }
   .login-form ul li input[type="password"], .login-form ul li input[type="text"] {
     padding: 0rem 0.75rem; }
   .login-form ul li input[type="password"], .login-form ul li input[type="text"], .login-form ul li label {

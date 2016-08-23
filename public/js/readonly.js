@@ -966,9 +966,9 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
      * @returns {String} token
      */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){location='/login';throw new Error('Not logged in');}return localStorage.getItem('token');}} /**
      * Get user name
-     */},{key:"getUserName",value:function getUserName(){var user=Router.params?Router.params.user:null;if(!user){user=localStorage.getItem('user');}if(!user){location='/login';throw new Error('Not logged in');}else {localStorage.setItem('user',user);return user;}} /**
+     */},{key:"getUserName",value:function getUserName(){var user=Router.params&&Router.params.user?Router.params.user:localStorage.getItem('user');;if(!user){location='/login';debug.error('Not logged in',this);}else {localStorage.setItem('user',user);return user;}} /**
      * Gets project name
-     */},{key:"getProjectName",value:function getProjectName(){return Router.params?Router.params.project:null;} /**
+     */},{key:"getProjectName",value:function getProjectName(){var project=Router.params&&Router.params.project?Router.params.project:localStorage.getItem('project');if(!project){debug.error('No project is defined',this);}return project;} /**
      * Resets the API token and reloads
      */},{key:"resetApiToken",value:function resetApiToken(){localStorage.setItem('token','');this.getApiToken();} /**
      * Logs out the currently logged in user and reloads

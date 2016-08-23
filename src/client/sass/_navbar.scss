@@ -44,6 +44,10 @@
                         color: material-color('grey', '900');
                     }
                     
+                    &.logo {
+                        background-image: url('/public/svg/logo-dark.svg');
+                    }
+
                     &:before {
                         width: 100%;
                     }
@@ -91,6 +95,13 @@
             text-align: center;
             position: relative;
             background-color: transparent;
+            background-size: 30px 30px;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            &.logo {
+                background-image: url('/public/svg/logo-light.svg');
+            }
 
             &:before {
                 background-color: #fff;

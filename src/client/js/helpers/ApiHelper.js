@@ -51,16 +51,12 @@ class ApiHelper {
      * Get user name
      */
     getUserName() {
-        let user = Router.params ? Router.params.user : null;
+        let user = Router.params && Router.params.user ? Router.params.user : localStorage.getItem('user');;
         
-        if(!user) {
-            user = localStorage.getItem('user');
-        }
-
         if(!user) {
             location = '/login';
 
-            throw new Error('Not logged in');
+            debug.error('Not logged in', this);
         
         } else {
             localStorage.setItem('user', user)
@@ -73,7 +69,13 @@ class ApiHelper {
      * Gets project name
      */    
     getProjectName() {
-        return Router.params ? Router.params.project : null;
+        let project = Router.params && Router.params.project ? Router.params.project : localStorage.getItem('project');
+    
+        if(!project) {
+            debug.error('No project is defined', this);
+        }
+
+        return project;
     }
 
     /**

@@ -1481,7 +1481,7 @@ if(InputHelper.isShiftDown){e.preventDefault();e.stopPropagation();this.$element
      * Event: Click new issue button
      */_createClass(MilestoneEditor,[{key:"onClickNewIssue",value:function onClickNewIssue(){var _this61=this;spinner(true);Issue.create({milestone:this.model.index}).then(function(issue){var editor=new IssueEditor({model:issue});var $issue=editor.$element;$('.milestone-editor[data-index="'+issue.milestone+'"] .column[data-index="'+issue.column+'"] .btn-new-issue').before($issue);$issue.toggleClass('expanded',true);$issue.toggleClass('selected',false);_this61.updateProgress();spinner(false);});if(this.$element.hasClass('collapsed')){this.onClickToggle();}} /**
      * Event: Click toggle button
-     */},{key:"onClickToggle",value:function onClickToggle(){this.$element.toggleClass('collapsed');SettingsHelper.set('milestone',this.model.index,this.$element.hasClass('collapsed')?'collapsed':'');} /**
+     */},{key:"onClickToggle",value:function onClickToggle(){this.$element.toggleClass('collapsed');var isCollapsed=this.$element.hasClass('collapsed');var newKey=isCollapsed?'collapsed':'expanded';SettingsHelper.set('milestone',this.model.index,newKey);} /**
      * Gets remaining days
      *
      * @returns {Number} days

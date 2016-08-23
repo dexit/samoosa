@@ -48,11 +48,14 @@ class MilestoneEditor extends View {
      */
     onClickToggle() {
         this.$element.toggleClass('collapsed');
-        
+      
+        let isCollapsed = this.$element.hasClass('collapsed');
+        let newKey = isCollapsed ? 'collapsed' : 'expanded';
+
         SettingsHelper.set(
             'milestone',
             this.model.index,
-            this.$element.hasClass('collapsed') ? 'collapsed' : ''
+            newKey
         );
     }
 

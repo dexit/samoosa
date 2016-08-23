@@ -91,7 +91,7 @@
 
             // Adopt API token
             if(query('code')) {
-                $('#input-token').val(query('token'));
+                $('input[name="token"]').val(query('code'));
             }
 
             // Event hookups

@@ -94,6 +94,11 @@
                 $('input[name="token"]').val(query('code'));
             }
 
+            // Adopt source
+            if(query('source')) {
+                $('select[name="source"]').val(query('source'));
+            }
+
             // Event hookups
             $('.login-form').on('submit', onSubmit);
             $('#input-source').on('change', onChangeSource);

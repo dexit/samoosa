@@ -22,7 +22,7 @@ class ApiHelper {
 
     // ----------
     // Session methods
-    // ----------
+    // ---------- 
     /**
      * Gets the API token and prompts for one if needed
      * 

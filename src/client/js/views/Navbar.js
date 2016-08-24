@@ -47,10 +47,12 @@ class Navbar extends View {
             icon: 'cog'
         });
 
-        links.push({
-            url: '/plan/',
-            icon: 'calendar'
-        });
+        if(localStorage.getItem('source') != 'bitbucket') {
+            links.push({
+                url: '/plan/',
+                icon: 'calendar'
+            });
+        }
         
         links.push({
             url: '/board/kanban/',

@@ -24,6 +24,7 @@ class Issue {
         // Essential properties
         this.title = properties.title || 'New issue';
         this.description = properties.description || '';
+        this.id = properties.id;
         
         // Optional params
         this.column = properties.column || 0;

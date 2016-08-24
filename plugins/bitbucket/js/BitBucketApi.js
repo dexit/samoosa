@@ -4,7 +4,7 @@ let ApiHelper = require('../../../src/client/js/helpers/ApiHelper');
 
 let labelCache;
 
-class GitHubApi extends ApiHelper {
+class BitBucketApi extends ApiHelper {
     // ----------
     // Generic API methods
     // ----------
@@ -12,36 +12,54 @@ class GitHubApi extends ApiHelper {
      * GET method
      *
      * @param {String} url
-     * @param {String} param
+     * @param {String} key
      * @param {Boolean} recursePages
      *
      * @returns {Promise} promise
      */
-    get(url, param, recursePages) {
+    get(url, key, recursePages) {
         let self = this;
 
         return new Promise((resolve, reject) => {
-            let issues = [];
+            let items = [];
 
             function getPage(page) {
+                let apiUrl = 'https://api.bitbucket.org/1.0' + url;
+
+                if(recursePages) {
+                    apiUrl += '?limit=50&start=' + page;
+                }
+
                 $.ajax({
-                    url: 'https://api.github.com' + url + self.getApiTokenString(true) + 'per_page=100&page=' + page + (param ? '&' + param : ''),
+                    url: apiUrl,
                     type: 'GET',
                     cache: false,
                     success: (result) => {
-                        issues = issues.concat(result);
-
-                        if(recursePages && result.length > 0) {
-                            getPage(page + 1);
-
+                        if(result.error) {
+                            reject(new Error(result.error.message));
+                        
                         } else {
-                            resolve(issues);
+                            if(key) {
+                                result = result[key];
+                            }
 
+                            items = items.concat(result);
+
+                            if(recursePages && result.length > 0) {
+                                getPage(page + 1);
+
+                            } else {
+                                resolve(items);
+
+                            }
                         }
+                    },
+                    beforeSend: (xhr) => {
+                        xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
                     },
                     error: (e) => {
                         self.error(e);
-                        reject(new Error(e.responseJSON.message));
+                        reject(new Error(e.responseText));
                     }
                 });
             }
@@ -59,17 +77,22 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     delete(url, param) {
+        let self = this;
+
         return new Promise((reseolve, reject) => {
             $.ajax({
-                url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + this.getApiTokenString(),
+                url: 'https://api.bitbucket.org/1.0' + url + '?' + (param ? param + '&' : ''),
                 type: 'DELETE',
                 cache: false,
                 success: (result) => {
                     resolve(result);
                 },
+                beforeSend: (xhr) => {
+                    xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+                },
                 error: (e) => {
                     this.error(e);
-                    reject(e);
+                    reject(new Error(e.responseText));
                 }
             });
         });
@@ -84,22 +107,22 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     patch(url, data) {
-        if(typeof data === 'object') {
-            data = JSON.stringify(data);
-        }
+        let self = this;
 
         return new Promise((resolve, reject) => {
             $.ajax({
-                url: 'https://api.github.com' + url + this.getApiTokenString(),
-                type: 'PATCH',
+                url: 'https://api.bitbucket.org/1.0' + url,
+                type: 'POST',
                 data: data,
                 cache: false,
                 success: (result) => {
                     resolve(result);
                 },
+                beforeSend: (xhr) => {
+                    xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+                },
                 error: (e) => {
-                    this.error(e);
-                    reject(e);
+                    reject(new Error(e.responseText));
                 }
             });
         });
@@ -114,22 +137,22 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     post(url, data) {
-        if(typeof data === 'object') {
-            data = JSON.stringify(data);
-        }
+        let self = this;
 
         return new Promise((resolve, reject) => {
             $.ajax({
-                url: 'https://api.github.com' + url + this.getApiTokenString(),
+                url: 'https://api.bitbucket.org/1.0' + url,
                 type: 'POST',
                 data: data,
                 cache: false,
                 success: (result) => {
                     resolve(result);
                 },
+                beforeSend: (xhr) => {
+                    xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+                },
                 error: (e) => {
-                    this.error(e);
-                    reject(e);
+                    reject(new Error(e.responseText));
                 }
             });
         });
@@ -139,21 +162,27 @@ class GitHubApi extends ApiHelper {
      * PUT method
      *
      * @param {String} url
+     * @param {Object} data
      *
      * @returns {Promise} promise
      */
-    put(url) {
+    put(url, data) {
+        let self = this;
+
         return new Promise((resolve, reject) => {
             $.ajax({
-                url: 'https://api.github.com' + url + this.getApiTokenString(),
-                type: 'PUT',
+                url: 'https://api.bitbucket.org/1.0' + url,
+                type: 'POST',
+                data: data,
                 cache: false,
                 success: (result) => {
                     resolve(result);
                 },
+                beforeSend: (xhr) => {
+                    xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+                },
                 error: (e) => {
-                    this.error(e);
-                    reject(e);
+                    reject(new Error(e.responseText));
                 }
             });
         });
@@ -166,6 +195,8 @@ class GitHubApi extends ApiHelper {
      */
     error(error) {
         if(error) {
+            console.log(error);
+
             switch(error.status) {
                 //case 401: case 403:
                 //    this.resetApiToken();
@@ -185,29 +216,6 @@ class GitHubApi extends ApiHelper {
     // ----------
     // Session methods
     // ----------
-    /**
-     * Gets the API token string
-     *
-     * @param {Boolean} includeSuffix
-     *
-     * @returns {String} string
-     */
-    getApiTokenString(includeSuffix) {
-        let token = this.getApiToken();
-
-        if(!token) {
-            if(includeSuffix) {
-                return '?';
-            }
-        } else {
-            if(includeSuffix) {
-                token += '&';
-            }
-
-            return '?access_token=' + token;
-        }
-    }
-
     /**
      * Gets the currently logged in user object
      *
@@ -250,9 +258,9 @@ class GitHubApi extends ApiHelper {
      */
     getProjects() {
         return new Promise((resolve, reject) => {
-            this.get('/users/' + this.getUserName() + '/repos')
-            .then((repos) => {
-                this.processProjects(repos);
+            this.get('/user/repositories')
+            .then((repositories) => {
+                this.processProjects(repositories);
 
                 resolve();
             })
@@ -267,7 +275,7 @@ class GitHubApi extends ApiHelper {
      */
     getCollaborators() {
         return new Promise((resolve, reject) => {
-            this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators')
+            this.get('/privileges/' + this.getUserName() + '/' + this.getProjectName())
             .then((collaborators) => {
                 this.processCollaborators(collaborators);
 
@@ -291,51 +299,32 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssues() {
-        return new Promise((callback) => {
-            this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues', 'state=all', true)
-            .then((issues) => {
-                this.processIssues(issues);
+        return new Promise((resolve, reject) => {
+            this.get('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues', 'issues', false)
+            .then((res) => {
+                this.processIssues(res);
 
-                callback();
-            });
+                resolve();
+            })
+            .catch(reject);
         });
     }
     
-    /**
-     * Gets labels and caches them
-     *
-     * @returns {Promise} promise
-     */
-    getLabels() {
-        return new Promise((callback) => {
-            if(!labelCache) {
-                this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels')
-                .then((labels) => {
-                    labelCache = labels;
-
-                    callback(labelCache);
-                });    
-
-            } else {
-                callback(labelCache);
-            
-            }
-        });
-    }
-
     /**
      * Gets issue types
      *
      * @returns {Promise} promise
      */
     getIssueTypes() {
-        return new Promise((callback) => {
-            this.getLabels()
-            .then((labels) => {
-                this.processIssueTypes(labels);
-
-                callback();
-            });
+        return new Promise((resolve, reject) => {
+            window.resources.issueTypes = [
+                'bug',
+                'enhancement',
+                'proposal',
+                'task'
+            ];
+            
+            resolve();
         });
     }
     
@@ -345,13 +334,14 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssueColumns() {
-        return new Promise((callback) => {
-            this.getLabels()
-            .then((labels) => {
-                this.processIssueColumns(labels);
-
-                callback();
-            });
+        return new Promise((resolve, reject) => {
+            window.resources.issueColumns = [
+                'open',
+                'resolved',
+                'closed'
+            ];
+            
+            resolve();
         });
     }
     
@@ -361,13 +351,16 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssuePriorities() {
-        return new Promise((callback) => {
-            this.getLabels()
-            .then((labels) => {
-                this.processIssuePriorities(labels);
+        return new Promise((resolve, reject) => {
+            window.resources.issuePriorities = [
+                'trivial',
+                'minor',
+                'major',
+                'critical',
+                'blocker'
+            ];
 
-                callback();
-            });
+            resolve();
         });
     }
     
@@ -377,29 +370,39 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssueEstimates() {
-        return new Promise((callback) => {
-            this.getLabels()
-            .then((labels) => {
-                this.processIssueEstimates(labels);
+        return new Promise((resolve, reject) => {
+            window.resources.issueEstimates = [
+                '0.25h',
+                '0.5h',
+                '1h',
+                '2h',
+                '3h',
+                '4h',
+                '5h',
+                '6h',
+                '7h',
+                '8h'
+            ];
 
-                callback();
-            });
+            resolve();
         });
     }
     
     /**
      * Gets versions
      *
+     * TODO: This only returns empty arrays, why?
+     *
      * @returns {Promise} promise
      */
     getVersions() {
         return new Promise((callback) => {
-            this.getLabels()
-            .then((labels) => {
-                this.processVersions(labels);
-
+            this.get('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/versions')
+            .then((versions) => {
+                this.processVersions(versions);
+                
                 callback();
-            });
+            });    
         });
     }
 
@@ -410,7 +413,7 @@ class GitHubApi extends ApiHelper {
      */
     getMilestones() {
         return new Promise((callback) => {
-            this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones')
+            this.get('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/milestones')
             .then((milestones) => {
                 this.processMilestones(milestones);
                 
@@ -431,7 +434,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssue(issue) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue))
+            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue))
             .then(() => {
                 callback(issue);
             });
@@ -447,7 +450,7 @@ class GitHubApi extends ApiHelper {
      */
     addCollaborator(collaborator) {
         return new Promise((callback) => {
-            this.put('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators/' + collaborator)
+            this.put('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators/' + collaborator)
             .then(() => {
                 callback();
             });    
@@ -463,7 +466,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueType(type) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
                 name: 'type:' + type,
                 color: 'ffffff'
             })
@@ -482,7 +485,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssuePriority(priority) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
                 name: 'priority:' + priority,
                 color: 'ffffff'
             })
@@ -501,7 +504,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueEstimate(estimate) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
                 name: 'estimate:' + estimate,
                 color: 'ffffff'
             })
@@ -520,7 +523,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueColumn(column) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
                 name: 'column:' + column,
                 color: 'ffffff'
             })
@@ -539,7 +542,7 @@ class GitHubApi extends ApiHelper {
      */
     addMilestone(milestone) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones', this.convertMilestone(milestone))
+            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/milestones', this.convertMilestone(milestone))
             .then(() => {
                 callback();
             });
@@ -555,7 +558,7 @@ class GitHubApi extends ApiHelper {
      */
     addVersion(version) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
                 name: 'version:' + version,
                 color: 'ffffff'
             })
@@ -577,7 +580,7 @@ class GitHubApi extends ApiHelper {
      */
     removeCollaborator(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index])
+            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index])
             .then(() => {
                 callback();
             });
@@ -593,7 +596,7 @@ class GitHubApi extends ApiHelper {
      */
     removeIssueType(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/type:' + window.resources.issueTypes[index])
+            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/type:' + window.resources.issueTypes[index])
             .then(() => {
                 callback();
             });
@@ -609,7 +612,7 @@ class GitHubApi extends ApiHelper {
      */
     removeIssuePriority(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index])
+            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index])
             .then(() => {
                 callback();
             });
@@ -625,7 +628,7 @@ class GitHubApi extends ApiHelper {
      */
     removeIssueEstimate(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index])
+            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index])
             .then(() => {
                 callback();
             });
@@ -641,7 +644,7 @@ class GitHubApi extends ApiHelper {
      */
     removeIssueColumn(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index])
+            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index])
             .then(() => {
                 callback();
             });
@@ -657,7 +660,7 @@ class GitHubApi extends ApiHelper {
      */
     removeMilestone(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + (parseInt(index) + 1))
+            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + (parseInt(index) + 1))
             .then(() => {
                 callback();
             });
@@ -673,7 +676,7 @@ class GitHubApi extends ApiHelper {
      */
     removeVersion(index) {
         return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/version:' + window.resources.versions[index])
+            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/version:' + window.resources.versions[index])
             .then(() => {
                 callback();
             });
@@ -690,7 +693,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssue(issue) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + (issue.index + 1), this.convertIssue(issue))
+            this.put('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + issue.id, this.convertIssue(issue))
             .then(() => {
                 callback();
             });
@@ -706,7 +709,7 @@ class GitHubApi extends ApiHelper {
      */
     updateMilestone(milestone) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + (parseInt(milestone.index) + 1), this.convertMilestone(milestone))
+            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + (parseInt(milestone.index) + 1), this.convertMilestone(milestone))
             .then(() => {
                 callback();
             });
@@ -723,7 +726,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssueType(type, previousName) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/type:' + previousName, {
+            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/type:' + previousName, {
                 name: 'type:' + type,
                 color: 'ffffff'
             })
@@ -743,7 +746,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssuePriority(priority, previousName) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/priority:' + previousName, {
+            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/priority:' + previousName, {
                 name: 'priority:' + priority,
                 color: 'ffffff'
             })
@@ -763,7 +766,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssueEstimate(estimate, previousName) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/estimate:' + previousName, {
+            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/estimate:' + previousName, {
                 name: 'estimate:' + estimate,
                 color: 'ffffff'
             })
@@ -783,7 +786,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssueColumn(column, previousName) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/column:' + previousName, {
+            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/column:' + previousName, {
                 name: 'column:' + column,
                 color: 'ffffff'
             })
@@ -803,7 +806,7 @@ class GitHubApi extends ApiHelper {
      */
     updateVersion(version, previousName) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/version:' + previousName, {
+            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/version:' + previousName, {
                 name: 'version:' + version,
                 color: 'ffffff'
             })
@@ -827,9 +830,8 @@ class GitHubApi extends ApiHelper {
         for(let i in projects) {
             let project = {
                 index: i,
-                title: projects[i].name,
-                description: projects[i].description,
-                cloneUrl: projects[i].clone_url
+                title: projects[i].slug,
+                description: projects[i].description
             };
 
             window.resources.projects[i] = project;
@@ -845,35 +847,30 @@ class GitHubApi extends ApiHelper {
         window.resources.milestones = [];
         
         for(let i in milestones) {
-            let index = parseInt(milestones[i].number) - 1;
-
             let milestone = {
-                index: index,
-                title: milestones[i].title,
-                description: milestones[i].description,
-                endDate: milestones[i].due_on
+                index: i,
+                title: milestones[i].name
             };
 
-            window.resources.milestones[index] = milestone;
+            window.resources.milestones[i] = milestone;
         }
     }
 
     /**
      * Process versions
      *
-     * @param {Array} labels
+     * @param {Array} versions
      */
-    processVersions(labels) {
+    processVersions(versions) {
         window.resources.versions = [];
 
-        for(let label of labels) {
-            let versionIndex = label.name.indexOf('version:');
-            
-            if(versionIndex > -1) {
-                let versionName = label.name.replace('version:', '');
+        for(let i in versions) {
+            let version = {
+                index: i,
+                title: versions[i].name
+            };
 
-                window.resources.versions.push(versionName);
-            }
+            window.resources.versions[i] = version;
         }
     }
     
@@ -981,6 +978,8 @@ class GitHubApi extends ApiHelper {
         window.resources.collaborators = [];
 
         for(let collaborator of collaborators) {
+            console.log('COLLABORATOR', collaborator);
+
             window.resources.collaborators.push({
                 name: collaborator.login,
                 avatar: collaborator.avatar_url,
@@ -996,72 +995,57 @@ class GitHubApi extends ApiHelper {
     processIssues(issues) {
         window.resources.issues = [];
         
-        for(let gitHubIssue of issues) {
+        let indexCounter = 0;
+
+        for(let bitBucketIssue of issues) {
             let issue = new Issue();
 
-            issue.title = gitHubIssue.title;
-            issue.description = gitHubIssue.body;
-            issue.id = gitHubIssue.number; 
-            issue.reporter =  ResourceHelper.getCollaborator(gitHubIssue.user.login);
+            issue.title = bitBucketIssue.title;
+            issue.description = bitBucketIssue.content;
+            issue.id = bitBucketIssue.local_id;
+            
+            issue.reporter = ResourceHelper.getCollaborator(bitBucketIssue.reported_by.username);
 
-            if(gitHubIssue.assignee) {
-                issue.assignee = ResourceHelper.getCollaborator(gitHubIssue.assignee.login);
+            if(bitBucketIssue.responsible) {
+                issue.assignee = ResourceHelper.getCollaborator(bitBucketIssue.responsible.username);
             }
 
-            for(let label of gitHubIssue.labels) {
-                let typeIndex = label.name.indexOf('type:');
-                let priorityIndex = label.name.indexOf('priority:');
-                let estimateIndex = label.name.indexOf('estimate:');
-                let versionIndex = label.name.indexOf('version:');
-                let columnIndex = label.name.indexOf('column:');
+            issue.priority = ResourceHelper.getIssuePriority(bitBucketIssue.priority);
+            issue.milestone = ResourceHelper.getMilestone(bitBucketIssue.metadata.milestone);
+            issue.type = ResourceHelper.getIssueType(bitBucketIssue.metadata.kind);
+            issue.version = ResourceHelper.getVersion(bitBucketIssue.metadata.version);
 
-                if(typeIndex > -1) {
-                    let name = label.name.replace('type:', '');
-                    
-                    issue.type = ResourceHelper.getIssueType(name);
+            // Parse for estimate
+            let estimateMatches = /{% estimate: ([0-9](\.[0-9])?h) %}/.exec(issue.content || '');
 
-                } else if(versionIndex > -1) {
-                    let name = label.name.replace('version:', '');
-                    
-                    issue.version = ResourceHelper.getVersion(name);
-                
-                } else if(estimateIndex > -1) {
-                    let name = label.name.replace('estimate:', '');
-                   
-                    issue.estimate = ResourceHelper.getIssueEstimate(name);
-
-                } else if(priorityIndex > -1) {
-                    let name = label.name.replace('priority:', '');
-                    
-                    issue.priority = ResourceHelper.getIssuePriority(name);
-
-                } else if(columnIndex > -1) {
-                    let name = label.name.replace('column:', '');
-                    
-                    issue.column = ResourceHelper.getIssueColumn(name);
-
-                } else {
-                    issue.labels.push(label);
-
-                }
+            if(estimateMatches && estimateMatches.length > 0) {
+                issue.estimate = ResourceHelper.getIssueEstimates(estimateMatches[0]);
             }
 
-            if(gitHubIssue.state == 'closed') {
-                issue.column = resources.issueColumns.length - 1;
+            switch(bitBucketIssue.status) {
+                case 'open': default:
+                    issue.column = 0;
+                    break;
+
+                case 'resolved': 
+                    issue.column = 1;
+                    break;
+
+                case 'closed':
+                    issue.column = 2;
+                    break;
             }
 
-            if(gitHubIssue.milestone) {
-                issue.milestone = ResourceHelper.getMilestone(gitHubIssue.milestone.title);
-            }
-
-            issue.index = parseInt(gitHubIssue.number) - 1;
+            issue.index = indexCounter;
 
             window.resources.issues[issue.index] = issue;
+
+            indexCounter++;
         }
     }
 
     /**
-     * Convert milestone model to GitHub schema
+     * Convert milestone model to BitBucket schema
      *
      * @param {Object} milestone
      */
@@ -1077,77 +1061,64 @@ class GitHubApi extends ApiHelper {
     }
 
     /**
-     * Convert issue model to GitHub schema
+     * Convert issue model to BitBucket schema
      *
      * @param {Object} issue
      */
     convertIssue(issue) {
         // Directly mappable properties
-        let gitHubIssue = {
+        let bitBucketIssue = {
             title: issue.title,
-            body: issue.description,
-            number: issue.id,
-            labels: []
+            content: issue.description,
+            local_id: issue.id
         };
 
         // Assignee
         let assignee = resources.collaborators[issue.assignee];
 
         if(assignee) {
-            gitHubIssue.assignee = assignee.name;
+            bitBucketIssue.responsible = assignee.name;
         
         } else {
-            gitHubIssue.assignee = '';
+            bitBucketIssue.responsible = '';
 
         }
 
         // State
         let issueColumn = resources.issueColumns[issue.column];
 
-        gitHubIssue.state = issueColumn == 'done' ? 'closed' : 'open';
+        bitBucketIssue.status = issueColumn;
 
         // Milestone
-        // GitHub counts numbers from 1, ' + this.getProjectName() + ' counts from 0
-        if(issue.milestone >= 0) {
-            gitHubIssue.milestone = parseInt(issue.milestone) + 1;
-        } else {
-            gitHubIssue.milestone = null;
+        let milestone = resources.milestones[issue.milestone];
+        
+        if(milestone) {
+            bitBucketIssue.milestone = milestone.title;
         }
 
         // Type
         let issueType = resources.issueTypes[issue.type];
 
-        if(issueType) {
-            gitHubIssue.labels.push('type:' + issueType);
-        }
+        bitBucketIssue.kind = issueType;
 
         // Version
         let version = resources.versions[issue.version];
 
-        if(version) {
-            gitHubIssue.labels.push('version:' + version);
-        }
+        bitBucketIssue.version = version;
        
         // Estimate
         let issueEstimate = resources.issueEstimates[issue.estimate];
+        let estimateString = '{% estimate: ' + issueEstimate + ' %}';
 
-        if(issueEstimate) {
-            gitHubIssue.labels.push('estimate:' + issueEstimate);
-        }
+        bitBucketIssue.content = bitBucketIssue.content.replace(/{% estimate: ([0-9](\.[0-9])?h) %}/g, '');
+        bitBucketIssue.content += estimateString;
 
         // Priority
-        let issuePriority = resources.issuePriorities[issue.priority];
+        let issuePriority = resources.issuePriorities[issue.type];
 
-        if(issuePriority) {
-            gitHubIssue.labels.push('priority:' + issuePriority);
-        }
+        bitBucketIssue.priority = issuePriority;
 
-        // Column
-        if(issueColumn && issueColumn != 'to do' && issueColumn != 'done') {
-            gitHubIssue.labels.push('column:' + issueColumn);
-        }
-
-        return gitHubIssue;
+        return bitBucketIssue;
     }
 
     /**
@@ -1158,7 +1129,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueComment(issue, text) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + (issue.index + 1) + '/comments', {
+            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + (issue.index + 1) + '/comments', {
                 body: text
             })
             .then(() => {
@@ -1175,7 +1146,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssueComment(issue, comment) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues/comments/' + comment.index, {
+            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/comments/' + comment.index, {
                 body: comment.text
             })
             .then(() => {
@@ -1193,7 +1164,7 @@ class GitHubApi extends ApiHelper {
      */
     getIssueComments(issue) {
         return new Promise((callback) => {
-            this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + (issue.index + 1) + '/comments')
+            this.get('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + (issue.index + 1) + '/comments')
             .then((gitHubComments) => {
                 let comments = [];
 
@@ -1213,4 +1184,4 @@ class GitHubApi extends ApiHelper {
     }
 }
 
-module.exports = GitHubApi;
+module.exports = BitBucketApi;

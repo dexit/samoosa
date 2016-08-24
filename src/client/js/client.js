@@ -12,6 +12,9 @@ Promise.onPossiblyUnhandledRejection((error, promise) => {
     debug.warning(error, Promise);
 });
 
+// Globals
+require('./globals');
+
 // Helpers
 window.ResourceHelper = require('./helpers/ResourceHelper');
 window.SettingsHelper = require('./helpers/SettingsHelper');
@@ -22,7 +25,23 @@ window.debug = window.DebugHelper;
 window.debug.verbosity = 1;
 
 let GitHubApi = require('../../../plugins/github/js/GitHubApi');
-window.ApiHelper = new GitHubApi();
+let BitBucketApi = require('../../../plugins/bitbucket/js/BitBucketApi');
+
+switch(getSource()) {
+    case 'bitbucket':
+        window.ApiHelper = new BitBucketApi();
+        break;
+
+    case 'github':
+        window.ApiHelper = new GitHubApi();
+        break;
+
+    default:
+        location = '/login';
+
+        debug.error('No source provided', this);
+        break;
+}
 
 // Models
 window.Issue = require('./models/Issue');
@@ -36,9 +55,6 @@ window.PlanItemEditor = require('./views/PlanItemEditor');
 window.PlanEditor = require('./views/PlanEditor');
 window.ProjectEditor = require('./views/ProjectEditor');
 window.FilterEditor = require('./views/FilterEditor');
-
-// Globals
-require('./globals');
 
 // Routes
 require('./routes');

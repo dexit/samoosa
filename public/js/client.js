@@ -623,7 +623,317 @@ route+=strict&&endsWithSlash?'':'(?=\\/|$)';}return new RegExp('^'+route,flags(o
  */function pathToRegexp(path,keys,options){keys=keys||[];if(!isarray(keys)){options= /** @type {!Object} */keys;keys=[];}else if(!options){options={};}if(path instanceof RegExp){return regexpToRegexp(path, /** @type {!Array} */keys);}if(isarray(path)){return arrayToRegexp( /** @type {!Array} */path, /** @type {!Array} */keys,options);}return stringToRegexp( /** @type {string} */path, /** @type {!Array} */keys,options);}},{"isarray":11}],11:[function(require,module,exports){module.exports=Array.isArray||function(arr){return Object.prototype.toString.call(arr)=='[object Array]';};},{}],12:[function(require,module,exports){ // shim for using process in browser
 var process=module.exports={};var queue=[];var draining=false;var currentQueue;var queueIndex=-1;function cleanUpNextTick(){if(!draining||!currentQueue){return;}draining=false;if(currentQueue.length){queue=currentQueue.concat(queue);}else {queueIndex=-1;}if(queue.length){drainQueue();}}function drainQueue(){if(draining){return;}var timeout=setTimeout(cleanUpNextTick);draining=true;var len=queue.length;while(len){currentQueue=queue;queue=[];while(++queueIndex<len){if(currentQueue){currentQueue[queueIndex].run();}}queueIndex=-1;len=queue.length;}currentQueue=null;draining=false;clearTimeout(timeout);}process.nextTick=function(fun){var args=new Array(arguments.length-1);if(arguments.length>1){for(var i=1;i<arguments.length;i++){args[i-1]=arguments[i];}}queue.push(new Item(fun,args));if(queue.length===1&&!draining){setTimeout(drainQueue,0);}}; // v8 likes predictible objects
 function Item(fun,array){this.fun=fun;this.array=array;}Item.prototype.run=function(){this.fun.apply(null,this.array);};process.title='browser';process.browser=true;process.env={};process.argv=[];process.version=''; // empty string to avoid regexp issues
-process.versions={};function noop(){}process.on=noop;process.addListener=noop;process.once=noop;process.off=noop;process.removeListener=noop;process.removeAllListeners=noop;process.emit=noop;process.binding=function(name){throw new Error('process.binding is not supported');};process.cwd=function(){return '/';};process.chdir=function(dir){throw new Error('process.chdir is not supported');};process.umask=function(){return 0;};},{}],13:[function(require,module,exports){module.exports={"name":"samoosa","version":"0.2.0","description":"","main":"index.html","scripts":{"test":"echo \"Error: no test specified\" && exit 1"},"author":"Putaitu Productions","license":"ISC","dependencies":{"babel-preset-es2015":"^6.3.13","bluebird":"^3.3.3","bootstrap":"^3.3.6","bootstrap-datepicker":"^1.6.0","browserify":"^13.0.0","event-stream":"^3.3.2","exomon":"^1.1.0","gulp":"^3.9.0","gulp-babel":"^6.1.1","gulp-browserify":"^0.5.1","gulp-concat":"^2.6.0","gulp-plumber":"^1.0.1","gulp-sass":"^2.1.0","gulp-sourcemaps":"^1.6.0","jquery":"^2.2.1","marked":"^0.3.5","path-to-regexp":"^1.2.1","sass-material-colors":"0.0.5","vinyl-buffer":"^1.0.0","vinyl-source-stream":"^1.1.0"}};},{}],14:[function(require,module,exports){'use strict';var ApiHelper=require('../../../src/client/js/helpers/ApiHelper');var labelCache=void 0;var GitHubApi=function(_ApiHelper){_inherits(GitHubApi,_ApiHelper);function GitHubApi(){_classCallCheck(this,GitHubApi);return _possibleConstructorReturn(this,Object.getPrototypeOf(GitHubApi).apply(this,arguments));}_createClass(GitHubApi,[{key:"get", // ----------
+process.versions={};function noop(){}process.on=noop;process.addListener=noop;process.once=noop;process.off=noop;process.removeListener=noop;process.removeAllListeners=noop;process.emit=noop;process.binding=function(name){throw new Error('process.binding is not supported');};process.cwd=function(){return '/';};process.chdir=function(dir){throw new Error('process.chdir is not supported');};process.umask=function(){return 0;};},{}],13:[function(require,module,exports){module.exports={"name":"samoosa","version":"0.2.0","description":"","main":"index.html","scripts":{"test":"echo \"Error: no test specified\" && exit 1"},"author":"Putaitu Productions","license":"ISC","dependencies":{"babel-preset-es2015":"^6.3.13","bluebird":"^3.3.3","bootstrap":"^3.3.6","bootstrap-datepicker":"^1.6.0","browserify":"^13.0.0","event-stream":"^3.3.2","exomon":"^1.1.0","gulp":"^3.9.0","gulp-babel":"^6.1.1","gulp-browserify":"^0.5.1","gulp-concat":"^2.6.0","gulp-plumber":"^1.0.1","gulp-sass":"^2.1.0","gulp-sourcemaps":"^1.6.0","jquery":"^2.2.1","marked":"^0.3.5","path-to-regexp":"^1.2.1","sass-material-colors":"0.0.5","vinyl-buffer":"^1.0.0","vinyl-source-stream":"^1.1.0"}};},{}],14:[function(require,module,exports){'use strict';var ApiHelper=require('../../../src/client/js/helpers/ApiHelper');var labelCache=void 0;var BitBucketApi=function(_ApiHelper){_inherits(BitBucketApi,_ApiHelper);function BitBucketApi(){_classCallCheck(this,BitBucketApi);return _possibleConstructorReturn(this,Object.getPrototypeOf(BitBucketApi).apply(this,arguments));}_createClass(BitBucketApi,[{key:"get", // ----------
+// Generic API methods
+// ----------
+/**
+     * GET method
+     *
+     * @param {String} url
+     * @param {String} key
+     * @param {Boolean} recursePages
+     *
+     * @returns {Promise} promise
+     */value:function get(url,key,recursePages){var self=this;return new Promise(function(resolve,reject){var items=[];function getPage(page){var apiUrl='https://api.bitbucket.org/1.0'+url;if(recursePages){apiUrl+='?limit=50&start='+page;}$.ajax({url:apiUrl,type:'GET',cache:false,success:function success(result){if(result.error){reject(new Error(result.error.message));}else {if(key){result=result[key];}items=items.concat(result);if(recursePages&&result.length>0){getPage(page+1);}else {resolve(items);}}},beforeSend:function beforeSend(xhr){xhr.setRequestHeader('Authorization','Basic '+self.getApiToken());},error:function error(e){self.error(e);reject(new Error(e.responseText));}});}getPage(1);});} /**
+     * DELETE method
+     *
+     * @param {String} url
+     * @param {String} param
+     *
+     * @returns {Promise} promise
+     */},{key:"delete",value:function _delete(url,param){var _this5=this;var self=this;return new Promise(function(reseolve,reject){$.ajax({url:'https://api.bitbucket.org/1.0'+url+'?'+(param?param+'&':''),type:'DELETE',cache:false,success:function success(result){resolve(result);},beforeSend:function beforeSend(xhr){xhr.setRequestHeader('Authorization','Basic '+self.getApiToken());},error:function error(e){_this5.error(e);reject(new Error(e.responseText));}});});} /**
+     * PATCH method
+     *
+     * @param {String} url
+     * @param {Object} data
+     *
+     * @returns {Promise} promise
+     */},{key:"patch",value:function patch(url,data){var self=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.bitbucket.org/1.0'+url,type:'POST',data:data,cache:false,success:function success(result){resolve(result);},beforeSend:function beforeSend(xhr){xhr.setRequestHeader('Authorization','Basic '+self.getApiToken());},error:function error(e){reject(new Error(e.responseText));}});});} /**
+     * POST method
+     *
+     * @param {String} url
+     * @param {Object} data
+     *
+     * @returns {Promise} promise
+     */},{key:"post",value:function post(url,data){var self=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.bitbucket.org/1.0'+url,type:'POST',data:data,cache:false,success:function success(result){resolve(result);},beforeSend:function beforeSend(xhr){xhr.setRequestHeader('Authorization','Basic '+self.getApiToken());},error:function error(e){reject(new Error(e.responseText));}});});} /**
+     * PUT method
+     *
+     * @param {String} url
+     * @param {Object} data
+     *
+     * @returns {Promise} promise
+     */},{key:"put",value:function put(url,data){var self=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.bitbucket.org/1.0'+url,type:'POST',data:data,cache:false,success:function success(result){resolve(result);},beforeSend:function beforeSend(xhr){xhr.setRequestHeader('Authorization','Basic '+self.getApiToken());},error:function error(e){reject(new Error(e.responseText));}});});} /**
+     * Error message
+     *
+     * @param {Object} error
+     */},{key:"error",value:function error(_error){if(_error){console.log(_error);switch(_error.status){ //case 401: case 403:
+//    this.resetApiToken();
+//    break;
+default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(_error.statusText);}break;}}} // ----------
+// Session methods
+// ----------
+/**
+     * Gets the currently logged in user object
+     *
+     * @returns {Promise} promise
+     */},{key:"getUser",value:function getUser(){var _this6=this;return new Promise(function(resolve,reject){_this6.get('/user').then(function(gitHubUser){if(Array.isArray(gitHubUser)){gitHubUser=gitHubUser[0];}var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};resolve(user);}).catch(function(e){if(_this6.isSpectating()){resolve({name:'',avatar:''});}else {reject(e);}});});} // ----------
+// Resource getters
+// ----------
+/**
+     * Gets projects
+     *
+     * @returns {Promise} promise
+     */},{key:"getProjects",value:function getProjects(){var _this7=this;return new Promise(function(resolve,reject){_this7.get('/user/repositories').then(function(repositories){_this7.processProjects(repositories);resolve();}).catch(reject);});} /**
+     * Gets collaborators
+     *
+     * @returns {Promise} promise
+     */},{key:"getCollaborators",value:function getCollaborators(){var _this8=this;return new Promise(function(resolve,reject){_this8.get('/privileges/'+_this8.getUserName()+'/'+_this8.getProjectName()).then(function(collaborators){_this8.processCollaborators(collaborators);resolve();}).catch(function(e){if(_this8.isSpectating()){resolve([]);}else {reject(e);}});});} /**
+     * Gets issues
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssues",value:function getIssues(){var _this9=this;return new Promise(function(resolve,reject){_this9.get('/repositories/'+_this9.getUserName()+'/'+_this9.getProjectName()+'/issues','issues',false).then(function(res){_this9.processIssues(res);resolve();}).catch(reject);});} /**
+     * Gets issue types
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssueTypes",value:function getIssueTypes(){return new Promise(function(resolve,reject){window.resources.issueTypes=['bug','enhancement','proposal','task'];resolve();});} /**
+     * Gets issue columns
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssueColumns",value:function getIssueColumns(){return new Promise(function(resolve,reject){window.resources.issueColumns=['open','resolved','closed'];resolve();});} /**
+     * Gets issue priorities
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssuePriorities",value:function getIssuePriorities(){return new Promise(function(resolve,reject){window.resources.issuePriorities=['trivial','minor','major','critical','blocker'];resolve();});} /**
+     * Gets issue estimates
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssueEstimates",value:function getIssueEstimates(){return new Promise(function(resolve,reject){window.resources.issueEstimates=['0.25h','0.5h','1h','2h','3h','4h','5h','6h','7h','8h'];resolve();});} /**
+     * Gets versions
+     *
+     * TODO: This only returns empty arrays, why?
+     *
+     * @returns {Promise} promise
+     */},{key:"getVersions",value:function getVersions(){var _this10=this;return new Promise(function(callback){_this10.get('/repositories/'+_this10.getUserName()+'/'+_this10.getProjectName()+'/issues/versions').then(function(versions){_this10.processVersions(versions);callback();});});} /**
+     * Gets milestones
+     *
+     * @returns {Promise} promise
+     */},{key:"getMilestones",value:function getMilestones(){var _this11=this;return new Promise(function(callback){_this11.get('/repositories/'+_this11.getUserName()+'/'+_this11.getProjectName()+'/issues/milestones').then(function(milestones){_this11.processMilestones(milestones);callback();});});} // ----------
+// Resource adders
+// ----------
+/**
+     * Adds a new issue
+     *
+     * @param {Object} issue
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssue",value:function addIssue(issue){var _this12=this;return new Promise(function(callback){_this12.post('/repositories/'+_this12.getUserName()+'/'+_this12.getProjectName()+'/issues',_this12.convertIssue(issue)).then(function(){callback(issue);});});} /**
+     * Adds collaborator
+     *
+     * @param {String} collaborator
+     *
+     * @returns {Promise} promise
+     */},{key:"addCollaborator",value:function addCollaborator(collaborator){var _this13=this;return new Promise(function(callback){_this13.put('/repositories/'+_this13.getUserName()+'/'+_this13.getProjectName()+'/collaborators/'+collaborator).then(function(){callback();});});} /**
+     * Adds issue type
+     *
+     * @param {String} type
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssueType",value:function addIssueType(type){var _this14=this;return new Promise(function(callback){_this14.post('/repositories/'+_this14.getUserName()+'/'+_this14.getProjectName()+'/labels',{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
+     * Adds issue priority
+     *
+     * @param {String} priority
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssuePriority",value:function addIssuePriority(priority){var _this15=this;return new Promise(function(callback){_this15.post('/repositories/'+_this15.getUserName()+'/'+_this15.getProjectName()+'/labels',{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
+     * Adds issue estimate
+     *
+     * @param {String} estimate
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssueEstimate",value:function addIssueEstimate(estimate){var _this16=this;return new Promise(function(callback){_this16.post('/repositories/'+_this16.getUserName()+'/'+_this16.getProjectName()+'/labels',{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
+     * Adds issue column
+     *
+     * @param {String} column
+     *
+     * @returns {Promise} promise
+     */},{key:"addIssueColumn",value:function addIssueColumn(column){var _this17=this;return new Promise(function(callback){_this17.post('/repositories/'+_this17.getUserName()+'/'+_this17.getProjectName()+'/labels',{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
+     * Adds milestone 
+     *
+     * @param {Object} milestone
+     *
+     * @returns {Promise} promise
+     */},{key:"addMilestone",value:function addMilestone(milestone){var _this18=this;return new Promise(function(callback){_this18.post('/repositories/'+_this18.getUserName()+'/'+_this18.getProjectName()+'/milestones',_this18.convertMilestone(milestone)).then(function(){callback();});});} /**
+     * Adds version
+     *
+     * @param {String} version
+     *
+     * @returns {Promise} promise
+     */},{key:"addVersion",value:function addVersion(version){var _this19=this;return new Promise(function(callback){_this19.post('/repositories/'+_this19.getUserName()+'/'+_this19.getProjectName()+'/labels',{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
+// Resource removers
+// ----------
+/**
+     * Removes collaborator
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeCollaborator",value:function removeCollaborator(index){var _this20=this;return new Promise(function(callback){_this20.delete('/repositories/'+_this20.getUserName()+'/'+_this20.getProjectName()+'/collaborators/'+window.resources.collaborators[index]).then(function(){callback();});});} /**
+     * Removes issue type
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssueType",value:function removeIssueType(index){var _this21=this;return new Promise(function(callback){_this21.delete('/repositories/'+_this21.getUserName()+'/'+_this21.getProjectName()+'/labels/type:'+window.resources.issueTypes[index]).then(function(){callback();});});} /**
+     * Removes issue priority
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssuePriority",value:function removeIssuePriority(index){var _this22=this;return new Promise(function(callback){_this22.delete('/repositories/'+_this22.getUserName()+'/'+_this22.getProjectName()+'/labels/priority:'+window.resources.issuePriorities[index]).then(function(){callback();});});} /**
+     * Removes issue estimate
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssueEstimate",value:function removeIssueEstimate(index){var _this23=this;return new Promise(function(callback){_this23.delete('/repositories/'+_this23.getUserName()+'/'+_this23.getProjectName()+'/labels/estimate:'+window.resources.issueEstimates[index]).then(function(){callback();});});} /**
+     * Removes issue column
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeIssueColumn",value:function removeIssueColumn(index){var _this24=this;return new Promise(function(callback){_this24.delete('/repositories/'+_this24.getUserName()+'/'+_this24.getProjectName()+'/labels/column:'+window.resources.issueColumns[index]).then(function(){callback();});});} /**
+     * Removes milestone 
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeMilestone",value:function removeMilestone(index){var _this25=this;return new Promise(function(callback){_this25.delete('/repositories/'+_this25.getUserName()+'/'+_this25.getProjectName()+'/milestones/'+(parseInt(index)+1)).then(function(){callback();});});} /**
+     * Removes version
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */},{key:"removeVersion",value:function removeVersion(index){var _this26=this;return new Promise(function(callback){_this26.delete('/repositories/'+_this26.getUserName()+'/'+_this26.getProjectName()+'/labels/version:'+window.resources.versions[index]).then(function(){callback();});});} // ----------
+// Resource updaters
+// ----------
+/**
+     * Update issue
+     *
+     * @param {Object} issue
+     */},{key:"updateIssue",value:function updateIssue(issue){var _this27=this;return new Promise(function(callback){_this27.put('/repositories/'+_this27.getUserName()+'/'+_this27.getProjectName()+'/issues/'+issue.id,_this27.convertIssue(issue)).then(function(){callback();});});} /**
+     * Updates milestone 
+     *
+     * @param {Object} milestone
+     *
+     * @returns {Promise} promise
+     */},{key:"updateMilestone",value:function updateMilestone(milestone){var _this28=this;return new Promise(function(callback){_this28.patch('/repositories/'+_this28.getUserName()+'/'+_this28.getProjectName()+'/milestones/'+(parseInt(milestone.index)+1),_this28.convertMilestone(milestone)).then(function(){callback();});});} /**
+     * Updates issue type
+     *
+     * @param {String} type
+     * @param {String} previousName
+     *
+     * @returns {Promise} promise
+     */},{key:"updateIssueType",value:function updateIssueType(type,previousName){var _this29=this;return new Promise(function(callback){_this29.patch('/repositories/'+_this29.getUserName()+'/'+_this29.getProjectName()+'/labels/type:'+previousName,{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
+     * Updates issue priority
+     *
+     * @param {String} priority
+     * @param {String} previousName
+     *
+     * @returns {Promise} promise
+     */},{key:"updateIssuePriority",value:function updateIssuePriority(priority,previousName){var _this30=this;return new Promise(function(callback){_this30.patch('/repositories/'+_this30.getUserName()+'/'+_this30.getProjectName()+'/labels/priority:'+previousName,{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
+     * Updates issue estimate
+     *
+     * @param {String} estimate
+     * @param {String} previousName
+     *
+     * @returns {Promise} promise
+     */},{key:"updateIssueEstimate",value:function updateIssueEstimate(estimate,previousName){var _this31=this;return new Promise(function(callback){_this31.patch('/repositories/'+_this31.getUserName()+'/'+_this31.getProjectName()+'/labels/estimate:'+previousName,{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
+     * Updates issue column
+     *
+     * @param {String} column
+     * @param {String} previousName
+     *
+     * @returns {Promise} promise
+     */},{key:"updateIssueColumn",value:function updateIssueColumn(column,previousName){var _this32=this;return new Promise(function(callback){_this32.patch('/repositories/'+_this32.getUserName()+'/'+_this32.getProjectName()+'/labels/column:'+previousName,{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
+     * Updates version
+     *
+     * @param {String} version
+     * @param {String} previousName
+     *
+     * @returns {Promise} promise
+     */},{key:"updateVersion",value:function updateVersion(version,previousName){var _this33=this;return new Promise(function(callback){_this33.patch('/repositories/'+_this33.getUserName()+'/'+_this33.getProjectName()+'/labels/version:'+previousName,{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
+// Resource processing methods
+// ----------
+/**
+     * Process projects
+     *
+     * @param {Array} projects
+     */},{key:"processProjects",value:function processProjects(projects){window.resources.projects=[];for(var i in projects){var project={index:i,title:projects[i].slug,description:projects[i].description};window.resources.projects[i]=project;}} /**
+     * Process milestones
+     *
+     * @param {Array} milestones
+     */},{key:"processMilestones",value:function processMilestones(milestones){window.resources.milestones=[];for(var i in milestones){var milestone={index:i,title:milestones[i].name};window.resources.milestones[i]=milestone;}} /**
+     * Process versions
+     *
+     * @param {Array} versions
+     */},{key:"processVersions",value:function processVersions(versions){window.resources.versions=[];for(var i in versions){var version={index:i,title:versions[i].name};window.resources.versions[i]=version;}} /**
+     * Process issue priotities
+     *
+     * @param {Array} labels
+     */},{key:"processIssuePriorities",value:function processIssuePriorities(labels){window.resources.issuePriorities=[];var _iteratorNormalCompletion5=true;var _didIteratorError5=false;var _iteratorError5=undefined;try{for(var _iterator5=labels[Symbol.iterator](),_step5;!(_iteratorNormalCompletion5=(_step5=_iterator5.next()).done);_iteratorNormalCompletion5=true){var label=_step5.value;var index=label.name.indexOf('priority:');if(index>-1){var name=label.name.replace('priority:','');window.resources.issuePriorities.push(name);}}}catch(err){_didIteratorError5=true;_iteratorError5=err;}finally {try{if(!_iteratorNormalCompletion5&&_iterator5.return){_iterator5.return();}}finally {if(_didIteratorError5){throw _iteratorError5;}}}} /**
+     * Process issue estimates
+     *
+     * @param {Array} labels
+     */},{key:"processIssueEstimates",value:function processIssueEstimates(labels){window.resources.issueEstimates=[];var _iteratorNormalCompletion6=true;var _didIteratorError6=false;var _iteratorError6=undefined;try{for(var _iterator6=labels[Symbol.iterator](),_step6;!(_iteratorNormalCompletion6=(_step6=_iterator6.next()).done);_iteratorNormalCompletion6=true){var label=_step6.value;var index=label.name.indexOf('estimate:');if(index>-1){var name=label.name.replace('estimate:','');window.resources.issueEstimates.push(name);}}}catch(err){_didIteratorError6=true;_iteratorError6=err;}finally {try{if(!_iteratorNormalCompletion6&&_iterator6.return){_iterator6.return();}}finally {if(_didIteratorError6){throw _iteratorError6;}}}window.resources.issueEstimates.sort(function(a,b){a=parseFloat(a);b=parseFloat(b);if(a<b){return -1;}if(a>b){return 1;}return 0;});} /**
+     * Process issue columns
+     *
+     * @param {Array} labels
+     */},{key:"processIssueColumns",value:function processIssueColumns(labels){window.resources.issueColumns=[];window.resources.issueColumns.push('to do');var _iteratorNormalCompletion7=true;var _didIteratorError7=false;var _iteratorError7=undefined;try{for(var _iterator7=labels[Symbol.iterator](),_step7;!(_iteratorNormalCompletion7=(_step7=_iterator7.next()).done);_iteratorNormalCompletion7=true){var label=_step7.value;var index=label.name.indexOf('column:');if(index>-1){var name=label.name.replace('column:','');window.resources.issueColumns.push(name);}}}catch(err){_didIteratorError7=true;_iteratorError7=err;}finally {try{if(!_iteratorNormalCompletion7&&_iterator7.return){_iterator7.return();}}finally {if(_didIteratorError7){throw _iteratorError7;}}}window.resources.issueColumns.push('done');} /**
+     * Process issue types
+     *
+     * @param {Array} labels
+     */},{key:"processIssueTypes",value:function processIssueTypes(labels){window.resources.issueTypes=[];var _iteratorNormalCompletion8=true;var _didIteratorError8=false;var _iteratorError8=undefined;try{for(var _iterator8=labels[Symbol.iterator](),_step8;!(_iteratorNormalCompletion8=(_step8=_iterator8.next()).done);_iteratorNormalCompletion8=true){var label=_step8.value;var index=label.name.indexOf('type:');if(index>-1){var name=label.name.replace('type:','');window.resources.issueTypes.push(name);}}}catch(err){_didIteratorError8=true;_iteratorError8=err;}finally {try{if(!_iteratorNormalCompletion8&&_iterator8.return){_iterator8.return();}}finally {if(_didIteratorError8){throw _iteratorError8;}}}} /**
+     * Process collaborators
+     *
+     * @param {Array} collaborators
+     */},{key:"processCollaborators",value:function processCollaborators(collaborators){window.resources.collaborators=[];var _iteratorNormalCompletion9=true;var _didIteratorError9=false;var _iteratorError9=undefined;try{for(var _iterator9=collaborators[Symbol.iterator](),_step9;!(_iteratorNormalCompletion9=(_step9=_iterator9.next()).done);_iteratorNormalCompletion9=true){var collaborator=_step9.value;console.log('COLLABORATOR',collaborator);window.resources.collaborators.push({name:collaborator.login,avatar:collaborator.avatar_url});}}catch(err){_didIteratorError9=true;_iteratorError9=err;}finally {try{if(!_iteratorNormalCompletion9&&_iterator9.return){_iterator9.return();}}finally {if(_didIteratorError9){throw _iteratorError9;}}}} /**
+     * Process issues
+     *
+     * @param {Array} issues
+     */},{key:"processIssues",value:function processIssues(issues){window.resources.issues=[];var indexCounter=0;var _iteratorNormalCompletion10=true;var _didIteratorError10=false;var _iteratorError10=undefined;try{for(var _iterator10=issues[Symbol.iterator](),_step10;!(_iteratorNormalCompletion10=(_step10=_iterator10.next()).done);_iteratorNormalCompletion10=true){var bitBucketIssue=_step10.value;var issue=new Issue();issue.title=bitBucketIssue.title;issue.description=bitBucketIssue.content;issue.id=bitBucketIssue.local_id;issue.reporter=ResourceHelper.getCollaborator(bitBucketIssue.reported_by.username);if(bitBucketIssue.responsible){issue.assignee=ResourceHelper.getCollaborator(bitBucketIssue.responsible.username);}issue.priority=ResourceHelper.getIssuePriority(bitBucketIssue.priority);issue.milestone=ResourceHelper.getMilestone(bitBucketIssue.metadata.milestone);issue.type=ResourceHelper.getIssueType(bitBucketIssue.metadata.kind);issue.version=ResourceHelper.getVersion(bitBucketIssue.metadata.version); // Parse for estimate
+var estimateMatches=/{% estimate: ([0-9](\.[0-9])?h) %}/.exec(issue.content||'');if(estimateMatches&&estimateMatches.length>0){issue.estimate=ResourceHelper.getIssueEstimates(estimateMatches[0]);}switch(bitBucketIssue.status){case 'open':default:issue.column=0;break;case 'resolved':issue.column=1;break;case 'closed':issue.column=2;break;}issue.index=indexCounter;window.resources.issues[issue.index]=issue;indexCounter++;}}catch(err){_didIteratorError10=true;_iteratorError10=err;}finally {try{if(!_iteratorNormalCompletion10&&_iterator10.return){_iterator10.return();}}finally {if(_didIteratorError10){throw _iteratorError10;}}}} /**
+     * Convert milestone model to BitBucket schema
+     *
+     * @param {Object} milestone
+     */},{key:"convertMilestone",value:function convertMilestone(milestone){var gitHubMilestone={title:milestone.title,description:milestone.description,due_on:milestone.endDate,state:milestone.closed?'closed':'open'};return gitHubMilestone;} /**
+     * Convert issue model to BitBucket schema
+     *
+     * @param {Object} issue
+     */},{key:"convertIssue",value:function convertIssue(issue){ // Directly mappable properties
+var bitBucketIssue={title:issue.title,content:issue.description,local_id:issue.id}; // Assignee
+var assignee=resources.collaborators[issue.assignee];if(assignee){bitBucketIssue.responsible=assignee.name;}else {bitBucketIssue.responsible='';} // State
+var issueColumn=resources.issueColumns[issue.column];bitBucketIssue.status=issueColumn; // Milestone
+var milestone=resources.milestones[issue.milestone];if(milestone){bitBucketIssue.milestone=milestone.title;} // Type
+var issueType=resources.issueTypes[issue.type];bitBucketIssue.kind=issueType; // Version
+var version=resources.versions[issue.version];bitBucketIssue.version=version; // Estimate
+var issueEstimate=resources.issueEstimates[issue.estimate];var estimateString='{% estimate: '+issueEstimate+' %}';bitBucketIssue.content=bitBucketIssue.content.replace(/{% estimate: ([0-9](\.[0-9])?h) %}/g,'');bitBucketIssue.content+=estimateString; // Priority
+var issuePriority=resources.issuePriorities[issue.type];bitBucketIssue.priority=issuePriority;return bitBucketIssue;} /**
+     * Add issue comment
+     *
+     * @param {Issue} issue
+     * @param {String} text
+     */},{key:"addIssueComment",value:function addIssueComment(issue,text){var _this34=this;return new Promise(function(callback){_this34.post('/repositories/'+_this34.getUserName()+'/'+_this34.getProjectName()+'/issues/'+(issue.index+1)+'/comments',{body:text}).then(function(){callback();});});} /**
+     * Update issue comment
+     *
+     * @param {Issue} issue
+     * @param {Object} comment
+     */},{key:"updateIssueComment",value:function updateIssueComment(issue,comment){var _this35=this;return new Promise(function(callback){_this35.patch('/repositories/'+_this35.getUserName()+'/'+_this35.getProjectName()+'/issues/comments/'+comment.index,{body:comment.text}).then(function(){callback();});});} /**
+     * Get issue comments
+     *
+     * @param {Object} issue
+     *
+     * @returns {Promise} promise
+     */},{key:"getIssueComments",value:function getIssueComments(issue){var _this36=this;return new Promise(function(callback){_this36.get('/repositories/'+_this36.getUserName()+'/'+_this36.getProjectName()+'/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion11=true;var _didIteratorError11=false;var _iteratorError11=undefined;try{for(var _iterator11=gitHubComments[Symbol.iterator](),_step11;!(_iteratorNormalCompletion11=(_step11=_iterator11.next()).done);_iteratorNormalCompletion11=true){var gitHubComment=_step11.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body,index:gitHubComment.id};comments.push(comment);}}catch(err){_didIteratorError11=true;_iteratorError11=err;}finally {try{if(!_iteratorNormalCompletion11&&_iterator11.return){_iterator11.return();}}finally {if(_didIteratorError11){throw _iteratorError11;}}}callback(comments);});});}}]);return BitBucketApi;}(ApiHelper);module.exports=BitBucketApi;},{"../../../src/client/js/helpers/ApiHelper":18}],15:[function(require,module,exports){'use strict';var ApiHelper=require('../../../src/client/js/helpers/ApiHelper');var labelCache=void 0;var GitHubApi=function(_ApiHelper2){_inherits(GitHubApi,_ApiHelper2);function GitHubApi(){_classCallCheck(this,GitHubApi);return _possibleConstructorReturn(this,Object.getPrototypeOf(GitHubApi).apply(this,arguments));}_createClass(GitHubApi,[{key:"get", // ----------
 // Generic API methods
 // ----------
 /**
@@ -641,34 +951,34 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * @param {String} param
      *
      * @returns {Promise} promise
-     */},{key:"delete",value:function _delete(url,param){var _this5=this;return new Promise(function(reseolve,reject){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+_this5.getApiTokenString(),type:'DELETE',cache:false,success:function success(result){resolve(result);},error:function error(e){_this5.error(e);reject(e);}});});} /**
+     */},{key:"delete",value:function _delete(url,param){var _this38=this;return new Promise(function(reseolve,reject){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+_this38.getApiTokenString(),type:'DELETE',cache:false,success:function success(result){resolve(result);},error:function error(e){_this38.error(e);reject(e);}});});} /**
      * PATCH method
      *
      * @param {String} url
      * @param {Object} data
      *
      * @returns {Promise} promise
-     */},{key:"patch",value:function patch(url,data){var _this6=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this6.getApiTokenString(),type:'PATCH',data:data,cache:false,success:function success(result){resolve(result);},error:function error(e){_this6.error(e);reject(e);}});});} /**
+     */},{key:"patch",value:function patch(url,data){var _this39=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this39.getApiTokenString(),type:'PATCH',data:data,cache:false,success:function success(result){resolve(result);},error:function error(e){_this39.error(e);reject(e);}});});} /**
      * POST method
      *
      * @param {String} url
      * @param {Object} data
      *
      * @returns {Promise} promise
-     */},{key:"post",value:function post(url,data){var _this7=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this7.getApiTokenString(),type:'POST',data:data,cache:false,success:function success(result){resolve(result);},error:function error(e){_this7.error(e);reject(e);}});});} /**
+     */},{key:"post",value:function post(url,data){var _this40=this;if((typeof data==="undefined"?"undefined":_typeof(data))==='object'){data=JSON.stringify(data);}return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this40.getApiTokenString(),type:'POST',data:data,cache:false,success:function success(result){resolve(result);},error:function error(e){_this40.error(e);reject(e);}});});} /**
      * PUT method
      *
      * @param {String} url
      *
      * @returns {Promise} promise
-     */},{key:"put",value:function put(url){var _this8=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this8.getApiTokenString(),type:'PUT',cache:false,success:function success(result){resolve(result);},error:function error(e){_this8.error(e);reject(e);}});});} /**
+     */},{key:"put",value:function put(url){var _this41=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this41.getApiTokenString(),type:'PUT',cache:false,success:function success(result){resolve(result);},error:function error(e){_this41.error(e);reject(e);}});});} /**
      * Error message
      *
      * @param {Object} error
-     */},{key:"error",value:function error(_error){if(_error){switch(_error.status){ //case 401: case 403:
+     */},{key:"error",value:function error(_error2){if(_error2){switch(_error2.status){ //case 401: case 403:
 //    this.resetApiToken();
 //    break;
-default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(_error.statusText);}break;}}} // ----------
+default:if(_error2.responseJSON){alert(_error2.responseJSON.message);}else {alert(_error2.statusText);}break;}}} // ----------
 // Session methods
 // ----------
 /**
@@ -681,50 +991,50 @@ default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(
      * Gets the currently logged in user object
      *
      * @returns {Promise} promise
-     */},{key:"getUser",value:function getUser(){var _this9=this;return new Promise(function(resolve,reject){_this9.get('/user').then(function(gitHubUser){if(Array.isArray(gitHubUser)){gitHubUser=gitHubUser[0];}var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};resolve(user);}).catch(function(e){if(_this9.isSpectating()){resolve({name:'',avatar:''});}else {reject(e);}});});} // ----------
+     */},{key:"getUser",value:function getUser(){var _this42=this;return new Promise(function(resolve,reject){_this42.get('/user').then(function(gitHubUser){if(Array.isArray(gitHubUser)){gitHubUser=gitHubUser[0];}var user={name:gitHubUser.login,avatar:gitHubUser.avatar_url};resolve(user);}).catch(function(e){if(_this42.isSpectating()){resolve({name:'',avatar:''});}else {reject(e);}});});} // ----------
 // Resource getters
 // ----------
 /**
      * Gets projects
      *
      * @returns {Promise} promise
-     */},{key:"getProjects",value:function getProjects(){var _this10=this;return new Promise(function(resolve,reject){_this10.get('/users/'+_this10.getUserName()+'/repos').then(function(repos){_this10.processProjects(repos);resolve();}).catch(reject);});} /**
+     */},{key:"getProjects",value:function getProjects(){var _this43=this;return new Promise(function(resolve,reject){_this43.get('/users/'+_this43.getUserName()+'/repos').then(function(repos){_this43.processProjects(repos);resolve();}).catch(reject);});} /**
      * Gets collaborators
      *
      * @returns {Promise} promise
-     */},{key:"getCollaborators",value:function getCollaborators(){var _this11=this;return new Promise(function(resolve,reject){_this11.get('/repos/'+_this11.getUserName()+'/'+_this11.getProjectName()+'/collaborators').then(function(collaborators){_this11.processCollaborators(collaborators);resolve();}).catch(function(e){if(_this11.isSpectating()){resolve([]);}else {reject(e);}});});} /**
+     */},{key:"getCollaborators",value:function getCollaborators(){var _this44=this;return new Promise(function(resolve,reject){_this44.get('/repos/'+_this44.getUserName()+'/'+_this44.getProjectName()+'/collaborators').then(function(collaborators){_this44.processCollaborators(collaborators);resolve();}).catch(function(e){if(_this44.isSpectating()){resolve([]);}else {reject(e);}});});} /**
      * Gets issues
      *
      * @returns {Promise} promise
-     */},{key:"getIssues",value:function getIssues(){var _this12=this;return new Promise(function(callback){_this12.get('/repos/'+_this12.getUserName()+'/'+_this12.getProjectName()+'/issues','state=all',true).then(function(issues){_this12.processIssues(issues);callback();});});} /**
+     */},{key:"getIssues",value:function getIssues(){var _this45=this;return new Promise(function(callback){_this45.get('/repos/'+_this45.getUserName()+'/'+_this45.getProjectName()+'/issues','state=all',true).then(function(issues){_this45.processIssues(issues);callback();});});} /**
      * Gets labels and caches them
      *
      * @returns {Promise} promise
-     */},{key:"getLabels",value:function getLabels(){var _this13=this;return new Promise(function(callback){if(!labelCache){_this13.get('/repos/'+_this13.getUserName()+'/'+_this13.getProjectName()+'/labels').then(function(labels){labelCache=labels;callback(labelCache);});}else {callback(labelCache);}});} /**
+     */},{key:"getLabels",value:function getLabels(){var _this46=this;return new Promise(function(callback){if(!labelCache){_this46.get('/repos/'+_this46.getUserName()+'/'+_this46.getProjectName()+'/labels').then(function(labels){labelCache=labels;callback(labelCache);});}else {callback(labelCache);}});} /**
      * Gets issue types
      *
      * @returns {Promise} promise
-     */},{key:"getIssueTypes",value:function getIssueTypes(){var _this14=this;return new Promise(function(callback){_this14.getLabels().then(function(labels){_this14.processIssueTypes(labels);callback();});});} /**
+     */},{key:"getIssueTypes",value:function getIssueTypes(){var _this47=this;return new Promise(function(callback){_this47.getLabels().then(function(labels){_this47.processIssueTypes(labels);callback();});});} /**
      * Gets issue columns
      *
      * @returns {Promise} promise
-     */},{key:"getIssueColumns",value:function getIssueColumns(){var _this15=this;return new Promise(function(callback){_this15.getLabels().then(function(labels){_this15.processIssueColumns(labels);callback();});});} /**
+     */},{key:"getIssueColumns",value:function getIssueColumns(){var _this48=this;return new Promise(function(callback){_this48.getLabels().then(function(labels){_this48.processIssueColumns(labels);callback();});});} /**
      * Gets issue priorities
      *
      * @returns {Promise} promise
-     */},{key:"getIssuePriorities",value:function getIssuePriorities(){var _this16=this;return new Promise(function(callback){_this16.getLabels().then(function(labels){_this16.processIssuePriorities(labels);callback();});});} /**
+     */},{key:"getIssuePriorities",value:function getIssuePriorities(){var _this49=this;return new Promise(function(callback){_this49.getLabels().then(function(labels){_this49.processIssuePriorities(labels);callback();});});} /**
      * Gets issue estimates
      *
      * @returns {Promise} promise
-     */},{key:"getIssueEstimates",value:function getIssueEstimates(){var _this17=this;return new Promise(function(callback){_this17.getLabels().then(function(labels){_this17.processIssueEstimates(labels);callback();});});} /**
+     */},{key:"getIssueEstimates",value:function getIssueEstimates(){var _this50=this;return new Promise(function(callback){_this50.getLabels().then(function(labels){_this50.processIssueEstimates(labels);callback();});});} /**
      * Gets versions
      *
      * @returns {Promise} promise
-     */},{key:"getVersions",value:function getVersions(){var _this18=this;return new Promise(function(callback){_this18.getLabels().then(function(labels){_this18.processVersions(labels);callback();});});} /**
+     */},{key:"getVersions",value:function getVersions(){var _this51=this;return new Promise(function(callback){_this51.getLabels().then(function(labels){_this51.processVersions(labels);callback();});});} /**
      * Gets milestones
      *
      * @returns {Promise} promise
-     */},{key:"getMilestones",value:function getMilestones(){var _this19=this;return new Promise(function(callback){_this19.get('/repos/'+_this19.getUserName()+'/'+_this19.getProjectName()+'/milestones').then(function(milestones){_this19.processMilestones(milestones);callback();});});} // ----------
+     */},{key:"getMilestones",value:function getMilestones(){var _this52=this;return new Promise(function(callback){_this52.get('/repos/'+_this52.getUserName()+'/'+_this52.getProjectName()+'/milestones').then(function(milestones){_this52.processMilestones(milestones);callback();});});} // ----------
 // Resource adders
 // ----------
 /**
@@ -733,49 +1043,49 @@ default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(
      * @param {Object} issue
      *
      * @returns {Promise} promise
-     */},{key:"addIssue",value:function addIssue(issue){var _this20=this;return new Promise(function(callback){_this20.post('/repos/'+_this20.getUserName()+'/'+_this20.getProjectName()+'/issues',_this20.convertIssue(issue)).then(function(){callback(issue);});});} /**
+     */},{key:"addIssue",value:function addIssue(issue){var _this53=this;return new Promise(function(callback){_this53.post('/repos/'+_this53.getUserName()+'/'+_this53.getProjectName()+'/issues',_this53.convertIssue(issue)).then(function(){callback(issue);});});} /**
      * Adds collaborator
      *
      * @param {String} collaborator
      *
      * @returns {Promise} promise
-     */},{key:"addCollaborator",value:function addCollaborator(collaborator){var _this21=this;return new Promise(function(callback){_this21.put('/repos/'+_this21.getUserName()+'/'+_this21.getProjectName()+'/collaborators/'+collaborator).then(function(){callback();});});} /**
+     */},{key:"addCollaborator",value:function addCollaborator(collaborator){var _this54=this;return new Promise(function(callback){_this54.put('/repos/'+_this54.getUserName()+'/'+_this54.getProjectName()+'/collaborators/'+collaborator).then(function(){callback();});});} /**
      * Adds issue type
      *
      * @param {String} type
      *
      * @returns {Promise} promise
-     */},{key:"addIssueType",value:function addIssueType(type){var _this22=this;return new Promise(function(callback){_this22.post('/repos/'+_this22.getUserName()+'/'+_this22.getProjectName()+'/labels',{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssueType",value:function addIssueType(type){var _this55=this;return new Promise(function(callback){_this55.post('/repos/'+_this55.getUserName()+'/'+_this55.getProjectName()+'/labels',{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds issue priority
      *
      * @param {String} priority
      *
      * @returns {Promise} promise
-     */},{key:"addIssuePriority",value:function addIssuePriority(priority){var _this23=this;return new Promise(function(callback){_this23.post('/repos/'+_this23.getUserName()+'/'+_this23.getProjectName()+'/labels',{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssuePriority",value:function addIssuePriority(priority){var _this56=this;return new Promise(function(callback){_this56.post('/repos/'+_this56.getUserName()+'/'+_this56.getProjectName()+'/labels',{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds issue estimate
      *
      * @param {String} estimate
      *
      * @returns {Promise} promise
-     */},{key:"addIssueEstimate",value:function addIssueEstimate(estimate){var _this24=this;return new Promise(function(callback){_this24.post('/repos/'+_this24.getUserName()+'/'+_this24.getProjectName()+'/labels',{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssueEstimate",value:function addIssueEstimate(estimate){var _this57=this;return new Promise(function(callback){_this57.post('/repos/'+_this57.getUserName()+'/'+_this57.getProjectName()+'/labels',{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds issue column
      *
      * @param {String} column
      *
      * @returns {Promise} promise
-     */},{key:"addIssueColumn",value:function addIssueColumn(column){var _this25=this;return new Promise(function(callback){_this25.post('/repos/'+_this25.getUserName()+'/'+_this25.getProjectName()+'/labels',{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"addIssueColumn",value:function addIssueColumn(column){var _this58=this;return new Promise(function(callback){_this58.post('/repos/'+_this58.getUserName()+'/'+_this58.getProjectName()+'/labels',{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
      * Adds milestone 
      *
      * @param {Object} milestone
      *
      * @returns {Promise} promise
-     */},{key:"addMilestone",value:function addMilestone(milestone){var _this26=this;return new Promise(function(callback){_this26.post('/repos/'+_this26.getUserName()+'/'+_this26.getProjectName()+'/milestones',_this26.convertMilestone(milestone)).then(function(){callback();});});} /**
+     */},{key:"addMilestone",value:function addMilestone(milestone){var _this59=this;return new Promise(function(callback){_this59.post('/repos/'+_this59.getUserName()+'/'+_this59.getProjectName()+'/milestones',_this59.convertMilestone(milestone)).then(function(){callback();});});} /**
      * Adds version
      *
      * @param {String} version
      *
      * @returns {Promise} promise
-     */},{key:"addVersion",value:function addVersion(version){var _this27=this;return new Promise(function(callback){_this27.post('/repos/'+_this27.getUserName()+'/'+_this27.getProjectName()+'/labels',{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
+     */},{key:"addVersion",value:function addVersion(version){var _this60=this;return new Promise(function(callback){_this60.post('/repos/'+_this60.getUserName()+'/'+_this60.getProjectName()+'/labels',{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
 // Resource removers
 // ----------
 /**
@@ -784,91 +1094,91 @@ default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeCollaborator",value:function removeCollaborator(index){var _this28=this;return new Promise(function(callback){_this28.delete('/repos/'+_this28.getUserName()+'/'+_this28.getProjectName()+'/collaborators/'+window.resources.collaborators[index]).then(function(){callback();});});} /**
+     */},{key:"removeCollaborator",value:function removeCollaborator(index){var _this61=this;return new Promise(function(callback){_this61.delete('/repos/'+_this61.getUserName()+'/'+_this61.getProjectName()+'/collaborators/'+window.resources.collaborators[index]).then(function(){callback();});});} /**
      * Removes issue type
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssueType",value:function removeIssueType(index){var _this29=this;return new Promise(function(callback){_this29.delete('/repos/'+_this29.getUserName()+'/'+_this29.getProjectName()+'/labels/type:'+window.resources.issueTypes[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssueType",value:function removeIssueType(index){var _this62=this;return new Promise(function(callback){_this62.delete('/repos/'+_this62.getUserName()+'/'+_this62.getProjectName()+'/labels/type:'+window.resources.issueTypes[index]).then(function(){callback();});});} /**
      * Removes issue priority
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssuePriority",value:function removeIssuePriority(index){var _this30=this;return new Promise(function(callback){_this30.delete('/repos/'+_this30.getUserName()+'/'+_this30.getProjectName()+'/labels/priority:'+window.resources.issuePriorities[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssuePriority",value:function removeIssuePriority(index){var _this63=this;return new Promise(function(callback){_this63.delete('/repos/'+_this63.getUserName()+'/'+_this63.getProjectName()+'/labels/priority:'+window.resources.issuePriorities[index]).then(function(){callback();});});} /**
      * Removes issue estimate
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssueEstimate",value:function removeIssueEstimate(index){var _this31=this;return new Promise(function(callback){_this31.delete('/repos/'+_this31.getUserName()+'/'+_this31.getProjectName()+'/labels/estimate:'+window.resources.issueEstimates[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssueEstimate",value:function removeIssueEstimate(index){var _this64=this;return new Promise(function(callback){_this64.delete('/repos/'+_this64.getUserName()+'/'+_this64.getProjectName()+'/labels/estimate:'+window.resources.issueEstimates[index]).then(function(){callback();});});} /**
      * Removes issue column
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeIssueColumn",value:function removeIssueColumn(index){var _this32=this;return new Promise(function(callback){_this32.delete('/repos/'+_this32.getUserName()+'/'+_this32.getProjectName()+'/labels/column:'+window.resources.issueColumns[index]).then(function(){callback();});});} /**
+     */},{key:"removeIssueColumn",value:function removeIssueColumn(index){var _this65=this;return new Promise(function(callback){_this65.delete('/repos/'+_this65.getUserName()+'/'+_this65.getProjectName()+'/labels/column:'+window.resources.issueColumns[index]).then(function(){callback();});});} /**
      * Removes milestone 
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeMilestone",value:function removeMilestone(index){var _this33=this;return new Promise(function(callback){_this33.delete('/repos/'+_this33.getUserName()+'/'+_this33.getProjectName()+'/milestones/'+(parseInt(index)+1)).then(function(){callback();});});} /**
+     */},{key:"removeMilestone",value:function removeMilestone(index){var _this66=this;return new Promise(function(callback){_this66.delete('/repos/'+_this66.getUserName()+'/'+_this66.getProjectName()+'/milestones/'+(parseInt(index)+1)).then(function(){callback();});});} /**
      * Removes version
      *
      * @param {Number} index
      *
      * @returns {Promise} promise
-     */},{key:"removeVersion",value:function removeVersion(index){var _this34=this;return new Promise(function(callback){_this34.delete('/repos/'+_this34.getUserName()+'/'+_this34.getProjectName()+'/labels/version:'+window.resources.versions[index]).then(function(){callback();});});} // ----------
+     */},{key:"removeVersion",value:function removeVersion(index){var _this67=this;return new Promise(function(callback){_this67.delete('/repos/'+_this67.getUserName()+'/'+_this67.getProjectName()+'/labels/version:'+window.resources.versions[index]).then(function(){callback();});});} // ----------
 // Resource updaters
 // ----------
 /**
      * Update issue
      *
      * @param {Object} issue
-     */},{key:"updateIssue",value:function updateIssue(issue){var _this35=this;return new Promise(function(callback){_this35.patch('/repos/'+_this35.getUserName()+'/'+_this35.getProjectName()+'/issues/'+(issue.index+1),_this35.convertIssue(issue)).then(function(){callback();});});} /**
+     */},{key:"updateIssue",value:function updateIssue(issue){var _this68=this;return new Promise(function(callback){_this68.patch('/repos/'+_this68.getUserName()+'/'+_this68.getProjectName()+'/issues/'+(issue.index+1),_this68.convertIssue(issue)).then(function(){callback();});});} /**
      * Updates milestone 
      *
      * @param {Object} milestone
      *
      * @returns {Promise} promise
-     */},{key:"updateMilestone",value:function updateMilestone(milestone){var _this36=this;return new Promise(function(callback){_this36.patch('/repos/'+_this36.getUserName()+'/'+_this36.getProjectName()+'/milestones/'+(parseInt(milestone.index)+1),_this36.convertMilestone(milestone)).then(function(){callback();});});} /**
+     */},{key:"updateMilestone",value:function updateMilestone(milestone){var _this69=this;return new Promise(function(callback){_this69.patch('/repos/'+_this69.getUserName()+'/'+_this69.getProjectName()+'/milestones/'+(parseInt(milestone.index)+1),_this69.convertMilestone(milestone)).then(function(){callback();});});} /**
      * Updates issue type
      *
      * @param {String} type
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssueType",value:function updateIssueType(type,previousName){var _this37=this;return new Promise(function(callback){_this37.patch('/repos/'+_this37.getUserName()+'/'+_this37.getProjectName()+'/labels/type:'+previousName,{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssueType",value:function updateIssueType(type,previousName){var _this70=this;return new Promise(function(callback){_this70.patch('/repos/'+_this70.getUserName()+'/'+_this70.getProjectName()+'/labels/type:'+previousName,{name:'type:'+type,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates issue priority
      *
      * @param {String} priority
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssuePriority",value:function updateIssuePriority(priority,previousName){var _this38=this;return new Promise(function(callback){_this38.patch('/repos/'+_this38.getUserName()+'/'+_this38.getProjectName()+'/labels/priority:'+previousName,{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssuePriority",value:function updateIssuePriority(priority,previousName){var _this71=this;return new Promise(function(callback){_this71.patch('/repos/'+_this71.getUserName()+'/'+_this71.getProjectName()+'/labels/priority:'+previousName,{name:'priority:'+priority,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates issue estimate
      *
      * @param {String} estimate
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssueEstimate",value:function updateIssueEstimate(estimate,previousName){var _this39=this;return new Promise(function(callback){_this39.patch('/repos/'+_this39.getUserName()+'/'+_this39.getProjectName()+'/labels/estimate:'+previousName,{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssueEstimate",value:function updateIssueEstimate(estimate,previousName){var _this72=this;return new Promise(function(callback){_this72.patch('/repos/'+_this72.getUserName()+'/'+_this72.getProjectName()+'/labels/estimate:'+previousName,{name:'estimate:'+estimate,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates issue column
      *
      * @param {String} column
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateIssueColumn",value:function updateIssueColumn(column,previousName){var _this40=this;return new Promise(function(callback){_this40.patch('/repos/'+_this40.getUserName()+'/'+_this40.getProjectName()+'/labels/column:'+previousName,{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
+     */},{key:"updateIssueColumn",value:function updateIssueColumn(column,previousName){var _this73=this;return new Promise(function(callback){_this73.patch('/repos/'+_this73.getUserName()+'/'+_this73.getProjectName()+'/labels/column:'+previousName,{name:'column:'+column,color:'ffffff'}).then(function(){callback();});});} /**
      * Updates version
      *
      * @param {String} version
      * @param {String} previousName
      *
      * @returns {Promise} promise
-     */},{key:"updateVersion",value:function updateVersion(version,previousName){var _this41=this;return new Promise(function(callback){_this41.patch('/repos/'+_this41.getUserName()+'/'+_this41.getProjectName()+'/labels/version:'+previousName,{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
+     */},{key:"updateVersion",value:function updateVersion(version,previousName){var _this74=this;return new Promise(function(callback){_this74.patch('/repos/'+_this74.getUserName()+'/'+_this74.getProjectName()+'/labels/version:'+previousName,{name:'version:'+version,color:'ffffff'}).then(function(){callback();});});} // ----------
 // Resource processing methods
 // ----------
 /**
@@ -883,31 +1193,31 @@ default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(
      * Process versions
      *
      * @param {Array} labels
-     */},{key:"processVersions",value:function processVersions(labels){window.resources.versions=[];var _iteratorNormalCompletion5=true;var _didIteratorError5=false;var _iteratorError5=undefined;try{for(var _iterator5=labels[Symbol.iterator](),_step5;!(_iteratorNormalCompletion5=(_step5=_iterator5.next()).done);_iteratorNormalCompletion5=true){var label=_step5.value;var versionIndex=label.name.indexOf('version:');if(versionIndex>-1){var versionName=label.name.replace('version:','');window.resources.versions.push(versionName);}}}catch(err){_didIteratorError5=true;_iteratorError5=err;}finally {try{if(!_iteratorNormalCompletion5&&_iterator5.return){_iterator5.return();}}finally {if(_didIteratorError5){throw _iteratorError5;}}}} /**
+     */},{key:"processVersions",value:function processVersions(labels){window.resources.versions=[];var _iteratorNormalCompletion12=true;var _didIteratorError12=false;var _iteratorError12=undefined;try{for(var _iterator12=labels[Symbol.iterator](),_step12;!(_iteratorNormalCompletion12=(_step12=_iterator12.next()).done);_iteratorNormalCompletion12=true){var label=_step12.value;var versionIndex=label.name.indexOf('version:');if(versionIndex>-1){var versionName=label.name.replace('version:','');window.resources.versions.push(versionName);}}}catch(err){_didIteratorError12=true;_iteratorError12=err;}finally {try{if(!_iteratorNormalCompletion12&&_iterator12.return){_iterator12.return();}}finally {if(_didIteratorError12){throw _iteratorError12;}}}} /**
      * Process issue priotities
      *
      * @param {Array} labels
-     */},{key:"processIssuePriorities",value:function processIssuePriorities(labels){window.resources.issuePriorities=[];var _iteratorNormalCompletion6=true;var _didIteratorError6=false;var _iteratorError6=undefined;try{for(var _iterator6=labels[Symbol.iterator](),_step6;!(_iteratorNormalCompletion6=(_step6=_iterator6.next()).done);_iteratorNormalCompletion6=true){var label=_step6.value;var index=label.name.indexOf('priority:');if(index>-1){var name=label.name.replace('priority:','');window.resources.issuePriorities.push(name);}}}catch(err){_didIteratorError6=true;_iteratorError6=err;}finally {try{if(!_iteratorNormalCompletion6&&_iterator6.return){_iterator6.return();}}finally {if(_didIteratorError6){throw _iteratorError6;}}}} /**
+     */},{key:"processIssuePriorities",value:function processIssuePriorities(labels){window.resources.issuePriorities=[];var _iteratorNormalCompletion13=true;var _didIteratorError13=false;var _iteratorError13=undefined;try{for(var _iterator13=labels[Symbol.iterator](),_step13;!(_iteratorNormalCompletion13=(_step13=_iterator13.next()).done);_iteratorNormalCompletion13=true){var label=_step13.value;var index=label.name.indexOf('priority:');if(index>-1){var name=label.name.replace('priority:','');window.resources.issuePriorities.push(name);}}}catch(err){_didIteratorError13=true;_iteratorError13=err;}finally {try{if(!_iteratorNormalCompletion13&&_iterator13.return){_iterator13.return();}}finally {if(_didIteratorError13){throw _iteratorError13;}}}} /**
      * Process issue estimates
      *
      * @param {Array} labels
-     */},{key:"processIssueEstimates",value:function processIssueEstimates(labels){window.resources.issueEstimates=[];var _iteratorNormalCompletion7=true;var _didIteratorError7=false;var _iteratorError7=undefined;try{for(var _iterator7=labels[Symbol.iterator](),_step7;!(_iteratorNormalCompletion7=(_step7=_iterator7.next()).done);_iteratorNormalCompletion7=true){var label=_step7.value;var index=label.name.indexOf('estimate:');if(index>-1){var name=label.name.replace('estimate:','');window.resources.issueEstimates.push(name);}}}catch(err){_didIteratorError7=true;_iteratorError7=err;}finally {try{if(!_iteratorNormalCompletion7&&_iterator7.return){_iterator7.return();}}finally {if(_didIteratorError7){throw _iteratorError7;}}}window.resources.issueEstimates.sort(function(a,b){a=parseFloat(a);b=parseFloat(b);if(a<b){return -1;}if(a>b){return 1;}return 0;});} /**
+     */},{key:"processIssueEstimates",value:function processIssueEstimates(labels){window.resources.issueEstimates=[];var _iteratorNormalCompletion14=true;var _didIteratorError14=false;var _iteratorError14=undefined;try{for(var _iterator14=labels[Symbol.iterator](),_step14;!(_iteratorNormalCompletion14=(_step14=_iterator14.next()).done);_iteratorNormalCompletion14=true){var label=_step14.value;var index=label.name.indexOf('estimate:');if(index>-1){var name=label.name.replace('estimate:','');window.resources.issueEstimates.push(name);}}}catch(err){_didIteratorError14=true;_iteratorError14=err;}finally {try{if(!_iteratorNormalCompletion14&&_iterator14.return){_iterator14.return();}}finally {if(_didIteratorError14){throw _iteratorError14;}}}window.resources.issueEstimates.sort(function(a,b){a=parseFloat(a);b=parseFloat(b);if(a<b){return -1;}if(a>b){return 1;}return 0;});} /**
      * Process issue columns
      *
      * @param {Array} labels
-     */},{key:"processIssueColumns",value:function processIssueColumns(labels){window.resources.issueColumns=[];window.resources.issueColumns.push('to do');var _iteratorNormalCompletion8=true;var _didIteratorError8=false;var _iteratorError8=undefined;try{for(var _iterator8=labels[Symbol.iterator](),_step8;!(_iteratorNormalCompletion8=(_step8=_iterator8.next()).done);_iteratorNormalCompletion8=true){var label=_step8.value;var index=label.name.indexOf('column:');if(index>-1){var name=label.name.replace('column:','');window.resources.issueColumns.push(name);}}}catch(err){_didIteratorError8=true;_iteratorError8=err;}finally {try{if(!_iteratorNormalCompletion8&&_iterator8.return){_iterator8.return();}}finally {if(_didIteratorError8){throw _iteratorError8;}}}window.resources.issueColumns.push('done');} /**
+     */},{key:"processIssueColumns",value:function processIssueColumns(labels){window.resources.issueColumns=[];window.resources.issueColumns.push('to do');var _iteratorNormalCompletion15=true;var _didIteratorError15=false;var _iteratorError15=undefined;try{for(var _iterator15=labels[Symbol.iterator](),_step15;!(_iteratorNormalCompletion15=(_step15=_iterator15.next()).done);_iteratorNormalCompletion15=true){var label=_step15.value;var index=label.name.indexOf('column:');if(index>-1){var name=label.name.replace('column:','');window.resources.issueColumns.push(name);}}}catch(err){_didIteratorError15=true;_iteratorError15=err;}finally {try{if(!_iteratorNormalCompletion15&&_iterator15.return){_iterator15.return();}}finally {if(_didIteratorError15){throw _iteratorError15;}}}window.resources.issueColumns.push('done');} /**
      * Process issue types
      *
      * @param {Array} labels
-     */},{key:"processIssueTypes",value:function processIssueTypes(labels){window.resources.issueTypes=[];var _iteratorNormalCompletion9=true;var _didIteratorError9=false;var _iteratorError9=undefined;try{for(var _iterator9=labels[Symbol.iterator](),_step9;!(_iteratorNormalCompletion9=(_step9=_iterator9.next()).done);_iteratorNormalCompletion9=true){var label=_step9.value;var index=label.name.indexOf('type:');if(index>-1){var name=label.name.replace('type:','');window.resources.issueTypes.push(name);}}}catch(err){_didIteratorError9=true;_iteratorError9=err;}finally {try{if(!_iteratorNormalCompletion9&&_iterator9.return){_iterator9.return();}}finally {if(_didIteratorError9){throw _iteratorError9;}}}} /**
+     */},{key:"processIssueTypes",value:function processIssueTypes(labels){window.resources.issueTypes=[];var _iteratorNormalCompletion16=true;var _didIteratorError16=false;var _iteratorError16=undefined;try{for(var _iterator16=labels[Symbol.iterator](),_step16;!(_iteratorNormalCompletion16=(_step16=_iterator16.next()).done);_iteratorNormalCompletion16=true){var label=_step16.value;var index=label.name.indexOf('type:');if(index>-1){var name=label.name.replace('type:','');window.resources.issueTypes.push(name);}}}catch(err){_didIteratorError16=true;_iteratorError16=err;}finally {try{if(!_iteratorNormalCompletion16&&_iterator16.return){_iterator16.return();}}finally {if(_didIteratorError16){throw _iteratorError16;}}}} /**
      * Process collaborators
      *
      * @param {Array} collaborators
-     */},{key:"processCollaborators",value:function processCollaborators(collaborators){window.resources.collaborators=[];var _iteratorNormalCompletion10=true;var _didIteratorError10=false;var _iteratorError10=undefined;try{for(var _iterator10=collaborators[Symbol.iterator](),_step10;!(_iteratorNormalCompletion10=(_step10=_iterator10.next()).done);_iteratorNormalCompletion10=true){var collaborator=_step10.value;window.resources.collaborators.push({name:collaborator.login,avatar:collaborator.avatar_url});}}catch(err){_didIteratorError10=true;_iteratorError10=err;}finally {try{if(!_iteratorNormalCompletion10&&_iterator10.return){_iterator10.return();}}finally {if(_didIteratorError10){throw _iteratorError10;}}}} /**
+     */},{key:"processCollaborators",value:function processCollaborators(collaborators){window.resources.collaborators=[];var _iteratorNormalCompletion17=true;var _didIteratorError17=false;var _iteratorError17=undefined;try{for(var _iterator17=collaborators[Symbol.iterator](),_step17;!(_iteratorNormalCompletion17=(_step17=_iterator17.next()).done);_iteratorNormalCompletion17=true){var collaborator=_step17.value;window.resources.collaborators.push({name:collaborator.login,avatar:collaborator.avatar_url});}}catch(err){_didIteratorError17=true;_iteratorError17=err;}finally {try{if(!_iteratorNormalCompletion17&&_iterator17.return){_iterator17.return();}}finally {if(_didIteratorError17){throw _iteratorError17;}}}} /**
      * Process issues
      *
      * @param {Array} issues
-     */},{key:"processIssues",value:function processIssues(issues){window.resources.issues=[];var _iteratorNormalCompletion11=true;var _didIteratorError11=false;var _iteratorError11=undefined;try{for(var _iterator11=issues[Symbol.iterator](),_step11;!(_iteratorNormalCompletion11=(_step11=_iterator11.next()).done);_iteratorNormalCompletion11=true){var gitHubIssue=_step11.value;var issue=new Issue();issue.title=gitHubIssue.title;issue.description=gitHubIssue.body;issue.reporter=ResourceHelper.getCollaborator(gitHubIssue.user.login);if(gitHubIssue.assignee){issue.assignee=ResourceHelper.getCollaborator(gitHubIssue.assignee.login);}var _iteratorNormalCompletion12=true;var _didIteratorError12=false;var _iteratorError12=undefined;try{for(var _iterator12=gitHubIssue.labels[Symbol.iterator](),_step12;!(_iteratorNormalCompletion12=(_step12=_iterator12.next()).done);_iteratorNormalCompletion12=true){var label=_step12.value;var typeIndex=label.name.indexOf('type:');var priorityIndex=label.name.indexOf('priority:');var estimateIndex=label.name.indexOf('estimate:');var versionIndex=label.name.indexOf('version:');var columnIndex=label.name.indexOf('column:');if(typeIndex>-1){var name=label.name.replace('type:','');issue.type=ResourceHelper.getIssueType(name);}else if(versionIndex>-1){var _name=label.name.replace('version:','');issue.version=ResourceHelper.getVersion(_name);}else if(estimateIndex>-1){var _name2=label.name.replace('estimate:','');issue.estimate=ResourceHelper.getIssueEstimate(_name2);}else if(priorityIndex>-1){var _name3=label.name.replace('priority:','');issue.priority=ResourceHelper.getIssuePriority(_name3);}else if(columnIndex>-1){var _name4=label.name.replace('column:','');issue.column=ResourceHelper.getIssueColumn(_name4);}else {issue.labels.push(label);}}}catch(err){_didIteratorError12=true;_iteratorError12=err;}finally {try{if(!_iteratorNormalCompletion12&&_iterator12.return){_iterator12.return();}}finally {if(_didIteratorError12){throw _iteratorError12;}}}if(gitHubIssue.state=='closed'){issue.column=resources.issueColumns.length-1;}if(gitHubIssue.milestone){issue.milestone=ResourceHelper.getMilestone(gitHubIssue.milestone.title);}issue.index=parseInt(gitHubIssue.number)-1;window.resources.issues[issue.index]=issue;}}catch(err){_didIteratorError11=true;_iteratorError11=err;}finally {try{if(!_iteratorNormalCompletion11&&_iterator11.return){_iterator11.return();}}finally {if(_didIteratorError11){throw _iteratorError11;}}}} /**
+     */},{key:"processIssues",value:function processIssues(issues){window.resources.issues=[];var _iteratorNormalCompletion18=true;var _didIteratorError18=false;var _iteratorError18=undefined;try{for(var _iterator18=issues[Symbol.iterator](),_step18;!(_iteratorNormalCompletion18=(_step18=_iterator18.next()).done);_iteratorNormalCompletion18=true){var gitHubIssue=_step18.value;var issue=new Issue();issue.title=gitHubIssue.title;issue.description=gitHubIssue.body;issue.id=gitHubIssue.number;issue.reporter=ResourceHelper.getCollaborator(gitHubIssue.user.login);if(gitHubIssue.assignee){issue.assignee=ResourceHelper.getCollaborator(gitHubIssue.assignee.login);}var _iteratorNormalCompletion19=true;var _didIteratorError19=false;var _iteratorError19=undefined;try{for(var _iterator19=gitHubIssue.labels[Symbol.iterator](),_step19;!(_iteratorNormalCompletion19=(_step19=_iterator19.next()).done);_iteratorNormalCompletion19=true){var label=_step19.value;var typeIndex=label.name.indexOf('type:');var priorityIndex=label.name.indexOf('priority:');var estimateIndex=label.name.indexOf('estimate:');var versionIndex=label.name.indexOf('version:');var columnIndex=label.name.indexOf('column:');if(typeIndex>-1){var name=label.name.replace('type:','');issue.type=ResourceHelper.getIssueType(name);}else if(versionIndex>-1){var _name=label.name.replace('version:','');issue.version=ResourceHelper.getVersion(_name);}else if(estimateIndex>-1){var _name2=label.name.replace('estimate:','');issue.estimate=ResourceHelper.getIssueEstimate(_name2);}else if(priorityIndex>-1){var _name3=label.name.replace('priority:','');issue.priority=ResourceHelper.getIssuePriority(_name3);}else if(columnIndex>-1){var _name4=label.name.replace('column:','');issue.column=ResourceHelper.getIssueColumn(_name4);}else {issue.labels.push(label);}}}catch(err){_didIteratorError19=true;_iteratorError19=err;}finally {try{if(!_iteratorNormalCompletion19&&_iterator19.return){_iterator19.return();}}finally {if(_didIteratorError19){throw _iteratorError19;}}}if(gitHubIssue.state=='closed'){issue.column=resources.issueColumns.length-1;}if(gitHubIssue.milestone){issue.milestone=ResourceHelper.getMilestone(gitHubIssue.milestone.title);}issue.index=parseInt(gitHubIssue.number)-1;window.resources.issues[issue.index]=issue;}}catch(err){_didIteratorError18=true;_iteratorError18=err;}finally {try{if(!_iteratorNormalCompletion18&&_iterator18.return){_iterator18.return();}}finally {if(_didIteratorError18){throw _iteratorError18;}}}} /**
      * Convert milestone model to GitHub schema
      *
      * @param {Object} milestone
@@ -916,7 +1226,7 @@ default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(
      *
      * @param {Object} issue
      */},{key:"convertIssue",value:function convertIssue(issue){ // Directly mappable properties
-var gitHubIssue={title:issue.title,body:issue.description,labels:[]}; // Assignee
+var gitHubIssue={title:issue.title,body:issue.description,number:issue.id,labels:[]}; // Assignee
 var assignee=resources.collaborators[issue.assignee];if(assignee){gitHubIssue.assignee=assignee.name;}else {gitHubIssue.assignee='';} // State
 var issueColumn=resources.issueColumns[issue.column];gitHubIssue.state=issueColumn=='done'?'closed':'open'; // Milestone
 // GitHub counts numbers from 1, ' + this.getProjectName() + ' counts from 0
@@ -930,26 +1240,27 @@ if(issueColumn&&issueColumn!='to do'&&issueColumn!='done'){gitHubIssue.labels.pu
      *
      * @param {Issue} issue
      * @param {String} text
-     */},{key:"addIssueComment",value:function addIssueComment(issue,text){var _this42=this;return new Promise(function(callback){_this42.post('/repos/'+_this42.getUserName()+'/'+_this42.getProjectName()+'/issues/'+(issue.index+1)+'/comments',{body:text}).then(function(){callback();});});} /**
+     */},{key:"addIssueComment",value:function addIssueComment(issue,text){var _this75=this;return new Promise(function(callback){_this75.post('/repos/'+_this75.getUserName()+'/'+_this75.getProjectName()+'/issues/'+(issue.index+1)+'/comments',{body:text}).then(function(){callback();});});} /**
      * Update issue comment
      *
      * @param {Issue} issue
      * @param {Object} comment
-     */},{key:"updateIssueComment",value:function updateIssueComment(issue,comment){var _this43=this;return new Promise(function(callback){_this43.patch('/repos/'+_this43.getUserName()+'/'+_this43.getProjectName()+'/issues/comments/'+comment.index,{body:comment.text}).then(function(){callback();});});} /**
+     */},{key:"updateIssueComment",value:function updateIssueComment(issue,comment){var _this76=this;return new Promise(function(callback){_this76.patch('/repos/'+_this76.getUserName()+'/'+_this76.getProjectName()+'/issues/comments/'+comment.index,{body:comment.text}).then(function(){callback();});});} /**
      * Get issue comments
      *
      * @param {Object} issue
      *
      * @returns {Promise} promise
-     */},{key:"getIssueComments",value:function getIssueComments(issue){var _this44=this;return new Promise(function(callback){_this44.get('/repos/'+_this44.getUserName()+'/'+_this44.getProjectName()+'/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion13=true;var _didIteratorError13=false;var _iteratorError13=undefined;try{for(var _iterator13=gitHubComments[Symbol.iterator](),_step13;!(_iteratorNormalCompletion13=(_step13=_iterator13.next()).done);_iteratorNormalCompletion13=true){var gitHubComment=_step13.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body,index:gitHubComment.id};comments.push(comment);}}catch(err){_didIteratorError13=true;_iteratorError13=err;}finally {try{if(!_iteratorNormalCompletion13&&_iterator13.return){_iterator13.return();}}finally {if(_didIteratorError13){throw _iteratorError13;}}}callback(comments);});});}}]);return GitHubApi;}(ApiHelper);module.exports=GitHubApi;},{"../../../src/client/js/helpers/ApiHelper":17}],15:[function(require,module,exports){'use strict'; // Package
+     */},{key:"getIssueComments",value:function getIssueComments(issue){var _this77=this;return new Promise(function(callback){_this77.get('/repos/'+_this77.getUserName()+'/'+_this77.getProjectName()+'/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion20=true;var _didIteratorError20=false;var _iteratorError20=undefined;try{for(var _iterator20=gitHubComments[Symbol.iterator](),_step20;!(_iteratorNormalCompletion20=(_step20=_iterator20.next()).done);_iteratorNormalCompletion20=true){var gitHubComment=_step20.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body,index:gitHubComment.id};comments.push(comment);}}catch(err){_didIteratorError20=true;_iteratorError20=err;}finally {try{if(!_iteratorNormalCompletion20&&_iterator20.return){_iterator20.return();}}finally {if(_didIteratorError20){throw _iteratorError20;}}}callback(comments);});});}}]);return GitHubApi;}(ApiHelper);module.exports=GitHubApi;},{"../../../src/client/js/helpers/ApiHelper":18}],16:[function(require,module,exports){'use strict'; // Package
 window.app=require('../../../package.json'); // Libs
-require('exomon');window.Promise=require('bluebird');window.marked=require('marked');Promise.onPossiblyUnhandledRejection(function(error,promise){debug.warning(error,Promise);}); // Helpers
-window.ResourceHelper=require('./helpers/ResourceHelper');window.SettingsHelper=require('./helpers/SettingsHelper');window.InputHelper=require('./helpers/InputHelper');window.IssueHelper=require('./helpers/IssueHelper');window.DebugHelper=require('./helpers/DebugHelper');window.debug=window.DebugHelper;window.debug.verbosity=1;var GitHubApi=require('../../../plugins/github/js/GitHubApi');window.ApiHelper=new GitHubApi(); // Models
+require('exomon');window.Promise=require('bluebird');window.marked=require('marked');Promise.onPossiblyUnhandledRejection(function(error,promise){debug.warning(error,Promise);}); // Globals
+require('./globals'); // Helpers
+window.ResourceHelper=require('./helpers/ResourceHelper');window.SettingsHelper=require('./helpers/SettingsHelper');window.InputHelper=require('./helpers/InputHelper');window.IssueHelper=require('./helpers/IssueHelper');window.DebugHelper=require('./helpers/DebugHelper');window.debug=window.DebugHelper;window.debug.verbosity=1;var GitHubApi=require('../../../plugins/github/js/GitHubApi');var BitBucketApi=require('../../../plugins/bitbucket/js/BitBucketApi');switch(getSource()){case 'bitbucket':window.ApiHelper=new BitBucketApi();break;case 'github':window.ApiHelper=new GitHubApi();break;default:location='/login';debug.error('No source provided',this);break;} // Models
 window.Issue=require('./models/Issue'); // Views
-window.Navbar=require('./views/Navbar');window.IssueEditor=require('./views/IssueEditor');window.MilestoneEditor=require('./views/MilestoneEditor');window.ResourceEditor=require('./views/ResourceEditor');window.PlanItemEditor=require('./views/PlanItemEditor');window.PlanEditor=require('./views/PlanEditor');window.ProjectEditor=require('./views/ProjectEditor');window.FilterEditor=require('./views/FilterEditor'); // Globals
-require('./globals'); // Routes
+window.Navbar=require('./views/Navbar');window.IssueEditor=require('./views/IssueEditor');window.MilestoneEditor=require('./views/MilestoneEditor');window.ResourceEditor=require('./views/ResourceEditor');window.PlanItemEditor=require('./views/PlanItemEditor');window.PlanEditor=require('./views/PlanEditor');window.ProjectEditor=require('./views/ProjectEditor');window.FilterEditor=require('./views/FilterEditor'); // Routes
 require('./routes'); // Title
-$('head title').html((Router.params.project?Router.params.project+' - ':'')+'Samoosa');},{"../../../package.json":13,"../../../plugins/github/js/GitHubApi":14,"./globals":16,"./helpers/DebugHelper":18,"./helpers/InputHelper":19,"./helpers/IssueHelper":20,"./helpers/ResourceHelper":21,"./helpers/SettingsHelper":22,"./models/Issue":23,"./routes":24,"./views/FilterEditor":33,"./views/IssueEditor":34,"./views/MilestoneEditor":35,"./views/Navbar":36,"./views/PlanEditor":37,"./views/PlanItemEditor":38,"./views/ProjectEditor":39,"./views/ResourceEditor":40,"bluebird":1,"exomon":8,"marked":9}],16:[function(require,module,exports){'use strict'; // Convert to HTML from markdown
+$('head title').html((Router.params.project?Router.params.project+' - ':'')+'Samoosa');},{"../../../package.json":13,"../../../plugins/bitbucket/js/BitBucketApi":14,"../../../plugins/github/js/GitHubApi":15,"./globals":17,"./helpers/DebugHelper":19,"./helpers/InputHelper":20,"./helpers/IssueHelper":21,"./helpers/ResourceHelper":22,"./helpers/SettingsHelper":23,"./models/Issue":24,"./routes":25,"./views/FilterEditor":34,"./views/IssueEditor":35,"./views/MilestoneEditor":36,"./views/Navbar":37,"./views/PlanEditor":38,"./views/PlanItemEditor":39,"./views/ProjectEditor":40,"./views/ResourceEditor":41,"bluebird":1,"exomon":8,"marked":9}],17:[function(require,module,exports){'use strict'; // Get source
+window.getSource=function getSource(){var source=localStorage.getItem('source');if(!source&&Router.query('source')){source=Router.query('source');}return source;}; // Convert to HTML from markdown
 window.markdownToHtml=function(string){if(string){try{var html=marked(string);html=html.replace(/\[ \]/g,'<input type="checkbox" disabled readonly>');html=html.replace(/\[x\]/g,'<input type="checkbox" checked="checked" disabled readonly>');return html;}catch(e){console.log(e);}}}; // Simple date string
 Date.prototype.getSimpleString=function(){return this.getFullYear()+'-'+(this.getMonth()+1)+'-'+this.getDate();}; // Floor date extension
 Date.prototype.floor=function(){this.setHours(0,0,0,0);return this;}; // Get ISO day
@@ -961,7 +1272,7 @@ window.prettyName=function(name){var prettyName=name;for(var i in prettyName){if
 window.prettyDate=function(date,separator){var prettyDate='';if(date){if(date.constructor===String){date=new Date(date);}date.floor();separator=separator||'.';prettyDate=date.getFullYear()+separator+(date.getMonth()+1)+separator+date.getDate();}return prettyDate;}; // Spinner
 window.spinner=function(active){$('.spinner-backdrop').remove();if(active){$('body').append(_.div({class:'spinner-backdrop'},_.div({class:'spinner-container'},_.span({class:'spinner-icon fa fa-refresh'}))));}}; // Scroll on page
 window.scroll=function(amount){var current=$(document).scrollTop();$(document).scrollTop(current+amount);}; // Sort array by date
-window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a=new Date(a[key]).floor();b=new Date(b[key]).floor();if(a<b){return -1;}if(a>b){return 1;}return 0;});};},{}],17:[function(require,module,exports){'use strict';var ApiHelper=function(){function ApiHelper(){_classCallCheck(this,ApiHelper);}_createClass(ApiHelper,[{key:"isSpectating", // ----------
+window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a=new Date(a[key]).floor();b=new Date(b[key]).floor();if(a<b){return -1;}if(a>b){return 1;}return 0;});};},{}],18:[function(require,module,exports){'use strict';var ApiHelper=function(){function ApiHelper(){_classCallCheck(this,ApiHelper);}_createClass(ApiHelper,[{key:"isSpectating", // ----------
 // Checkers
 // ----------
 /**
@@ -970,7 +1281,7 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
      * Check whether the connection to the source has been made
      */},{key:"checkConnection",value:function checkConnection(){return new Promise(function(callback){callback();});} // ----------
 // Session methods
-// ----------
+// ---------- 
 /**
      * Gets the API token and prompts for one if needed
      * 
@@ -1258,7 +1569,7 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
      * @returns {Promise} promise
      */},{key:"getResources",value:function getResources(excludeResources){var helper=this;spinner(true);return new Promise(function(resolve,reject){function get(resource){window.resources[resource]=[];debug.log('Getting '+resource+'...',helper); // If this resource is excluded, just proceed
 if(excludeResources&&Array.isArray(excludeResources)&&excludeResources.indexOf(resource)>-1){return new Promise(function(resolve){resolve();}); // If not, fetch it normally
-}else {return helper.getResource(resource);}}get('issueTypes').then(function(){return get('issuePriorities');}).then(function(){return get('issueEstimates');}).then(function(){return get('issueColumns');}).then(function(){return get('collaborators');}).then(function(){return get('milestones');}).then(function(){return get('versions');}).then(function(){return get('issues');}).then(function(){spinner(false);resolve();});});}}]);return ApiHelper;}();module.exports=ApiHelper;},{}],18:[function(require,module,exports){'use strict';var lastSenderName='';var DebugHelper=function(){function DebugHelper(){_classCallCheck(this,DebugHelper);}_createClass(DebugHelper,null,[{key:"log", /**
+}else {return helper.getResource(resource);}}get('issueTypes').then(function(){return get('issuePriorities');}).then(function(){return get('issueEstimates');}).then(function(){return get('issueColumns');}).then(function(){return get('collaborators');}).then(function(){return get('milestones');}).then(function(){return get('versions');}).then(function(){return get('issues');}).then(function(){spinner(false);resolve();});});}}]);return ApiHelper;}();module.exports=ApiHelper;},{}],19:[function(require,module,exports){'use strict';var lastSenderName='';var DebugHelper=function(){function DebugHelper(){_classCallCheck(this,DebugHelper);}_createClass(DebugHelper,null,[{key:"log", /**
      * Logs a message
      *
      * @param {String} message
@@ -1281,18 +1592,18 @@ if(excludeResources&&Array.isArray(excludeResources)&&excludeResources.indexOf(r
      * @param {Object} sender
      */},{key:"error",value:function error(message,sender){throw new Error(this.parseSender(sender)+' '+this.getDateString()+' '+message);} /**
      * Shows a warning
-     */},{key:"warning",value:function warning(message,sender){console.log(this.parseSender(sender),this.getDateString(),message);console.trace();}}]);return DebugHelper;}();module.exports=DebugHelper;},{}],19:[function(require,module,exports){'use strict'; // The idle timeout is 10 minutes
+     */},{key:"warning",value:function warning(message,sender){console.log(this.parseSender(sender),this.getDateString(),message);console.trace();}}]);return DebugHelper;}();module.exports=DebugHelper;},{}],20:[function(require,module,exports){'use strict'; // The idle timeout is 10 minutes
 var IDLE_TIMEOUT=600;var idleTimer=0; /**
  * A helper module for input events
  *
  * @class InputHelper
- */var InputHelper=function(){function InputHelper(){_classCallCheck(this,InputHelper);}_createClass(InputHelper,null,[{key:"init",value:function init(){var _this45=this; // Register keydown events
-$(document).keydown(function(e){switch(e.which){case 16:_this45.isShiftDown=true;break;}InputHelper.poke();}); // Register keyup events
-$(document).keyup(function(e){switch(e.which){case 16:_this45.isShiftDown=false;break;case 27:IssueEditor.cancelMultiSelect();break;}}); // Register mousedown event
+ */var InputHelper=function(){function InputHelper(){_classCallCheck(this,InputHelper);}_createClass(InputHelper,null,[{key:"init",value:function init(){var _this78=this; // Register keydown events
+$(document).keydown(function(e){switch(e.which){case 16:_this78.isShiftDown=true;break;}InputHelper.poke();}); // Register keyup events
+$(document).keyup(function(e){switch(e.which){case 16:_this78.isShiftDown=false;break;case 27:IssueEditor.cancelMultiSelect();break;}}); // Register mousedown event
 $(document).mousedown(function(e){var $target=$(e.target); // Handle multi-select cancel event
 if($target.parents('.issue-editor').length<1&&!$target.hasClass('issue-editor')){IssueEditor.cancelMultiSelect();} // Reset the idle timer
 InputHelper.poke();}); // Register idle timer
-setInterval(function(){_this45.incrementIdleTimer();},1000);} /**
+setInterval(function(){_this78.incrementIdleTimer();},1000);} /**
      * Increments the idle timer
      */},{key:"incrementIdleTimer",value:function incrementIdleTimer(){idleTimer++;if(idleTimer>=IDLE_TIMEOUT){ // Do something after idle timeout
 }} /**
@@ -1301,7 +1612,7 @@ setInterval(function(){_this45.incrementIdleTimer();},1000);} /**
      * Gets the current idle timer
      *
      * @returns {Number} timer
-     */},{key:"getIdleTimer",value:function getIdleTimer(){return idleTimer;}}]);return InputHelper;}();InputHelper.init();module.exports=InputHelper;},{}],20:[function(require,module,exports){'use strict'; /**
+     */},{key:"getIdleTimer",value:function getIdleTimer(){return idleTimer;}}]);return InputHelper;}();InputHelper.init();module.exports=InputHelper;},{}],21:[function(require,module,exports){'use strict'; /**
  * A tool for performing Issue related operations
  */var IssueHelper=function(){function IssueHelper(){_classCallCheck(this,IssueHelper);}_createClass(IssueHelper,null,[{key:"search", /**
      * Find an issue by a query
@@ -1310,7 +1621,7 @@ setInterval(function(){_this45.incrementIdleTimer();},1000);} /**
      * @param {Number} max
      *
      * @returns {Array(Issue)}
-     */value:function search(query,max){var results=[];var found=0;for(var i=0;i<resources.issues.length;i++){var string=JSON.stringify(resources.issues[i]).toLowerCase();if(string.search(query.toLowerCase())>-1){results[results.length]=resources.issues[i];found++;if(found>=max){break;}}}return results;}}]);return IssueHelper;}();module.exports=IssueHelper;},{}],21:[function(require,module,exports){'use strict';window.resources={};var ResourceHelper=function(){function ResourceHelper(){_classCallCheck(this,ResourceHelper);}_createClass(ResourceHelper,null,[{key:"getCollaborator",value:function getCollaborator(name){for(var i in window.resources.collaborators){var collaborator=window.resources.collaborators[i];if(collaborator.name==name){return i;}}}},{key:"getIssuePriority",value:function getIssuePriority(name){for(var i in window.resources.issuePriorities){var type=window.resources.issuePriorities[i];if(type==name){return i;}}}},{key:"getIssueEstimate",value:function getIssueEstimate(name){for(var i in window.resources.issueEstimates){var estimate=window.resources.issueEstimates[i];if(estimate==name){return i;}}}},{key:"getIssueColumn",value:function getIssueColumn(name){for(var i in window.resources.issueColumns){var type=window.resources.issueColumns[i];if(type==name){return i;}}return 0;}},{key:"getIssueType",value:function getIssueType(name){for(var i in window.resources.issueTypes){var type=window.resources.issueTypes[i];if(type==name){return i;}}}},{key:"getVersion",value:function getVersion(name){for(var i in window.resources.versions){var version=window.resources.versions[i];if(version==name){return i;}}}},{key:"getMilestone",value:function getMilestone(name){for(var i in window.resources.milestones){var milestone=window.resources.milestones[i];if(milestone.title==name){return i;}}}},{key:"reloadResource",value:function reloadResource(resource){return new Promise(function(callback){window.resources[resource]=[];ApiHelper.getResource(resource).then(function(){callback();});});}},{key:"updateResource",value:function updateResource(resource,item,index,identifier){return new Promise(function(callback){ApiHelper.updateResource(resource,item,identifier).then(function(){if(!index){index=item.index||resources[resource].indexOf(item);}resources[resource][index]=item;callback();});});}},{key:"removeResource",value:function removeResource(resource,index){return new Promise(function(callback){ApiHelper.removeResource(resource,index).then(function(){resources[resource].splice(index,1);callback();});});}},{key:"addResource",value:function addResource(resource,item){return new Promise(function(callback){ApiHelper.addResource(resource,item).then(function(){var index=resources[resource].length;if((typeof item==="undefined"?"undefined":_typeof(item))==='object'){item.index=index;}resources[resource][index]=item;callback();});});}}]);return ResourceHelper;}();module.exports=ResourceHelper;},{}],22:[function(require,module,exports){'use strict'; /**
+     */value:function search(query,max){var results=[];var found=0;for(var i=0;i<resources.issues.length;i++){var string=JSON.stringify(resources.issues[i]).toLowerCase();if(string.search(query.toLowerCase())>-1){results[results.length]=resources.issues[i];found++;if(found>=max){break;}}}return results;}}]);return IssueHelper;}();module.exports=IssueHelper;},{}],22:[function(require,module,exports){'use strict';window.resources={};var ResourceHelper=function(){function ResourceHelper(){_classCallCheck(this,ResourceHelper);}_createClass(ResourceHelper,null,[{key:"getCollaborator",value:function getCollaborator(name){for(var i in window.resources.collaborators){var collaborator=window.resources.collaborators[i];if(collaborator.name==name){return i;}}}},{key:"getIssuePriority",value:function getIssuePriority(name){for(var i in window.resources.issuePriorities){var type=window.resources.issuePriorities[i];if(type==name){return i;}}}},{key:"getIssueEstimate",value:function getIssueEstimate(name){for(var i in window.resources.issueEstimates){var estimate=window.resources.issueEstimates[i];if(estimate==name){return i;}}}},{key:"getIssueColumn",value:function getIssueColumn(name){for(var i in window.resources.issueColumns){var type=window.resources.issueColumns[i];if(type==name){return i;}}return 0;}},{key:"getIssueType",value:function getIssueType(name){for(var i in window.resources.issueTypes){var type=window.resources.issueTypes[i];if(type==name){return i;}}}},{key:"getVersion",value:function getVersion(name){for(var i in window.resources.versions){var version=window.resources.versions[i];if(version==name){return i;}}}},{key:"getMilestone",value:function getMilestone(name){for(var i in window.resources.milestones){var milestone=window.resources.milestones[i];if(milestone.title==name){return i;}}}},{key:"reloadResource",value:function reloadResource(resource){return new Promise(function(callback){window.resources[resource]=[];ApiHelper.getResource(resource).then(function(){callback();});});}},{key:"updateResource",value:function updateResource(resource,item,index,identifier){return new Promise(function(callback){ApiHelper.updateResource(resource,item,identifier).then(function(){if(!index){index=item.index||resources[resource].indexOf(item);}resources[resource][index]=item;callback();});});}},{key:"removeResource",value:function removeResource(resource,index){return new Promise(function(callback){ApiHelper.removeResource(resource,index).then(function(){resources[resource].splice(index,1);callback();});});}},{key:"addResource",value:function addResource(resource,item){return new Promise(function(callback){ApiHelper.addResource(resource,item).then(function(){var index=resources[resource].length;if((typeof item==="undefined"?"undefined":_typeof(item))==='object'){item.index=index;}resources[resource][index]=item;callback();});});}}]);return ResourceHelper;}();module.exports=ResourceHelper;},{}],23:[function(require,module,exports){'use strict'; /**
  * A manager for local storage settings
  */var SettingsHelper=function(){function SettingsHelper(){_classCallCheck(this,SettingsHelper);}_createClass(SettingsHelper,null,[{key:"set", /**
      * Set value
@@ -1330,12 +1641,12 @@ if(type!='projects'){prefix=localStorage.getItem('settings:projects:current')+pr
      *
      * @returns {String} value
      */},{key:"get",value:function get(type,key,defaultValue,parse){var prefix='settings'; // Exceptions for types not managed on a project basis
-if(type!='projects'){prefix=localStorage.getItem('settings:projects:current')+prefix+':';}var result=localStorage.getItem(prefix+':'+type+':'+key);if(result==='null'||result===null||result===undefined||result==='undefined'||typeof result==='undefined'){SettingsHelper.set(type,key,defaultValue,parse);result=defaultValue||false;}if(parse){try{result=JSON.parse(result);}catch(e){debug.log(e.message,this);}}return result;}}]);return SettingsHelper;}();module.exports=SettingsHelper;},{}],23:[function(require,module,exports){'use strict'; /**
+if(type!='projects'){prefix=localStorage.getItem('settings:projects:current')+prefix+':';}var result=localStorage.getItem(prefix+':'+type+':'+key);if(result==='null'||result===null||result===undefined||result==='undefined'||typeof result==='undefined'){SettingsHelper.set(type,key,defaultValue,parse);result=defaultValue||false;}if(parse){try{result=JSON.parse(result);}catch(e){debug.log(e.message,this);}}return result;}}]);return SettingsHelper;}();module.exports=SettingsHelper;},{}],24:[function(require,module,exports){'use strict'; /**
  * The data model for issues
  */var Issue=function(){_createClass(Issue,null,[{key:"create", /**
      * Create a new issue and push it to the remote source
      */value:function create(properties){return new Promise(function(callback){var issue=new Issue(properties);ResourceHelper.addResource('issues',issue).then(function(){callback(issue);});});}}]);function Issue(properties){_classCallCheck(this,Issue);properties=properties||{}; // Essential properties
-this.title=properties.title||'New issue';this.description=properties.description||''; // Optional params
+this.title=properties.title||'New issue';this.description=properties.description||'';this.id=properties.id; // Optional params
 this.column=properties.column||0;this.type=properties.type||0;this.priority=properties.priority||0;this.estimate=properties.estimate||0;this.version=properties.version;this.milestone=properties.milestone;this.comments=properties.comments||[];this.assignee=properties.assignee;} /**
      * Gets an object with all the baked values
      */_createClass(Issue,[{key:"getBakedValues",value:function getBakedValues(){var baked={column:resources.issueColumns[this.column],type:resources.issueTypes[this.type],priority:resources.issuePriorities[this.priority],version:resources.versions[this.version],milestone:resources.milestones[this.milestone],assignee:resources.collaborators[this.assignee]};if(baked.assignee){baked.assignee=baked.assignee.name;}if(baked.milestone){baked.milestone=baked.milestone.title;}return baked;} /**
@@ -1346,7 +1657,7 @@ this.column=properties.column||0;this.type=properties.type||0;this.priority=prop
      * Get estimated hours
      *
      * @returns {Number} hours
-     */},{key:"getEstimatedHours",value:function getEstimatedHours(){var estimate=window.resources.issueEstimates[this.estimate];if(estimate){return parseFloat(estimate);}else {return 0;}}}]);return Issue;}();module.exports=Issue;},{}],24:[function(require,module,exports){'use strict'; // Root
+     */},{key:"getEstimatedHours",value:function getEstimatedHours(){var estimate=window.resources.issueEstimates[this.estimate];if(estimate){return parseFloat(estimate);}else {return 0;}}}]);return Issue;}();module.exports=Issue;},{}],25:[function(require,module,exports){'use strict'; // Root
 Router.route('/',function(){setTimeout(function(){navbar.toggleAboutPanel(true);},10);}); // User
 Router.route('/:user',function(){setTimeout(function(){navbar.toggleProjectsList(true);},10);}); // Project
 Router.route('/:user/:project',function(){location.hash='/'+Router.params.user+'/'+Router.params.project+'/board/kanban';}); // Plan
@@ -1357,13 +1668,13 @@ $('.app-container .board-container .milestone-editor').sort(function(a,b){var aD
 $('.app-container .board-container').append(new MilestoneEditor({model:{title:'Unassigned',description:'These issues have yet to be assigned to a milestone'}}).$element);navbar.slideIn();});});}); // Settings
 Router.route('/:user/:project/settings/',function(){ApiHelper.checkConnection().then(function(){ApiHelper.getResources().then(function(){$('.workspace').remove();$('.app-container').append(_.div({class:'workspace settings-container'},_.div({class:'tabbed-container vertical'},_.div({class:'tabs'},_.each(window.resources,function(name,resource){if(name!='issues'&&name!='milestones'&&name!='projects'){return _.button({class:'tab'+(name=='issueTypes'?' active':'')},prettyName(name)).click(function(){var index=$(this).index();$(this).parent().children().each(function(i){$(this).toggleClass('active',i==index);});$(this).parents('.tabbed-container').find('.panes .pane').each(function(i){$(this).toggleClass('active',i==index);});});}})),_.div({class:'panes'},_.each(window.resources,function(name,resource){if(name!='issues'&&name!='milestones'&&name!='projects'){return _.div({class:'pane'+(name=='issueTypes'?' active':'')},new ResourceEditor({name:name,model:resource}).$element);}})))));navbar.slideIn();});});}); // Init router
 Router.init(); // Navbar
-var navbar=new Navbar();$('.app-container').html(navbar.$element);},{}],25:[function(require,module,exports){'use strict';module.exports=function render(){var _this46=this;var issueKeys=Object.keys(new Issue().getBakedValues());return _.div({class:'filter-editor'},_.h4({class:'title'},'Filters'),_.div({class:'filters'},_.each(this.model,function(i,filter){var resourceKey=filter.key; // Change assignee to collaborator
+var navbar=new Navbar();$('.app-container').html(navbar.$element);},{}],26:[function(require,module,exports){'use strict';module.exports=function render(){var _this79=this;var issueKeys=Object.keys(new Issue().getBakedValues());return _.div({class:'filter-editor'},_.h4({class:'title'},'Filters'),_.div({class:'filters'},_.each(this.model,function(i,filter){var resourceKey=filter.key; // Change assignee to collaborator
 if(resourceKey=='assignee'){resourceKey='collaborator';} // Append 's' for plural
 resourceKey+='s'; // Correct grammar
 resourceKey=resourceKey.replace('ys','ies');var resource=resources[resourceKey]; // If we didn't find the resource, it's likely that we just need to capitalise it and prepend 'issue'
 // For example: 'type' should be 'issueType' when referring to the resource
-if(!resource){resourceKey='issue'+resourceKey.substring(0,1).toUpperCase()+resourceKey.substring(1);resource=resources[resourceKey];}var $filter=_.div({class:'filter'},_.div({class:'select-container key'},_.select({},_.each(issueKeys,function(i,key){return _.option({value:key,selected:key==filter.key},key);})).change(function(e){filter.key=$filter.find('.key select').val();filter.value=null;_this46.onChange(i);})),_.div({class:'select-container operator'},_.select({},_.each(_this46.getOperators(),function(i,operator){return _.option({value:operator},operator);})).val(filter.operator||'!=').change(function(e){filter.operator=$filter.find('.operator select').val();_this46.onChange(i);})),_.div({class:'select-container value'},_.select({},_.each(resource,function(i,value){var valueName=value;if(value.title){valueName=value.title;}if(value.name){valueName=value.name;}var isSelected=valueName==filter.value;if(!filter.value&&i==0){isSelected=true;}return _.option({value:valueName,selected:isSelected},valueName);})).change(function(e){filter.value=$filter.find('.value select').val();_this46.onChange(i);})),_.button({class:'btn-remove btn-transparent'},_.span({class:'fa fa-remove'})).click(function(){_this46.onClickRemove(i);}));return $filter;})),_.div({class:'button-container'},_.if(this.model.length<this.MAX_FILTERS,_.button({class:'btn'},'Add filter',_.span({class:'fa fa-plus'})).click(function(){_this46.onClickAdd();}))));};},{}],26:[function(require,module,exports){module.exports=function render(){var _this47=this;return _.div({class:'issue-editor','data-index':this.model.index,'data-type':resources.issueTypes[this.model.type]},_.div({class:'header'},_.div({class:'drag-handle'},_.span({class:'fa fa-bars'})).on('mousedown',function(e){_this47.onClickDragHandle(e);}),_.if(!ApiHelper.isSpectating(),_.div({class:'assignee-avatar'},this.getAssigneeAvatar())),_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa icon-close fa-chevron-down'}),_.span({class:'fa icon-open fa-chevron-right'})).click(function(e){_this47.onClickToggle(e);}),_.div({class:'issue-index'},this.model.index.toString()),this.getPriorityIndicator(),_.h4({},_.span({class:'btn-edit'},this.model.title).click(this.onClickEdit),_.input({type:'text',class:'selectable edit hidden btn-transparent','data-property':'title',value:this.model.title}).change(function(){_this47.onChange();_this47.$element.find('.header .btn-edit').html(_this47.model.title);}).blur(this.onBlur).keyup(function(e){if(e.which==13){_this47.onBlur(e);}}))).click(function(e){_this47.onClickElement(e);}),_.div({class:'meta'},_.div({class:'multi-edit-notification'},'Now editing multiple issues'),_.div({class:'meta-field type'+(window.resources.issueTypes.length<1?' hidden':'')},_.label('Type'),_.select({'data-property':'type',disabled:ApiHelper.isSpectating()},_.each(window.resources.issueTypes,function(i,type){return _.option({value:i},type);})).change(function(){_this47.onChange();}).val(this.model.type),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.div({class:'meta-field priority'+(window.resources.issuePriorities.length<1?' hidden':'')},_.label('Priority'),_.select({'data-property':'priority',disabled:ApiHelper.isSpectating()},_.each(window.resources.issuePriorities,function(i,priority){return _.option({value:i},priority);})).change(function(){_this47.onChange();}).val(this.model.priority),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.if(window.resources.collaborators.length>0,_.div({class:'meta-field assignee'},_.label('Assignee'),_.select({'data-property':'assignee',disabled:ApiHelper.isSpectating()},_.option({value:null},'(unassigned)'),_.each(window.resources.collaborators,function(i,collaborator){return _.option({value:i},collaborator.name);})).change(function(){_this47.onChange();}).val(this.model.assignee),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);}))),_.div({class:'meta-field version'+(window.resources.versions.length<1?' hidden':'')},_.label('Version'),_.select({'data-property':'version',disabled:ApiHelper.isSpectating()},_.each(window.resources.versions,function(i,version){return _.option({value:i},version);})).change(function(){_this47.onChange();}).val(this.model.version),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.div({class:'meta-field estimate'+(window.resources.issueEstimates.length<1?' hidden':'')},_.label('Estimate'),_.select({'data-property':'estimate',disabled:ApiHelper.isSpectating()},_.each(window.resources.issueEstimates,function(i,estimate){return _.option({value:i},estimate);})).change(function(){_this47.onChange();}).val(this.model.estimate),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this47.onChangeCheckbox(e);})),_.div({class:'multi-edit-actions'},_.button({class:'btn'},'Cancel').click(function(){_this47.onClickMultiEditCancel();}),_.button({class:'btn'},'Apply').click(function(){_this47.onClickMultiEditApply();}))),_.div({class:'body'},_.div({class:'btn-edit'},markdownToHtml(this.model.description)).click(this.onClickEdit),_.textarea({class:'selectable edit hidden btn-transparent','data-property':'description'},this.model.description).change(function(){_this47.onChange();_this47.$element.find('.body .btn-edit').html(markdownToHtml(_this47.model.description)||'');}).blur(this.onBlur)),_.div({class:'comments'}),_.if(!ApiHelper.isSpectating(),_.div({class:'add-comment'},_.textarea({class:'btn-transparent',placeholder:'Add comment here...'}),_.button({class:'btn'},'Comment').click(function(){_this47.onClickComment();}))));};},{}],27:[function(require,module,exports){'use strict';module.exports=function render(){var _this48=this;var state=SettingsHelper.get('milestone',this.model.index)||'';if(!state&&this.getPercentComplete()>=100){state='collapsed';}return _.div({class:'milestone-editor '+state,'data-index':this.model.index,'data-end-date':this.model.endDate},_.div({class:'header'},_.div({class:'progress-bar',style:'width: '+this.getPercentComplete()+'%'}),_.div({class:'title'},_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa fa-chevron-right'}),_.span({class:'fa fa-chevron-down'}),_.h4(this.model.title),_.p(this.model.description)).click(function(){_this48.onClickToggle();})),_.div({class:'stats'},_.span({class:'progress-amounts'},_.span({class:'fa fa-exclamation-circle'}),_.span({class:'total'}),_.span({class:'remaining'})),_.span({class:'progress-hours'},_.span({class:'fa fa-clock-o'}),_.span({class:'total'}),_.span({class:'remaining'})))),_.div({class:'columns'},_.each(window.resources.issueColumns,function(columnIndex,column){return _.div({class:'column','data-index':columnIndex},_.div({class:'header'},_.h4(column)),_.div({class:'body'},_.each(window.resources.issues,function(issueIndex,issue){if(issue.column==columnIndex&&issue.milestone==_this48.model.index){return new IssueEditor({model:issue}).$element;}}),_.if(columnIndex==0&&!ApiHelper.isSpectating(),_.button({class:'btn btn-new-issue'},'New issue ',_.span({class:'fa fa-plus'})).click(function(){_this48.onClickNewIssue();}))));})));};},{}],28:[function(require,module,exports){'use strict';module.exports=function Navbar(){var _this49=this;return _.div({class:'navbar'},_.div({class:'obscure'},_.div({class:'content'})),_.div({class:'buttons'},_.each(this.getLinks(),function(i,link){if(link.separator){return _.div({class:'separator'});}else {return _.button({'data-url':link.url,class:(link.class||'')+(link.bottom?' bottom':'')+(link.handler?' handler':'')},_.if(link.icon,_.span({class:'fa fa-'+link.icon})),_.if(link.img,_.img({src:link.img}))).click(function(){_this49.cleanUpClasses();if(link.handler){link.handler.call(_this49);}else if(link.url){_this49.onClickLink(link.url);}});}})));};},{}],29:[function(require,module,exports){'use strict';module.exports=function render(){var _this50=this;return _.div({class:'plan-editor'},_.div({class:'tabbed-container'},_.div({class:'tabs years'},_.each(this.getYears(),function(i,year){return _.button({class:'tab year'+(_this50.currentYear==year.number?' active':'')},year.number).click(function(){_this50.onClickYear(year.number);});})),_.div({class:'tabs months'},_.each(this.getMonths(),function(i,month){return _.button({class:'tab month'+(_this50.currentMonth==month.number?' active':'')},month.name).click(function(){_this50.onClickMonth(month.number);});}))),_.div({class:'weekdays'},_.each(this.getWeekDays(),function(i,weekday){return _.div({class:'weekday'},weekday);})),_.div({class:'dates'},this.iterateDates(function(date){if(!date){return _.div({class:'date-placeholder'});}else {return _.div({class:'date','data-date':date.getSimpleString()},_.div({class:'header'},_.span({class:'datenumber'},date.getDate()),_.span({class:'weeknumber'},'w '+date.getWeek())),_.div({class:'body'},_.each(window.resources.milestones,function(i,milestone){if(milestone.endDate){var dueDate=new Date(milestone.endDate);dueDate.setHours(0);dueDate.setMinutes(0);dueDate.setSeconds(0);if(dueDate.getFullYear()==date.getFullYear()&&dueDate.getMonth()==date.getMonth()&&dueDate.getDate()==date.getDate()){return new PlanItemEditor({model:milestone}).$element;}}}),_.button({class:'btn-transparent'},_.span({class:'fa fa-plus'})).click(function(){_this50.onClickAddMilestone(date);})));}})),_.if(this.getUndatedMilestones().length>0,_.div({class:'undated'},_.h4('Undated'),_.each(this.getUndatedMilestones(),function(i,milestone){return new PlanItemEditor({model:milestone}).$element;}))));};},{}],30:[function(require,module,exports){'use strict';module.exports=function render(){var _this51=this;return _.div({class:'plan-item-editor','data-date':this.model.endDate},_.div({class:'drag-handle'},this.model.title).on('mousedown',function(e){_this51.onClickDragHandle(e);}),_.button({class:'btn-close btn-transparent'},_.span({class:'fa fa-remove'})).click(function(){_this51.onClickClose();}),_.div({class:'header'},_.h4('Title'),_.input({class:'selectable edit',placeholder:'Type milestone title here',type:'text',value:this.model.title})),_.div({class:'body'},_.h4('Description'),_.input({class:'selectable',placeholder:'Type milestone description here',type:'text',value:this.model.description})),_.div({class:'footer'},_.button({class:'btn'},'Delete',_.span({class:'fa fa-remove'})).click(function(){_this51.onClickDelete();}),_.button({class:'btn'},'OK',_.span({class:'fa fa-check'})).click(function(){_this51.onClickOK();})));};},{}],31:[function(require,module,exports){'use strict';module.exports=function render(){var _this52=this;return _.div({class:'project-editor'},_.div({class:'content'},_.div({class:'header'},_.h4(this.model.title)),_.div({class:'body'},this.model.description))).click(function(){_this52.onClick();});};},{}],32:[function(require,module,exports){'use strict';module.exports=function render(){var _this53=this;return _.div({class:'resource-editor'},_.div({class:'body'},_.each(this.model,function(i,item){ // Special cases
-if(_this53.name=='issueColumns'&&(item=='to do'||item=='done')){return;}return _.div({class:'item'},_.if(typeof item==='string',_.input({class:'selectable',value:item,placeholder:'Input name',type:'text'}).change(function(){_this53.onChange(i,item);})),_.if(typeof item!=='string',_.label(item.title||item.name)),_.button({class:'btn-remove'},_.span({class:'fa fa-remove'})).click(function(){_this53.onClickRemove(i);}));})),_.div({class:'footer'},_.input({type:'text'}),_.button({class:'btn btn-add'},'Add',_.span({class:'fa fa-plus'})).click(function(){_this53.onClickAdd(_this53.$element.find('.footer input').val());})));};},{}],33:[function(require,module,exports){'use strict';var FilterEditor=function(_View2){_inherits(FilterEditor,_View2);function FilterEditor(params){_classCallCheck(this,FilterEditor);var _this54=_possibleConstructorReturn(this,Object.getPrototypeOf(FilterEditor).call(this,params));_this54.MAX_FILTERS=5;_this54.template=require('../templates/FilterEditor');_this54.defaultFilter={key:'column',operator:'!=',value:'done'};_this54.model=SettingsHelper.get('filters','custom',[],true);_this54.fetch();setTimeout(function(){_this54.applyFilters();},2);return _this54;} /**
+if(!resource){resourceKey='issue'+resourceKey.substring(0,1).toUpperCase()+resourceKey.substring(1);resource=resources[resourceKey];}var $filter=_.div({class:'filter'},_.div({class:'select-container key'},_.select({},_.each(issueKeys,function(i,key){return _.option({value:key,selected:key==filter.key},key);})).change(function(e){filter.key=$filter.find('.key select').val();filter.value=null;_this79.onChange(i);})),_.div({class:'select-container operator'},_.select({},_.each(_this79.getOperators(),function(i,operator){return _.option({value:operator},operator);})).val(filter.operator||'!=').change(function(e){filter.operator=$filter.find('.operator select').val();_this79.onChange(i);})),_.div({class:'select-container value'},_.select({},_.each(resource,function(i,value){var valueName=value;if(value.title){valueName=value.title;}if(value.name){valueName=value.name;}var isSelected=valueName==filter.value;if(!filter.value&&i==0){isSelected=true;}return _.option({value:valueName,selected:isSelected},valueName);})).change(function(e){filter.value=$filter.find('.value select').val();_this79.onChange(i);})),_.button({class:'btn-remove btn-transparent'},_.span({class:'fa fa-remove'})).click(function(){_this79.onClickRemove(i);}));return $filter;})),_.div({class:'button-container'},_.if(this.model.length<this.MAX_FILTERS,_.button({class:'btn'},'Add filter',_.span({class:'fa fa-plus'})).click(function(){_this79.onClickAdd();}))));};},{}],27:[function(require,module,exports){module.exports=function render(){var _this80=this;return _.div({class:'issue-editor','data-index':this.model.index,'data-type':resources.issueTypes[this.model.type]},_.div({class:'header'},_.div({class:'drag-handle'},_.span({class:'fa fa-bars'})).on('mousedown',function(e){_this80.onClickDragHandle(e);}),_.if(!ApiHelper.isSpectating(),_.div({class:'assignee-avatar'},this.getAssigneeAvatar())),_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa icon-close fa-chevron-down'}),_.span({class:'fa icon-open fa-chevron-right'})).click(function(e){_this80.onClickToggle(e);}),_.div({class:'issue-index'},this.model.index.toString()),this.getPriorityIndicator(),_.h4({},_.span({class:'btn-edit'},this.model.title).click(this.onClickEdit),_.input({type:'text',class:'selectable edit hidden btn-transparent','data-property':'title',value:this.model.title}).change(function(){_this80.onChange();_this80.$element.find('.header .btn-edit').html(_this80.model.title);}).blur(this.onBlur).keyup(function(e){if(e.which==13){_this80.onBlur(e);}}))).click(function(e){_this80.onClickElement(e);}),_.div({class:'meta'},_.div({class:'multi-edit-notification'},'Now editing multiple issues'),_.div({class:'meta-field type'+(window.resources.issueTypes.length<1?' hidden':'')},_.label('Type'),_.select({'data-property':'type',disabled:ApiHelper.isSpectating()},_.each(window.resources.issueTypes,function(i,type){return _.option({value:i},type);})).change(function(){_this80.onChange();}).val(this.model.type),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this80.onChangeCheckbox(e);})),_.div({class:'meta-field priority'+(window.resources.issuePriorities.length<1?' hidden':'')},_.label('Priority'),_.select({'data-property':'priority',disabled:ApiHelper.isSpectating()},_.each(window.resources.issuePriorities,function(i,priority){return _.option({value:i},priority);})).change(function(){_this80.onChange();}).val(this.model.priority),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this80.onChangeCheckbox(e);})),_.if(window.resources.collaborators.length>0,_.div({class:'meta-field assignee'},_.label('Assignee'),_.select({'data-property':'assignee',disabled:ApiHelper.isSpectating()},_.option({value:null},'(unassigned)'),_.each(window.resources.collaborators,function(i,collaborator){return _.option({value:i},collaborator.name);})).change(function(){_this80.onChange();}).val(this.model.assignee),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this80.onChangeCheckbox(e);}))),_.div({class:'meta-field version'+(window.resources.versions.length<1?' hidden':'')},_.label('Version'),_.select({'data-property':'version',disabled:ApiHelper.isSpectating()},_.each(window.resources.versions,function(i,version){return _.option({value:i},version);})).change(function(){_this80.onChange();}).val(this.model.version),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this80.onChangeCheckbox(e);})),_.div({class:'meta-field estimate'+(window.resources.issueEstimates.length<1?' hidden':'')},_.label('Estimate'),_.select({'data-property':'estimate',disabled:ApiHelper.isSpectating()},_.each(window.resources.issueEstimates,function(i,estimate){return _.option({value:i},estimate);})).change(function(){_this80.onChange();}).val(this.model.estimate),_.input({class:'multi-edit-toggle',type:'checkbox'}).change(function(e){_this80.onChangeCheckbox(e);})),_.div({class:'multi-edit-actions'},_.button({class:'btn'},'Cancel').click(function(){_this80.onClickMultiEditCancel();}),_.button({class:'btn'},'Apply').click(function(){_this80.onClickMultiEditApply();}))),_.div({class:'body'},_.div({class:'btn-edit'},markdownToHtml(this.model.description)).click(this.onClickEdit),_.textarea({class:'selectable edit hidden btn-transparent','data-property':'description'},this.model.description).change(function(){_this80.onChange();_this80.$element.find('.body .btn-edit').html(markdownToHtml(_this80.model.description)||'');}).blur(this.onBlur)),_.div({class:'comments'}),_.if(!ApiHelper.isSpectating(),_.div({class:'add-comment'},_.textarea({class:'btn-transparent',placeholder:'Add comment here...'}),_.button({class:'btn'},'Comment').click(function(){_this80.onClickComment();}))));};},{}],28:[function(require,module,exports){'use strict';module.exports=function render(){var _this81=this;var state=SettingsHelper.get('milestone',this.model.index)||'';if(!state&&this.getPercentComplete()>=100){state='collapsed';}return _.div({class:'milestone-editor '+state,'data-index':this.model.index,'data-end-date':this.model.endDate},_.div({class:'header'},_.div({class:'progress-bar',style:'width: '+this.getPercentComplete()+'%'}),_.div({class:'title'},_.button({class:'btn-toggle btn-transparent'},_.span({class:'fa fa-chevron-right'}),_.span({class:'fa fa-chevron-down'}),_.h4(this.model.title),_.p(this.model.description)).click(function(){_this81.onClickToggle();})),_.div({class:'stats'},_.span({class:'progress-amounts'},_.span({class:'fa fa-exclamation-circle'}),_.span({class:'total'}),_.span({class:'remaining'})),_.span({class:'progress-hours'},_.span({class:'fa fa-clock-o'}),_.span({class:'total'}),_.span({class:'remaining'})))),_.div({class:'columns'},_.each(window.resources.issueColumns,function(columnIndex,column){return _.div({class:'column','data-index':columnIndex},_.div({class:'header'},_.h4(column)),_.div({class:'body'},_.each(window.resources.issues,function(issueIndex,issue){if(issue.column==columnIndex&&issue.milestone==_this81.model.index){return new IssueEditor({model:issue}).$element;}}),_.if(columnIndex==0&&!ApiHelper.isSpectating(),_.button({class:'btn btn-new-issue'},'New issue ',_.span({class:'fa fa-plus'})).click(function(){_this81.onClickNewIssue();}))));})));};},{}],29:[function(require,module,exports){'use strict';module.exports=function Navbar(){var _this82=this;return _.div({class:'navbar'},_.div({class:'obscure'},_.div({class:'content'})),_.div({class:'buttons'},_.each(this.getLinks(),function(i,link){if(link.separator){return _.div({class:'separator'});}else {return _.button({'data-url':link.url,class:(link.class||'')+(link.bottom?' bottom':'')+(link.handler?' handler':'')},_.if(link.icon,_.span({class:'fa fa-'+link.icon})),_.if(link.img,_.img({src:link.img}))).click(function(){_this82.cleanUpClasses();if(link.handler){link.handler.call(_this82);}else if(link.url){_this82.onClickLink(link.url);}});}})));};},{}],30:[function(require,module,exports){'use strict';module.exports=function render(){var _this83=this;return _.div({class:'plan-editor'},_.div({class:'tabbed-container'},_.div({class:'tabs years'},_.each(this.getYears(),function(i,year){return _.button({class:'tab year'+(_this83.currentYear==year.number?' active':'')},year.number).click(function(){_this83.onClickYear(year.number);});})),_.div({class:'tabs months'},_.each(this.getMonths(),function(i,month){return _.button({class:'tab month'+(_this83.currentMonth==month.number?' active':'')},month.name).click(function(){_this83.onClickMonth(month.number);});}))),_.div({class:'weekdays'},_.each(this.getWeekDays(),function(i,weekday){return _.div({class:'weekday'},weekday);})),_.div({class:'dates'},this.iterateDates(function(date){if(!date){return _.div({class:'date-placeholder'});}else {return _.div({class:'date','data-date':date.getSimpleString()},_.div({class:'header'},_.span({class:'datenumber'},date.getDate()),_.span({class:'weeknumber'},'w '+date.getWeek())),_.div({class:'body'},_.each(window.resources.milestones,function(i,milestone){if(milestone.endDate){var dueDate=new Date(milestone.endDate);dueDate.setHours(0);dueDate.setMinutes(0);dueDate.setSeconds(0);if(dueDate.getFullYear()==date.getFullYear()&&dueDate.getMonth()==date.getMonth()&&dueDate.getDate()==date.getDate()){return new PlanItemEditor({model:milestone}).$element;}}}),_.button({class:'btn-transparent'},_.span({class:'fa fa-plus'})).click(function(){_this83.onClickAddMilestone(date);})));}})),_.if(this.getUndatedMilestones().length>0,_.div({class:'undated'},_.h4('Undated'),_.each(this.getUndatedMilestones(),function(i,milestone){return new PlanItemEditor({model:milestone}).$element;}))));};},{}],31:[function(require,module,exports){'use strict';module.exports=function render(){var _this84=this;return _.div({class:'plan-item-editor','data-date':this.model.endDate},_.div({class:'drag-handle'},this.model.title).on('mousedown',function(e){_this84.onClickDragHandle(e);}),_.button({class:'btn-close btn-transparent'},_.span({class:'fa fa-remove'})).click(function(){_this84.onClickClose();}),_.div({class:'header'},_.h4('Title'),_.input({class:'selectable edit',placeholder:'Type milestone title here',type:'text',value:this.model.title})),_.div({class:'body'},_.h4('Description'),_.input({class:'selectable',placeholder:'Type milestone description here',type:'text',value:this.model.description})),_.div({class:'footer'},_.button({class:'btn'},'Delete',_.span({class:'fa fa-remove'})).click(function(){_this84.onClickDelete();}),_.button({class:'btn'},'OK',_.span({class:'fa fa-check'})).click(function(){_this84.onClickOK();})));};},{}],32:[function(require,module,exports){'use strict';module.exports=function render(){var _this85=this;return _.div({class:'project-editor'},_.div({class:'content'},_.div({class:'header'},_.h4(this.model.title)),_.div({class:'body'},this.model.description))).click(function(){_this85.onClick();});};},{}],33:[function(require,module,exports){'use strict';module.exports=function render(){var _this86=this;return _.div({class:'resource-editor'},_.div({class:'body'},_.each(this.model,function(i,item){ // Special cases
+if(_this86.name=='issueColumns'&&(item=='to do'||item=='done')){return;}return _.div({class:'item'},_.if(typeof item==='string',_.input({class:'selectable',value:item,placeholder:'Input name',type:'text'}).change(function(){_this86.onChange(i,item);})),_.if(typeof item!=='string',_.label(item.title||item.name)),_.button({class:'btn-remove'},_.span({class:'fa fa-remove'})).click(function(){_this86.onClickRemove(i);}));})),_.div({class:'footer'},_.input({type:'text'}),_.button({class:'btn btn-add'},'Add',_.span({class:'fa fa-plus'})).click(function(){_this86.onClickAdd(_this86.$element.find('.footer input').val());})));};},{}],34:[function(require,module,exports){'use strict';var FilterEditor=function(_View2){_inherits(FilterEditor,_View2);function FilterEditor(params){_classCallCheck(this,FilterEditor);var _this87=_possibleConstructorReturn(this,Object.getPrototypeOf(FilterEditor).call(this,params));_this87.MAX_FILTERS=5;_this87.template=require('../templates/FilterEditor');_this87.defaultFilter={key:'column',operator:'!=',value:'done'};_this87.model=SettingsHelper.get('filters','custom',[],true);_this87.fetch();setTimeout(function(){_this87.applyFilters();},2);return _this87;} /**
      * Event: Change
      *
      * @param {Number} index
@@ -1383,7 +1694,7 @@ SettingsHelper.set('filters','custom',this.model,true);this.applyFilters();this.
      * @param {Array} operators
      */},{key:"getOperators",value:function getOperators(){return ['!=','=='];} /**
      * Applies selected filters
-     */},{key:"applyFilters",value:function applyFilters(){var issueViews=ViewHelper.getAll('IssueEditor');var _iteratorNormalCompletion14=true;var _didIteratorError14=false;var _iteratorError14=undefined;try{for(var _iterator14=issueViews[Symbol.iterator](),_step14;!(_iteratorNormalCompletion14=(_step14=_iterator14.next()).done);_iteratorNormalCompletion14=true){var issueView=_step14.value;issueView.$element.toggle(true);var issue=new Issue(issueView.model).getBakedValues();var _iteratorNormalCompletion15=true;var _didIteratorError15=false;var _iteratorError15=undefined;try{for(var _iterator15=this.model[Symbol.iterator](),_step15;!(_iteratorNormalCompletion15=(_step15=_iterator15.next()).done);_iteratorNormalCompletion15=true){var filter=_step15.value;try{var value=filter.value;if(value&&value.constructor===String){value='\''+value+'\'';}var evalString='issue.'+filter.key+' '+filter.operator+' '+value;var isValid=eval(evalString);if(!isValid){issueView.$element.toggle(false);break;}}catch(e){alert(e);return;}}}catch(err){_didIteratorError15=true;_iteratorError15=err;}finally {try{if(!_iteratorNormalCompletion15&&_iterator15.return){_iterator15.return();}}finally {if(_didIteratorError15){throw _iteratorError15;}}}}}catch(err){_didIteratorError14=true;_iteratorError14=err;}finally {try{if(!_iteratorNormalCompletion14&&_iterator14.return){_iterator14.return();}}finally {if(_didIteratorError14){throw _iteratorError14;}}}}}]);return FilterEditor;}(View);module.exports=FilterEditor;},{"../templates/FilterEditor":25}],34:[function(require,module,exports){'use strict';var IssueEditor=function(_View3){_inherits(IssueEditor,_View3);function IssueEditor(params){_classCallCheck(this,IssueEditor);var _this55=_possibleConstructorReturn(this,Object.getPrototypeOf(IssueEditor).call(this,params));_this55.template=require('../templates/IssueEditor');_this55.fetch();return _this55;} /**
+     */},{key:"applyFilters",value:function applyFilters(){var issueViews=ViewHelper.getAll('IssueEditor');var _iteratorNormalCompletion21=true;var _didIteratorError21=false;var _iteratorError21=undefined;try{for(var _iterator21=issueViews[Symbol.iterator](),_step21;!(_iteratorNormalCompletion21=(_step21=_iterator21.next()).done);_iteratorNormalCompletion21=true){var issueView=_step21.value;issueView.$element.toggle(true);var issue=new Issue(issueView.model).getBakedValues();var _iteratorNormalCompletion22=true;var _didIteratorError22=false;var _iteratorError22=undefined;try{for(var _iterator22=this.model[Symbol.iterator](),_step22;!(_iteratorNormalCompletion22=(_step22=_iterator22.next()).done);_iteratorNormalCompletion22=true){var filter=_step22.value;try{var value=filter.value;if(value&&value.constructor===String){value='\''+value+'\'';}var evalString='issue.'+filter.key+' '+filter.operator+' '+value;var isValid=eval(evalString);if(!isValid){issueView.$element.toggle(false);break;}}catch(e){alert(e);return;}}}catch(err){_didIteratorError22=true;_iteratorError22=err;}finally {try{if(!_iteratorNormalCompletion22&&_iterator22.return){_iterator22.return();}}finally {if(_didIteratorError22){throw _iteratorError22;}}}}}catch(err){_didIteratorError21=true;_iteratorError21=err;}finally {try{if(!_iteratorNormalCompletion21&&_iterator21.return){_iterator21.return();}}finally {if(_didIteratorError21){throw _iteratorError21;}}}}}]);return FilterEditor;}(View);module.exports=FilterEditor;},{"../templates/FilterEditor":26}],35:[function(require,module,exports){'use strict';var IssueEditor=function(_View3){_inherits(IssueEditor,_View3);function IssueEditor(params){_classCallCheck(this,IssueEditor);var _this88=_possibleConstructorReturn(this,Object.getPrototypeOf(IssueEditor).call(this,params));_this88.template=require('../templates/IssueEditor');_this88.fetch();return _this88;} /**
      * Cancels multi select
      */_createClass(IssueEditor,[{key:"onClickToggle", /**
      * Event: Click the toggle button
@@ -1417,16 +1728,16 @@ this.$element.find('.priority-indicator').replaceWith(this.getPriorityIndicator(
      * @returns {Boolean} active
      */},{key:"usingMultiEdit",value:function usingMultiEdit(){return this.$element.hasClass('selected')&&$('.issue-editor.selected').length>1;} /**
      * Synchronises the model data with the remote backend
-     */},{key:"sync",value:function sync(){var _this56=this; // Start loading
+     */},{key:"sync",value:function sync(){var _this89=this; // Start loading
 this.$element.toggleClass('loading',true); // Update the issue though the API
-ApiHelper.updateIssue(this.model).then(function(){_this56.$element.toggleClass('loading',false);});} /**
+ApiHelper.updateIssue(this.model).then(function(){_this89.$element.toggleClass('loading',false);});} /**
      * Event: Click the dragging handle
-     */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this57=this;if(ApiHelper.isSpectating()){return;}if(!InputHelper.isShiftDown){(function(){ // Set class on board container
+     */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this90=this;if(ApiHelper.isSpectating()){return;}if(!InputHelper.isShiftDown){(function(){ // Set class on board container
 $('.board-container').toggleClass('dragging',true); // Set element
-var $element=_this57.$element;if(_this57.usingMultiEdit()){$element=$('.issue-editor.selected');}else {} //IssueEditor.cancelMultiSelect();
+var $element=_this90.$element;if(_this90.usingMultiEdit()){$element=$('.issue-editor.selected');}else {} //IssueEditor.cancelMultiSelect();
 // Apply temporary CSS properties
-$element.each(function(i,element){$(element).css({top:_this57.$element.offset().top,left:_this57.$element.offset().left,width:_this57.$element.outerWidth(),height:_this57.$element.outerHeight(),'pointer-events':'none','z-index':999,'margin-top':i*15+'px'});}); // Buffer the offset between mouse cursor and element position
-var offset={x:_this57.$element.offset().left-e.pageX,y:_this57.$element.offset().top-e.pageY}; // Add absolute positioning afterwards to allow getting proper offset
+$element.each(function(i,element){$(element).css({top:_this90.$element.offset().top,left:_this90.$element.offset().left,width:_this90.$element.outerWidth(),height:_this90.$element.outerHeight(),'pointer-events':'none','z-index':999,'margin-top':i*15+'px'});}); // Buffer the offset between mouse cursor and element position
+var offset={x:_this90.$element.offset().left-e.pageX,y:_this90.$element.offset().top-e.pageY}; // Add absolute positioning afterwards to allow getting proper offset
 $element.css({position:'absolute'}); // Column mouse hover events
 $('.milestone-editor .columns .column').on('mouseenter',function(){$(this).toggleClass('hovering',true);}).on('mouseleave',function(){$(this).toggleClass('hovering',false);}); // Document pointer movement logic
 $(document).off('mousemove').on('mousemove',function(e){ // Get current pointer location
@@ -1434,7 +1745,7 @@ var current={x:e.pageX,y:e.pageY}; // Get current viewport
 var viewport={x:0,y:$(document).scrollTop(),w:$(window).width(),h:$(window).height()}; // Apply new CSS positioning values
 $element.css({top:current.y+offset.y,left:current.x+offset.x}); // Scroll page if dragging near the top or bottom
 var scrollSpeed=5;if(current.y>viewport.y+viewport.h-100){scroll(1*scrollSpeed);}else if(current.y<viewport.y+100){scroll(-1*scrollSpeed);}}); // Document pointer release mouse button logic
-$(document).off('mouseup').on('mouseup',function(e){_this57.onReleaseDragHandle(e);});})();}} /**
+$(document).off('mouseup').on('mouseup',function(e){_this90.onReleaseDragHandle(e);});})();}} /**
      * Event: Release the dragging handle
      */},{key:"onReleaseDragHandle",value:function onReleaseDragHandle(e){if(ApiHelper.isSpectating()){return;} // Unregister mouse events
 $(document).off('mouseup').off('mousemove'); // Set element
@@ -1442,18 +1753,18 @@ var $element=this.$element;if(this.usingMultiEdit()){$element=$('.issue-editor.s
 $('.board-container').toggleClass('dragging',false);$element.removeAttr('style'); // Place this element into the hovered column
 $('.milestone-editor .columns .column.hovering .body').first().prepend($element); // Unregister column mouse events and unset hovering state
 $('.milestone-editor .columns .column').off('mouseenter').off('mouseleave').toggleClass('hovering',false); // Update model data with new information based on DOM location
-$element.each(function(i){var _iteratorNormalCompletion16=true;var _didIteratorError16=false;var _iteratorError16=undefined;try{for(var _iterator16=ViewHelper.getAll('IssueEditor')[Symbol.iterator](),_step16;!(_iteratorNormalCompletion16=(_step16=_iterator16.next()).done);_iteratorNormalCompletion16=true){var view=_step16.value;if(this==view.$element[0]){view.model.milestone=view.$element.parents('.milestone-editor').attr('data-index');view.model.column=view.$element.parents('.column').attr('data-index'); // Trigger the sync event
-view.sync();}}}catch(err){_didIteratorError16=true;_iteratorError16=err;}finally {try{if(!_iteratorNormalCompletion16&&_iterator16.return){_iterator16.return();}}finally {if(_didIteratorError16){throw _iteratorError16;}}}}); // Update filters
+$element.each(function(i){var _iteratorNormalCompletion23=true;var _didIteratorError23=false;var _iteratorError23=undefined;try{for(var _iterator23=ViewHelper.getAll('IssueEditor')[Symbol.iterator](),_step23;!(_iteratorNormalCompletion23=(_step23=_iterator23.next()).done);_iteratorNormalCompletion23=true){var view=_step23.value;if(this==view.$element[0]){view.model.milestone=view.$element.parents('.milestone-editor').attr('data-index');view.model.column=view.$element.parents('.column').attr('data-index'); // Trigger the sync event
+view.sync();}}}catch(err){_didIteratorError23=true;_iteratorError23=err;}finally {try{if(!_iteratorNormalCompletion23&&_iterator23.return){_iterator23.return();}}finally {if(_didIteratorError23){throw _iteratorError23;}}}}); // Update filters
 ViewHelper.get('FilterEditor').applyFilters(); // Cancel multiselect
 IssueEditor.cancelMultiSelect(); // Update milestones progress
-var _iteratorNormalCompletion17=true;var _didIteratorError17=false;var _iteratorError17=undefined;try{for(var _iterator17=ViewHelper.getAll('MilestoneEditor')[Symbol.iterator](),_step17;!(_iteratorNormalCompletion17=(_step17=_iterator17.next()).done);_iteratorNormalCompletion17=true){var milestoneEditor=_step17.value;milestoneEditor.updateProgress();}}catch(err){_didIteratorError17=true;_iteratorError17=err;}finally {try{if(!_iteratorNormalCompletion17&&_iterator17.return){_iterator17.return();}}finally {if(_didIteratorError17){throw _iteratorError17;}}}} /**
+var _iteratorNormalCompletion24=true;var _didIteratorError24=false;var _iteratorError24=undefined;try{for(var _iterator24=ViewHelper.getAll('MilestoneEditor')[Symbol.iterator](),_step24;!(_iteratorNormalCompletion24=(_step24=_iterator24.next()).done);_iteratorNormalCompletion24=true){var milestoneEditor=_step24.value;milestoneEditor.updateProgress();}}catch(err){_didIteratorError24=true;_iteratorError24=err;}finally {try{if(!_iteratorNormalCompletion24&&_iterator24.return){_iterator24.return();}}finally {if(_didIteratorError24){throw _iteratorError24;}}}} /**
      * Event: Fires on every change to a property
      */},{key:"onChange",value:function onChange(){if(ApiHelper.isSpectating()){return;} // Only update values if we're not using multi edit
 if(!this.usingMultiEdit()){this.updateModel();this.updateDOM();this.sync(); // Update filters
-ViewHelper.get('FilterEditor').applyFilters();var _iteratorNormalCompletion18=true;var _didIteratorError18=false;var _iteratorError18=undefined;try{for(var _iterator18=ViewHelper.getAll('MilestoneEditor')[Symbol.iterator](),_step18;!(_iteratorNormalCompletion18=(_step18=_iterator18.next()).done);_iteratorNormalCompletion18=true){var milestoneEditor=_step18.value;if(milestoneEditor.model.index==this.model.milestone){milestoneEditor.updateProgress();break;}}}catch(err){_didIteratorError18=true;_iteratorError18=err;}finally {try{if(!_iteratorNormalCompletion18&&_iterator18.return){_iterator18.return();}}finally {if(_didIteratorError18){throw _iteratorError18;}}}}} /**
+ViewHelper.get('FilterEditor').applyFilters();var _iteratorNormalCompletion25=true;var _didIteratorError25=false;var _iteratorError25=undefined;try{for(var _iterator25=ViewHelper.getAll('MilestoneEditor')[Symbol.iterator](),_step25;!(_iteratorNormalCompletion25=(_step25=_iterator25.next()).done);_iteratorNormalCompletion25=true){var milestoneEditor=_step25.value;if(milestoneEditor.model.index==this.model.milestone){milestoneEditor.updateProgress();break;}}}catch(err){_didIteratorError25=true;_iteratorError25=err;}finally {try{if(!_iteratorNormalCompletion25&&_iterator25.return){_iterator25.return();}}finally {if(_didIteratorError25){throw _iteratorError25;}}}}} /**
      * Event: Click multi edit apply button
      */},{key:"onClickMultiEditApply",value:function onClickMultiEditApply(){if(ApiHelper.isSpectating()){return;}this.updateModel();this.updateDOM();this.sync(); // Look for other IssueEditor views and update them as needed
-if(this.usingMultiEdit()){var _iteratorNormalCompletion19=true;var _didIteratorError19=false;var _iteratorError19=undefined;try{for(var _iterator19=ViewHelper.getAll('IssueEditor')[Symbol.iterator](),_step19;!(_iteratorNormalCompletion19=(_step19=_iterator19.next()).done);_iteratorNormalCompletion19=true){var view=_step19.value;if(view!=this&&view.$element.hasClass('selected')){view.model.type=this.getProperty('type',true)||view.model.type;view.model.priority=this.getProperty('priority',true)||view.model.priority;view.model.assignee=this.getProperty('assignee',true)||view.model.assignee;view.model.version=this.getProperty('version',true)||view.model.version;view.model.estimate=this.getProperty('estimate',true)||view.model.estimate;view.updateDOM();view.sync();}}}catch(err){_didIteratorError19=true;_iteratorError19=err;}finally {try{if(!_iteratorNormalCompletion19&&_iterator19.return){_iterator19.return();}}finally {if(_didIteratorError19){throw _iteratorError19;}}}} // Update filters
+if(this.usingMultiEdit()){var _iteratorNormalCompletion26=true;var _didIteratorError26=false;var _iteratorError26=undefined;try{for(var _iterator26=ViewHelper.getAll('IssueEditor')[Symbol.iterator](),_step26;!(_iteratorNormalCompletion26=(_step26=_iterator26.next()).done);_iteratorNormalCompletion26=true){var view=_step26.value;if(view!=this&&view.$element.hasClass('selected')){view.model.type=this.getProperty('type',true)||view.model.type;view.model.priority=this.getProperty('priority',true)||view.model.priority;view.model.assignee=this.getProperty('assignee',true)||view.model.assignee;view.model.version=this.getProperty('version',true)||view.model.version;view.model.estimate=this.getProperty('estimate',true)||view.model.estimate;view.updateDOM();view.sync();}}}catch(err){_didIteratorError26=true;_iteratorError26=err;}finally {try{if(!_iteratorNormalCompletion26&&_iterator26.return){_iterator26.return();}}finally {if(_didIteratorError26){throw _iteratorError26;}}}} // Update filters
 ViewHelper.get('FilterEditor').applyFilters();} /**
      * Event: Click multi edit cancel button
      */},{key:"onClickMultiEditCancel",value:function onClickMultiEditCancel(){if(ApiHelper.isSpectating()){return;}IssueEditor.cancelMultiSelect();} /**
@@ -1462,7 +1773,7 @@ ViewHelper.get('FilterEditor').applyFilters();} /**
      * Event: Click the edit button of a field
      */},{key:"onClickEdit",value:function onClickEdit(e){e.preventDefault();e.stopPropagation();if(ApiHelper.isSpectating()){return;}if(!InputHelper.isShiftDown&&!$(this).parents('.issue-editor').hasClass('selected')){$(this).toggleClass('hidden',true).siblings('.edit').toggleClass('hidden',false).focus().select();}} /**
      * Event: Click the comment button
-     */},{key:"onClickComment",value:function onClickComment(){var _this58=this;if(ApiHelper.isSpectating()){return;}var text=this.$element.find('.add-comment textarea').val();this.$element.toggleClass('loading',true);ApiHelper.addIssueComment(this.model,text).then(function(){_this58.getComments();});} /**
+     */},{key:"onClickComment",value:function onClickComment(){var _this91=this;if(ApiHelper.isSpectating()){return;}var text=this.$element.find('.add-comment textarea').val();this.$element.toggleClass('loading',true);ApiHelper.addIssueComment(this.model,text).then(function(){_this91.getComments();});} /**
      * Event: Remove focus from input fields
      *
      * @param {Event} e
@@ -1478,11 +1789,11 @@ if(InputHelper.isShiftDown){e.preventDefault();e.stopPropagation();this.$element
      * @returns {String} icon
      */},{key:"getPriorityIndicator",value:function getPriorityIndicator(){var priority=resources.issuePriorities[this.model.priority];var icon='';switch(priority){case 'low':case 'trivial':icon='arrow-down';break;case 'medium':case 'minor':icon='arrow-up';break;case 'high':case 'critical':icon='arrow-up';break;case 'blocker':icon='arrow-up';break;}return _.span({class:'priority-indicator fa fa-'+icon+' '+priority});} /**
      * Lazy-load the comments
-     */},{key:"getComments",value:function getComments(){var _this59=this;var $comments=this.$element.find('.comments');ApiHelper.getUser().then(function(user){ApiHelper.getIssueComments(_this59.model).then(function(comments){_this59.$element.toggleClass('loading',false);$comments.html(_.each(comments,function(i,comment){var collaborator=window.resources.collaborators[comment.collaborator];var text=markdownToHtml(comment.text);var isUser=collaborator.name==user.name;return _.div({class:'comment','data-index':comment.index},_.div({class:'collaborator'},_.img({src:collaborator.avatar}),_.p(collaborator.name)),_.if(isUser,_.div({class:'btn-edit'},text).click(_this59.onClickEdit),_.textarea({class:'edit selectable hidden text btn-transparent'},comment.text).change(function(){_this59.$element.toggleClass('loading',true);comment.text=_this59.$element.find('.comments .comment[data-index="'+comment.index+'"] textarea').val();_this59.$element.find('.comments .comment[data-index="'+comment.index+'"] .btn-edit').html(markdownToHtml(comment.text)||'');ApiHelper.updateIssueComment(_this59.model,comment).then(function(){_this59.$element.toggleClass('loading',false);});}).blur(_this59.onBlur)),_.if(!isUser,_.div({class:'text'},text)));}));});});}}],[{key:"cancelMultiSelect",value:function cancelMultiSelect(){$('.issue-editor').toggleClass('selected',false);$('.issue-editor .multi-edit-toggle').each(function(){this.checked=false;});$('.board-container').toggleClass('multi-edit',false);}}]);return IssueEditor;}(View);module.exports=IssueEditor;},{"../templates/IssueEditor":26}],35:[function(require,module,exports){'use strict'; /**
+     */},{key:"getComments",value:function getComments(){var _this92=this;var $comments=this.$element.find('.comments');ApiHelper.getUser().then(function(user){ApiHelper.getIssueComments(_this92.model).then(function(comments){_this92.$element.toggleClass('loading',false);$comments.html(_.each(comments,function(i,comment){var collaborator=window.resources.collaborators[comment.collaborator];var text=markdownToHtml(comment.text);var isUser=collaborator.name==user.name;return _.div({class:'comment','data-index':comment.index},_.div({class:'collaborator'},_.img({src:collaborator.avatar}),_.p(collaborator.name)),_.if(isUser,_.div({class:'btn-edit'},text).click(_this92.onClickEdit),_.textarea({class:'edit selectable hidden text btn-transparent'},comment.text).change(function(){_this92.$element.toggleClass('loading',true);comment.text=_this92.$element.find('.comments .comment[data-index="'+comment.index+'"] textarea').val();_this92.$element.find('.comments .comment[data-index="'+comment.index+'"] .btn-edit').html(markdownToHtml(comment.text)||'');ApiHelper.updateIssueComment(_this92.model,comment).then(function(){_this92.$element.toggleClass('loading',false);});}).blur(_this92.onBlur)),_.if(!isUser,_.div({class:'text'},text)));}));});});}}],[{key:"cancelMultiSelect",value:function cancelMultiSelect(){$('.issue-editor').toggleClass('selected',false);$('.issue-editor .multi-edit-toggle').each(function(){this.checked=false;});$('.board-container').toggleClass('multi-edit',false);}}]);return IssueEditor;}(View);module.exports=IssueEditor;},{"../templates/IssueEditor":27}],36:[function(require,module,exports){'use strict'; /**
  * An editor for milestones, displaying issues in columns or rows
- */var MilestoneEditor=function(_View4){_inherits(MilestoneEditor,_View4);function MilestoneEditor(params){_classCallCheck(this,MilestoneEditor);var _this60=_possibleConstructorReturn(this,Object.getPrototypeOf(MilestoneEditor).call(this,params));_this60.template=require('../templates/MilestoneEditor');_this60.fetch();_this60.updateProgress();return _this60;} /**
+ */var MilestoneEditor=function(_View4){_inherits(MilestoneEditor,_View4);function MilestoneEditor(params){_classCallCheck(this,MilestoneEditor);var _this93=_possibleConstructorReturn(this,Object.getPrototypeOf(MilestoneEditor).call(this,params));_this93.template=require('../templates/MilestoneEditor');_this93.fetch();_this93.updateProgress();return _this93;} /**
      * Event: Click new issue button
-     */_createClass(MilestoneEditor,[{key:"onClickNewIssue",value:function onClickNewIssue(){var _this61=this;spinner(true);Issue.create({milestone:this.model.index}).then(function(issue){var editor=new IssueEditor({model:issue});var $issue=editor.$element;$('.milestone-editor[data-index="'+issue.milestone+'"] .column[data-index="'+issue.column+'"] .btn-new-issue').before($issue);$issue.toggleClass('expanded',true);$issue.toggleClass('selected',false);_this61.updateProgress();spinner(false);});if(this.$element.hasClass('collapsed')){this.onClickToggle();}} /**
+     */_createClass(MilestoneEditor,[{key:"onClickNewIssue",value:function onClickNewIssue(){var _this94=this;spinner(true);Issue.create({milestone:this.model.index}).then(function(issue){var editor=new IssueEditor({model:issue});var $issue=editor.$element;$('.milestone-editor[data-index="'+issue.milestone+'"] .column[data-index="'+issue.column+'"] .btn-new-issue').before($issue);$issue.toggleClass('expanded',true);$issue.toggleClass('selected',false);_this94.updateProgress();spinner(false);});if(this.$element.hasClass('collapsed')){this.onClickToggle();}} /**
      * Event: Click toggle button
      */},{key:"onClickToggle",value:function onClickToggle(){this.$element.toggleClass('collapsed');var isCollapsed=this.$element.hasClass('collapsed');var newKey=isCollapsed?'collapsed':'expanded';SettingsHelper.set('milestone',this.model.index,newKey);} /**
      * Gets remaining days
@@ -1494,22 +1805,22 @@ if(InputHelper.isShiftDown){e.preventDefault();e.stopPropagation();this.$element
      * @returns {Number} percent
      */},{key:"getPercentComplete",value:function getPercentComplete(){var total=this.getIssues();var completed=this.getCompletedIssues();var percentage=0;var totalHours=0;var completedHours=0;for(var i in total){totalHours+=total[i].getEstimatedHours();}for(var _i2 in completed){completedHours+=completed[_i2].getEstimatedHours();}if(total.length>0&&completed.length>0){percentage=completed.length/total.length*100;}return percentage;} /**
      * Update progress indicators
-     */},{key:"updateProgress",value:function updateProgress(){var total=this.getIssues();var completed=this.getCompletedIssues();var percentage=0;var totalHours=0;var completedHours=0;var _iteratorNormalCompletion20=true;var _didIteratorError20=false;var _iteratorError20=undefined;try{for(var _iterator20=total[Symbol.iterator](),_step20;!(_iteratorNormalCompletion20=(_step20=_iterator20.next()).done);_iteratorNormalCompletion20=true){var issue=_step20.value;totalHours+=issue.getEstimatedHours();}}catch(err){_didIteratorError20=true;_iteratorError20=err;}finally {try{if(!_iteratorNormalCompletion20&&_iterator20.return){_iterator20.return();}}finally {if(_didIteratorError20){throw _iteratorError20;}}}var _iteratorNormalCompletion21=true;var _didIteratorError21=false;var _iteratorError21=undefined;try{for(var _iterator21=completed[Symbol.iterator](),_step21;!(_iteratorNormalCompletion21=(_step21=_iterator21.next()).done);_iteratorNormalCompletion21=true){var _issue=_step21.value;completedHours+=_issue.getEstimatedHours();}}catch(err){_didIteratorError21=true;_iteratorError21=err;}finally {try{if(!_iteratorNormalCompletion21&&_iterator21.return){_iterator21.return();}}finally {if(_didIteratorError21){throw _iteratorError21;}}}if(total.length>0&&completed.length>0){percentage=completed.length/total.length*100;}this.$element.find('.header .progress-bar').css({width:percentage+'%'});this.$element.find('.header .progress-amounts .total').html(total.length);this.$element.find('.header .progress-hours .total').html(totalHours+'h');this.$element.find('.header .progress-amounts .remaining').html(total.length-completed.length);this.$element.find('.header .progress-hours .remaining').html(totalHours-completedHours+'h'); // Due date
+     */},{key:"updateProgress",value:function updateProgress(){var total=this.getIssues();var completed=this.getCompletedIssues();var percentage=0;var totalHours=0;var completedHours=0;var _iteratorNormalCompletion27=true;var _didIteratorError27=false;var _iteratorError27=undefined;try{for(var _iterator27=total[Symbol.iterator](),_step27;!(_iteratorNormalCompletion27=(_step27=_iterator27.next()).done);_iteratorNormalCompletion27=true){var issue=_step27.value;totalHours+=issue.getEstimatedHours();}}catch(err){_didIteratorError27=true;_iteratorError27=err;}finally {try{if(!_iteratorNormalCompletion27&&_iterator27.return){_iterator27.return();}}finally {if(_didIteratorError27){throw _iteratorError27;}}}var _iteratorNormalCompletion28=true;var _didIteratorError28=false;var _iteratorError28=undefined;try{for(var _iterator28=completed[Symbol.iterator](),_step28;!(_iteratorNormalCompletion28=(_step28=_iterator28.next()).done);_iteratorNormalCompletion28=true){var _issue=_step28.value;completedHours+=_issue.getEstimatedHours();}}catch(err){_didIteratorError28=true;_iteratorError28=err;}finally {try{if(!_iteratorNormalCompletion28&&_iterator28.return){_iterator28.return();}}finally {if(_didIteratorError28){throw _iteratorError28;}}}if(total.length>0&&completed.length>0){percentage=completed.length/total.length*100;}this.$element.find('.header .progress-bar').css({width:percentage+'%'});this.$element.find('.header .progress-amounts .total').html(total.length);this.$element.find('.header .progress-hours .total').html(totalHours+'h');this.$element.find('.header .progress-amounts .remaining').html(total.length-completed.length);this.$element.find('.header .progress-hours .remaining').html(totalHours-completedHours+'h'); // Due date
 if(this.model.endDate){var $dueDate=this.$element.find('.header .due-date');if($dueDate.length<1){$dueDate=_.span({class:'due-date'}).prependTo(this.$element.find('.header .stats'));}_.append($dueDate.empty(),_.span({class:'fa fa-calendar'}),_.span({class:'date'},prettyDate(this.model.endDate)), // No time left
 _.if(this.getRemainingDays()<1&&this.getPercentComplete()<100,_.span({class:'remaining warn-red'},this.getRemainingDays()+'d')), // Little time left
 _.if(this.getRemainingDays()>=1&&this.getRemainingDays()<3&&this.getPercentComplete()<100,_.span({class:'remaining warn-yellow'},this.getRemainingDays()+'d')), // More time left
 _.if(this.getRemainingDays()>=3&&this.getPercentComplete()<100,_.span({class:'remaining'},this.getRemainingDays()+'d')), // Complete
 _.if(this.getPercentComplete()==100,_.span({class:'remaining ok fa fa-check'})));}} /**
      * Gets a list of completed
-     */},{key:"getCompletedIssues",value:function getCompletedIssues(){var issues=[];var _iteratorNormalCompletion22=true;var _didIteratorError22=false;var _iteratorError22=undefined;try{for(var _iterator22=window.resources.issues[Symbol.iterator](),_step22;!(_iteratorNormalCompletion22=(_step22=_iterator22.next()).done);_iteratorNormalCompletion22=true){var issue=_step22.value;if(issue.milestone==this.model.index&&issue.isClosed()){issues.push(issue);}}}catch(err){_didIteratorError22=true;_iteratorError22=err;}finally {try{if(!_iteratorNormalCompletion22&&_iterator22.return){_iterator22.return();}}finally {if(_didIteratorError22){throw _iteratorError22;}}}return issues;} /**
+     */},{key:"getCompletedIssues",value:function getCompletedIssues(){var issues=[];var _iteratorNormalCompletion29=true;var _didIteratorError29=false;var _iteratorError29=undefined;try{for(var _iterator29=window.resources.issues[Symbol.iterator](),_step29;!(_iteratorNormalCompletion29=(_step29=_iterator29.next()).done);_iteratorNormalCompletion29=true){var issue=_step29.value;if(issue.milestone==this.model.index&&issue.isClosed()){issues.push(issue);}}}catch(err){_didIteratorError29=true;_iteratorError29=err;}finally {try{if(!_iteratorNormalCompletion29&&_iterator29.return){_iterator29.return();}}finally {if(_didIteratorError29){throw _iteratorError29;}}}return issues;} /**
      * Gets a list of all issues
-     */},{key:"getIssues",value:function getIssues(){var issues=[];var _iteratorNormalCompletion23=true;var _didIteratorError23=false;var _iteratorError23=undefined;try{for(var _iterator23=window.resources.issues[Symbol.iterator](),_step23;!(_iteratorNormalCompletion23=(_step23=_iterator23.next()).done);_iteratorNormalCompletion23=true){var issue=_step23.value;if(issue.milestone==this.model.index){issues.push(issue);}}}catch(err){_didIteratorError23=true;_iteratorError23=err;}finally {try{if(!_iteratorNormalCompletion23&&_iterator23.return){_iterator23.return();}}finally {if(_didIteratorError23){throw _iteratorError23;}}}return issues;}}]);return MilestoneEditor;}(View);module.exports=MilestoneEditor;},{"../templates/MilestoneEditor":27}],36:[function(require,module,exports){'use strict'; /**
+     */},{key:"getIssues",value:function getIssues(){var issues=[];var _iteratorNormalCompletion30=true;var _didIteratorError30=false;var _iteratorError30=undefined;try{for(var _iterator30=window.resources.issues[Symbol.iterator](),_step30;!(_iteratorNormalCompletion30=(_step30=_iterator30.next()).done);_iteratorNormalCompletion30=true){var issue=_step30.value;if(issue.milestone==this.model.index){issues.push(issue);}}}catch(err){_didIteratorError30=true;_iteratorError30=err;}finally {try{if(!_iteratorNormalCompletion30&&_iterator30.return){_iterator30.return();}}finally {if(_didIteratorError30){throw _iteratorError30;}}}return issues;}}]);return MilestoneEditor;}(View);module.exports=MilestoneEditor;},{"../templates/MilestoneEditor":28}],37:[function(require,module,exports){'use strict'; /**
  * The navbar view
  *
  * @class View Navbar
- */var Navbar=function(_View5){_inherits(Navbar,_View5);function Navbar(params){_classCallCheck(this,Navbar);var _this62=_possibleConstructorReturn(this,Object.getPrototypeOf(Navbar).call(this,params));_this62.template=require('../templates/Navbar');_this62.fetch();return _this62;} /**
+ */var Navbar=function(_View5){_inherits(Navbar,_View5);function Navbar(params){_classCallCheck(this,Navbar);var _this95=_possibleConstructorReturn(this,Object.getPrototypeOf(Navbar).call(this,params));_this95.template=require('../templates/Navbar');_this95.fetch();return _this95;} /**
      * Gets a list of links
-     */_createClass(Navbar,[{key:"getLinks",value:function getLinks(){var links=[];links.push({url:'/',class:'logo',handler:this.toggleAboutPanel});links.push({url:'/source/',handler:this.toggleSourcePanel,icon:'user'});links.push({url:'/projects/',handler:this.toggleProjectsList,icon:'folder'});links.push({separator:true});links.push({url:'/settings/',icon:'cog'});links.push({url:'/plan/',icon:'calendar'});links.push({url:'/board/kanban/',icon:'columns'});links.push({url:'/board/list/',icon:'list'});return links;} /**
+     */_createClass(Navbar,[{key:"getLinks",value:function getLinks(){var links=[];links.push({url:'/',class:'logo',handler:this.toggleAboutPanel});links.push({url:'/source/',handler:this.toggleSourcePanel,icon:'user'});links.push({url:'/projects/',handler:this.toggleProjectsList,icon:'folder'});links.push({separator:true});links.push({url:'/settings/',icon:'cog'});if(localStorage.getItem('source')!='bitbucket'){links.push({url:'/plan/',icon:'calendar'});}links.push({url:'/board/kanban/',icon:'columns'});links.push({url:'/board/list/',icon:'list'});return links;} /**
      * Cleans up extra added classes
      */},{key:"cleanUpClasses",value:function cleanUpClasses(){this.$element.toggleClass('project-list',false);this.$element.toggleClass('source-panel',false);this.$element.toggleClass('about-panel',false);} /**
      * Toggles a panel
@@ -1517,9 +1828,9 @@ _.if(this.getPercentComplete()==100,_.span({class:'remaining ok fa fa-check'})))
      * Toggles the about panel
      */},{key:"toggleAboutPanel",value:function toggleAboutPanel(isActive){this.togglePanel('/','about-panel',function($content){$.get('/README.md',function(res){$content.append(markdownToHtml(res));});},isActive);} /**
      * Toggles the source panel
-     */},{key:"toggleSourcePanel",value:function toggleSourcePanel(isActive){var _this63=this;this.togglePanel('/source/','source-panel',function($content){ApiHelper.getUser().then(function(user){$content.append([_.div({class:'current-user'},_.img({src:user.avatar}),_.p(user.name),_.button({class:'btn'},'Log out').click(function(e){e.preventDefault();ApiHelper.logOut();}))]);}).catch(function(e){debug.error(e,_this63);});},isActive);} /**
+     */},{key:"toggleSourcePanel",value:function toggleSourcePanel(isActive){var _this96=this;this.togglePanel('/source/','source-panel',function($content){ApiHelper.getUser().then(function(user){$content.append([_.div({class:'current-user'},_.img({src:user.avatar}),_.p(user.name),_.button({class:'btn'},'Log out').click(function(e){e.preventDefault();ApiHelper.logOut();}))]);}).catch(function(e){debug.error(e,_this96);});},isActive);} /**
      * Toggles the projects list
-     */},{key:"toggleProjectsList",value:function toggleProjectsList(isActive,overrideUrl){var _this64=this;this.togglePanel('/projects/','project-list',function($content){ApiHelper.getProjects().then(function(){$content.empty().append(_.each(window.resources.projects,function(i,project){return new ProjectEditor({model:project,overrideUrl:overrideUrl}).$element;}));}).catch(function(e){debug.error(e,_this64);});},isActive);} /**
+     */},{key:"toggleProjectsList",value:function toggleProjectsList(isActive,overrideUrl){var _this97=this;this.togglePanel('/projects/','project-list',function($content){ApiHelper.getProjects().then(function(){$content.empty().append(_.each(window.resources.projects,function(i,project){return new ProjectEditor({model:project,overrideUrl:overrideUrl}).$element;}));}).catch(function(e){debug.error(e,_this97);});},isActive);} /**
      * Gets the full router URL
      *
      * @param {String} url
@@ -1533,18 +1844,18 @@ url='/'+ApiHelper.getUserName()+url;return url;} /**
      * @param {String} url
      */},{key:"onClickLink",value:function onClickLink(url){this.cleanUpClasses();this.$element.find('.obscure .content').empty();if(!ApiHelper.getProjectName()){ViewHelper.get('Navbar').toggleProjectsList(true,url);}else {url=this.getFullUrl(url);if(url!=Router.url){this.$element.toggleClass('out',true);resources={};setTimeout(function(){location.hash=url;},400);}}} /**
      * Slide navbar in
-     */},{key:"slideIn",value:function slideIn(){if(Router.url){var url=Router.url.replace('/'+ApiHelper.getUserName(),'').replace('/'+ApiHelper.getProjectName(),'');this.$element.find('button.active').removeClass('active');this.$element.find('button[data-url*="'+url+'"]').toggleClass('active',true);this.$element.toggleClass('out',false);$('.navbar .obscure .content').empty();}}}]);return Navbar;}(View);module.exports=Navbar;},{"../templates/Navbar":28}],37:[function(require,module,exports){'use strict';var PlanEditor=function(_View6){_inherits(PlanEditor,_View6);function PlanEditor(params){_classCallCheck(this,PlanEditor);var _this65=_possibleConstructorReturn(this,Object.getPrototypeOf(PlanEditor).call(this,params));_this65.currentYear=new Date().getFullYear();_this65.currentMonth=new Date().getMonth()+1;if(_this65.currentMonth.length==1){_this65.currentMonth='0'+_this65.currentMonth;}_this65.template=require('../templates/PlanEditor');_this65.init();return _this65;}_createClass(PlanEditor,[{key:"onClickYear",value:function onClickYear(year){this.currentYear=parseInt(year);this.render();}},{key:"onClickMonth",value:function onClickMonth(month){this.currentMonth=parseInt(month);this.render();}},{key:"updateUndatedBox",value:function updateUndatedBox(){if(this.getUndatedMilestones().length<1){$('.plan-editor .undated').remove();}}},{key:"getUndatedMilestones",value:function getUndatedMilestones(){var milestones=[];var _iteratorNormalCompletion24=true;var _didIteratorError24=false;var _iteratorError24=undefined;try{for(var _iterator24=resources.milestones[Symbol.iterator](),_step24;!(_iteratorNormalCompletion24=(_step24=_iterator24.next()).done);_iteratorNormalCompletion24=true){var milestone=_step24.value;if(!milestone.endDate){milestones.push(milestone);}}}catch(err){_didIteratorError24=true;_iteratorError24=err;}finally {try{if(!_iteratorNormalCompletion24&&_iterator24.return){_iterator24.return();}}finally {if(_didIteratorError24){throw _iteratorError24;}}}return milestones;}},{key:"getYears",value:function getYears(){var years=[];for(var i=new Date().getFullYear()-2;i<new Date().getFullYear()+4;i++){years.push({number:i});}return years;}},{key:"getMonths",value:function getMonths(){var months=[];for(var i=1;i<=12;i++){var num=i.toString();if(num.length==1){num='0'+num;}months.push({name:new Date('2016-'+num+'-01').getMonthName(),number:i});}return months;}},{key:"getWeekDays",value:function getWeekDays(){var weekdays=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];return weekdays;}},{key:"onClickAddMilestone",value:function onClickAddMilestone(date){var _this66=this;if(ApiHelper.isSpectating()){return;}spinner(true);ResourceHelper.addResource('milestones',{title:'New milestone',endDate:date.toISOString()}).then(function(){_this66.render();spinner(false);});}},{key:"getWeeks",value:function getWeeks(){var weeks=[];var firstDay=new Date(this.currentYear,this.currentMonth,1);var firstWeek=firstDay.getWeek();var _iteratorNormalCompletion25=true;var _didIteratorError25=false;var _iteratorError25=undefined;try{for(var _iterator25=this.getDates()[Symbol.iterator](),_step25;!(_iteratorNormalCompletion25=(_step25=_iterator25.next()).done);_iteratorNormalCompletion25=true){var date=_step25.value;if(weeks.indexOf(date.getWeek())<0){weeks.push(date.getWeek());}}}catch(err){_didIteratorError25=true;_iteratorError25=err;}finally {try{if(!_iteratorNormalCompletion25&&_iterator25.return){_iterator25.return();}}finally {if(_didIteratorError25){throw _iteratorError25;}}}return weeks;}},{key:"getDates",value:function getDates(){var year=this.currentYear;var month=this.currentMonth;var dates=[];for(var i=1;i<=new Date(year,month,0).getDate();i++){var day=i.toString();if(day.length==1){day='0'+day;}if(month.toString().length==1){month='0'+month;}var date=new Date(year+'-'+month+'-'+day).floor();dates.push(date);}return dates;}},{key:"getDate",value:function getDate(week,weekday){var _iteratorNormalCompletion26=true;var _didIteratorError26=false;var _iteratorError26=undefined;try{for(var _iterator26=this.getDates()[Symbol.iterator](),_step26;!(_iteratorNormalCompletion26=(_step26=_iterator26.next()).done);_iteratorNormalCompletion26=true){var date=_step26.value;if(date.getWeek()==week&&date.getISODay()==weekday){return date;}}}catch(err){_didIteratorError26=true;_iteratorError26=err;}finally {try{if(!_iteratorNormalCompletion26&&_iterator26.return){_iterator26.return();}}finally {if(_didIteratorError26){throw _iteratorError26;}}}}},{key:"iterateDates",value:function iterateDates(renderFunction){var weekdays=this.getWeekDays();var weeks=this.getWeeks();var renders=[];for(var y=0;y<6;y++){for(var x=0;x<7;x++){var weekday=weekdays[x];var week=weeks[y];if(week&&weekday){var date=this.getDate(week,x);renders.push(renderFunction(date));}else {renders.push(renderFunction());}}}return renders;}}]);return PlanEditor;}(View);module.exports=PlanEditor;},{"../templates/PlanEditor":29}],38:[function(require,module,exports){'use strict';var PlanItemEditor=function(_View7){_inherits(PlanItemEditor,_View7);function PlanItemEditor(params){_classCallCheck(this,PlanItemEditor);var _this67=_possibleConstructorReturn(this,Object.getPrototypeOf(PlanItemEditor).call(this,params));_this67.template=require('../templates/PlanItemEditor');_this67.fetch();return _this67;} /**
+     */},{key:"slideIn",value:function slideIn(){if(Router.url){var url=Router.url.replace('/'+ApiHelper.getUserName(),'').replace('/'+ApiHelper.getProjectName(),'');this.$element.find('button.active').removeClass('active');this.$element.find('button[data-url*="'+url+'"]').toggleClass('active',true);this.$element.toggleClass('out',false);$('.navbar .obscure .content').empty();}}}]);return Navbar;}(View);module.exports=Navbar;},{"../templates/Navbar":29}],38:[function(require,module,exports){'use strict';var PlanEditor=function(_View6){_inherits(PlanEditor,_View6);function PlanEditor(params){_classCallCheck(this,PlanEditor);var _this98=_possibleConstructorReturn(this,Object.getPrototypeOf(PlanEditor).call(this,params));_this98.currentYear=new Date().getFullYear();_this98.currentMonth=new Date().getMonth()+1;if(_this98.currentMonth.length==1){_this98.currentMonth='0'+_this98.currentMonth;}_this98.template=require('../templates/PlanEditor');_this98.init();return _this98;}_createClass(PlanEditor,[{key:"onClickYear",value:function onClickYear(year){this.currentYear=parseInt(year);this.render();}},{key:"onClickMonth",value:function onClickMonth(month){this.currentMonth=parseInt(month);this.render();}},{key:"updateUndatedBox",value:function updateUndatedBox(){if(this.getUndatedMilestones().length<1){$('.plan-editor .undated').remove();}}},{key:"getUndatedMilestones",value:function getUndatedMilestones(){var milestones=[];var _iteratorNormalCompletion31=true;var _didIteratorError31=false;var _iteratorError31=undefined;try{for(var _iterator31=resources.milestones[Symbol.iterator](),_step31;!(_iteratorNormalCompletion31=(_step31=_iterator31.next()).done);_iteratorNormalCompletion31=true){var milestone=_step31.value;if(!milestone.endDate){milestones.push(milestone);}}}catch(err){_didIteratorError31=true;_iteratorError31=err;}finally {try{if(!_iteratorNormalCompletion31&&_iterator31.return){_iterator31.return();}}finally {if(_didIteratorError31){throw _iteratorError31;}}}return milestones;}},{key:"getYears",value:function getYears(){var years=[];for(var i=new Date().getFullYear()-2;i<new Date().getFullYear()+4;i++){years.push({number:i});}return years;}},{key:"getMonths",value:function getMonths(){var months=[];for(var i=1;i<=12;i++){var num=i.toString();if(num.length==1){num='0'+num;}months.push({name:new Date('2016-'+num+'-01').getMonthName(),number:i});}return months;}},{key:"getWeekDays",value:function getWeekDays(){var weekdays=['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];return weekdays;}},{key:"onClickAddMilestone",value:function onClickAddMilestone(date){var _this99=this;if(ApiHelper.isSpectating()){return;}spinner(true);ResourceHelper.addResource('milestones',{title:'New milestone',endDate:date.toISOString()}).then(function(){_this99.render();spinner(false);});}},{key:"getWeeks",value:function getWeeks(){var weeks=[];var firstDay=new Date(this.currentYear,this.currentMonth,1);var firstWeek=firstDay.getWeek();var _iteratorNormalCompletion32=true;var _didIteratorError32=false;var _iteratorError32=undefined;try{for(var _iterator32=this.getDates()[Symbol.iterator](),_step32;!(_iteratorNormalCompletion32=(_step32=_iterator32.next()).done);_iteratorNormalCompletion32=true){var date=_step32.value;if(weeks.indexOf(date.getWeek())<0){weeks.push(date.getWeek());}}}catch(err){_didIteratorError32=true;_iteratorError32=err;}finally {try{if(!_iteratorNormalCompletion32&&_iterator32.return){_iterator32.return();}}finally {if(_didIteratorError32){throw _iteratorError32;}}}return weeks;}},{key:"getDates",value:function getDates(){var year=this.currentYear;var month=this.currentMonth;var dates=[];for(var i=1;i<=new Date(year,month,0).getDate();i++){var day=i.toString();if(day.length==1){day='0'+day;}if(month.toString().length==1){month='0'+month;}var date=new Date(year+'-'+month+'-'+day).floor();dates.push(date);}return dates;}},{key:"getDate",value:function getDate(week,weekday){var _iteratorNormalCompletion33=true;var _didIteratorError33=false;var _iteratorError33=undefined;try{for(var _iterator33=this.getDates()[Symbol.iterator](),_step33;!(_iteratorNormalCompletion33=(_step33=_iterator33.next()).done);_iteratorNormalCompletion33=true){var date=_step33.value;if(date.getWeek()==week&&date.getISODay()==weekday){return date;}}}catch(err){_didIteratorError33=true;_iteratorError33=err;}finally {try{if(!_iteratorNormalCompletion33&&_iterator33.return){_iterator33.return();}}finally {if(_didIteratorError33){throw _iteratorError33;}}}}},{key:"iterateDates",value:function iterateDates(renderFunction){var weekdays=this.getWeekDays();var weeks=this.getWeeks();var renders=[];for(var y=0;y<6;y++){for(var x=0;x<7;x++){var weekday=weekdays[x];var week=weeks[y];if(week&&weekday){var date=this.getDate(week,x);renders.push(renderFunction(date));}else {renders.push(renderFunction());}}}return renders;}}]);return PlanEditor;}(View);module.exports=PlanEditor;},{"../templates/PlanEditor":30}],39:[function(require,module,exports){'use strict';var PlanItemEditor=function(_View7){_inherits(PlanItemEditor,_View7);function PlanItemEditor(params){_classCallCheck(this,PlanItemEditor);var _this100=_possibleConstructorReturn(this,Object.getPrototypeOf(PlanItemEditor).call(this,params));_this100.template=require('../templates/PlanItemEditor');_this100.fetch();return _this100;} /**
      * Opens this milestone as a dialog
-     */_createClass(PlanItemEditor,[{key:"openDialog",value:function openDialog(){var _this68=this;var prev={x:this.$element.offset().left,y:this.$element.offset().top,w:this.$element.width(),h:this.$element.height(),$parent:this.$element.parent()};this.positionBuffer=prev;$('body').append(this.$element);this.$element.css({position:'absolute',left:prev.x,top:prev.y,width:prev.w,height:prev.h,transition:'all 0.5s ease',overflow:'hidden'});setTimeout(function(){_this68.$element.removeAttr('style');_this68.$element.css({position:'absolute',left:'50%',top:'100px',transform:'translateX(-50%)',transition:'all 0.5s ease'});},1);} /**
+     */_createClass(PlanItemEditor,[{key:"openDialog",value:function openDialog(){var _this101=this;var prev={x:this.$element.offset().left,y:this.$element.offset().top,w:this.$element.width(),h:this.$element.height(),$parent:this.$element.parent()};this.positionBuffer=prev;$('body').append(this.$element);this.$element.css({position:'absolute',left:prev.x,top:prev.y,width:prev.w,height:prev.h,transition:'all 0.5s ease',overflow:'hidden'});setTimeout(function(){_this101.$element.removeAttr('style');_this101.$element.css({position:'absolute',left:'50%',top:'100px',transform:'translateX(-50%)',transition:'all 0.5s ease'});},1);} /**
      * Event: Change
-     */},{key:"onChange",value:function onChange(){var _this69=this;var dateString=this.$element.parents('.date').attr('data-date'); // Update model data with new information based on DOM location
+     */},{key:"onChange",value:function onChange(){var _this102=this;var dateString=this.$element.parents('.date').attr('data-date'); // Update model data with new information based on DOM location
 this.model.title=this.$element.find('.header input').val();this.model.description=this.$element.find('.body input').val();if(dateString){var date=new Date(dateString);this.model.endDate=date.getSimpleString();} // Update DOM elements to match model
 this.$element.find('.drag-handle').text(this.model.title);console.log(dateString,this.model.endDate); // Start loading
-this.$element.toggleClass('loading',true);ResourceHelper.updateResource('milestones',this.model).then(function(){_this69.$element.toggleClass('loading',false);});} /**
+this.$element.toggleClass('loading',true);ResourceHelper.updateResource('milestones',this.model).then(function(){_this102.$element.toggleClass('loading',false);});} /**
      * Event: Click delete button
      */},{key:"onClickDelete",value:function onClickDelete(){spinner(true);ResourceHelper.removeResource('milestones',this.model.index).then(function(){ViewHelper.removeAll('PlanItemEditor');ViewHelper.get('PlanEditor').render();spinner(false);});} /**
      * Event: Click close button
-     */},{key:"onClickClose",value:function onClickClose(){var _this70=this;var prev=this.positionBuffer;this.$element.removeAttr('style');this.$element.css({position:'absolute',left:prev.x,top:prev.y,width:prev.w,height:prev.h,transition:'all 0.5s ease',overflow:'hidden'});setTimeout(function(){prev.$parent.prepend(_this70.$element);_this70.$element.removeAttr('style');},550);} /**
+     */},{key:"onClickClose",value:function onClickClose(){var _this103=this;var prev=this.positionBuffer;this.$element.removeAttr('style');this.$element.css({position:'absolute',left:prev.x,top:prev.y,width:prev.w,height:prev.h,transition:'all 0.5s ease',overflow:'hidden'});setTimeout(function(){prev.$parent.prepend(_this103.$element);_this103.$element.removeAttr('style');},550);} /**
      * Event: Click OK button
      */},{key:"onClickOK",value:function onClickOK(){this.onChange();this.onClickClose();} /**
      * Event: Release the dragging handle
@@ -1567,7 +1878,7 @@ this.$element.hide();ResourceHelper.updateResource('milestones',this.model).then
 $target.click();});} // Update the undated box
 ViewHelper.get('PlanEditor').updateUndatedBox();}} /**
      * Event: Click the dragging handle
-     */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this71=this; // Cache the previous click
+     */},{key:"onClickDragHandle",value:function onClickDragHandle(e){var _this104=this; // Cache the previous click
 this.prevClick=Date.now(); // Set class on board container
 $('.plan-container').toggleClass('dragging',true); // Apply temporary CSS properties
 this.$element.css({top:this.$element.offset().top,left:this.$element.offset().left,width:this.$element.outerWidth(),height:this.$element.outerHeight(),'pointer-events':'none','z-index':999});this.$element.find('button, input').css({'pointer-events':'none'}); // Find the offset parent
@@ -1578,7 +1889,7 @@ var prev={x:e.pageX,y:e.pageY}; // Date mouse hover events
 $('.plan-editor .dates .date, .tab.year, .tab.month').on('mouseenter',function(){$(this).toggleClass('hovering',true);}).on('mouseleave',function(){$(this).toggleClass('hovering',false);}); // Document pointer movement logic
 $(document).off('mousemove').on('mousemove',function(e){ // Get current pointer location
 var current={x:e.pageX,y:e.pageY}; // Apply new CSS positioning values
-_this71.$element.css({top:current.y+offset.y,left:current.x+offset.x}); // Replace previous position buffer data
+_this104.$element.css({top:current.y+offset.y,left:current.x+offset.x}); // Replace previous position buffer data
 prev=current;}); // Document pointer release mouse button logic
-$(document).off('mouseup').on('mouseup',function(e){_this71.onReleaseDragHandle(e);});}}]);return PlanItemEditor;}(View);module.exports=PlanItemEditor;},{"../templates/PlanItemEditor":30}],39:[function(require,module,exports){'use strict';var ProjectEditor=function(_View8){_inherits(ProjectEditor,_View8);function ProjectEditor(params){_classCallCheck(this,ProjectEditor);var _this72=_possibleConstructorReturn(this,Object.getPrototypeOf(ProjectEditor).call(this,params));_this72.template=require('../templates/ProjectEditor');_this72.fetch();return _this72;}_createClass(ProjectEditor,[{key:"onClick",value:function onClick(){if(this.overrideUrl){location.hash='/'+ApiHelper.getUserName()+'/'+this.model.title+this.overrideUrl;}else if(Router.params.project){location.hash=location.hash.replace('#','').replace(Router.params.project,this.model.title);}else {location.hash='/'+ApiHelper.getUserName()+'/'+this.model.title+'/board/kanban/';}}}]);return ProjectEditor;}(View);module.exports=ProjectEditor;},{"../templates/ProjectEditor":31}],40:[function(require,module,exports){'use strict';var ResourceEditor=function(_View9){_inherits(ResourceEditor,_View9);function ResourceEditor(params){_classCallCheck(this,ResourceEditor);var _this73=_possibleConstructorReturn(this,Object.getPrototypeOf(ResourceEditor).call(this,params));_this73.template=require('../templates/ResourceEditor');_this73.fetch();return _this73;}_createClass(ResourceEditor,[{key:"onClickRemove",value:function onClickRemove(index){var _this74=this;ResourceHelper.removeResource(this.name,index).then(function(){_this74.render();});}},{key:"onClickAdd",value:function onClickAdd(name){var _this75=this;if(name){ResourceHelper.addResource(this.name,name).then(function(){_this75.render();});}}},{key:"onChange",value:function onChange(index,identifier){var _this76=this;var value=this.$element.find('.item').eq(index).find('input').val();ResourceHelper.updateResource(this.name,value,index,identifier).then(function(){_this76.render();});}}]);return ResourceEditor;}(View);module.exports=ResourceEditor;},{"../templates/ResourceEditor":32}]},{},[15]);
+$(document).off('mouseup').on('mouseup',function(e){_this104.onReleaseDragHandle(e);});}}]);return PlanItemEditor;}(View);module.exports=PlanItemEditor;},{"../templates/PlanItemEditor":31}],40:[function(require,module,exports){'use strict';var ProjectEditor=function(_View8){_inherits(ProjectEditor,_View8);function ProjectEditor(params){_classCallCheck(this,ProjectEditor);var _this105=_possibleConstructorReturn(this,Object.getPrototypeOf(ProjectEditor).call(this,params));_this105.template=require('../templates/ProjectEditor');_this105.fetch();return _this105;}_createClass(ProjectEditor,[{key:"onClick",value:function onClick(){if(this.overrideUrl){location.hash='/'+ApiHelper.getUserName()+'/'+this.model.title+this.overrideUrl;}else if(Router.params.project){location.hash=location.hash.replace('#','').replace(Router.params.project,this.model.title);}else {location.hash='/'+ApiHelper.getUserName()+'/'+this.model.title+'/board/kanban/';}}}]);return ProjectEditor;}(View);module.exports=ProjectEditor;},{"../templates/ProjectEditor":32}],41:[function(require,module,exports){'use strict';var ResourceEditor=function(_View9){_inherits(ResourceEditor,_View9);function ResourceEditor(params){_classCallCheck(this,ResourceEditor);var _this106=_possibleConstructorReturn(this,Object.getPrototypeOf(ResourceEditor).call(this,params));_this106.template=require('../templates/ResourceEditor');_this106.fetch();return _this106;}_createClass(ResourceEditor,[{key:"onClickRemove",value:function onClickRemove(index){var _this107=this;ResourceHelper.removeResource(this.name,index).then(function(){_this107.render();});}},{key:"onClickAdd",value:function onClickAdd(name){var _this108=this;if(name){ResourceHelper.addResource(this.name,name).then(function(){_this108.render();});}}},{key:"onChange",value:function onChange(index,identifier){var _this109=this;var value=this.$element.find('.item').eq(index).find('input').val();ResourceHelper.updateResource(this.name,value,index,identifier).then(function(){_this109.render();});}}]);return ResourceEditor;}(View);module.exports=ResourceEditor;},{"../templates/ResourceEditor":33}]},{},[16]);
 //# sourceMappingURL=public/js/maps/client.js.map

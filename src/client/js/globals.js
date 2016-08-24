@@ -1,5 +1,16 @@
 'use strict';
 
+// Get source
+window.getSource = function getSource() {
+    let source = localStorage.getItem('source');
+    
+    if(!source && Router.query('source')) {
+        source = Router.query('source');
+    }
+
+    return source;
+}
+
 // Convert to HTML from markdown
 window.markdownToHtml = function(string) {
     if(string) {

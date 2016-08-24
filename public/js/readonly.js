@@ -665,7 +665,10 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * Error message
      *
      * @param {Object} error
-     */},{key:"error",value:function error(_error){if(_error){switch(_error.status){case 401:case 403:this.resetApiToken();break;default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(_error.statusText);}break;}}} // ----------
+     */},{key:"error",value:function error(_error){if(_error){switch(_error.status){ //case 401: case 403:
+//    this.resetApiToken();
+//    break;
+default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(_error.statusText);}break;}}} // ----------
 // Session methods
 // ----------
 /**
@@ -938,7 +941,8 @@ if(issueColumn&&issueColumn!='to do'&&issueColumn!='done'){gitHubIssue.labels.pu
      * @param {Object} issue
      *
      * @returns {Promise} promise
-     */},{key:"getIssueComments",value:function getIssueComments(issue){var _this44=this;return new Promise(function(callback){_this44.get('/repos/'+_this44.getUserName()+'/'+_this44.getProjectName()+'/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion13=true;var _didIteratorError13=false;var _iteratorError13=undefined;try{for(var _iterator13=gitHubComments[Symbol.iterator](),_step13;!(_iteratorNormalCompletion13=(_step13=_iterator13.next()).done);_iteratorNormalCompletion13=true){var gitHubComment=_step13.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body,index:gitHubComment.id};comments.push(comment);}}catch(err){_didIteratorError13=true;_iteratorError13=err;}finally {try{if(!_iteratorNormalCompletion13&&_iterator13.return){_iterator13.return();}}finally {if(_didIteratorError13){throw _iteratorError13;}}}callback(comments);});});}}]);return GitHubApi;}(ApiHelper);module.exports=GitHubApi;},{"../../../src/client/js/helpers/ApiHelper":15}],14:[function(require,module,exports){'use strict'; // Convert to HTML from markdown
+     */},{key:"getIssueComments",value:function getIssueComments(issue){var _this44=this;return new Promise(function(callback){_this44.get('/repos/'+_this44.getUserName()+'/'+_this44.getProjectName()+'/issues/'+(issue.index+1)+'/comments').then(function(gitHubComments){var comments=[];var _iteratorNormalCompletion13=true;var _didIteratorError13=false;var _iteratorError13=undefined;try{for(var _iterator13=gitHubComments[Symbol.iterator](),_step13;!(_iteratorNormalCompletion13=(_step13=_iterator13.next()).done);_iteratorNormalCompletion13=true){var gitHubComment=_step13.value;var comment={collaborator:ResourceHelper.getCollaborator(gitHubComment.user.login),text:gitHubComment.body,index:gitHubComment.id};comments.push(comment);}}catch(err){_didIteratorError13=true;_iteratorError13=err;}finally {try{if(!_iteratorNormalCompletion13&&_iterator13.return){_iterator13.return();}}finally {if(_didIteratorError13){throw _iteratorError13;}}}callback(comments);});});}}]);return GitHubApi;}(ApiHelper);module.exports=GitHubApi;},{"../../../src/client/js/helpers/ApiHelper":15}],14:[function(require,module,exports){'use strict'; // Get source
+window.getSource=function getSource(){var source=localStorage.getItem('source');if(!source&&Router.query('source')){source=Router.query('source');}return source;}; // Convert to HTML from markdown
 window.markdownToHtml=function(string){if(string){try{var html=marked(string);html=html.replace(/\[ \]/g,'<input type="checkbox" disabled readonly>');html=html.replace(/\[x\]/g,'<input type="checkbox" checked="checked" disabled readonly>');return html;}catch(e){console.log(e);}}}; // Simple date string
 Date.prototype.getSimpleString=function(){return this.getFullYear()+'-'+(this.getMonth()+1)+'-'+this.getDate();}; // Floor date extension
 Date.prototype.floor=function(){this.setHours(0,0,0,0);return this;}; // Get ISO day
@@ -959,16 +963,18 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
      * Check whether the connection to the source has been made
      */},{key:"checkConnection",value:function checkConnection(){return new Promise(function(callback){callback();});} // ----------
 // Session methods
-// ----------
+// ---------- 
 /**
      * Gets the API token and prompts for one if needed
      * 
      * @returns {String} token
-     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){location='/login';debug.error('Not logged in',this);}return localStorage.getItem('token');}} /**
+     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){ //location = '/login';
+debug.error('No API token found',this);}return localStorage.getItem('token');}} /**
      * Get user name
-     */},{key:"getUserName",value:function getUserName(){var user=Router.params&&Router.params.user?Router.params.user:localStorage.getItem('user');;if(!user){location='/login';debug.error('Not logged in',this);}else {localStorage.setItem('user',user);return user;}} /**
+     */},{key:"getUserName",value:function getUserName(){var user=Router.params&&Router.params.user?Router.params.user:localStorage.getItem('user');;if(!user){ //location = '/login';
+debug.error('No username found',this);}else {localStorage.setItem('user',user);return user;}} /**
      * Gets project name
-     */},{key:"getProjectName",value:function getProjectName(){var project=Router.params&&Router.params.project?Router.params.project:localStorage.getItem('project');if(!project){debug.error('No project is defined',this);}return project;} /**
+     */},{key:"getProjectName",value:function getProjectName(){var project=null;if(Router.params&&Router.params.project){project=Router.params.project;}return project;} /**
      * Resets the API token and reloads
      */},{key:"resetApiToken",value:function resetApiToken(){localStorage.setItem('token','');this.getApiToken();} /**
      * Logs out the currently logged in user and reloads

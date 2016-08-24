@@ -24,8 +24,8 @@
                         </select>
                     </li>
                     <li> 
-                        <label for="input-username">Username</label>
-                        <input id="input-username" type="text" name="user"/>
+                        <label for="input-user">User/team</label>
+                        <input id="input-user" name="user" type="text" />
                     </li>
                     <li> 
                         <label for="input-token">API token</label>
@@ -43,39 +43,6 @@
 
         <script src="../public/lib/jquery/jquery.min.js"></script>
         <script>
-            // Get query
-            function query(name) {
-                var url = window.location.href;
-                
-                name = name.replace(/[\[\]]/g, "\\$&");
-                
-                var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
-                var results = regex.exec(url);
-
-                if (!results) return null;
-                if (!results[2]) return '';
-                
-                return decodeURIComponent(results[2].replace(/\+/g, " "));
-            }
-
-            // Change action
-            function onChangeSource() {
-                var source = $('#input-source').val();
-                var url = '';        
-
-                switch(source) {
-                    case 'github':
-                        url = 'https://github.com/login/oauth/authorize?client_id=ae9aad1c2517280c0b3e&scope=repo user read:org';
-                        break;
-
-                    case 'bitbucket':
-                        url = 'https://bitbucket.org/site/oauth2/authorize?client_id=nSGT7KpdMbzSDTHg7P&response_type=code';
-                        break;
-                }
-
-                $('#link-new-token').attr('href', url);
-            }
-
             // Submit action
             function onSubmit(e) {
                 e.preventDefault();
@@ -89,22 +56,39 @@
                 location = '/#/' + localStorage.getItem('user');
             }
 
-            // Adopt API token
-            if(query('code')) {
-                $('input[name="token"]').val(query('code'));
-            }
+            // New token action
+            function onClickNewToken(e) {
+                e.preventDefault();
 
-            // Adopt source
-            if(query('source')) {
-                $('select[name="source"]').val(query('source'));
+                var source = $('#input-source').val();
+                var user = $('#input-user').val();
+
+                switch(source) {
+                    case 'github':
+                        window.open('https://github.com/settings/tokens/new');
+                        break;
+
+                    case 'bitbucket':
+                        let username = prompt('Input username');
+                        let password = prompt('Input password');
+                        let token = btoa(username + ':' + password);
+
+                        $('input[name="token"]').val(token);
+
+                        /*if(!user) {
+                            alert('Please fill out user/team name first');
+                            return;
+                        }
+
+                        url = 'https://bitbucket.org/account/user/' + user + '/app-passwords/new';*/
+                        break;
+                }
+
             }
 
             // Event hookups
             $('.login-form').on('submit', onSubmit);
-            $('#input-source').on('change', onChangeSource);
-
-            // Init
-            onChangeSource();
+            $('#link-new-token').on('click', onClickNewToken);
         </script>
     </body>
 </html>

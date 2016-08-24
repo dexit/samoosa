@@ -97,38 +97,61 @@ Router.route('/:user/:project/settings/', () => {
         .then(() => {
             $('.workspace').remove();
 
+            let tabCounter = 0;
+            let paneCounter = 0;
+
             $('.app-container').append(
                 _.div({class: 'workspace settings-container'},
                     _.div({class: 'tabbed-container vertical'},
                         _.div({class: 'tabs'},
                             _.each(window.resources, (name, resource) => {
-                                if(name != 'issues' && name != 'milestones' && name != 'projects') {
-                                    return _.button({class: 'tab' + (name == 'issueTypes' ? ' active' : '')},
-                                        prettyName(name)
-                                    ).click(function() {
-                                        let index = $(this).index();
-                                        
-                                        $(this).parent().children().each(function(i) {
-                                            $(this).toggleClass('active', i == index);
-                                        });
-
-                                        $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
-                                            $(this).toggleClass('active', i == index);
-                                        });
-                                    });
+                                // Read only
+                                if(ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
+                                    return;
                                 }
+                               
+                                // Not editable in resource editor
+                                if(name == 'issues' || name == 'projects') {
+                                    return;
+                                }
+
+                                tabCounter++;
+                                
+                                return _.button({class: 'tab' + (tabCounter == 1 ? ' active' : '')},
+                                    prettyName(name)
+                                ).click(function() {
+                                    let index = $(this).index();
+                                    
+                                    $(this).parent().children().each(function(i) {
+                                        $(this).toggleClass('active', i == index);
+                                    });
+
+                                    $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
+                                        $(this).toggleClass('active', i == index);
+                                    });
+                                });
                             })
                         ),
                         _.div({class: 'panes'},
                             _.each(window.resources, (name, resource) => {
-                                if(name != 'issues' && name != 'milestones' && name != 'projects') {
-                                    return _.div({class: 'pane' + (name == 'issueTypes' ? ' active' : '')},
-                                        new ResourceEditor({
-                                            name: name,
-                                            model: resource
-                                        }).$element
-                                    );
+                                // Read only
+                                if(ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
+                                    return;
                                 }
+                                
+                                // Not editable in resource editor
+                                if(name == 'issues' || name == 'projects') {
+                                    return;
+                                }
+                                
+                                paneCounter++;
+                                
+                                return _.div({class: 'pane' + (paneCounter == 1 ? ' active' : '')},
+                                    new ResourceEditor({
+                                        name: name,
+                                        model: resource
+                                    }).$element
+                                );
                             })
                         )
                     )

@@ -59,7 +59,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     delete(url, param) {
-        return new Promise((reseolve, reject) => {
+        return new Promise((resolve, reject) => {
             $.ajax({
                 url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + this.getApiTokenString(),
                 type: 'DELETE',
@@ -538,6 +538,12 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addMilestone(milestone) {
+        if(typeof milestone == 'string') {
+            milestone = {
+                title: milestone
+            };
+        }
+
         return new Promise((callback) => {
             this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones', this.convertMilestone(milestone))
             .then(() => {

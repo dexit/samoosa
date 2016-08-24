@@ -1,6 +1,15 @@
 'use strict';
 
 class ApiHelper {
+    /**
+     * Get config
+     */
+    getConfig() {
+        return {
+            readonlyResources: []
+        };
+    }
+
     // ----------
     // Checkers
     // ----------

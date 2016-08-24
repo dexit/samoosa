@@ -2,9 +2,21 @@
 
 let ApiHelper = require('../../../src/client/js/helpers/ApiHelper');
 
-let labelCache;
-
 class BitBucketApi extends ApiHelper {
+    /**
+     * Gets the configuration for this plugin
+     */
+    getConfig() {
+        return {
+            readonlyResources: [
+                'issueTypes',
+                'issueEstimates',
+                'issuePriorities',
+                'issueColumns'
+            ]
+        };
+    }
+
     // ----------
     // Generic API methods
     // ----------
@@ -79,7 +91,7 @@ class BitBucketApi extends ApiHelper {
     delete(url, param) {
         let self = this;
 
-        return new Promise((reseolve, reject) => {
+        return new Promise((resolve, reject) => {
             $.ajax({
                 url: 'https://api.bitbucket.org/1.0' + url + '?' + (param ? param + '&' : ''),
                 type: 'DELETE',
@@ -541,8 +553,14 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addMilestone(milestone) {
+        if(typeof milestone == 'string') {
+            milestone = {
+                title: milestone
+            };
+        }
+
         return new Promise((callback) => {
-            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/milestones', this.convertMilestone(milestone))
+            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/milestones', this.convertMilestone(milestone))
             .then(() => {
                 callback();
             });
@@ -659,8 +677,10 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeMilestone(index) {
+        let milestone = resources.milestones[index];
+
         return new Promise((callback) => {
-            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + (parseInt(index) + 1))
+            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/milestones/' + milestone.id)
             .then(() => {
                 callback();
             });
@@ -709,7 +729,7 @@ class BitBucketApi extends ApiHelper {
      */
     updateMilestone(milestone) {
         return new Promise((callback) => {
-            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + (parseInt(milestone.index) + 1), this.convertMilestone(milestone))
+            this.put('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/milestones/' + milestone.id, this.convertMilestone(milestone))
             .then(() => {
                 callback();
             });
@@ -849,7 +869,8 @@ class BitBucketApi extends ApiHelper {
         for(let i in milestones) {
             let milestone = {
                 index: i,
-                title: milestones[i].name
+                title: milestones[i].name,
+                id: milestones[i].id
             };
 
             window.resources.milestones[i] = milestone;
@@ -1050,14 +1071,12 @@ class BitBucketApi extends ApiHelper {
      * @param {Object} milestone
      */
     convertMilestone(milestone) {
-        let gitHubMilestone = {
-            title: milestone.title,
-            description: milestone.description,
-            due_on: milestone.endDate,
-            state: milestone.closed ? 'closed' : 'open'
+        let bitBucketMilestone = {
+            name: milestone.title,
+            id: milestone.id
         };
 
-        return gitHubMilestone;
+        return bitBucketMilestone;
     }
 
     /**
@@ -1110,8 +1129,9 @@ class BitBucketApi extends ApiHelper {
         let issueEstimate = resources.issueEstimates[issue.estimate];
         let estimateString = '{% estimate: ' + issueEstimate + ' %}';
 
+        bitBucketIssue.content = bitBucketIssue.content.replace(/\n\n{% estimate: ([0-9](\.[0-9])?h) %}/g, '');
         bitBucketIssue.content = bitBucketIssue.content.replace(/{% estimate: ([0-9](\.[0-9])?h) %}/g, '');
-        bitBucketIssue.content += estimateString;
+        bitBucketIssue.content += '\n\n' + estimateString;
 
         // Priority
         let issuePriority = resources.issuePriorities[issue.type];

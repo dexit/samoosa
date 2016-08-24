@@ -14,7 +14,7 @@ module.exports = function render() {
                 _.span({class: 'fa icon-open fa-chevron-right'})
             ).click((e) => { this.onClickToggle(e); }),
             _.div({class: 'issue-index'},
-                this.model.index.toString()
+                (this.model.id || this.model.index).toString()
             ),
             this.getPriorityIndicator(),
             _.h4({},

@@ -482,14 +482,6 @@ class IssueEditor extends View {
             if(this.$element.hasClass('selected')) {
                 this.$element.toggleClass('expanded', false);
             }
-
-        // If not trying to edit the title, allow select of one issue
-        } else {
-            if($(e.target).parents('.btn-edit').length < 1) {
-                $('.issue-editor.selected').removeClass('selected');
-                this.$element.toggleClass('selected', true);
-            }
-
         }
     }
 

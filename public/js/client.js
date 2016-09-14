@@ -1790,8 +1790,7 @@ ViewHelper.get('FilterEditor').applyFilters();} /**
      *
      * @param {Object} event
      */},{key:"onClickElement",value:function onClickElement(e){if(ApiHelper.isSpectating()){return;} // Check for shift key
-if(InputHelper.isShiftDown){e.preventDefault();e.stopPropagation();this.$element.toggleClass('selected');if(this.$element.hasClass('selected')){this.$element.toggleClass('expanded',false);} // If not trying to edit the title, allow select of one issue
-}else {if($(e.target).parents('.btn-edit').length<1){$('.issue-editor.selected').removeClass('selected');this.$element.toggleClass('selected',true);}}} /**
+if(InputHelper.isShiftDown){e.preventDefault();e.stopPropagation();this.$element.toggleClass('selected');if(this.$element.hasClass('selected')){this.$element.toggleClass('expanded',false);}}} /**
      * Gets priority icon
      *
      * @returns {String} icon

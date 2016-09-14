@@ -641,7 +641,7 @@ process.versions={};function noop(){}process.on=noop;process.addListener=noop;pr
      * @param {String} param
      *
      * @returns {Promise} promise
-     */},{key:"delete",value:function _delete(url,param){var _this5=this;return new Promise(function(reseolve,reject){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+_this5.getApiTokenString(),type:'DELETE',cache:false,success:function success(result){resolve(result);},error:function error(e){_this5.error(e);reject(e);}});});} /**
+     */},{key:"delete",value:function _delete(url,param){var _this5=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+_this5.getApiTokenString(),type:'DELETE',cache:false,success:function success(result){resolve(result);},error:function error(e){_this5.error(e);reject(e);}});});} /**
      * PATCH method
      *
      * @param {String} url
@@ -769,7 +769,7 @@ default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(
      * @param {Object} milestone
      *
      * @returns {Promise} promise
-     */},{key:"addMilestone",value:function addMilestone(milestone){var _this26=this;return new Promise(function(callback){_this26.post('/repos/'+_this26.getUserName()+'/'+_this26.getProjectName()+'/milestones',_this26.convertMilestone(milestone)).then(function(){callback();});});} /**
+     */},{key:"addMilestone",value:function addMilestone(milestone){var _this26=this;if(typeof milestone=='string'){milestone={title:milestone};}return new Promise(function(callback){_this26.post('/repos/'+_this26.getUserName()+'/'+_this26.getProjectName()+'/milestones',_this26.convertMilestone(milestone)).then(function(){callback();});});} /**
      * Adds version
      *
      * @param {String} version
@@ -907,7 +907,7 @@ default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(
      * Process issues
      *
      * @param {Array} issues
-     */},{key:"processIssues",value:function processIssues(issues){window.resources.issues=[];var _iteratorNormalCompletion11=true;var _didIteratorError11=false;var _iteratorError11=undefined;try{for(var _iterator11=issues[Symbol.iterator](),_step11;!(_iteratorNormalCompletion11=(_step11=_iterator11.next()).done);_iteratorNormalCompletion11=true){var gitHubIssue=_step11.value;var issue=new Issue();issue.title=gitHubIssue.title;issue.description=gitHubIssue.body;issue.reporter=ResourceHelper.getCollaborator(gitHubIssue.user.login);if(gitHubIssue.assignee){issue.assignee=ResourceHelper.getCollaborator(gitHubIssue.assignee.login);}var _iteratorNormalCompletion12=true;var _didIteratorError12=false;var _iteratorError12=undefined;try{for(var _iterator12=gitHubIssue.labels[Symbol.iterator](),_step12;!(_iteratorNormalCompletion12=(_step12=_iterator12.next()).done);_iteratorNormalCompletion12=true){var label=_step12.value;var typeIndex=label.name.indexOf('type:');var priorityIndex=label.name.indexOf('priority:');var estimateIndex=label.name.indexOf('estimate:');var versionIndex=label.name.indexOf('version:');var columnIndex=label.name.indexOf('column:');if(typeIndex>-1){var name=label.name.replace('type:','');issue.type=ResourceHelper.getIssueType(name);}else if(versionIndex>-1){var _name=label.name.replace('version:','');issue.version=ResourceHelper.getVersion(_name);}else if(estimateIndex>-1){var _name2=label.name.replace('estimate:','');issue.estimate=ResourceHelper.getIssueEstimate(_name2);}else if(priorityIndex>-1){var _name3=label.name.replace('priority:','');issue.priority=ResourceHelper.getIssuePriority(_name3);}else if(columnIndex>-1){var _name4=label.name.replace('column:','');issue.column=ResourceHelper.getIssueColumn(_name4);}else {issue.labels.push(label);}}}catch(err){_didIteratorError12=true;_iteratorError12=err;}finally {try{if(!_iteratorNormalCompletion12&&_iterator12.return){_iterator12.return();}}finally {if(_didIteratorError12){throw _iteratorError12;}}}if(gitHubIssue.state=='closed'){issue.column=resources.issueColumns.length-1;}if(gitHubIssue.milestone){issue.milestone=ResourceHelper.getMilestone(gitHubIssue.milestone.title);}issue.index=parseInt(gitHubIssue.number)-1;window.resources.issues[issue.index]=issue;}}catch(err){_didIteratorError11=true;_iteratorError11=err;}finally {try{if(!_iteratorNormalCompletion11&&_iterator11.return){_iterator11.return();}}finally {if(_didIteratorError11){throw _iteratorError11;}}}} /**
+     */},{key:"processIssues",value:function processIssues(issues){window.resources.issues=[];var _iteratorNormalCompletion11=true;var _didIteratorError11=false;var _iteratorError11=undefined;try{for(var _iterator11=issues[Symbol.iterator](),_step11;!(_iteratorNormalCompletion11=(_step11=_iterator11.next()).done);_iteratorNormalCompletion11=true){var gitHubIssue=_step11.value;var issue=new Issue();issue.title=gitHubIssue.title;issue.description=gitHubIssue.body;issue.id=gitHubIssue.number;issue.reporter=ResourceHelper.getCollaborator(gitHubIssue.user.login);if(gitHubIssue.assignee){issue.assignee=ResourceHelper.getCollaborator(gitHubIssue.assignee.login);}var _iteratorNormalCompletion12=true;var _didIteratorError12=false;var _iteratorError12=undefined;try{for(var _iterator12=gitHubIssue.labels[Symbol.iterator](),_step12;!(_iteratorNormalCompletion12=(_step12=_iterator12.next()).done);_iteratorNormalCompletion12=true){var label=_step12.value;var typeIndex=label.name.indexOf('type:');var priorityIndex=label.name.indexOf('priority:');var estimateIndex=label.name.indexOf('estimate:');var versionIndex=label.name.indexOf('version:');var columnIndex=label.name.indexOf('column:');if(typeIndex>-1){var name=label.name.replace('type:','');issue.type=ResourceHelper.getIssueType(name);}else if(versionIndex>-1){var _name=label.name.replace('version:','');issue.version=ResourceHelper.getVersion(_name);}else if(estimateIndex>-1){var _name2=label.name.replace('estimate:','');issue.estimate=ResourceHelper.getIssueEstimate(_name2);}else if(priorityIndex>-1){var _name3=label.name.replace('priority:','');issue.priority=ResourceHelper.getIssuePriority(_name3);}else if(columnIndex>-1){var _name4=label.name.replace('column:','');issue.column=ResourceHelper.getIssueColumn(_name4);}else {issue.labels.push(label);}}}catch(err){_didIteratorError12=true;_iteratorError12=err;}finally {try{if(!_iteratorNormalCompletion12&&_iterator12.return){_iterator12.return();}}finally {if(_didIteratorError12){throw _iteratorError12;}}}if(gitHubIssue.state=='closed'){issue.column=resources.issueColumns.length-1;}if(gitHubIssue.milestone){issue.milestone=ResourceHelper.getMilestone(gitHubIssue.milestone.title);}issue.index=parseInt(gitHubIssue.number)-1;window.resources.issues[issue.index]=issue;}}catch(err){_didIteratorError11=true;_iteratorError11=err;}finally {try{if(!_iteratorNormalCompletion11&&_iterator11.return){_iterator11.return();}}finally {if(_didIteratorError11){throw _iteratorError11;}}}} /**
      * Convert milestone model to GitHub schema
      *
      * @param {Object} milestone
@@ -916,7 +916,7 @@ default:if(_error.responseJSON){alert(_error.responseJSON.message);}else {alert(
      *
      * @param {Object} issue
      */},{key:"convertIssue",value:function convertIssue(issue){ // Directly mappable properties
-var gitHubIssue={title:issue.title,body:issue.description,labels:[]}; // Assignee
+var gitHubIssue={title:issue.title,body:issue.description,number:issue.id,labels:[]}; // Assignee
 var assignee=resources.collaborators[issue.assignee];if(assignee){gitHubIssue.assignee=assignee.name;}else {gitHubIssue.assignee='';} // State
 var issueColumn=resources.issueColumns[issue.column];gitHubIssue.state=issueColumn=='done'?'closed':'open'; // Milestone
 // GitHub counts numbers from 1, ' + this.getProjectName() + ' counts from 0
@@ -954,12 +954,14 @@ window.prettyName=function(name){var prettyName=name;for(var i in prettyName){if
 window.prettyDate=function(date,separator){var prettyDate='';if(date){if(date.constructor===String){date=new Date(date);}date.floor();separator=separator||'.';prettyDate=date.getFullYear()+separator+(date.getMonth()+1)+separator+date.getDate();}return prettyDate;}; // Spinner
 window.spinner=function(active){$('.spinner-backdrop').remove();if(active){$('body').append(_.div({class:'spinner-backdrop'},_.div({class:'spinner-container'},_.span({class:'spinner-icon fa fa-refresh'}))));}}; // Scroll on page
 window.scroll=function(amount){var current=$(document).scrollTop();$(document).scrollTop(current+amount);}; // Sort array by date
-window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a=new Date(a[key]).floor();b=new Date(b[key]).floor();if(a<b){return -1;}if(a>b){return 1;}return 0;});};},{}],15:[function(require,module,exports){'use strict';var ApiHelper=function(){function ApiHelper(){_classCallCheck(this,ApiHelper);}_createClass(ApiHelper,[{key:"isSpectating", // ----------
+window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a=new Date(a[key]).floor();b=new Date(b[key]).floor();if(a<b){return -1;}if(a>b){return 1;}return 0;});};},{}],15:[function(require,module,exports){'use strict';var ApiHelper=function(){function ApiHelper(){_classCallCheck(this,ApiHelper);}_createClass(ApiHelper,[{key:"getConfig", /**
+     * Get config
+     */value:function getConfig(){return {readonlyResources:[]};} // ----------
 // Checkers
 // ----------
 /**
      * Gets whether we're in spectator mode
-     */value:function isSpectating(){return Router.query('spectate')=='true';} /**
+     */},{key:"isSpectating",value:function isSpectating(){return Router.query('spectate')=='true';} /**
      * Check whether the connection to the source has been made
      */},{key:"checkConnection",value:function checkConnection(){return new Promise(function(callback){callback();});} // ----------
 // Session methods
@@ -968,11 +970,9 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
      * Gets the API token and prompts for one if needed
      * 
      * @returns {String} token
-     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){ //location = '/login';
-debug.error('No API token found',this);}return localStorage.getItem('token');}} /**
+     */},{key:"getApiToken",value:function getApiToken(){var queryToken=Router.query('token');if(queryToken){localStorage.setItem('token',queryToken);return queryToken;}else {if(!localStorage.getItem('token')){location='/login';debug.error('No API token found',this);}return localStorage.getItem('token');}} /**
      * Get user name
-     */},{key:"getUserName",value:function getUserName(){var user=Router.params&&Router.params.user?Router.params.user:localStorage.getItem('user');;if(!user){ //location = '/login';
-debug.error('No username found',this);}else {localStorage.setItem('user',user);return user;}} /**
+     */},{key:"getUserName",value:function getUserName(){var user=Router.params&&Router.params.user?Router.params.user:localStorage.getItem('user');;if(!user){location='/login';debug.error('No username found',this);}else {localStorage.setItem('user',user);return user;}} /**
      * Gets project name
      */},{key:"getProjectName",value:function getProjectName(){var project=null;if(Router.params&&Router.params.project){project=Router.params.project;}return project;} /**
      * Resets the API token and reloads
@@ -1301,7 +1301,7 @@ if(type!='projects'){prefix=localStorage.getItem('settings:projects:current')+pr
  */var Issue=function(){_createClass(Issue,null,[{key:"create", /**
      * Create a new issue and push it to the remote source
      */value:function create(properties){return new Promise(function(callback){var issue=new Issue(properties);ResourceHelper.addResource('issues',issue).then(function(){callback(issue);});});}}]);function Issue(properties){_classCallCheck(this,Issue);properties=properties||{}; // Essential properties
-this.title=properties.title||'New issue';this.description=properties.description||''; // Optional params
+this.title=properties.title||'New issue';this.description=properties.description||'';this.id=properties.id; // Optional params
 this.column=properties.column||0;this.type=properties.type||0;this.priority=properties.priority||0;this.estimate=properties.estimate||0;this.version=properties.version;this.milestone=properties.milestone;this.comments=properties.comments||[];this.assignee=properties.assignee;} /**
      * Gets an object with all the baked values
      */_createClass(Issue,[{key:"getBakedValues",value:function getBakedValues(){var baked={column:resources.issueColumns[this.column],type:resources.issueTypes[this.type],priority:resources.issuePriorities[this.priority],version:resources.versions[this.version],milestone:resources.milestones[this.milestone],assignee:resources.collaborators[this.assignee]};if(baked.assignee){baked.assignee=baked.assignee.name;}if(baked.milestone){baked.milestone=baked.milestone.title;}return baked;} /**

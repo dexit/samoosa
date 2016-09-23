@@ -1571,9 +1571,9 @@ window.sortByDate=function(array,key){return array.concat().sort(function(a,b){a
      * @param {Array} excludeResources
      *
      * @returns {Promise} promise
-     */},{key:"getResources",value:function getResources(excludeResources){var helper=this;spinner(true);return new Promise(function(resolve,reject){function get(resource){window.resources[resource]=[];debug.log('Getting '+resource+'...',helper); // If this resource is excluded, just proceed
+     */},{key:"getResources",value:function getResources(excludeResources){var helper=this;spinner(true);function get(resource){window.resources[resource]=[];debug.log('Getting '+resource+'...',helper); // If this resource is excluded, just proceed
 if(excludeResources&&Array.isArray(excludeResources)&&excludeResources.indexOf(resource)>-1){return new Promise(function(resolve){resolve();}); // If not, fetch it normally
-}else {return helper.getResource(resource);}}get('issueTypes').then(function(){return get('issuePriorities');}).then(function(){return get('issueEstimates');}).then(function(){return get('issueColumns');}).then(function(){return get('collaborators');}).then(function(){return get('milestones');}).then(function(){return get('versions');}).then(function(){return get('issues');}).then(function(){spinner(false);resolve();});});}}]);return ApiHelper;}();module.exports=ApiHelper;},{}],19:[function(require,module,exports){'use strict';var lastSenderName='';var DebugHelper=function(){function DebugHelper(){_classCallCheck(this,DebugHelper);}_createClass(DebugHelper,null,[{key:"log", /**
+}else {return helper.getResource(resource);}}return get('issueTypes').then(function(){return get('issuePriorities');}).then(function(){return get('issueEstimates');}).then(function(){return get('issueColumns');}).then(function(){return get('collaborators');}).then(function(){return get('milestones');}).then(function(){return get('versions');}).then(function(){return get('issues');}).then(function(){spinner(false);});}}]);return ApiHelper;}();module.exports=ApiHelper;},{}],19:[function(require,module,exports){'use strict';var lastSenderName='';var DebugHelper=function(){function DebugHelper(){_classCallCheck(this,DebugHelper);}_createClass(DebugHelper,null,[{key:"log", /**
      * Logs a message
      *
      * @param {String} message

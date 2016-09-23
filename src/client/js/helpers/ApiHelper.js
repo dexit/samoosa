@@ -800,50 +800,47 @@ class ApiHelper {
         
         spinner(true);
 
-        return new Promise((resolve, reject) => {
-            function get(resource) {
-                window.resources[resource] = [];
-              
-                debug.log('Getting ' + resource + '...', helper);
+        function get(resource) {
+            window.resources[resource] = [];
+          
+            debug.log('Getting ' + resource + '...', helper);
 
-                // If this resource is excluded, just proceed
-                if(excludeResources && Array.isArray(excludeResources) && excludeResources.indexOf(resource) > -1) {
-                    return new Promise((resolve) => {
-                        resolve();
-                    });
+            // If this resource is excluded, just proceed
+            if(excludeResources && Array.isArray(excludeResources) && excludeResources.indexOf(resource) > -1) {
+                return new Promise((resolve) => {
+                    resolve();
+                });
 
-                // If not, fetch it normally
-                } else {
-                    return helper.getResource(resource);
-                }
+            // If not, fetch it normally
+            } else {
+                return helper.getResource(resource);
             }
+        }
 
-            get('issueTypes')
-            .then(() => {
-                return get('issuePriorities');
-            })
-            .then(() => {
-                return get('issueEstimates');
-            })
-            .then(() => {
-                return get('issueColumns');
-            })
-            .then(() => {
-                return get('collaborators');
-            })
-            .then(() => {
-                return get('milestones');
-            })
-            .then(() => {
-                return get('versions');
-            })
-            .then(() => {
-                return get('issues');
-            })
-            .then(() => {
-                spinner(false);
-                resolve();  
-            });
+        return get('issueTypes')
+        .then(() => {
+            return get('issuePriorities');
+        })
+        .then(() => {
+            return get('issueEstimates');
+        })
+        .then(() => {
+            return get('issueColumns');
+        })
+        .then(() => {
+            return get('collaborators');
+        })
+        .then(() => {
+            return get('milestones');
+        })
+        .then(() => {
+            return get('versions');
+        })
+        .then(() => {
+            return get('issues');
+        })
+        .then(() => {
+            spinner(false);
         });
     }
 }

@@ -1014,6 +1014,8 @@ class GitHubApi extends ApiHelper {
                 issue.assignee = ResourceHelper.getCollaborator(gitHubIssue.assignee.login);
             }
 
+            issue.labels = issue.labels || [];
+
             for(let label of gitHubIssue.labels) {
                 let typeIndex = label.name.indexOf('type:');
                 let priorityIndex = label.name.indexOf('priority:');

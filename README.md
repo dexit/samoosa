@@ -4,7 +4,7 @@
 A free and open-source issue tracker frontend
 
 ## Made to connect with any service
-Samoosa can be set up to work with GitHub, Bitbucket, your own custom backend, you name it. The support is added through plugins that reshape the content of their API sources into the Mondai format. In the case of the GitHub plugin, labels are being used to track version numbers, estimates, issue types and columns.
+Samoosa can be set up to work with GitHub, Bitbucket, your own custom backend, you name it. The support is added through plugins that reshape the content of their API sources into the Samoosa format. In the case of the GitHub plugin, labels are being used to track version numbers, estimates, issue types and columns.
 
 ## Entirely client-side
 No server software, such as Node.js or PHP, is needed to run Samoosa. It's built entirely in client-side JavaScript.

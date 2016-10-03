@@ -149,17 +149,34 @@ class Navbar extends View {
      */
     toggleProjectsList(isActive, overrideUrl) {
         this.togglePanel('/projects/', 'project-list', ($content) => {
+            let filterProjects = (query) => {
+                $content.find('.project-editor').each((i, element) => {
+                    let title = $(element).find('.header > h4').text() || '';
+                    let isMatch = title.toLowerCase().indexOf(query.toLowerCase()) > -1;
+
+                    $(element).toggle(!query || query.length < 2 || isMatch);
+                });       
+            };
+
             ApiHelper.getProjects()
             .then(() => {
-                $content
-                .empty()
-                .append(
-                    _.each(window.resources.projects, (i, project) => {
-                        return new ProjectEditor({
-                            model: project,
-                            overrideUrl: overrideUrl
-                        }).$element;
-                    })
+                _.append($content.empty(),
+                    _.div({class: 'project-list-search'},
+                        _.input({type: 'text', placeholder: 'Search in projects...'})
+                            .on('change keyup paste', (e) => {
+                                let query = e.target.value;
+
+                                filterProjects(query);
+                            })
+                    ),
+                    _.div({class: 'project-list-items'},
+                        _.each(window.resources.projects, (i, project) => {
+                            return new ProjectEditor({
+                                model: project,
+                                overrideUrl: overrideUrl
+                            }).$element;
+                        })
+                    )
                 );
             })
             .catch((e) => {

@@ -691,6 +691,21 @@ body, html {
     max-width: 20rem; }
   .navbar.out.project-list .obscure {
     max-width: 40rem; }
+    .navbar.out.project-list .obscure > .content {
+      overflow-y: hidden; }
+      .navbar.out.project-list .obscure > .content .project-list-search {
+        width: 100%;
+        height: 30px;
+        margin-bottom: 15px; }
+        .navbar.out.project-list .obscure > .content .project-list-search input {
+          padding: 0px 5px;
+          line-height: 30px;
+          display: block;
+          width: 100%;
+          border: 0px; }
+      .navbar.out.project-list .obscure > .content .project-list-items {
+        height: calc(100% - 45px);
+        overflow-y: auto; }
   .navbar.out .obscure {
     width: 100%;
     transition-delay: 0.05s; }

@@ -77,6 +77,16 @@ class Navbar extends View {
     }
    
     /**
+     * Hides the navbar
+     */
+    hide() {
+        this.cleanUpClasses();
+        this.$element.toggleClass('out', false);
+        this.$element.find('.obscure .content').empty();
+        this.$element.find('.buttons > button').toggleClass('active', false);
+    }
+
+    /**
      * Toggles a panel
      */
     togglePanel(url, className, onActive, isActive) {
@@ -212,7 +222,7 @@ class Navbar extends View {
         this.$element.find('.obscure .content').empty();
         
         if(!ApiHelper.getProjectName()) {
-            ViewHelper.get('Navbar').toggleProjectsList(true, url);
+            this.toggleProjectsList(true, url);
 
         } else {
             url = this.getFullUrl(url);

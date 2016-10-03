@@ -709,6 +709,16 @@ body, html {
         padding: 0px 15px;
         height: calc(100% - 30px);
         overflow-y: auto; }
+  .navbar.out .backdrop {
+    background-color: rgba(255, 255, 255, 0.5);
+    display: block;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 900;
+    pointer-events: auto; }
   .navbar.out .obscure {
     width: 100%;
     transition-delay: 0.05s; }
@@ -720,6 +730,9 @@ body, html {
     color: #212121; }
   .navbar:not(.out) .buttons button.active:before {
     width: 100%; }
+  .navbar .backdrop {
+    pointer-events: none;
+    display: none; }
   .navbar .obscure {
     position: fixed;
     top: 0px;
@@ -1046,17 +1059,6 @@ ul {
     box-shadow: none; }
     .navbar .content .project-editor .content .header h4, .navbar .obscure .content .project-editor .content .header h4 {
       font-weight: normal; }
-
-.navbar.out:before {
-  content: '';
-  background-color: rgba(255, 255, 255, 0.5);
-  display: block;
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 100%;
-  z-index: 5; }
 
 .navbar.out button.active.handler:before {
   width: 80%;

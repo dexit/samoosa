@@ -2,6 +2,12 @@
 
 module.exports = function Navbar() {
     return _.div({class: 'navbar'},
+        _.div({class: 'backdrop'})
+            .click(() => {
+                    console.log('dsaasd');
+
+                this.hide();
+            }),
         _.div({class: 'obscure'},
             _.div({class: 'content'})
         ),

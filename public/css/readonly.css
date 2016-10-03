@@ -274,17 +274,6 @@ ul {
     .navbar .content .project-editor .content .header h4, .navbar .obscure .content .project-editor .content .header h4 {
       font-weight: normal; }
 
-.navbar.out:before {
-  content: '';
-  background-color: rgba(255, 255, 255, 0.5);
-  display: block;
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 100%;
-  z-index: 5; }
-
 .navbar.out button.active.handler:before {
   width: 80%;
   height: 80%; }

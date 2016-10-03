@@ -692,11 +692,13 @@ body, html {
   .navbar.out.project-list .obscure {
     max-width: 40rem; }
     .navbar.out.project-list .obscure > .content {
-      overflow-y: hidden; }
+      overflow-y: hidden;
+      padding: 15px 0px; }
       .navbar.out.project-list .obscure > .content .project-list-search {
         width: 100%;
         height: 30px;
-        margin-bottom: 15px; }
+        margin-bottom: 15px;
+        padding: 0px 15px; }
         .navbar.out.project-list .obscure > .content .project-list-search input {
           padding: 0px 5px;
           line-height: 30px;
@@ -704,7 +706,8 @@ body, html {
           width: 100%;
           border: 0px; }
       .navbar.out.project-list .obscure > .content .project-list-items {
-        height: calc(100% - 45px);
+        padding: 0px 15px;
+        height: calc(100% - 30px);
         overflow-y: auto; }
   .navbar.out .obscure {
     width: 100%;

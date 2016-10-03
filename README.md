@@ -1,4 +1,4 @@
-<img class="logo" src="https://cdn.rawgit.com/Putaitu/samoosa/gh-pages/public/svg/logo-medium.svg" width="128" />
+<img class="logo" src="https://rawgit.com/Putaitu/samoosa/gh-pages/public/svg/logo-medium.svg" width="128" />
 
 # Samoosa
 A free and open-source issue tracker frontend

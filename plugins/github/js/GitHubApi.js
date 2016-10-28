@@ -61,7 +61,7 @@ class GitHubApi extends ApiHelper {
     delete(url, param) {
         return new Promise((resolve, reject) => {
             $.ajax({
-                url: 'https://api.github.com' + url + '?' + (param ? param + '&' : '') + this.getApiTokenString(),
+                url: 'https://api.github.com' + url + this.getApiTokenString() + (param ? '&' + param : ''),
                 type: 'DELETE',
                 cache: false,
                 success: (result) => {

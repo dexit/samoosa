@@ -1013,7 +1013,7 @@ var issuePriority=resources.issuePriorities[issue.type];bitBucketIssue.priority=
      * @param {String} param
      *
      * @returns {Promise} promise
-     */},{key:"delete",value:function _delete(url,param){var _this39=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+'?'+(param?param+'&':'')+_this39.getApiTokenString(),type:'DELETE',cache:false,success:function success(result){resolve(result);},error:function error(e){_this39.error(e);reject(e);}});});}/**
+     */},{key:"delete",value:function _delete(url,param){var _this39=this;return new Promise(function(resolve,reject){$.ajax({url:'https://api.github.com'+url+_this39.getApiTokenString()+(param?'&'+param:''),type:'DELETE',cache:false,success:function success(result){resolve(result);},error:function error(e){_this39.error(e);reject(e);}});});}/**
      * PATCH method
      *
      * @param {String} url

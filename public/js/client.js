@@ -4048,6 +4048,43 @@
 	            html = html.replace(/\[ \]/g, '<input type="checkbox" disabled readonly>');
 	            html = html.replace(/\[x\]/g, '<input type="checkbox" checked="checked" disabled readonly>');
 
+	            html = html.replace(/@[a-zA-Z0-9-_]+/g, function (string) {
+	                var typedName = string.replace('@', '');
+
+	                var _iteratorNormalCompletion = true;
+	                var _didIteratorError = false;
+	                var _iteratorError = undefined;
+
+	                try {
+	                    for (var _iterator = (resources.collaborators || [])[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                        var collaborator = _step.value;
+
+	                        if (!collaborator) {
+	                            continue;
+	                        }
+
+	                        if (typedName == collaborator.name) {
+	                            return '<span class="collaborator-reference"><img src="' + collaborator.avatar + '" />' + string + '</span>';
+	                        }
+	                    }
+	                } catch (err) {
+	                    _didIteratorError = true;
+	                    _iteratorError = err;
+	                } finally {
+	                    try {
+	                        if (!_iteratorNormalCompletion && _iterator.return) {
+	                            _iterator.return();
+	                        }
+	                    } finally {
+	                        if (_didIteratorError) {
+	                            throw _iteratorError;
+	                        }
+	                    }
+	                }
+
+	                return string;
+	            });
+
 	            return html;
 	        } catch (e) {
 	            console.log(e);
@@ -10031,6 +10068,74 @@
 	        }
 
 	        /**
+	         * Event: Key up on input fields
+	         *
+	         * @param {Event} e
+	         */
+
+	    }, {
+	        key: 'onKeyUp',
+	        value: function onKeyUp(e) {
+	            if (ApiHelper.isSpectating()) {
+	                return;
+	            }
+
+	            var foundAnyFuzzyMatches = false;
+
+	            var replaced = $(this).val().replace(/@[a-zA-Z0-9-_]+ /g, function (string) {
+	                var fuzzyMatch = void 0;
+	                var typedName = string.replace('@', '').replace(' ', '');
+
+	                var _iteratorNormalCompletion5 = true;
+	                var _didIteratorError5 = false;
+	                var _iteratorError5 = undefined;
+
+	                try {
+	                    for (var _iterator5 = (resources.collaborators || [])[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                        var collaborator = _step5.value;
+
+	                        if (!collaborator) {
+	                            continue;
+	                        }
+
+	                        if (typedName == collaborator.name) {
+	                            return string;
+	                        } else if (collaborator.name.indexOf(typedName) == 0) {
+	                            fuzzyMatch = collaborator.name;
+	                        }
+	                    }
+	                } catch (err) {
+	                    _didIteratorError5 = true;
+	                    _iteratorError5 = err;
+	                } finally {
+	                    try {
+	                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	                            _iterator5.return();
+	                        }
+	                    } finally {
+	                        if (_didIteratorError5) {
+	                            throw _iteratorError5;
+	                        }
+	                    }
+	                }
+
+	                if (fuzzyMatch) {
+	                    foundAnyFuzzyMatches = true;
+
+	                    return '@' + fuzzyMatch + ' ';
+	                } else {
+	                    return string;
+	                }
+	            });
+
+	            if (foundAnyFuzzyMatches) {
+	                $(this).val(replaced);
+
+	                $(this).change();
+	            }
+	        }
+
+	        /**
 	         * Event: Remove focus from input fields
 	         *
 	         * @param {Event} e
@@ -10219,7 +10324,7 @@
 	        _this.onChange();
 
 	        _this.$element.find('.body .btn-edit').html(markdownToHtml(_this.model.description) || '');
-	    }).blur(this.onBlur)), _.div({ class: 'comments' }), _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' }, _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }), _.button({ class: 'btn' }, 'Comment').click(function () {
+	    }).blur(this.onBlur).keyup(this.onKeyUp)), _.div({ class: 'comments' }), _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' }, _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }), _.button({ class: 'btn' }, 'Comment').click(function () {
 	        _this.onClickComment();
 	    }))));
 	};

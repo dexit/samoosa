@@ -125,6 +125,7 @@ module.exports = function render() {
                 );
             })
             .blur(this.onBlur)
+            .keyup(this.onKeyUp)
         ),
         _.div({class: 'comments'}),
         _.if(!ApiHelper.isSpectating(),

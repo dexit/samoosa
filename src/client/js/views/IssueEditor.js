@@ -179,9 +179,7 @@ class IssueEditor extends View {
      * Event: Click the dragging handle
      */
     onClickDragHandle(e) {
-        if(ApiHelper.isSpectating()) {
-            return;
-        }
+        if(ApiHelper.isSpectating()) { return; }
         
         if(!InputHelper.isShiftDown) {
             // Set class on board container
@@ -274,9 +272,7 @@ class IssueEditor extends View {
      * Event: Release the dragging handle
      */
     onReleaseDragHandle(e) {
-        if(ApiHelper.isSpectating()) {
-            return;
-        }
+        if(ApiHelper.isSpectating()) { return; }
         
         // Unregister mouse events
         $(document)
@@ -334,9 +330,7 @@ class IssueEditor extends View {
      * Event: Fires on every change to a property
      */
     onChange() {
-        if(ApiHelper.isSpectating()) {
-            return;
-        }
+        if(ApiHelper.isSpectating()) { return; }
 
         // Only update values if we're not using multi edit
         if(!this.usingMultiEdit()) {
@@ -360,9 +354,7 @@ class IssueEditor extends View {
      * Event: Click multi edit apply button
      */
     onClickMultiEditApply() {
-        if(ApiHelper.isSpectating()) {
-            return;
-        }
+        if(ApiHelper.isSpectating()) { return; }
         
         this.updateModel();
         this.updateDOM();
@@ -392,9 +384,7 @@ class IssueEditor extends View {
      * Event: Click multi edit cancel button
      */
     onClickMultiEditCancel() {
-        if(ApiHelper.isSpectating()) {
-            return;
-        }
+        if(ApiHelper.isSpectating()) { return; }
         
         IssueEditor.cancelMultiSelect();
     }
@@ -403,9 +393,7 @@ class IssueEditor extends View {
      * Event: Fires on changing a checkbox
      */
     onChangeCheckbox(e) {
-        if(ApiHelper.isSpectating()) {
-            return;
-        }
+        if(ApiHelper.isSpectating()) { return; }
         
         e.preventDefault();
         e.stopPropagation();
@@ -426,9 +414,7 @@ class IssueEditor extends View {
         e.preventDefault();
         e.stopPropagation();
 
-        if(ApiHelper.isSpectating()) {
-            return;
-        }
+        if(ApiHelper.isSpectating()) { return; }
         
         if(!InputHelper.isShiftDown && !$(this).parents('.issue-editor').hasClass('selected')) {
             $(this)
@@ -444,9 +430,7 @@ class IssueEditor extends View {
      * Event: Click the comment button
      */
     onClickComment() {
-        if(ApiHelper.isSpectating()) {
-            return;
-        }
+        if(ApiHelper.isSpectating()) { return; }
         
         let text = this.$element.find('.add-comment textarea').val();
 
@@ -459,14 +443,56 @@ class IssueEditor extends View {
     }
 
     /**
+     * Event: Key up on input fields
+     *
+     * @param {Event} e
+     */
+    onKeyUp(e) {
+        if(ApiHelper.isSpectating()) { return; }
+    
+        let foundAnyFuzzyMatches = false;
+
+        let replaced = $(this).val().replace(/@[a-zA-Z0-9-_]+ /g, (string) => {
+            let fuzzyMatch;
+            let typedName = string.replace('@', '').replace(' ', '');
+
+            for(let collaborator of resources.collaborators || []) {
+                if(!collaborator) { continue; }
+
+                if(typedName == collaborator.name) {
+                    return string;
+
+                } else if(collaborator.name.indexOf(typedName) == 0) {
+                    fuzzyMatch = collaborator.name;
+
+                }
+            }
+
+            if(fuzzyMatch) {
+                foundAnyFuzzyMatches = true;
+
+                return '@' + fuzzyMatch + ' ';
+            
+            } else {
+                return string;
+
+            }
+        });
+
+        if(foundAnyFuzzyMatches) {
+            $(this).val(replaced);
+
+            $(this).change();
+        }
+    }
+
+    /**
      * Event: Remove focus from input fields
      *
      * @param {Event} e
      */
     onBlur(e) {
-        if(ApiHelper.isSpectating()) {
-            return;
-        }
+        if(ApiHelper.isSpectating()) { return; }
         
         $(e.target)
             .toggleClass('hidden', true)
@@ -480,9 +506,7 @@ class IssueEditor extends View {
      * @param {Object} event
      */
     onClickElement(e) {
-        if(ApiHelper.isSpectating()) {
-            return;
-        }
+        if(ApiHelper.isSpectating()) { return; }
         
         // Check for shift key
         if(InputHelper.isShiftDown) {

@@ -428,8 +428,17 @@ body, html {
           clip-path: inset(0px 20px 0px 0px);
           -webkit-clip-path: inset(0px 20px 0px 0px);
           -moz-clip-path: inset(0px 20px 0px 0px); }
+  .issue-editor .collaborator-reference {
+    font-weight: bold;
+    margin-left: 4px; }
+    .issue-editor .collaborator-reference img {
+      margin-right: 5px;
+      height: 15px;
+      position: relative;
+      top: 3px; }
   .issue-editor .body {
-    padding-top: 0px; }
+    padding-top: 0px;
+    position: relative; }
     .issue-editor .body label {
       display: block;
       width: 100%; }

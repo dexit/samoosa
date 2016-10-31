@@ -307,8 +307,21 @@
         }
     }
 
+    .collaborator-reference {
+        font-weight: bold;
+        margin-left: 4px;
+
+        img {
+            margin-right: 5px;
+            height: 15px;
+            position: relative;
+            top: 3px;
+        }
+    }
+
     .body {
         padding-top: 0px;
+        position: relative;
 
         label {
             display: block;

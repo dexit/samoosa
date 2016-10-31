@@ -20,6 +20,20 @@ window.markdownToHtml = function(string) {
             html = html.replace(/\[ \]/g, '<input type="checkbox" disabled readonly>');
             html = html.replace(/\[x\]/g, '<input type="checkbox" checked="checked" disabled readonly>');
 
+            html = html.replace(/@[a-zA-Z0-9-_]+/g, (string) => {
+                let typedName = string.replace('@', '');
+
+                for(let collaborator of resources.collaborators || []) {
+                    if(!collaborator) { continue; }
+
+                    if(typedName == collaborator.name) {
+                        return '<span class="collaborator-reference"><img src="' + collaborator.avatar + '" />' + string + '</span>';
+                    }
+                }
+
+                return string;
+            });
+
             return html;
 
         } catch(e) {

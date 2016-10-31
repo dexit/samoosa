@@ -10062,6 +10062,8 @@
 
 	            this.$element.toggleClass('loading', true);
 
+	            this.$element.find('.add-comment textarea').val('');
+
 	            ApiHelper.addIssueComment(this.model, text).then(function () {
 	                _this5.getComments();
 	            });

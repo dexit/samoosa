@@ -1204,8 +1204,8 @@ ul {
   .issue-editor .comments, .issue-editor .add-comment {
     background-color: transparent; }
     .issue-editor .comments .comment .btn-edit, .issue-editor .add-comment .comment .btn-edit {
-      background-color: #5b84a2;
-      color: #21303B; }
+      background-color: #171e23;
+      color: #5b84a2; }
     .issue-editor .comments .comment .text, .issue-editor .add-comment .comment .text {
       background-color: #fff;
       color: #000;

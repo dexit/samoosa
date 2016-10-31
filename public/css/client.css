@@ -344,12 +344,10 @@ body, html {
       display: flex; }
       .issue-editor > .header .header-top-right .issue-index {
         border-bottom-left-radius: 5px;
-        color: #e0e0e0;
         padding: 2px 5px;
         font-size: 12px; }
       .issue-editor > .header .header-top-right .btn-remove {
         padding: 2px 5px;
-        background-color: #212121;
         line-height: 13px;
         height: auto; }
         .issue-editor > .header .header-top-right .btn-remove span {

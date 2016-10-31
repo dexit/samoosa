@@ -1253,7 +1253,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueComment(issue, text) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + (issue.index + 1) + '/comments', {
+            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments', {
                 body: text
             })
             .then(() => {
@@ -1288,7 +1288,7 @@ class GitHubApi extends ApiHelper {
      */
     getIssueComments(issue) {
         return new Promise((callback) => {
-            this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + (issue.index + 1) + '/comments')
+            this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments')
             .then((gitHubComments) => {
                 let comments = [];
 

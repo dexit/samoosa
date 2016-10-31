@@ -1,5 +1,8 @@
 'use strict';
 
+// Style
+require('../sass/client');
+
 // Package
 window.app = require('../../../package.json');
 
@@ -9,7 +12,7 @@ window.Promise = require('bluebird');
 window.marked = require('marked');
 
 Promise.onPossiblyUnhandledRejection((error, promise) => {
-    debug.warning(error, Promise);
+    throw error;
 });
 
 // Globals

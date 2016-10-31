@@ -35,6 +35,7 @@ class Issue {
         this.milestone = properties.milestone;
         this.comments = properties.comments || [];
         this.assignee = properties.assignee;
+        this.deleted = false;
     }
 
     /**

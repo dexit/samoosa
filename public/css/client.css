@@ -1,6 +1,4 @@
-@import 'https://fonts.googleapis.com/css?family=Open+Sans:400,700';
-@import 'https://fonts.googleapis.com/css?family=Bree+Serif';
-[role="button"],
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);@import url(https://fonts.googleapis.com/css?family=Bree+Serif);[role="button"],
 input[type="text"],
 input[type="submit"],
 input[type="reset"],
@@ -339,15 +337,24 @@ body, html {
       text-align: center; }
       .issue-editor > .header .unassigned .fa {
         font-size: 24px; }
-    .issue-editor > .header .issue-index {
+    .issue-editor > .header .header-top-right {
       position: absolute;
       top: 0px;
       right: 0px;
-      border-bottom-left-radius: 5px;
-      background-color: #212121;
-      color: #e0e0e0;
-      padding: 2px 5px;
-      font-size: 10px; }
+      display: flex; }
+      .issue-editor > .header .header-top-right .issue-index {
+        border-bottom-left-radius: 5px;
+        background-color: #212121;
+        color: #e0e0e0;
+        padding: 2px 5px;
+        font-size: 12px; }
+      .issue-editor > .header .header-top-right .btn-remove-issue {
+        padding: 2px 5px;
+        line-height: 14px;
+        height: auto; }
+        .issue-editor > .header .header-top-right .btn-remove-issue span {
+          margin: 0px;
+          line-height: inherit; }
     .issue-editor > .header .drag-handle {
       cursor: move; }
       .issue-editor > .header .drag-handle .fa {
@@ -1247,5 +1254,3 @@ button.btn, input[type="submit"].btn {
     .tabbed-container .tabs .tab, .tabbed-container .tabs .tab.active {
       border: 0px;
       box-shadow: none; }
-
-/*# sourceMappingURL=client.css.map */

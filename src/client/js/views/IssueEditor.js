@@ -21,6 +21,18 @@ class IssueEditor extends View {
     }
 
     /**
+     * Event: Click remove button
+     */
+    onClickRemove() {
+        if(confirm('Are you sure you want to delete "' + this.model.title + '"?')) {
+            ApiHelper.removeIssue(this.model)
+            .then(() => {
+                this.$element.remove();
+            });
+        }
+    }
+
+    /**
      * Event: Click the toggle button
      */
     onClickToggle(e) {

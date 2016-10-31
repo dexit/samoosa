@@ -29,6 +29,19 @@ window.markdownToHtml = function(string) {
     }
 };
 
+// Get cookie by name
+window.getCookie = function getCookie(name) {
+    let value = "; " + document.cookie;
+    let parts = value.split("; " + name + "=");
+    
+    if (parts.length == 2) return parts.pop().split(";").shift();
+};
+
+// Set cookie by name
+window.setCookie = function setCookie(name, value) {
+    document.cookie = name + '=' + value;
+}
+
 // Simple date string
 Date.prototype.getSimpleString = function() {
     return this.getFullYear() + '-' + (this.getMonth() + 1) + '-' + this.getDate();

@@ -336,13 +336,12 @@ class ApiHelper {
     // ----------
     /**
      * Removes issue
-     * NOTE: This is usually disabled
      *
-     * @param {Number} index
+     * @param {Issue} issue
      *
-     * @returns {Promise} promise
+     * @returns {Promise} Promise
      */ 
-    removeIssue(index) {
+    removeIssue(issue) {
         return new Promise((callback) => {
             callback();
         });

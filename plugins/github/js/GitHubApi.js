@@ -3,6 +3,7 @@
 let ApiHelper = require('../../../src/client/js/helpers/ApiHelper');
 
 let labelCache;
+let deletedIssuesCache = [];
 
 class GitHubApi extends ApiHelper {
     // ----------
@@ -244,6 +245,15 @@ class GitHubApi extends ApiHelper {
     // Resource getters
     // ----------
     /**
+     * Gets a list of deleted issues
+     *
+     * @returns {Array} List of deleted issues
+     */
+    getDeletedIssues() {
+        return deletedIssuesCache;
+    }
+
+    /**
      * Gets projects
      *
      * @returns {Promise} promise
@@ -302,25 +312,62 @@ class GitHubApi extends ApiHelper {
     }
     
     /**
+     * Ensures mandatory labels
+     *
+     * @returns {Promise} Promise
+     */
+    ensureMandatoryLabels() {
+        if(!labelCache) { 
+            return new Promise((resolve, reject) => {
+                reject(new Error('Label cache not initialised'));
+            });
+        
+        } else {
+            // Check if "deleted" label exists
+            for(let label of labelCache) {
+                if(label.name == 'deleted') {
+                    return new Promise((resolve, reject) => {
+                        resolve();
+                    });
+                }
+            }
+        
+            return this.addLabel('deleted', 'ff0000')
+            .then((newLabel) => {
+                labelCache.push(newLabel);
+
+                return new Promise((resolve, reject) => {
+                    resolve();
+                });
+            });
+        }
+    }
+
+
+    /**
      * Gets labels and caches them
      *
      * @returns {Promise} promise
      */
     getLabels() {
-        return new Promise((callback) => {
-            if(!labelCache) {
-                this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels')
-                .then((labels) => {
-                    labelCache = labels;
+        if(!labelCache) {
+            return this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels')
+            .then((labels) => {
+                labelCache = labels || [];
 
-                    callback(labelCache);
-                });    
+                return this.ensureMandatoryLabels();
+            })
+            .then(() => {
+                return new Promise((resolve, reject) => {
+                    resolve(labelCache);
+                });
+            });
 
-            } else {
-                callback(labelCache);
-            
-            }
-        });
+        } else {
+            return new Promise((resolve, reject) => {
+                resolve(labelCache);
+            });
+        }
     }
 
     /**
@@ -430,12 +477,17 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addIssue(issue) {
-        return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue))
-            .then(() => {
-                callback(issue);
-            });
-        });
+        let deletedIssue = deletedIssuesCache.pop();
+       
+        if(deletedIssue) {
+            issue.id = deletedIssue.id;
+
+            return this.updateIssue(issue);
+        
+        } else {
+            return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue));
+    
+        }
     }
     
     /**
@@ -451,6 +503,21 @@ class GitHubApi extends ApiHelper {
             .then(() => {
                 callback();
             });    
+        });
+    }
+    
+    /**
+     * Adds label
+     *
+     * @param {String} name
+     * @param {String} color
+     *
+     * @returns {Promise} New label
+     */
+    addLabel(name, color) {
+        return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            name: name,
+            color: color || 'ffffff'
         });
     }
     
@@ -575,6 +642,22 @@ class GitHubApi extends ApiHelper {
     // Resource removers
     // ----------
     /**
+     * Removes issue
+     *
+     * @param {Issue} issue
+     *
+     * @returns {Promise} Promise
+     */ 
+    removeIssue(issue) {
+        issue.deleted = true;
+        deletedIssuesCache.push(issue);
+
+        resources.issues[issue.index] = null;
+
+        return this.updateIssue(issue);
+    }
+    
+    /**
      * Removes collaborator
      *
      * @param {Number} index
@@ -695,12 +778,7 @@ class GitHubApi extends ApiHelper {
      * @param {Object} issue
      */
     updateIssue(issue) {
-        return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + (issue.index + 1), this.convertIssue(issue))
-            .then(() => {
-                callback();
-            });
-        });
+        return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + issue.id, this.convertIssue(issue));
     }
 
     /**
@@ -711,12 +789,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateMilestone(milestone) {
-        return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + (parseInt(milestone.index) + 1), this.convertMilestone(milestone))
-            .then(() => {
-                callback();
-            });
-        });
+        return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + (parseInt(milestone.index) + 1), this.convertMilestone(milestone));
     }
     
     /**
@@ -728,14 +801,9 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateIssueType(type, previousName) {
-        return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/type:' + previousName, {
-                name: 'type:' + type,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
+        return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/type:' + previousName, {
+            name: 'type:' + type,
+            color: 'ffffff'
         });
     }
     
@@ -1023,7 +1091,10 @@ class GitHubApi extends ApiHelper {
                 let versionIndex = label.name.indexOf('version:');
                 let columnIndex = label.name.indexOf('column:');
 
-                if(typeIndex > -1) {
+                if(label.name == 'deleted') {
+                    issue.deleted = true;
+
+                } else if(typeIndex > -1) {
                     let name = label.name.replace('type:', '');
                     
                     issue.type = ResourceHelper.getIssueType(name);
@@ -1064,7 +1135,11 @@ class GitHubApi extends ApiHelper {
 
             issue.index = parseInt(gitHubIssue.number) - 1;
 
-            window.resources.issues[issue.index] = issue;
+            if(issue.deleted) {
+                deletedIssuesCache.push(issue);
+            } else {
+                window.resources.issues[issue.index] = issue;
+            }
         }
     }
 
@@ -1153,6 +1228,11 @@ class GitHubApi extends ApiHelper {
         // Column
         if(issueColumn && issueColumn != 'to do' && issueColumn != 'done') {
             gitHubIssue.labels.push('column:' + issueColumn);
+        }
+
+        // Deleted
+        if(issue.deleted) {
+            gitHubIssue.labels.push('deleted');
         }
 
         return gitHubIssue;

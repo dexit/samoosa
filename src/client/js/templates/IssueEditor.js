@@ -13,8 +13,15 @@ module.exports = function render() {
                 _.span({class: 'fa icon-close fa-chevron-down'}),
                 _.span({class: 'fa icon-open fa-chevron-right'})
             ).click((e) => { this.onClickToggle(e); }),
-            _.div({class: 'issue-index'},
-                (this.model.id || this.model.index).toString()
+            _.div({class: 'header-top-right'},
+                _.div({class: 'issue-index'},
+                    (this.model.id || this.model.index).toString()
+                ),
+                _.if(!ApiHelper.isSpectating(),
+                    _.button({class: 'btn btn-remove-issue'},
+                        _.span({class: 'fa fa-remove'})
+                    ).click(() => { this.onClickRemove(); })
+                )
             ),
             this.getPriorityIndicator(),
             _.h4({},

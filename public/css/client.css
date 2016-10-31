@@ -457,7 +457,7 @@ body, html {
       padding-right: 15px;
       flex-shrink: 0; }
       .issue-editor .comments .comment .collaborator img {
-        max-width: 100%; }
+        max-width: 30px; }
     .issue-editor .comments .comment .text, .issue-editor .comments .comment .btn-edit, .issue-editor .comments .comment .edit {
       resize: none;
       flex-grow: 1;

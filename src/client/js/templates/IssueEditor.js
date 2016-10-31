@@ -49,57 +49,57 @@ module.exports = function render() {
                 'Now editing multiple issues'
             ),
             _.div({class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '')},
+                _.input({class: 'multi-edit-toggle', type: 'checkbox'})
+                    .change((e) => { this.onChangeCheckbox(e); }),
                 _.label('Type'),
                 _.select({'data-property': 'type', disabled: ApiHelper.isSpectating()},
                     _.each(window.resources.issueTypes, (i, type) => {
                         return _.option({value: i}, type);
                     })
-                ).change(() => { this.onChange(); }).val(this.model.type),
-                _.input({class: 'multi-edit-toggle', type: 'checkbox'})
-                    .change((e) => { this.onChangeCheckbox(e); })
+                ).change(() => { this.onChange(); }).val(this.model.type)
             ),
             _.div({class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '')},
+                _.input({class: 'multi-edit-toggle', type: 'checkbox'})
+                    .change((e) => { this.onChangeCheckbox(e); }),
                 _.label('Priority'),
                 _.select({'data-property': 'priority', disabled: ApiHelper.isSpectating()},
                     _.each(window.resources.issuePriorities, (i, priority) => {
                         return _.option({value: i}, priority);
                     })
-                ).change(() => { this.onChange(); }).val(this.model.priority),
-                _.input({class: 'multi-edit-toggle', type: 'checkbox'})
-                    .change((e) => { this.onChangeCheckbox(e); })
+                ).change(() => { this.onChange(); }).val(this.model.priority)
             ),
             _.if(window.resources.collaborators.length > 0,
                 _.div({class: 'meta-field assignee'},
+                    _.input({class: 'multi-edit-toggle', type: 'checkbox'})
+                        .change((e) => { this.onChangeCheckbox(e); }),
                     _.label('Assignee'),
                     _.select({'data-property': 'assignee', disabled: ApiHelper.isSpectating()},
                         _.option({value: null}, '(unassigned)'),
                         _.each(window.resources.collaborators, (i, collaborator) => {
                             return _.option({value: i}, collaborator.name);
                         })
-                    ).change(() => { this.onChange(); }).val(this.model.assignee),
-                    _.input({class: 'multi-edit-toggle', type: 'checkbox'})
-                        .change((e) => { this.onChangeCheckbox(e); })
+                    ).change(() => { this.onChange(); }).val(this.model.assignee)
                 )
             ),
             _.div({class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '')},
+                _.input({class: 'multi-edit-toggle', type: 'checkbox'})
+                    .change((e) => { this.onChangeCheckbox(e); }),
                 _.label('Version'),
                 _.select({'data-property': 'version', disabled: ApiHelper.isSpectating()},
                     _.each(window.resources.versions, (i, version) => {
                         return _.option({value: i}, version);
                     })
-                ).change(() => { this.onChange(); }).val(this.model.version),
-                _.input({class: 'multi-edit-toggle', type: 'checkbox'})
-                    .change((e) => { this.onChangeCheckbox(e); })
+                ).change(() => { this.onChange(); }).val(this.model.version)
             ),
             _.div({class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '')},
+                _.input({class: 'multi-edit-toggle', type: 'checkbox'})
+                    .change((e) => { this.onChangeCheckbox(e); }),
                 _.label('Estimate'),
                 _.select({'data-property': 'estimate', disabled: ApiHelper.isSpectating()},
                     _.each(window.resources.issueEstimates, (i, estimate) => {
                         return _.option({value: i}, estimate);
                     })
-                ).change(() => { this.onChange(); }).val(this.model.estimate),
-                _.input({class: 'multi-edit-toggle', type: 'checkbox'})
-                    .change((e) => { this.onChangeCheckbox(e); })
+                ).change(() => { this.onChange(); }).val(this.model.estimate)
             ),
             _.div({class: 'multi-edit-actions'}, 
                 _.button({class: 'btn'},
@@ -111,6 +111,7 @@ module.exports = function render() {
             )
         ),
         _.div({class: 'body'},
+            _.label('Description'),
             _.div({class: 'btn-edit'},
                 markdownToHtml(this.model.description)
             ).click(this.onClickEdit),

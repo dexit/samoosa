@@ -285,21 +285,29 @@ body, html {
     display: inline; }
   .issue-editor.expanded .header > button span.icon-open {
     display: none; }
-  .issue-editor.expanded .meta, .issue-editor.expanded .body, .issue-editor.expanded .operations, .issue-editor.expanded .comments, .issue-editor.expanded .add-comment {
+  .issue-editor.expanded .body, .issue-editor.expanded .operations, .issue-editor.expanded .comments, .issue-editor.expanded .add-comment {
     display: block; }
+  .issue-editor.expanded .meta {
+    display: flex; }
   .issue-editor.expanded.selected .multi-edit-notification {
     display: block;
+    width: 100%;
+    flex-basis: 100%;
     font-weight: bold;
     color: #f44336;
-    margin-bottom: 10px; }
+    padding: 15px 0px;
+    margin-left: 15px;
+    text-align: center; }
   .issue-editor.expanded.selected .multi-edit-toggle {
     display: inline;
     float: right;
-    margin: 4px 10px 0px 0px; }
+    margin: 10px 0px 0px 0px; }
   .issue-editor.expanded.selected .multi-edit-actions {
-    padding-top: 10px;
+    padding: 10px 0px;
     display: block;
-    text-align: right; }
+    text-align: right;
+    width: 100%;
+    flex-basis: 100%; }
     .issue-editor.expanded.selected .multi-edit-actions button {
       margin-left: 10px; }
   .issue-editor.expanded.selected .drag-handle {
@@ -392,30 +400,44 @@ body, html {
         display: none; }
       .issue-editor > .header span.icon-open, .issue-editor > .header input.icon-open, .issue-editor > .header h4.icon-open {
         display: inline; }
-  .issue-editor .meta, .issue-editor .body, .issue-editor .operations, .issue-editor .comments, .issue-editor .add-comment {
+  .issue-editor .body, .issue-editor .operations, .issue-editor .comments, .issue-editor .add-comment {
     display: none;
     padding: 15px; }
   .issue-editor .meta, .issue-editor .comments, .issue-editor .add-comment {
     background-color: #e0e0e0; }
-  .issue-editor .meta .meta-field {
-    clear: both; }
-    .issue-editor .meta .meta-field select {
-      float: right;
-      width: 200px; }
-      .issue-editor .meta .meta-field select[disabled] {
-        background-color: transparent;
-        border: 0px;
-        appearance: none;
-        -moz-appearance: none;
-        -webkit-appearance: none;
-        clip-path: inset(0px 20px 0px 0px);
-        -webkit-clip-path: inset(0px 20px 0px 0px);
-        -moz-clip-path: inset(0px 20px 0px 0px); }
-  .issue-editor .body textarea, .issue-editor .body .btn-edit {
-    resize: none;
-    display: block;
-    width: 100%;
-    min-height: 100px; }
+  .issue-editor .meta {
+    display: none;
+    flex-wrap: wrap;
+    padding-right: 15px; }
+    .issue-editor .meta .meta-field {
+      width: 50%;
+      flex-basis: 50%;
+      padding: 0px 0px 0px 15px; }
+      .issue-editor .meta .meta-field label {
+        display: block;
+        width: 100%; }
+      .issue-editor .meta .meta-field select {
+        display: block;
+        width: 100%; }
+        .issue-editor .meta .meta-field select[disabled] {
+          background-color: transparent;
+          border: 0px;
+          appearance: none;
+          -moz-appearance: none;
+          -webkit-appearance: none;
+          clip-path: inset(0px 20px 0px 0px);
+          -webkit-clip-path: inset(0px 20px 0px 0px);
+          -moz-clip-path: inset(0px 20px 0px 0px); }
+  .issue-editor .body {
+    padding-top: 0px; }
+    .issue-editor .body label {
+      display: block;
+      width: 100%; }
+    .issue-editor .body textarea, .issue-editor .body .btn-edit {
+      resize: none;
+      display: block;
+      width: 100%;
+      min-height: 100px; }
   .issue-editor .comments .comment {
     display: flex;
     margin-top: 15px; }
@@ -430,14 +452,14 @@ body, html {
     .issue-editor .comments .comment .text, .issue-editor .comments .comment .btn-edit, .issue-editor .comments .comment .edit {
       resize: none;
       flex-grow: 1;
-      padding: 5px 10px;
+      padding: 10px;
       border-radius: 5px;
       background-color: #f5f5f5; }
   .issue-editor .add-comment {
     text-align: right; }
     .issue-editor .add-comment textarea {
       text-align: left;
-      padding: 5px 10px;
+      padding: 10px;
       resize: none;
       display: block;
       width: 100%;
@@ -1129,6 +1151,8 @@ ul {
   border: 0px;
   background-color: #21303B;
   margin-bottom: 0.5rem; }
+  .issue-editor.selected {
+    outline-color: #E70D3B; }
   .issue-editor > .header {
     background-color: transparent; }
     .issue-editor > .header h4, .issue-editor > .header h4 input {
@@ -1143,24 +1167,42 @@ ul {
       color: #5b84a2; }
     .issue-editor > .header .btn-remove {
       background-color: #171e23; }
+  .issue-editor .meta, .issue-editor .body {
+    color: #5b84a2; }
   .issue-editor .body {
     background-color: #21303B; }
-    .issue-editor .body .btn-edit, .issue-editor .body p, .issue-editor .body textarea {
-      line-height: 1.5em;
+    .issue-editor .body label {
+      line-height: 2rem; }
+    .issue-editor .body textarea, .issue-editor .body .btn-edit {
+      outline: 1px solid #5b84a2;
+      padding: 10px; }
+    .issue-editor .body textarea {
+      background-color: #fff;
+      color: #000; }
+    .issue-editor .body .btn-edit, .issue-editor .body p {
       color: #fff; }
+    .issue-editor .body .btn-edit, .issue-editor .body p, .issue-editor .body textarea {
+      line-height: 1.5em; }
   .issue-editor .meta {
-    background-color: transparent;
-    color: #fff; }
-    .issue-editor .meta .meta-field {
-      margin-bottom: 0.5rem;
+    background-color: transparent; }
+    .issue-editor .meta .meta-field label {
+      line-height: 2rem;
       height: 2rem; }
-      .issue-editor .meta .meta-field label {
-        line-height: 2rem;
-        height: 2rem; }
+    .issue-editor .meta .meta-field select {
+      font-weight: bold; }
+  .issue-editor .multi-edit-notification {
+    color: #E70D3B !important; }
   .issue-editor .comments, .issue-editor .add-comment {
     background-color: transparent; }
-    .issue-editor .comments textarea, .issue-editor .add-comment textarea {
+    .issue-editor .comments .comment .btn-edit, .issue-editor .add-comment .comment .btn-edit {
+      background-color: #5b84a2;
+      color: #21303B; }
+    .issue-editor .comments .comment .text, .issue-editor .add-comment .comment .text {
+      background-color: #fff;
+      color: #000;
       border-radius: 0px; }
+    .issue-editor .comments .comment .collaborator, .issue-editor .add-comment .comment .collaborator {
+      color: #fff; }
 
 .plan-container .plan-item-editor {
   background-color: #21303B; }

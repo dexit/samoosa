@@ -77,28 +77,38 @@
             }
         }
 
-        .meta, .body, .operations, .comments, .add-comment {
+        .body, .operations, .comments, .add-comment {
             display: block;
+        }
+
+        .meta {
+            display: flex;
         }
 
         &.selected {
             .multi-edit-notification {
                 display: block;
+                width: 100%;
+                flex-basis: 100%;
                 font-weight: bold;
                 color: material-color('red', '500');
-                margin-bottom: 10px;
+                padding: 15px 0px;
+                margin-left: 15px;
+                text-align: center;
             }
 
             .multi-edit-toggle {
                 display: inline;
                 float: right;
-                margin: 4px 10px 0px 0px;
+                margin: 10px 0px 0px 0px;
             }
 
             .multi-edit-actions {
-                padding-top: 10px;
+                padding: 10px 0px;
                 display: block;
                 text-align: right;
+                width: 100%;
+                flex-basis: 100%;
 
                 button {
                     margin-left: 10px;
@@ -255,7 +265,7 @@
         }
     }
 
-    .meta, .body, .operations, .comments, .add-comment {
+    .body, .operations, .comments, .add-comment {
         display: none;
         padding: 15px;
     }
@@ -265,10 +275,24 @@
     }
 
     .meta {
+        display: none;
+        flex-wrap: wrap;
+        padding-right: 15px;
+
         .meta-field {
-            clear: both;
+            width: 50%;
+            flex-basis: 50%;
+            padding: 0px 0px 0px 15px;
+
+            label {
+                display: block;
+                width: 100%;
+            }
 
             select {
+                display: block;
+                width: 100%;
+
                 &[disabled] {
                     background-color: transparent;
                     border: 0px;
@@ -279,14 +303,18 @@
                     -webkit-clip-path: inset(0px 20px 0px 0px);
                     -moz-clip-path: inset(0px 20px 0px 0px);
                 }
-
-                float: right;
-                width: 200px;
             }
         }
     }
 
     .body {
+        padding-top: 0px;
+
+        label {
+            display: block;
+            width: 100%;
+        }
+        
         textarea, .btn-edit {
             resize: none;
             display: block;
@@ -317,7 +345,7 @@
             .text, .btn-edit, .edit {
                 resize: none;
                 flex-grow: 1;
-                padding: 5px 10px;
+                padding: 10px;
                 border-radius: 5px;
                 background-color: material-color('grey', '100');
             }
@@ -329,7 +357,7 @@
         
         textarea {    
             text-align: left;
-            padding: 5px 10px;
+            padding: 10px;
             resize: none;
             display: block;
             width: 100%;

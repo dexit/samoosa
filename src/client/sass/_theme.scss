@@ -219,6 +219,10 @@ ul {
     background-color: $teal-dark;
     margin-bottom: 0.5rem;
 
+    &.selected {
+        outline-color: $pink-medium;
+    }
+
     >.header {
         background-color: transparent;
 
@@ -243,35 +247,73 @@ ul {
         }
     }
 
+    .meta, .body {
+        color: $teal-light;
+    }
+
     .body {
         background-color: $teal-dark;
 
+        label {
+            line-height: 2rem;
+        }
+
+        textarea, .btn-edit {
+            outline: 1px solid $teal-light;
+            padding: 10px;
+        }
+
+        textarea {
+            background-color: $white;
+            color: $black;
+        }
+
+        .btn-edit, p {
+            color: $white;
+        }
+
         .btn-edit, p, textarea {
             line-height: 1.5em;
-            color: $white;
         }
     }
 
     .meta {
         background-color: transparent;
-        color: $white;
 
         .meta-field {
-            margin-bottom: 0.5rem;
-            height: 2rem;
-            
             label {
                 line-height: 2rem;
                 height: 2rem;
             }
+
+            select {
+                font-weight: bold;
+            }
         }
+    }
+    
+    .multi-edit-notification {
+        color: $pink-medium !important;
     }
 
     .comments, .add-comment {
         background-color: transparent;
-    
-        textarea {
-            border-radius: 0px;
+ 
+        .comment {   
+            .btn-edit {
+                background-color: $teal-light;
+                color: $teal-dark;
+            }
+
+            .text {
+                background-color: $white;
+                color: $black;
+                border-radius: 0px;
+            }
+
+            .collaborator {
+                color: $white;
+            }
         }
     }
 }

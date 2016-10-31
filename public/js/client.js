@@ -10181,41 +10181,41 @@
 	        }
 	    }))).click(function (e) {
 	        _this.onClickElement(e);
-	    }), _.div({ class: 'meta' }, _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'), _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueTypes, function (i, type) {
+	    }), _.div({ class: 'meta' }, _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'), _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueTypes, function (i, type) {
 	        return _.option({ value: i }, type);
 	    })).change(function () {
 	        _this.onChange();
-	    }).val(this.model.type), _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    }).val(this.model.type)), _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
-	    })), _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issuePriorities, function (i, priority) {
+	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issuePriorities, function (i, priority) {
 	        return _.option({ value: i }, priority);
 	    })).change(function () {
 	        _this.onChange();
-	    }).val(this.model.priority), _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    }).val(this.model.priority)), _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
-	    })), _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
+	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
 	        return _.option({ value: i }, collaborator.name);
 	    })).change(function () {
 	        _this.onChange();
-	    }).val(this.model.assignee), _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    }).val(this.model.assignee))), _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
-	    }))), _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
+	    }), _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
 	        return _.option({ value: i }, version);
 	    })).change(function () {
 	        _this.onChange();
-	    }).val(this.model.version), _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    }).val(this.model.version)), _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
-	    })), _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueEstimates, function (i, estimate) {
+	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueEstimates, function (i, estimate) {
 	        return _.option({ value: i }, estimate);
 	    })).change(function () {
 	        _this.onChange();
-	    }).val(this.model.estimate), _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    })), _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
+	    }).val(this.model.estimate)), _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
 	        _this.onClickMultiEditCancel();
 	    }), _.button({ class: 'btn' }, 'Apply').click(function () {
 	        _this.onClickMultiEditApply();
-	    }))), _.div({ class: 'body' }, _.div({ class: 'btn-edit' }, markdownToHtml(this.model.description)).click(this.onClickEdit), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
+	    }))), _.div({ class: 'body' }, _.label('Description'), _.div({ class: 'btn-edit' }, markdownToHtml(this.model.description)).click(this.onClickEdit), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
 	        _this.onChange();
 
 	        _this.$element.find('.body .btn-edit').html(markdownToHtml(_this.model.description) || '');

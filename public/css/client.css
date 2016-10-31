@@ -1188,7 +1188,7 @@ ul {
     .issue-editor .body textarea {
       background-color: #fff;
       color: #000; }
-    .issue-editor .body .btn-edit, .issue-editor .body p {
+    .issue-editor .body .btn-edit, .issue-editor .body p, .issue-editor .body span, .issue-editor .body a {
       color: #fff; }
     .issue-editor .body .btn-edit, .issue-editor .body p, .issue-editor .body textarea {
       line-height: 1.5em; }

@@ -171,15 +171,15 @@
             
             .issue-index {
                 border-bottom-left-radius: 5px;
-                background-color: material-color('grey', '900');
                 color: material-color('grey', '300');
                 padding: 2px 5px;
                 font-size: 12px;
             }
 
-            .btn-remove-issue {
+            .btn-remove {
                 padding: 2px 5px;
-                line-height: 14px;
+                background-color: material-color('grey', '900');
+                line-height: 13px;
                 height: auto;
 
                 span {

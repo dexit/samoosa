@@ -18,7 +18,7 @@ module.exports = function render() {
                     (this.model.id || this.model.index).toString()
                 ),
                 _.if(!ApiHelper.isSpectating(),
-                    _.button({class: 'btn btn-remove-issue'},
+                    _.button({class: 'btn btn-remove'},
                         _.span({class: 'fa fa-remove'})
                     ).click(() => { this.onClickRemove(); })
                 )

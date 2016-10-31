@@ -344,15 +344,15 @@ body, html {
       display: flex; }
       .issue-editor > .header .header-top-right .issue-index {
         border-bottom-left-radius: 5px;
-        background-color: #212121;
         color: #e0e0e0;
         padding: 2px 5px;
         font-size: 12px; }
-      .issue-editor > .header .header-top-right .btn-remove-issue {
+      .issue-editor > .header .header-top-right .btn-remove {
         padding: 2px 5px;
-        line-height: 14px;
+        background-color: #212121;
+        line-height: 13px;
         height: auto; }
-        .issue-editor > .header .header-top-right .btn-remove-issue span {
+        .issue-editor > .header .header-top-right .btn-remove span {
           margin: 0px;
           line-height: inherit; }
     .issue-editor > .header .drag-handle {
@@ -1141,6 +1141,9 @@ ul {
       font-size: 11px;
       line-height: 1em;
       border-radius: 0px;
+      background-color: transparent;
+      color: #3e586b; }
+    .issue-editor > .header .btn-remove {
       background-color: #171e23; }
   .issue-editor .body {
     background-color: #21303B; }
@@ -1206,6 +1209,10 @@ button.btn, input[type="submit"].btn {
     margin-left: 0.5rem; }
   button.btn .fa, input[type="submit"].btn .fa {
     margin-left: 0.5em; }
+
+button.btn-remove {
+  background-color: transparent;
+  color: #E70D3B; }
 
 .tabbed-container.vertical .tabs {
   padding-top: 0rem;

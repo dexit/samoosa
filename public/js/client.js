@@ -124,7 +124,7 @@
 
 	module.exports = {
 		"name": "samoosa",
-		"version": "0.2.0",
+		"version": "0.3.0",
 		"description": "",
 		"main": "index.html",
 		"scripts": {
@@ -10163,7 +10163,7 @@
 	        _this.onClickDragHandle(e);
 	    }), _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())), _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-down' }), _.span({ class: 'fa icon-open fa-chevron-right' })).click(function (e) {
 	        _this.onClickToggle(e);
-	    }), _.div({ class: 'header-top-right' }, _.div({ class: 'issue-index' }, (this.model.id || this.model.index).toString()), _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove-issue' }, _.span({ class: 'fa fa-remove' })).click(function () {
+	    }), _.div({ class: 'header-top-right' }, _.div({ class: 'issue-index' }, (this.model.id || this.model.index).toString()), _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-remove' })).click(function () {
 	        _this.onClickRemove();
 	    }))), this.getPriorityIndicator(), _.h4({}, _.span({ class: 'btn-edit' }, this.model.title).click(this.onClickEdit), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
 	        _this.onChange();

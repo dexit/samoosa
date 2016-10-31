@@ -26,8 +26,6 @@ class MilestoneEditor extends View {
                 model: issue
             }); 
 
-            console.log(issue);
-
             let $issue = editor.$element;
 
             this.$element.find('.column[data-index="' + issue.column + '"] .btn-new-issue').before($issue);

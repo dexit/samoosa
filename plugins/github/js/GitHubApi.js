@@ -485,7 +485,14 @@ class GitHubApi extends ApiHelper {
             return this.updateIssue(issue);
         
         } else {
-            return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue));
+            return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue))
+            .then((gitHubIssue) => {
+                issue.id = gitHubIssue.number;
+
+                return new Promise((resolve, reject) => {
+                    resolve();
+                });  
+            });
     
         }
     }

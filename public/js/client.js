@@ -5327,7 +5327,13 @@
 
 	                return this.updateIssue(issue);
 	            } else {
-	                return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue));
+	                return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue)).then(function (gitHubIssue) {
+	                    issue.id = gitHubIssue.number;
+
+	                    return new Promise(function (resolve, reject) {
+	                        resolve();
+	                    });
+	                });
 	            }
 	        }
 
@@ -10268,8 +10274,6 @@
 	                var editor = new IssueEditor({
 	                    model: issue
 	                });
-
-	                console.log(issue);
 
 	                var $issue = editor.$element;
 

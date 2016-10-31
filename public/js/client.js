@@ -6377,7 +6377,7 @@
 	            var _this35 = this;
 
 	            return new Promise(function (callback) {
-	                _this35.post('/repos/' + _this35.getUserName() + '/' + _this35.getProjectName() + '/issues/' + (issue.index + 1) + '/comments', {
+	                _this35.post('/repos/' + _this35.getUserName() + '/' + _this35.getProjectName() + '/issues/' + issue.id + '/comments', {
 	                    body: text
 	                }).then(function () {
 	                    callback();
@@ -6420,7 +6420,7 @@
 	            var _this37 = this;
 
 	            return new Promise(function (callback) {
-	                _this37.get('/repos/' + _this37.getUserName() + '/' + _this37.getProjectName() + '/issues/' + (issue.index + 1) + '/comments').then(function (gitHubComments) {
+	                _this37.get('/repos/' + _this37.getUserName() + '/' + _this37.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
 	                    var comments = [];
 
 	                    var _iteratorNormalCompletion10 = true;

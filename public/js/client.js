@@ -10324,7 +10324,7 @@
 	        _this.onChange();
 
 	        _this.$element.find('.body .btn-edit').html(markdownToHtml(_this.model.description) || '');
-	    }).blur(this.onBlur).keyup(this.onKeyUp)), _.div({ class: 'comments' }), _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' }, _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }), _.button({ class: 'btn' }, 'Comment').click(function () {
+	    }).blur(this.onBlur).keyup(this.onKeyUp)), _.div({ class: 'comments' }), _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' }, _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp), _.button({ class: 'btn' }, 'Comment').click(function () {
 	        _this.onClickComment();
 	    }))));
 	};

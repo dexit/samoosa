@@ -130,7 +130,8 @@ module.exports = function render() {
         _.div({class: 'comments'}),
         _.if(!ApiHelper.isSpectating(),
             _.div({class: 'add-comment'},
-                _.textarea({class: 'btn-transparent', placeholder: 'Add comment here...'}),
+                _.textarea({class: 'btn-transparent', placeholder: 'Add comment here...'})
+                    .keyup(this.onKeyUp),
                 _.button({class: 'btn'},
                     'Comment'
                 ).click(() => { this.onClickComment(); })

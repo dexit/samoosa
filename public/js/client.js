@@ -105,9 +105,10 @@
 	window.PlanEditor = __webpack_require__(36);
 	window.ProjectEditor = __webpack_require__(38);
 	window.FilterEditor = __webpack_require__(40);
+	window.ActivityAnalytics = __webpack_require__(42);
 
 	// Routes
-	__webpack_require__(42);
+	__webpack_require__(44);
 
 	// Title
 	$('head title').html((Router.params.project ? Router.params.project + ' - ' : '') + 'Samoosa');
@@ -4220,6 +4221,17 @@
 
 	        return 0;
 	    });
+	};
+
+	// Displays an error
+	window.displayError = function (error) {
+	    if (error instanceof Error == false) {
+	        return;
+	    }
+
+	    alert(error.name + '/n/n' + error.message);
+
+	    throw error;
 	};
 
 /***/ },
@@ -9215,11 +9227,6 @@
 	                separator: true
 	            });
 
-	            links.push({
-	                url: '/settings/',
-	                icon: 'cog'
-	            });
-
 	            if (localStorage.getItem('source') != 'bitbucket') {
 	                links.push({
 	                    url: '/plan/',
@@ -9235,6 +9242,16 @@
 	            links.push({
 	                url: '/board/list/',
 	                icon: 'list'
+	            });
+
+	            links.push({
+	                url: '/settings/',
+	                icon: 'cog'
+	            });
+
+	            links.push({
+	                url: '/analytics/',
+	                icon: 'line-chart'
 	            });
 
 	            return links;
@@ -11890,6 +11907,47 @@
 
 /***/ },
 /* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var ActivityAnalytics = function (_View) {
+	    _inherits(ActivityAnalytics, _View);
+
+	    function ActivityAnalytics(params) {
+	        _classCallCheck(this, ActivityAnalytics);
+
+	        var _this = _possibleConstructorReturn(this, (ActivityAnalytics.__proto__ || Object.getPrototypeOf(ActivityAnalytics)).call(this, params));
+
+	        _this.template = __webpack_require__(43);
+
+	        _this.fetch();
+	        return _this;
+	    }
+
+	    return ActivityAnalytics;
+	}(View);
+
+	module.exports = ActivityAnalytics;
+
+/***/ },
+/* 43 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function render() {
+	    return _.div({ class: 'activity-analytics' });
+	};
+
+/***/ },
+/* 44 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11917,112 +11975,125 @@
 	// Plan
 	Router.route('/:user/:project/plan/', function () {
 	    ApiHelper.checkConnection().then(function () {
-	        ApiHelper.getResources().then(function () {
-	            $('.workspace').remove();
+	        return ApiHelper.getResources();
+	    }).then(function () {
+	        $('.workspace').remove();
 
-	            $('.app-container').append(_.div({ class: 'workspace plan-container' }, new PlanEditor().$element));
+	        $('.app-container').append(_.div({ class: 'workspace plan-container' }, new PlanEditor().$element));
 
-	            navbar.slideIn();
-	        });
+	        navbar.slideIn();
 	    });
 	});
 
 	// Board
 	Router.route('/:user/:project/board/:mode', function () {
 	    ApiHelper.checkConnection().then(function () {
-	        ApiHelper.getResources().then(function () {
-	            $('.workspace').remove();
+	        return ApiHelper.getResources();
+	    }).then(function () {
+	        $('.workspace').remove();
 
-	            // Append all milestones
-	            $('.app-container').append(_.div({ class: 'workspace board-container ' + Router.params.mode }, new FilterEditor().$element, _.each(window.resources.milestones, function (i, milestone) {
-	                return new MilestoneEditor({
-	                    model: milestone
-	                }).$element;
-	            })));
+	        // Append all milestones
+	        $('.app-container').append(_.div({ class: 'workspace board-container ' + Router.params.mode }, new FilterEditor().$element, _.each(window.resources.milestones, function (i, milestone) {
+	            return new MilestoneEditor({
+	                model: milestone
+	            }).$element;
+	        })));
 
-	            // Sort milestones by end date
-	            $('.app-container .board-container .milestone-editor').sort(function (a, b) {
-	                var aDate = new Date(a.getAttribute('data-end-date'));
-	                var bDate = new Date(b.getAttribute('data-end-date'));
+	        // Sort milestones by end date
+	        $('.app-container .board-container .milestone-editor').sort(function (a, b) {
+	            var aDate = new Date(a.getAttribute('data-end-date'));
+	            var bDate = new Date(b.getAttribute('data-end-date'));
 
-	                if (aDate < bDate) {
-	                    return -1;
-	                }
+	            if (aDate < bDate) {
+	                return -1;
+	            }
 
-	                if (aDate > bDate) {
-	                    return 1;
-	                }
+	            if (aDate > bDate) {
+	                return 1;
+	            }
 
-	                return 0;
-	            }).detach().appendTo('.app-container .board-container');
+	            return 0;
+	        }).detach().appendTo('.app-container .board-container');
 
-	            // Append the unassigned items
-	            $('.app-container .board-container').append(new MilestoneEditor({
-	                model: {
-	                    title: 'Unassigned',
-	                    description: 'These issues have yet to be assigned to a milestone'
-	                }
-	            }).$element);
+	        // Append the unassigned items
+	        $('.app-container .board-container').append(new MilestoneEditor({
+	            model: {
+	                title: 'Unassigned',
+	                description: 'These issues have yet to be assigned to a milestone'
+	            }
+	        }).$element);
 
-	            navbar.slideIn();
-	        });
+	        navbar.slideIn();
 	    });
+	});
+
+	// Analytics
+	Router.route('/:user/:project/analytics/', function () {
+	    ApiHelper.checkConnection().then(function () {
+	        return ApiHelper.getResources();
+	    }).then(function () {
+	        $('.workspace').remove();
+
+	        $('.app-container').append(_.div({ class: 'workspace analytics' }, new ActivityAnalytics().$element));
+
+	        navbar.slideIn();
+	    }).catch(displayError);
 	});
 
 	// Settings
 	Router.route('/:user/:project/settings/', function () {
 	    ApiHelper.checkConnection().then(function () {
-	        ApiHelper.getResources().then(function () {
-	            $('.workspace').remove();
+	        return ApiHelper.getResources();
+	    }).then(function () {
+	        $('.workspace').remove();
 
-	            var tabCounter = 0;
-	            var paneCounter = 0;
+	        var tabCounter = 0;
+	        var paneCounter = 0;
 
-	            $('.app-container').append(_.div({ class: 'workspace settings-container' }, _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.each(window.resources, function (name, resource) {
-	                // Read only
-	                if (ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
-	                    return;
-	                }
+	        $('.app-container').append(_.div({ class: 'workspace settings-container' }, _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.each(window.resources, function (name, resource) {
+	            // Read only
+	            if (ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
+	                return;
+	            }
 
-	                // Not editable in resource editor
-	                if (name == 'issues' || name == 'projects') {
-	                    return;
-	                }
+	            // Not editable in resource editor
+	            if (name == 'issues' || name == 'projects') {
+	                return;
+	            }
 
-	                tabCounter++;
+	            tabCounter++;
 
-	                return _.button({ class: 'tab' + (tabCounter == 1 ? ' active' : '') }, prettyName(name)).click(function () {
-	                    var index = $(this).index();
+	            return _.button({ class: 'tab' + (tabCounter == 1 ? ' active' : '') }, prettyName(name)).click(function () {
+	                var index = $(this).index();
 
-	                    $(this).parent().children().each(function (i) {
-	                        $(this).toggleClass('active', i == index);
-	                    });
-
-	                    $(this).parents('.tabbed-container').find('.panes .pane').each(function (i) {
-	                        $(this).toggleClass('active', i == index);
-	                    });
+	                $(this).parent().children().each(function (i) {
+	                    $(this).toggleClass('active', i == index);
 	                });
-	            })), _.div({ class: 'panes' }, _.each(window.resources, function (name, resource) {
-	                // Read only
-	                if (ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
-	                    return;
-	                }
 
-	                // Not editable in resource editor
-	                if (name == 'issues' || name == 'projects') {
-	                    return;
-	                }
+	                $(this).parents('.tabbed-container').find('.panes .pane').each(function (i) {
+	                    $(this).toggleClass('active', i == index);
+	                });
+	            });
+	        })), _.div({ class: 'panes' }, _.each(window.resources, function (name, resource) {
+	            // Read only
+	            if (ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
+	                return;
+	            }
 
-	                paneCounter++;
+	            // Not editable in resource editor
+	            if (name == 'issues' || name == 'projects') {
+	                return;
+	            }
 
-	                return _.div({ class: 'pane' + (paneCounter == 1 ? ' active' : '') }, new ResourceEditor({
-	                    name: name,
-	                    model: resource
-	                }).$element);
-	            })))));
+	            paneCounter++;
 
-	            navbar.slideIn();
-	        });
+	            return _.div({ class: 'pane' + (paneCounter == 1 ? ' active' : '') }, new ResourceEditor({
+	                name: name,
+	                model: resource
+	            }).$element);
+	        })))));
+
+	        navbar.slideIn();
 	    });
 	});
 

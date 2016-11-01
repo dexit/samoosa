@@ -58,6 +58,7 @@ window.PlanItemEditor = require('./views/PlanItemEditor');
 window.PlanEditor = require('./views/PlanEditor');
 window.ProjectEditor = require('./views/ProjectEditor');
 window.FilterEditor = require('./views/FilterEditor');
+window.ActivityAnalytics = require('./views/ActivityAnalytics');
 
 // Routes
 require('./routes');

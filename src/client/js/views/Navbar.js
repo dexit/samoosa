@@ -42,11 +42,6 @@ class Navbar extends View {
             separator: true
         });
 
-        links.push({
-            url: '/settings/',
-            icon: 'cog'
-        });
-
         if(localStorage.getItem('source') != 'bitbucket') {
             links.push({
                 url: '/plan/',
@@ -62,6 +57,16 @@ class Navbar extends View {
         links.push({
             url: '/board/list/',
             icon: 'list'
+        });
+        
+        links.push({
+            url: '/settings/',
+            icon: 'cog'
+        });
+        
+        links.push({
+            url: '/analytics/',
+            icon: 'line-chart'
         });
         
         return links;

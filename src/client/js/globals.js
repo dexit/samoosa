@@ -201,3 +201,12 @@ window.sortByDate = function(array, key) {
         return 0;
     });
 }
+
+// Displays an error
+window.displayError = function(error) {
+    if(error instanceof Error == false) { return; }
+
+    alert(error.name + '/n/n' + error.message);
+
+    throw error;
+};

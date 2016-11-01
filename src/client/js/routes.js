@@ -23,18 +23,18 @@ Router.route('/:user/:project', () => {
 Router.route('/:user/:project/plan/', () => {
     ApiHelper.checkConnection()
     .then(() => {
-        ApiHelper.getResources()
-        .then(() => {
-            $('.workspace').remove();
+        return ApiHelper.getResources();
+    })
+    .then(() => {
+        $('.workspace').remove();
 
-            $('.app-container').append(
-                _.div({class: 'workspace plan-container'},
-                    new PlanEditor().$element
-                )
-            );
-            
-            navbar.slideIn();
-        });
+        $('.app-container').append(
+            _.div({class: 'workspace plan-container'},
+                new PlanEditor().$element
+            )
+        );
+        
+        navbar.slideIn();
     });
 });
 
@@ -42,124 +42,144 @@ Router.route('/:user/:project/plan/', () => {
 Router.route('/:user/:project/board/:mode', () => {
     ApiHelper.checkConnection()
     .then(() => {
-        ApiHelper.getResources()
-        .then(() => {
-            $('.workspace').remove();
+        return ApiHelper.getResources();
+    })
+    .then(() => {
+        $('.workspace').remove();
 
-            // Append all milestones
-            $('.app-container').append(
-                _.div({class: 'workspace board-container ' + Router.params.mode},
-                    new FilterEditor().$element,
-                    _.each(window.resources.milestones, (i, milestone) => {
-                        return new MilestoneEditor({
-                            model: milestone,
-                        }).$element;
-                    })
-                )
-            );
+        // Append all milestones
+        $('.app-container').append(
+            _.div({class: 'workspace board-container ' + Router.params.mode},
+                new FilterEditor().$element,
+                _.each(window.resources.milestones, (i, milestone) => {
+                    return new MilestoneEditor({
+                        model: milestone,
+                    }).$element;
+                })
+            )
+        );
+        
+        // Sort milestones by end date
+        $('.app-container .board-container .milestone-editor').sort((a, b) => {
+            let aDate = new Date(a.getAttribute('data-end-date'));
+            let bDate = new Date(b.getAttribute('data-end-date'));
+
+            if(aDate < bDate) {
+                return -1;
+            }
             
-            // Sort milestones by end date
-            $('.app-container .board-container .milestone-editor').sort((a, b) => {
-                let aDate = new Date(a.getAttribute('data-end-date'));
-                let bDate = new Date(b.getAttribute('data-end-date'));
+            if(aDate > bDate) {
+                return 1;
+            }
 
-                if(aDate < bDate) {
-                    return -1;
+            return 0;
+        }).detach().appendTo('.app-container .board-container');
+
+        // Append the unassigned items
+        $('.app-container .board-container').append(
+            new MilestoneEditor({
+                model: {
+                    title: 'Unassigned',
+                    description: 'These issues have yet to be assigned to a milestone'
                 }
-                
-                if(aDate > bDate) {
-                    return 1;
-                }
+            }).$element
+        );
 
-                return 0;
-            }).detach().appendTo('.app-container .board-container');
-
-            // Append the unassigned items
-            $('.app-container .board-container').append(
-                new MilestoneEditor({
-                    model: {
-                        title: 'Unassigned',
-                        description: 'These issues have yet to be assigned to a milestone'
-                    }
-                }).$element
-            );
-
-            navbar.slideIn();
-        });
+        navbar.slideIn();
     });
+});
+
+// Analytics
+Router.route('/:user/:project/analytics/', () => {
+    ApiHelper.checkConnection()
+    .then(() => {
+        return ApiHelper.getResources();
+    })
+    .then(() => {
+        $('.workspace').remove();
+
+        $('.app-container').append(
+            _.div({class: 'workspace analytics'},
+                new ActivityAnalytics().$element
+            )
+        );
+        
+        navbar.slideIn();
+    })
+    .catch(displayError);
 });
 
 // Settings
 Router.route('/:user/:project/settings/', () => {
     ApiHelper.checkConnection()
     .then(() => {
-        ApiHelper.getResources()
-        .then(() => {
-            $('.workspace').remove();
+        return ApiHelper.getResources();
+    })
+    .then(() => {
+        $('.workspace').remove();
 
-            let tabCounter = 0;
-            let paneCounter = 0;
+        let tabCounter = 0;
+        let paneCounter = 0;
 
-            $('.app-container').append(
-                _.div({class: 'workspace settings-container'},
-                    _.div({class: 'tabbed-container vertical'},
-                        _.div({class: 'tabs'},
-                            _.each(window.resources, (name, resource) => {
-                                // Read only
-                                if(ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
-                                    return;
-                                }
-                               
-                                // Not editable in resource editor
-                                if(name == 'issues' || name == 'projects') {
-                                    return;
-                                }
+        $('.app-container').append(
+            _.div({class: 'workspace settings-container'},
+                _.div({class: 'tabbed-container vertical'},
+                    _.div({class: 'tabs'},
+                        _.each(window.resources, (name, resource) => {
+                            // Read only
+                            if(ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
+                                return;
+                            }
+                           
+                            // Not editable in resource editor
+                            if(name == 'issues' || name == 'projects') {
+                                return;
+                            }
 
-                                tabCounter++;
+                            tabCounter++;
+                            
+                            return _.button({class: 'tab' + (tabCounter == 1 ? ' active' : '')},
+                                prettyName(name)
+                            ).click(function() {
+                                let index = $(this).index();
                                 
-                                return _.button({class: 'tab' + (tabCounter == 1 ? ' active' : '')},
-                                    prettyName(name)
-                                ).click(function() {
-                                    let index = $(this).index();
-                                    
-                                    $(this).parent().children().each(function(i) {
-                                        $(this).toggleClass('active', i == index);
-                                    });
-
-                                    $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
-                                        $(this).toggleClass('active', i == index);
-                                    });
+                                $(this).parent().children().each(function(i) {
+                                    $(this).toggleClass('active', i == index);
                                 });
-                            })
-                        ),
-                        _.div({class: 'panes'},
-                            _.each(window.resources, (name, resource) => {
-                                // Read only
-                                if(ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
-                                    return;
-                                }
-                                
-                                // Not editable in resource editor
-                                if(name == 'issues' || name == 'projects') {
-                                    return;
-                                }
-                                
-                                paneCounter++;
-                                
-                                return _.div({class: 'pane' + (paneCounter == 1 ? ' active' : '')},
-                                    new ResourceEditor({
-                                        name: name,
-                                        model: resource
-                                    }).$element
-                                );
-                            })
-                        )
+
+                                $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
+                                    $(this).toggleClass('active', i == index);
+                                });
+                            });
+                        })
+                    ),
+                    _.div({class: 'panes'},
+                        _.each(window.resources, (name, resource) => {
+                            // Read only
+                            if(ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
+                                return;
+                            }
+                            
+                            // Not editable in resource editor
+                            if(name == 'issues' || name == 'projects') {
+                                return;
+                            }
+                            
+                            paneCounter++;
+                            
+                            return _.div({class: 'pane' + (paneCounter == 1 ? ' active' : '')},
+                                new ResourceEditor({
+                                    name: name,
+                                    model: resource
+                                }).$element
+                            );
+                        })
                     )
                 )
-            );
-            
-            navbar.slideIn();
-        });
+            )
+        );
+        
+        navbar.slideIn();
     });
 });
 

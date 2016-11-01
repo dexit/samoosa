@@ -56,6 +56,11 @@ window.setCookie = function setCookie(name, value) {
     document.cookie = name + '=' + value;
 }
 
+// Get UNIX time
+Date.prototype.getUnixTime = function() {
+    return this.getTime()/1000|0;
+};
+
 // Simple date string
 Date.prototype.getSimpleString = function() {
     return this.getFullYear() + '-' + (this.getMonth() + 1) + '-' + this.getDate();
@@ -144,20 +149,31 @@ window.prettyName = function(name) {
 };
 
 // Pretty date
-window.prettyDate = function(date, separator) {
+window.prettyDate = function(inputDate, separator) {
+    let date = inputDate;
     let prettyDate = '';
 
-    if(date) {
-        if(date.constructor === String) {
-            date = new Date(date);
-        }
+    if(!date) { return prettyDate; }
+    
+    if(typeof date === 'string' || typeof date === 'number') { date = new Date(date); }
 
-        date.floor();
+    if(date instanceof Date == false) {
+        debug.warning('Date is of incorrect object type (' + typeof inputDate + ')');
 
-        separator = separator || '.';
-
-        prettyDate = date.getFullYear() + separator + (date.getMonth() + 1) + separator + date.getDate();
+        return prettyDate;
     }
+    
+    if(isNaN(date.getTime())) {
+        debug.warning('Date is invalid (' + inputDate + ')');
+
+        return prettyDate;
+    }
+
+    date.floor();
+
+    separator = separator || '.';
+
+    prettyDate = date.getFullYear() + separator + (date.getMonth() + 1) + separator + date.getDate();
 
     return prettyDate;
 }
@@ -206,7 +222,13 @@ window.sortByDate = function(array, key) {
 window.displayError = function(error) {
     if(error instanceof Error == false) { return; }
 
-    alert(error.name + '/n/n' + error.message);
+    let alertString = error.name + '\n\n' + error.message;
+
+    if(error.stack) {
+        alertString += '\n\n' + error.stack;
+    }
+
+    alert(alertString);
 
     throw error;
 };

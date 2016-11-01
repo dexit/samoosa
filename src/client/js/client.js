@@ -24,6 +24,7 @@ window.SettingsHelper = require('./helpers/SettingsHelper');
 window.InputHelper = require('./helpers/InputHelper');
 window.IssueHelper = require('./helpers/IssueHelper');
 window.DebugHelper = require('./helpers/DebugHelper');
+window.GraphHelper = require('./helpers/GraphHelper');
 window.debug = window.DebugHelper;
 window.debug.verbosity = 1;
 
@@ -48,6 +49,7 @@ switch(getSource()) {
 
 // Models
 window.Issue = require('./models/Issue');
+window.Milestone = require('./models/Milestone');
 
 // Views
 window.Navbar = require('./views/Navbar');
@@ -58,7 +60,7 @@ window.PlanItemEditor = require('./views/PlanItemEditor');
 window.PlanEditor = require('./views/PlanEditor');
 window.ProjectEditor = require('./views/ProjectEditor');
 window.FilterEditor = require('./views/FilterEditor');
-window.ActivityAnalytics = require('./views/ActivityAnalytics');
+window.BurnDownChart = require('./views/BurnDownChart');
 
 // Routes
 require('./routes');

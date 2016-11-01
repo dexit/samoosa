@@ -71,11 +71,12 @@
 	window.InputHelper = __webpack_require__(19);
 	window.IssueHelper = __webpack_require__(20);
 	window.DebugHelper = __webpack_require__(21);
+	window.GraphHelper = __webpack_require__(22);
 	window.debug = window.DebugHelper;
 	window.debug.verbosity = 1;
 
-	var GitHubApi = __webpack_require__(22);
-	var BitBucketApi = __webpack_require__(24);
+	var GitHubApi = __webpack_require__(23);
+	var BitBucketApi = __webpack_require__(25);
 
 	switch (getSource()) {
 	    case 'bitbucket':
@@ -94,21 +95,22 @@
 	}
 
 	// Models
-	window.Issue = __webpack_require__(25);
+	window.Issue = __webpack_require__(26);
+	window.Milestone = __webpack_require__(27);
 
 	// Views
-	window.Navbar = __webpack_require__(26);
-	window.IssueEditor = __webpack_require__(28);
-	window.MilestoneEditor = __webpack_require__(30);
-	window.ResourceEditor = __webpack_require__(32);
-	window.PlanItemEditor = __webpack_require__(34);
-	window.PlanEditor = __webpack_require__(36);
-	window.ProjectEditor = __webpack_require__(38);
-	window.FilterEditor = __webpack_require__(40);
-	window.ActivityAnalytics = __webpack_require__(42);
+	window.Navbar = __webpack_require__(28);
+	window.IssueEditor = __webpack_require__(30);
+	window.MilestoneEditor = __webpack_require__(32);
+	window.ResourceEditor = __webpack_require__(34);
+	window.PlanItemEditor = __webpack_require__(36);
+	window.PlanEditor = __webpack_require__(38);
+	window.ProjectEditor = __webpack_require__(40);
+	window.FilterEditor = __webpack_require__(42);
+	window.BurnDownChart = __webpack_require__(44);
 
 	// Routes
-	__webpack_require__(44);
+	__webpack_require__(46);
 
 	// Title
 	$('head title').html((Router.params.project ? Router.params.project + ' - ' : '') + 'Samoosa');
@@ -4030,6 +4032,8 @@
 
 	// Get source
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 	window.getSource = function getSource() {
 	    var source = localStorage.getItem('source');
 
@@ -4106,6 +4110,11 @@
 	    document.cookie = name + '=' + value;
 	};
 
+	// Get UNIX time
+	Date.prototype.getUnixTime = function () {
+	    return this.getTime() / 1000 | 0;
+	};
+
 	// Simple date string
 	Date.prototype.getSimpleString = function () {
 	    return this.getFullYear() + '-' + (this.getMonth() + 1) + '-' + this.getDate();
@@ -4171,20 +4180,35 @@
 	};
 
 	// Pretty date
-	window.prettyDate = function (date, separator) {
+	window.prettyDate = function (inputDate, separator) {
+	    var date = inputDate;
 	    var prettyDate = '';
 
-	    if (date) {
-	        if (date.constructor === String) {
-	            date = new Date(date);
-	        }
-
-	        date.floor();
-
-	        separator = separator || '.';
-
-	        prettyDate = date.getFullYear() + separator + (date.getMonth() + 1) + separator + date.getDate();
+	    if (!date) {
+	        return prettyDate;
 	    }
+
+	    if (typeof date === 'string' || typeof date === 'number') {
+	        date = new Date(date);
+	    }
+
+	    if (date instanceof Date == false) {
+	        debug.warning('Date is of incorrect object type (' + (typeof inputDate === 'undefined' ? 'undefined' : _typeof(inputDate)) + ')');
+
+	        return prettyDate;
+	    }
+
+	    if (isNaN(date.getTime())) {
+	        debug.warning('Date is invalid (' + inputDate + ')');
+
+	        return prettyDate;
+	    }
+
+	    date.floor();
+
+	    separator = separator || '.';
+
+	    prettyDate = date.getFullYear() + separator + (date.getMonth() + 1) + separator + date.getDate();
 
 	    return prettyDate;
 	};
@@ -4229,7 +4253,13 @@
 	        return;
 	    }
 
-	    alert(error.name + '/n/n' + error.message);
+	    var alertString = error.name + '\n\n' + error.message;
+
+	    if (error.stack) {
+	        alertString += '\n\n' + error.stack;
+	    }
+
+	    alert(alertString);
 
 	    throw error;
 	};
@@ -4781,6 +4811,72 @@
 
 /***/ },
 /* 22 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var GraphHelper = function () {
+	  function GraphHelper() {
+	    _classCallCheck(this, GraphHelper);
+	  }
+
+	  _createClass(GraphHelper, null, [{
+	    key: 'drawLine',
+
+	    /**
+	     * Draws a line
+	     *
+	     * @param {Context} ctx
+	     * @param {Number} fromX
+	     * @param {Number} fromY
+	     * @param {Number} toX
+	     * @param {Number} toY
+	     */
+	    value: function drawLine(ctx, fromX, fromY, toX, toY) {
+	      ctx.moveTo(fromX, fromY);
+	      ctx.lineTo(toX, toY);
+	      ctx.stroke();
+	    }
+
+	    /**
+	     * Draws a circle
+	     *
+	     * @param {Context} ctx
+	     */
+
+	  }, {
+	    key: 'drawCircle',
+	    value: function drawCircle(ctx, x, y, radius) {
+	      ctx.beginPath();
+	      ctx.arc(x, y, radius, 0, 2 * Math.PI);
+	      ctx.stroke();
+	    }
+
+	    /**
+	     * Draws a string
+	     *
+	     * @param {Context} ctx
+	     */
+
+	  }, {
+	    key: 'drawText',
+	    value: function drawText(ctx, x, y, string, size) {
+	      ctx.font = size + 'px Arial';
+	      ctx.fillText(string, x, y);
+	    }
+	  }]);
+
+	  return GraphHelper;
+	}();
+
+	module.exports = GraphHelper;
+
+/***/ },
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4795,7 +4891,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var ApiHelper = __webpack_require__(23);
+	var ApiHelper = __webpack_require__(24);
 
 	var labelCache = void 0;
 	var deletedIssuesCache = [];
@@ -5910,12 +6006,13 @@
 	            for (var i in milestones) {
 	                var index = parseInt(milestones[i].number) - 1;
 
-	                var milestone = {
+	                var milestone = new Milestone({
 	                    index: index,
 	                    title: milestones[i].title,
 	                    description: milestones[i].description,
+	                    startDate: milestones[i].created_at,
 	                    endDate: milestones[i].due_on
-	                };
+	                });
 
 	                window.resources.milestones[index] = milestone;
 	            }
@@ -6220,6 +6317,9 @@
 	                    issue.description = gitHubIssue.body;
 	                    issue.id = gitHubIssue.number;
 	                    issue.reporter = ResourceHelper.getCollaborator(gitHubIssue.user.login);
+	                    issue.createdAt = new Date(gitHubIssue.created_at);
+	                    issue.updatedAt = new Date(gitHubIssue.updated_at);
+	                    issue.closedAt = new Date(gitHubIssue.closed_at);
 
 	                    if (gitHubIssue.assignee) {
 	                        issue.assignee = ResourceHelper.getCollaborator(gitHubIssue.assignee.login);
@@ -6515,7 +6615,7 @@
 	module.exports = GitHubApi;
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -7518,7 +7618,7 @@
 	module.exports = ApiHelper;
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -7531,7 +7631,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var ApiHelper = __webpack_require__(23);
+	var ApiHelper = __webpack_require__(24);
 
 	var BitBucketApi = function (_ApiHelper) {
 	    _inherits(BitBucketApi, _ApiHelper);
@@ -9044,7 +9144,7 @@
 	module.exports = BitBucketApi;
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -9085,7 +9185,7 @@
 	        this.description = properties.description || '';
 	        this.id = properties.id;
 
-	        // Optional params
+	        // Optional properties
 	        this.column = properties.column || 0;
 	        this.type = properties.type || 0;
 	        this.priority = properties.priority || 0;
@@ -9095,6 +9195,14 @@
 	        this.comments = properties.comments || [];
 	        this.assignee = properties.assignee;
 	        this.deleted = false;
+
+	        if (properties.createdAt) {
+	            this.createdAt = new Date(properties.createdAt).getUnixTime();
+	        }
+
+	        if (properties.closedAt) {
+	            this.closedAt = new Date(properties.closedAt).getUnixTime();
+	        }
 	    }
 
 	    /**
@@ -9111,16 +9219,11 @@
 	                priority: resources.issuePriorities[this.priority],
 	                version: resources.versions[this.version],
 	                milestone: resources.milestones[this.milestone],
-	                assignee: resources.collaborators[this.assignee]
+	                assignee: resources.collaborators[this.assignee],
+	                estimate: resources.issueEstimates[this.estimate],
+	                createdAt: new Date(this.createdAt),
+	                closedAt: new Date(this.closedAt)
 	            };
-
-	            if (baked.assignee) {
-	                baked.assignee = baked.assignee.name;
-	            }
-
-	            if (baked.milestone) {
-	                baked.milestone = baked.milestone.title;
-	            }
 
 	            return baked;
 	        }
@@ -9162,7 +9265,151 @@
 	module.exports = Issue;
 
 /***/ },
-/* 26 */
+/* 27 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	/**
+	 * The data modle for milestones
+	 */
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Milestone = function () {
+	    function Milestone(properties) {
+	        _classCallCheck(this, Milestone);
+
+	        properties = properties || {};
+
+	        // Essential properties
+	        this.title = properties.title;
+	        this.description = properties.description;
+	        this.id = properties.id;
+	        this.index = properties.index;
+
+	        // Optional properties
+	        this.startDate = properties.startDate;
+	        this.endDate = properties.endDate;
+	    }
+
+	    /**
+	     * Gets a list of all issues under this milestone
+	     *
+	     * @returns {Array} Issues
+	     */
+
+
+	    _createClass(Milestone, [{
+	        key: 'getIssues',
+	        value: function getIssues() {
+	            var issues = [];
+
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = (resources.issues || [])[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var issue = _step.value;
+
+	                    if (issue.getBakedValues().milestone == this) {
+	                        issues[issues.length] = issue;
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+
+	            return issues;
+	        }
+
+	        /**
+	         * Gets the total amount of days
+	         *
+	         * @returns {Number} Days
+	         */
+
+	    }, {
+	        key: 'getTotalDays',
+	        value: function getTotalDays() {
+	            var start = new Date(this.startDate);
+	            var end = new Date(this.endDate);
+
+	            if (isNaN(start) || isNaN(end)) {
+	                return 0;
+	            }
+
+	            var timeDiff = Math.abs(start.getTime() - end.getTime());
+	            var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+	            return diffDays;
+	        }
+
+	        /**
+	         * Gets the total of issue estimates in hours
+	         *
+	         * @returns {Number} Hours
+	         */
+
+	    }, {
+	        key: 'getTotalEstimatedHours',
+	        value: function getTotalEstimatedHours() {
+	            var total = 0;
+
+	            var _iteratorNormalCompletion2 = true;
+	            var _didIteratorError2 = false;
+	            var _iteratorError2 = undefined;
+
+	            try {
+	                for (var _iterator2 = this.getIssues()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                    var issue = _step2.value;
+
+	                    if (!issue) {
+	                        continue;
+	                    }
+
+	                    total += issue.getEstimatedHours();
+	                }
+	            } catch (err) {
+	                _didIteratorError2 = true;
+	                _iteratorError2 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                        _iterator2.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError2) {
+	                        throw _iteratorError2;
+	                    }
+	                }
+	            }
+
+	            return total;
+	        }
+	    }]);
+
+	    return Milestone;
+	}();
+
+	module.exports = Milestone;
+
+/***/ },
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9189,7 +9436,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (Navbar.__proto__ || Object.getPrototypeOf(Navbar)).call(this, params));
 
-	        _this.template = __webpack_require__(27);
+	        _this.template = __webpack_require__(29);
 
 	        _this.fetch();
 	        return _this;
@@ -9459,7 +9706,7 @@
 	module.exports = Navbar;
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -9492,7 +9739,7 @@
 	};
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -9513,7 +9760,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (IssueEditor.__proto__ || Object.getPrototypeOf(IssueEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(29);
+	        _this.template = __webpack_require__(31);
 
 	        _this.fetch();
 	        return _this;
@@ -10306,7 +10553,7 @@
 	module.exports = IssueEditor;
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10440,7 +10687,7 @@
 	};
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10465,7 +10712,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (MilestoneEditor.__proto__ || Object.getPrototypeOf(MilestoneEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(31);
+	        _this.template = __webpack_require__(33);
 
 	        _this.fetch();
 
@@ -10767,7 +11014,7 @@
 	module.exports = MilestoneEditor;
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10797,7 +11044,7 @@
 	};
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10818,7 +11065,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ResourceEditor.__proto__ || Object.getPrototypeOf(ResourceEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(33);
+	        _this.template = __webpack_require__(35);
 
 	        _this.fetch();
 	        return _this;
@@ -10863,7 +11110,7 @@
 	module.exports = ResourceEditor;
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10888,7 +11135,7 @@
 	};
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10909,7 +11156,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (PlanItemEditor.__proto__ || Object.getPrototypeOf(PlanItemEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(35);
+	        _this.template = __webpack_require__(37);
 
 	        _this.fetch();
 	        return _this;
@@ -11217,7 +11464,7 @@
 	module.exports = PlanItemEditor;
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11237,7 +11484,7 @@
 	};
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11265,7 +11512,7 @@
 	            _this.currentMonth = '0' + _this.currentMonth;
 	        }
 
-	        _this.template = __webpack_require__(37);
+	        _this.template = __webpack_require__(39);
 
 	        _this.init();
 	        return _this;
@@ -11510,7 +11757,7 @@
 	module.exports = PlanEditor;
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11558,7 +11805,7 @@
 	};
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11579,7 +11826,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ProjectEditor.__proto__ || Object.getPrototypeOf(ProjectEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(39);
+	        _this.template = __webpack_require__(41);
 
 	        _this.fetch();
 	        return _this;
@@ -11604,7 +11851,7 @@
 	module.exports = ProjectEditor;
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11618,7 +11865,7 @@
 	};
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11641,7 +11888,7 @@
 
 	        _this.MAX_FILTERS = 5;
 
-	        _this.template = __webpack_require__(41);
+	        _this.template = __webpack_require__(43);
 
 	        _this.defaultFilter = {
 	            key: 'column',
@@ -11820,7 +12067,7 @@
 	module.exports = FilterEditor;
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11906,10 +12153,12 @@
 	};
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+
+	// Private
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -11919,57 +12168,92 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var currentMilestone = 0;
+	var currentMilestoneIndex = 0;
 
-	var ActivityAnalytics = function (_View) {
-	    _inherits(ActivityAnalytics, _View);
+	var BurnDownChart = function (_View) {
+	    _inherits(BurnDownChart, _View);
 
-	    function ActivityAnalytics(params) {
-	        _classCallCheck(this, ActivityAnalytics);
+	    function BurnDownChart(params) {
+	        _classCallCheck(this, BurnDownChart);
 
-	        var _this = _possibleConstructorReturn(this, (ActivityAnalytics.__proto__ || Object.getPrototypeOf(ActivityAnalytics)).call(this, params));
+	        var _this = _possibleConstructorReturn(this, (BurnDownChart.__proto__ || Object.getPrototypeOf(BurnDownChart)).call(this, params));
 
-	        _this.template = __webpack_require__(43);
+	        _this.template = __webpack_require__(45);
 
 	        _this.fetch();
 	        return _this;
 	    }
 
 	    /**
-	     * Gets the currently selected milestone
+	     * Event: Change milestone picker
 	     *
-	     * @returns {Milestone} Current milestone 
+	     * @param {Number} newIndex
 	     */
 
 
-	    _createClass(ActivityAnalytics, [{
-	        key: 'getCurrentMilestone',
-	        value: function getCurrentMilestone() {
-	            return resources.milestones[currentMilestone];
-	        }
-
-	        /**
-	         * Event: Change milestone picker
-	         *
-	         * @param {Number} newIndex
-	         */
-
-	    }, {
+	    _createClass(BurnDownChart, [{
 	        key: 'onChangeMilestonePicker',
 	        value: function onChangeMilestonePicker(newIndex) {
-	            currentMilestone = newIndex;
+	            currentMilestoneIndex = newIndex;
 
 	            this.render();
 	        }
+
+	        /**
+	         * Gets the currently selected milestone
+	         *
+	         * @returns {Milestone} Current milestone 
+	         */
+
+	    }, {
+	        key: 'getCurrentMilestone',
+	        value: function getCurrentMilestone() {
+	            return resources.milestones[currentMilestoneIndex];
+	        }
+
+	        /**
+	         * Gets the optimal hours remaining
+	         *
+	         * @returns {Array} Optimal hours by day
+	         */
+
+	    }, {
+	        key: 'getOptimalHours',
+	        value: function getOptimalHours() {
+	            var milestone = this.getCurrentMilestone();
+	            var optimalHours = [];
+
+	            if (!milestone) {
+	                return optimalHours;
+	            }
+
+	            var totalDays = milestone.getTotalDays();
+	            var totalHours = milestone.getTotalEstimatedHours();
+	            var divider = totalDays - 1;
+	            if (divider < 1) {
+	                divider = 1;
+	            }
+	            var optimalDecline = totalHours / divider;
+
+	            var currentHours = totalHours;
+
+	            for (var day = 0; day < totalDays; day++) {
+	                optimalHours[optimalHours.length] = currentHours;
+
+	                currentHours -= optimalDecline;
+	            }
+
+	            return optimalHours;
+	        }
 	    }]);
 
-	    return ActivityAnalytics;
+	    return BurnDownChart;
 	}(View);
 
-	module.exports = ActivityAnalytics;
+	module.exports = BurnDownChart;
 
 /***/ },
-/* 43 */
+/* 45 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11977,21 +12261,84 @@
 	module.exports = function render() {
 	    var _this = this;
 
-	    return _.div({ class: 'activity-analytics' }, _.div({ class: 'toolbar' }, _.select({ class: 'milestone-picker' }, _.each(resources.milestones, function (i, milestone) {
-	        return _.option({ value: milestone.index }, milestone.title);
-	    })).change(function (e) {
-	        _this.onChangeMilestonePicker($(e.target).val());
-	    })), _.div({ class: 'graph' }, _.each(resources.issues, function (i, issue) {
-	        if (issue.milestone != _this.getCurrentMilestone().index) {
-	            return;
+	    var milestone = this.getCurrentMilestone();
+	    var totalDays = milestone.getTotalDays();
+	    var totalHours = milestone.getTotalEstimatedHours();
+	    var milestoneStart = new Date(milestone.startDate);
+	    var milestoneEnd = new Date(milestone.endDate);
+
+	    var CANVAS_HEIGHT = 400;
+	    var CANVAS_WIDTH = 800;
+	    var CANVAS_MARGIN = 10;
+
+	    var optimalHours = this.getOptimalHours();
+
+	    var $canvas = _.canvas({ width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
+	    var ctx = $canvas[0].getContext('2d');
+
+	    /**
+	     * Draws the grid
+	     */
+	    var drawGrid = function drawGrid() {
+	        var xDivider = totalDays - 1;
+	        if (xDivider < 1) {
+	            xDivider = 1;
 	        }
 
-	        return _.p(issue.title);
-	    })));
+	        var xUnit = (CANVAS_WIDTH - CANVAS_MARGIN * 2) / xDivider;
+	        var yUnit = CANVAS_HEIGHT - CANVAS_MARGIN * 2;
+
+	        for (var i in optimalHours) {
+	            var x = CANVAS_MARGIN + i * xUnit;
+	            var y = CANVAS_MARGIN + (1 - optimalHours[i] / totalHours) * yUnit;
+
+	            GraphHelper.drawLine(ctx, x, CANVAS_MARGIN, x, CANVAS_HEIGHT - CANVAS_MARGIN);
+	            GraphHelper.drawLine(ctx, CANVAS_MARGIN, y, CANVAS_WIDTH - CANVAS_MARGIN, y);
+	        }
+	    };
+
+	    /**
+	     * Draws the optimal hours
+	     */
+	    var drawOptimalHours = function drawOptimalHours() {
+	        var xDivider = totalDays - 1;
+	        if (xDivider < 1) {
+	            xDivider = 1;
+	        }
+
+	        var xUnit = (CANVAS_WIDTH - CANVAS_MARGIN * 2) / xDivider;
+	        var yUnit = CANVAS_HEIGHT - CANVAS_MARGIN * 2;
+
+	        for (var i in optimalHours) {
+	            if (i == 0) {
+	                continue;
+	            }
+
+	            var startX = CANVAS_MARGIN + (i - 1) * xUnit;
+	            var startY = CANVAS_MARGIN + (1 - optimalHours[i - 1] / totalHours) * yUnit;
+
+	            var endX = CANVAS_MARGIN + i * xUnit;
+	            var endY = CANVAS_MARGIN + (1 - optimalHours[i] / totalHours) * yUnit;
+
+	            GraphHelper.drawCircle(ctx, startX, startY, 5);
+
+	            if (i >= optimalHours.length - 1) {
+	                GraphHelper.drawCircle(ctx, endX, endY, 5);
+	            }
+
+	            GraphHelper.drawLine(ctx, startX, startY, endX, endY);
+	        }
+	    };
+
+	    return _.div({ class: 'burndown-chart analytics-body' }, _.div({ class: 'toolbar' }, _.select({ class: 'milestone-picker' }, _.each(resources.milestones, function (i, milestone) {
+	        return _.option({ value: milestone.index }, milestone.title);
+	    })).val(milestone ? milestone.index : 0).change(function (e) {
+	        _this.onChangeMilestonePicker($(e.target).val());
+	    })), _.div({ class: 'graph' }, _.p('Total task estimates: ' + totalHours), _.p('Milestone start: ' + milestoneStart), _.p('Milestone end: ' + milestoneEnd), $canvas, drawGrid(), drawOptimalHours()));
 	};
 
 /***/ },
-/* 44 */
+/* 46 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12078,7 +12425,7 @@
 	    }).then(function () {
 	        $('.workspace').remove();
 
-	        $('.app-container').append(_.div({ class: 'workspace analytics' }, new ActivityAnalytics().$element));
+	        $('.app-container').append(_.div({ class: 'workspace analytics' }, new BurnDownChart().$element));
 
 	        navbar.slideIn();
 	    }).catch(displayError);

@@ -100,7 +100,7 @@ Router.route('/:user/:project/analytics/', () => {
 
         $('.app-container').append(
             _.div({class: 'workspace analytics'},
-                new ActivityAnalytics().$element
+                new BurnDownChart().$element
             )
         );
         

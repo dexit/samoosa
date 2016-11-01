@@ -928,12 +928,13 @@ class GitHubApi extends ApiHelper {
         for(let i in milestones) {
             let index = parseInt(milestones[i].number) - 1;
 
-            let milestone = {
+            let milestone = new Milestone({
                 index: index,
                 title: milestones[i].title,
                 description: milestones[i].description,
+                startDate: milestones[i].created_at,
                 endDate: milestones[i].due_on
-            };
+            });
 
             window.resources.milestones[index] = milestone;
         }
@@ -1084,6 +1085,9 @@ class GitHubApi extends ApiHelper {
             issue.description = gitHubIssue.body;
             issue.id = gitHubIssue.number; 
             issue.reporter =  ResourceHelper.getCollaborator(gitHubIssue.user.login);
+            issue.createdAt = new Date(gitHubIssue.created_at);
+            issue.updatedAt = new Date(gitHubIssue.updated_at);
+            issue.closedAt = new Date(gitHubIssue.closed_at);
 
             if(gitHubIssue.assignee) {
                 issue.assignee = ResourceHelper.getCollaborator(gitHubIssue.assignee.login);

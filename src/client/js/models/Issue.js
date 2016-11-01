@@ -26,7 +26,7 @@ class Issue {
         this.description = properties.description || '';
         this.id = properties.id;
         
-        // Optional params
+        // Optional properties
         this.column = properties.column || 0;
         this.type = properties.type || 0;
         this.priority = properties.priority || 0;
@@ -36,6 +36,15 @@ class Issue {
         this.comments = properties.comments || [];
         this.assignee = properties.assignee;
         this.deleted = false;
+        
+        if(properties.createdAt) {
+            this.createdAt = new Date(properties.createdAt).getUnixTime();
+        }
+
+        if(properties.closedAt) {
+            this.closedAt = new Date(properties.closedAt).getUnixTime();
+        }
+
     }
 
     /**
@@ -48,17 +57,12 @@ class Issue {
             priority: resources.issuePriorities[this.priority],
             version: resources.versions[this.version],
             milestone: resources.milestones[this.milestone],
-            assignee: resources.collaborators[this.assignee]
+            assignee: resources.collaborators[this.assignee],
+            estimate: resources.issueEstimates[this.estimate],
+            createdAt: new Date(this.createdAt),
+            closedAt: new Date(this.closedAt)
         };
-
-        if(baked.assignee) {
-            baked.assignee = baked.assignee.name
-        }
-
-        if(baked.milestone) {
-            baked.milestone = baked.milestone.title
-        }
-
+        
         return baked;
     }
 

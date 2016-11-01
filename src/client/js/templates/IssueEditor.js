@@ -1,29 +1,44 @@
+/**
+ * Issue editor template
+ */
 module.exports = function render() {
     return _.div({class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type]},
+
+        // Header
         _.div({class: 'header'},
+            // Drag handle
             _.div({class: 'drag-handle'},
                 _.span({class: 'fa fa-bars'})
             ).on('mousedown', (e) => { this.onClickDragHandle(e) }),
+
+            // Assignee avatar
             _.if(!ApiHelper.isSpectating(),
                 _.div({class: 'assignee-avatar'},
                     this.getAssigneeAvatar()
                 )
             ),
-            _.button({class: 'btn-toggle btn-transparent'},
-                _.span({class: 'fa icon-close fa-chevron-down'}),
-                _.span({class: 'fa icon-open fa-chevron-right'})
-            ).click((e) => { this.onClickToggle(e); }),
+
+            // Top right section
             _.div({class: 'header-top-right'},
+
+                // Issue id
+                // TODO Rename this class to "issue-id" and find similar occurences
                 _.div({class: 'issue-index'},
                     (this.model.id || this.model.index).toString()
                 ),
+
+                // Remove button
                 _.if(!ApiHelper.isSpectating(),
                     _.button({class: 'btn btn-remove'},
                         _.span({class: 'fa fa-remove'})
                     ).click(() => { this.onClickRemove(); })
                 )
             ),
+
+            // Priority indicator
             this.getPriorityIndicator(),
+
+            // Title
             _.h4({},
                 _.span({class: 'btn-edit'},
                     this.model.title
@@ -42,12 +57,24 @@ module.exports = function render() {
                             this.onBlur(e);
                         }
                     })
-            )
+            ),
+            
+            // Expand/collapse button
+            _.button({class: 'btn-toggle btn-transparent'},
+                _.span({class: 'fa icon-close fa-chevron-up'}),
+                _.span({class: 'fa icon-open fa-chevron-down'})
+            ).click((e) => { this.onClickToggle(e); })
         ).click((e) => { this.onClickElement(e); }),
+
+        // Meta information
         _.div({class: 'meta'},
+
+            // Multi edit notification
             _.div({class: 'multi-edit-notification'},
                 'Now editing multiple issues'
             ),
+
+            // Type
             _.div({class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '')},
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); }),
@@ -58,6 +85,8 @@ module.exports = function render() {
                     })
                 ).change(() => { this.onChange(); }).val(this.model.type)
             ),
+
+            // Priority
             _.div({class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '')},
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); }),
@@ -68,6 +97,8 @@ module.exports = function render() {
                     })
                 ).change(() => { this.onChange(); }).val(this.model.priority)
             ),
+
+            // Assignee
             _.if(window.resources.collaborators.length > 0,
                 _.div({class: 'meta-field assignee'},
                     _.input({class: 'multi-edit-toggle', type: 'checkbox'})
@@ -81,6 +112,8 @@ module.exports = function render() {
                     ).change(() => { this.onChange(); }).val(this.model.assignee)
                 )
             ),
+
+            // Version
             _.div({class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '')},
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); }),
@@ -91,6 +124,8 @@ module.exports = function render() {
                     })
                 ).change(() => { this.onChange(); }).val(this.model.version)
             ),
+
+            // Estimate
             _.div({class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '')},
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); }),
@@ -101,6 +136,8 @@ module.exports = function render() {
                     })
                 ).change(() => { this.onChange(); }).val(this.model.estimate)
             ),
+
+            // Multi edit actions
             _.div({class: 'multi-edit-actions'}, 
                 _.button({class: 'btn'},
                     'Cancel'
@@ -110,7 +147,11 @@ module.exports = function render() {
                 ).click(() => { this.onClickMultiEditApply(); })
             )
         ),
+
+        // Body
         _.div({class: 'body'},
+            
+            // Description
             _.label('Description'),
             _.div({class: 'btn-edit'},
                 markdownToHtml(this.model.description)
@@ -127,7 +168,11 @@ module.exports = function render() {
             .blur(this.onBlur)
             .keyup(this.onKeyUp)
         ),
+
+        // Comments
         _.div({class: 'comments'}),
+
+        // Add comment
         _.if(!ApiHelper.isSpectating(),
             _.div({class: 'add-comment'},
                 _.textarea({class: 'btn-transparent', placeholder: 'Add comment here...'})

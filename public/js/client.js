@@ -124,7 +124,7 @@
 
 	module.exports = {
 		"name": "samoosa",
-		"version": "0.3.0",
+		"version": "0.2.0",
 		"description": "",
 		"main": "index.html",
 		"scripts": {
@@ -9531,6 +9531,8 @@
 	    }, {
 	        key: 'onClickToggle',
 	        value: function onClickToggle(e) {
+	            var _this3 = this;
+
 	            e.preventDefault();
 	            e.stopPropagation();
 
@@ -9538,11 +9540,34 @@
 	                IssueEditor.cancelMultiSelect();
 	            }
 
+	            this.$element.removeAttr('style');
+
 	            var wasExpanded = this.$element.hasClass('expanded');
 
-	            $('.issue-editor').removeClass('expanded');
+	            this.$element.removeClass('expanded');
 
-	            this.$element.toggleClass('expanded', !wasExpanded);
+	            var collapsedHeight = this.$element.outerHeight();
+
+	            this.$element.addClass('expanded');
+
+	            var expandedHeight = this.$element.outerHeight();
+
+	            this.$element.removeClass('expanded');
+
+	            if (!wasExpanded) {
+	                this.$element.addClass('expanded');
+	                this.$element.css('height', collapsedHeight + 'px');
+
+	                setTimeout(function () {
+	                    _this3.$element.css('height', expandedHeight + 'px');
+	                }, 50);
+	            } else {
+	                this.$element.css('height', expandedHeight + 'px');
+
+	                setTimeout(function () {
+	                    _this3.$element.css('height', collapsedHeight + 'px');
+	                }, 50);
+	            }
 
 	            if (this.usingMultiEdit()) {
 	                $('.issue-editor .multi-edit-toggle').each(function () {
@@ -9676,14 +9701,14 @@
 	    }, {
 	        key: 'sync',
 	        value: function sync() {
-	            var _this3 = this;
+	            var _this4 = this;
 
 	            // Start loading
 	            this.$element.toggleClass('loading', true);
 
 	            // Update the issue though the API
 	            ApiHelper.updateIssue(this.model).then(function () {
-	                _this3.$element.toggleClass('loading', false);
+	                _this4.$element.toggleClass('loading', false);
 	            });
 	        }
 
@@ -9694,7 +9719,7 @@
 	    }, {
 	        key: 'onClickDragHandle',
 	        value: function onClickDragHandle(e) {
-	            var _this4 = this;
+	            var _this5 = this;
 
 	            if (ApiHelper.isSpectating()) {
 	                return;
@@ -9706,9 +9731,9 @@
 	                    $('.board-container').toggleClass('dragging', true);
 
 	                    // Set element
-	                    var $element = _this4.$element;
+	                    var $element = _this5.$element;
 
-	                    if (_this4.usingMultiEdit()) {
+	                    if (_this5.usingMultiEdit()) {
 	                        $element = $('.issue-editor.selected');
 	                    } else {}
 	                    //IssueEditor.cancelMultiSelect();
@@ -9717,10 +9742,10 @@
 	                    // Apply temporary CSS properties
 	                    $element.each(function (i, element) {
 	                        $(element).css({
-	                            top: _this4.$element.offset().top,
-	                            left: _this4.$element.offset().left,
-	                            width: _this4.$element.outerWidth(),
-	                            height: _this4.$element.outerHeight(),
+	                            top: _this5.$element.offset().top,
+	                            left: _this5.$element.offset().left,
+	                            width: _this5.$element.outerWidth(),
+	                            height: _this5.$element.outerHeight(),
 	                            'pointer-events': 'none',
 	                            'z-index': 999,
 	                            'margin-top': i * 15 + 'px'
@@ -9729,8 +9754,8 @@
 
 	                    // Buffer the offset between mouse cursor and element position
 	                    var offset = {
-	                        x: _this4.$element.offset().left - e.pageX,
-	                        y: _this4.$element.offset().top - e.pageY
+	                        x: _this5.$element.offset().left - e.pageX,
+	                        y: _this5.$element.offset().top - e.pageY
 	                    };
 
 	                    // Add absolute positioning afterwards to allow getting proper offset
@@ -9779,7 +9804,7 @@
 
 	                    // Document pointer release mouse button logic
 	                    $(document).off('mouseup').on('mouseup', function (e) {
-	                        _this4.onReleaseDragHandle(e);
+	                        _this5.onReleaseDragHandle(e);
 	                    });
 	                })();
 	            }
@@ -10052,7 +10077,7 @@
 	    }, {
 	        key: 'onClickComment',
 	        value: function onClickComment() {
-	            var _this5 = this;
+	            var _this6 = this;
 
 	            if (ApiHelper.isSpectating()) {
 	                return;
@@ -10065,7 +10090,7 @@
 	            this.$element.find('.add-comment textarea').val('');
 
 	            ApiHelper.addIssueComment(this.model, text).then(function () {
-	                _this5.getComments();
+	                _this6.getComments();
 	            });
 	        }
 
@@ -10219,30 +10244,30 @@
 	    }, {
 	        key: 'getComments',
 	        value: function getComments() {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            var $comments = this.$element.find('.comments');
 
 	            ApiHelper.getUser().then(function (user) {
-	                ApiHelper.getIssueComments(_this6.model).then(function (comments) {
-	                    _this6.$element.toggleClass('loading', false);
+	                ApiHelper.getIssueComments(_this7.model).then(function (comments) {
+	                    _this7.$element.toggleClass('loading', false);
 
 	                    $comments.html(_.each(comments, function (i, comment) {
 	                        var collaborator = window.resources.collaborators[comment.collaborator];
 	                        var text = markdownToHtml(comment.text);
 	                        var isUser = collaborator.name == user.name;
 
-	                        return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.name)), _.if(isUser, _.div({ class: 'btn-edit' }, text).click(_this6.onClickEdit), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
-	                            _this6.$element.toggleClass('loading', true);
+	                        return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.name)), _.if(isUser, _.div({ class: 'btn-edit' }, text).click(_this7.onClickEdit), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
+	                            _this7.$element.toggleClass('loading', true);
 
-	                            comment.text = _this6.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
+	                            comment.text = _this7.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
 
-	                            _this6.$element.find('.comments .comment[data-index="' + comment.index + '"] .btn-edit').html(markdownToHtml(comment.text) || '');
+	                            _this7.$element.find('.comments .comment[data-index="' + comment.index + '"] .btn-edit').html(markdownToHtml(comment.text) || '');
 
-	                            ApiHelper.updateIssueComment(_this6.model, comment).then(function () {
-	                                _this6.$element.toggleClass('loading', false);
+	                            ApiHelper.updateIssueComment(_this7.model, comment).then(function () {
+	                                _this7.$element.toggleClass('loading', false);
 	                            });
-	                        }).blur(_this6.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
+	                        }).blur(_this7.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
 	                    }));
 	                });
 	            });
@@ -10269,16 +10294,41 @@
 
 	'use strict';
 
+	/**
+	 * Issue editor template
+	 */
 	module.exports = function render() {
 	    var _this = this;
 
-	    return _.div({ class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type] }, _.div({ class: 'header' }, _.div({ class: 'drag-handle' }, _.span({ class: 'fa fa-bars' })).on('mousedown', function (e) {
+	    return _.div({ class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type] },
+
+	    // Header
+	    _.div({ class: 'header' },
+	    // Drag handle
+	    _.div({ class: 'drag-handle' }, _.span({ class: 'fa fa-bars' })).on('mousedown', function (e) {
 	        _this.onClickDragHandle(e);
-	    }), _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())), _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-down' }), _.span({ class: 'fa icon-open fa-chevron-right' })).click(function (e) {
-	        _this.onClickToggle(e);
-	    }), _.div({ class: 'header-top-right' }, _.div({ class: 'issue-index' }, (this.model.id || this.model.index).toString()), _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-remove' })).click(function () {
+	    }),
+
+	    // Assignee avatar
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())),
+
+	    // Top right section
+	    _.div({ class: 'header-top-right' },
+
+	    // Issue id
+	    // TODO Rename this class to "issue-id" and find similar occurences
+	    _.div({ class: 'issue-index' }, (this.model.id || this.model.index).toString()),
+
+	    // Remove button
+	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-remove' })).click(function () {
 	        _this.onClickRemove();
-	    }))), this.getPriorityIndicator(), _.h4({}, _.span({ class: 'btn-edit' }, this.model.title).click(this.onClickEdit), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
+	    }))),
+
+	    // Priority indicator
+	    this.getPriorityIndicator(),
+
+	    // Title
+	    _.h4({}, _.span({ class: 'btn-edit' }, this.model.title).click(this.onClickEdit), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
 	        _this.onChange();
 
 	        _this.$element.find('.header .btn-edit').html(_this.model.title);
@@ -10286,47 +10336,88 @@
 	        if (e.which == 13) {
 	            _this.onBlur(e);
 	        }
-	    }))).click(function (e) {
+	    })),
+
+	    // Expand/collapse button
+	    _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-up' }), _.span({ class: 'fa icon-open fa-chevron-down' })).click(function (e) {
+	        _this.onClickToggle(e);
+	    })).click(function (e) {
 	        _this.onClickElement(e);
-	    }), _.div({ class: 'meta' }, _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'), _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    }),
+
+	    // Meta information
+	    _.div({ class: 'meta' },
+
+	    // Multi edit notification
+	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
+
+	    // Type
+	    _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueTypes, function (i, type) {
 	        return _.option({ value: i }, type);
 	    })).change(function () {
 	        _this.onChange();
-	    }).val(this.model.type)), _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    }).val(this.model.type)),
+
+	    // Priority
+	    _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issuePriorities, function (i, priority) {
 	        return _.option({ value: i }, priority);
 	    })).change(function () {
 	        _this.onChange();
-	    }).val(this.model.priority)), _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    }).val(this.model.priority)),
+
+	    // Assignee
+	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
 	        return _.option({ value: i }, collaborator.name);
 	    })).change(function () {
 	        _this.onChange();
-	    }).val(this.model.assignee))), _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    }).val(this.model.assignee))),
+
+	    // Version
+	    _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
 	        return _.option({ value: i }, version);
 	    })).change(function () {
 	        _this.onChange();
-	    }).val(this.model.version)), _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    }).val(this.model.version)),
+
+	    // Estimate
+	    _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueEstimates, function (i, estimate) {
 	        return _.option({ value: i }, estimate);
 	    })).change(function () {
 	        _this.onChange();
-	    }).val(this.model.estimate)), _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
+	    }).val(this.model.estimate)),
+
+	    // Multi edit actions
+	    _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
 	        _this.onClickMultiEditCancel();
 	    }), _.button({ class: 'btn' }, 'Apply').click(function () {
 	        _this.onClickMultiEditApply();
-	    }))), _.div({ class: 'body' }, _.label('Description'), _.div({ class: 'btn-edit' }, markdownToHtml(this.model.description)).click(this.onClickEdit), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
+	    }))),
+
+	    // Body
+	    _.div({ class: 'body' },
+
+	    // Description
+	    _.label('Description'), _.div({ class: 'btn-edit' }, markdownToHtml(this.model.description)).click(this.onClickEdit), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
 	        _this.onChange();
 
 	        _this.$element.find('.body .btn-edit').html(markdownToHtml(_this.model.description) || '');
-	    }).blur(this.onBlur).keyup(this.onKeyUp)), _.div({ class: 'comments' }), _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' }, _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp), _.button({ class: 'btn' }, 'Comment').click(function () {
+	    }).blur(this.onBlur).keyup(this.onKeyUp)),
+
+	    // Comments
+	    _.div({ class: 'comments' }),
+
+	    // Add comment
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' }, _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp), _.button({ class: 'btn' }, 'Comment').click(function () {
 	        _this.onClickComment();
 	    }))));
 	};

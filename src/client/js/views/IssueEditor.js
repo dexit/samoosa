@@ -43,11 +43,36 @@ class IssueEditor extends View {
             IssueEditor.cancelMultiSelect();
         }
 
+        this.$element.removeAttr('style');
+
         let wasExpanded = this.$element.hasClass('expanded');
 
-        $('.issue-editor').removeClass('expanded');
+        this.$element.removeClass('expanded');
+        
+        let collapsedHeight = this.$element.outerHeight();
     
-        this.$element.toggleClass('expanded', !wasExpanded);
+        this.$element.addClass('expanded');
+        
+        let expandedHeight = this.$element.outerHeight();
+
+        this.$element.removeClass('expanded');
+
+        if(!wasExpanded) {
+            this.$element.addClass('expanded');
+            this.$element.css('height', collapsedHeight + 'px');
+            
+            setTimeout(() => {
+                this.$element.css('height', expandedHeight + 'px');
+            }, 50);
+        
+        } else {
+            this.$element.css('height', expandedHeight + 'px');
+            
+            setTimeout(() => {
+                this.$element.css('height', collapsedHeight + 'px');
+            }, 50);
+
+        }
 
         if(this.usingMultiEdit()) {
             $('.issue-editor .multi-edit-toggle').each(function() {

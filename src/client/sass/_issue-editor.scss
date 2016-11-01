@@ -10,6 +10,8 @@
 
 .issue-editor {
     border: 1px solid material-color('grey', '400');
+    transition: height 0.5s ease;       
+    overflow-y: hidden; 
 
     // Type indicators
     &[data-type="bug"] {
@@ -144,7 +146,7 @@
     >.header {
         background-color: material-color('grey', '800');
         color: material-color('grey', '200');
-        padding: 0px 15px 15px 15px;
+        padding: 0px 15px 5px 15px;
         position: relative;
 
         &:before {
@@ -211,13 +213,20 @@
         }
 
         .btn-toggle {
-            float: right;
-            width: 30px;
-            height: 30px;
+            width: 100%;
+            line-height: 14px;
+            height: 14px;
             display: block;
+            text-align: center;
+            padding: 0px;
 
             &, &:focus, &:hover, &:active {
                 outline: none;
+            }
+
+            .fa {
+                line-height: 1em;
+                margin: 0px;
             }
         }
 
@@ -245,11 +254,7 @@
             margin: 0px;
             display: inline;
             margin-left: 5px;
-        }
-
-        button {
-            float: right;
-            text-align: right;
+            line-height: 30px;
         }
 
         span, input, h4 {

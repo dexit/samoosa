@@ -2,6 +2,13 @@
 
 module.exports = function render() {
     let milestone = this.getCurrentMilestone();
+
+    if(!milestone) {
+        return _.div({class: 'burndown-chart analytics-body'},
+            _.div({class: 'error-message'}, 'There are no milestones defined in this project')
+        );
+    }
+
     let totalDays = milestone.getTotalDays();
     let totalHours = milestone.getTotalEstimatedHours();
     let milestoneStart = new Date(milestone.startDate);
@@ -24,28 +31,17 @@ module.exports = function render() {
      * Draws the grid
      */
     let drawGrid = () => {
-        let drawNextX = (x) => {
+        let drawNext = (x) => {
             let xPos = x * CANVAS_WIDTH_UNIT;
 
             GraphHelper.drawLine(ctx, xPos, 0, xPos, CANVAS_HEIGHT_UNIT * totalHours, 1, '#999999');
 
             if(x < totalDays) {
-                setTimeout(() => { drawNextX(x + 1); }, 1);
+                setTimeout(() => { drawNext(x + 1); }, 1);
             }
         };
 
-        let drawNextY = (y) => {
-            let yPos = y * CANVAS_HEIGHT_UNIT;
-            
-            GraphHelper.drawLine(ctx, 0, yPos, CANVAS_WIDTH_UNIT * totalDays, yPos, 1, '#999999');
-
-            if(yPos < 400) {
-                setTimeout(() => { drawNextY(y + 1); }, 1);
-            }
-        };
-
-        drawNextX(0);
-//        drawNextY(0);
+        drawNext(0);
     };
 
     /**
@@ -84,18 +80,26 @@ module.exports = function render() {
 
     return _.div({class: 'burndown-chart analytics-body'},
         _.div({class: 'toolbar'},
-            _.select({class: 'milestone-picker'},
-                _.each(resources.milestones, (i, milestone) => {
-                    return _.option({value: milestone.index}, milestone.title);
-                })
-            ).val(milestone ? milestone.index : 0).change((e) => { this.onChangeMilestonePicker($(e.target).val()); })
+            _.h4({},
+                'Milestone',
+                _.select({class: 'milestone-picker'},
+                    _.each(resources.milestones, (i, milestone) => {
+                        return _.option({value: milestone.index}, milestone.title);
+                    })
+                ).val(milestone ? milestone.index : 0).change((e) => { this.onChangeMilestonePicker($(e.target).val()); })
+            )
         ),
         _.div({class: 'meta'},
-            _.p('Total days: ' + (totalDays + 1)),
-            _.p('Total hours: ' + totalHours),
-            _.p('Milestone start: ' + milestoneStart),
-            _.p('Milestone end: ' + milestoneEnd),
+            _.h4('Total days'),
+            _.p((totalDays + 1).toString()),
+            _.h4('Total hours'),
+            _.p(totalHours.toString()),
+            _.h4('Milestone start'),
+            _.p(milestoneStart.toString()),
+            _.h4('Milestone end'),
+            _.p(milestoneEnd.toString())
         ),
+        _.h4('Chart'),
         _.div({class: 'graph-container'},
             _.div({class: 'graph-y-axis-labels'},
                 _.label({style: 'top: 0px'}, Math.round(totalHours) + ' h'),

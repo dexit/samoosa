@@ -7505,7 +7505,7 @@
 	                    return this.addProject(item);
 
 	                default:
-	                    alert('Resource "' + resource + '" is unknown');
+	                    displayError(new Error('Resource "' + resource + '" is unknown'));
 	            }
 	        }
 
@@ -7548,7 +7548,7 @@
 	                    return this.updateProject(item);
 
 	                default:
-	                    alert('Resource "' + resource + '" is unknown');
+	                    displayError(new Error('Resource "' + resource + '" is unknown'));
 	            }
 	        }
 
@@ -9858,8 +9858,6 @@
 	    var _this = this;
 
 	    return _.div({ class: 'navbar' }, _.div({ class: 'backdrop' }).click(function () {
-	        console.log('dsaasd');
-
 	        _this.hide();
 	    }), _.div({ class: 'obscure' }, _.div({ class: 'content' })), _.div({ class: 'buttons' }, _.each(this.getLinks(), function (i, link) {
 	        if (link.separator) {
@@ -12170,7 +12168,7 @@
 	                                    break;
 	                                }
 	                            } catch (e) {
-	                                alert(e);
+	                                displayError(e);
 	                                return;
 	                            }
 	                        }
@@ -12432,6 +12430,11 @@
 	    var _this = this;
 
 	    var milestone = this.getCurrentMilestone();
+
+	    if (!milestone) {
+	        return _.div({ class: 'burndown-chart analytics-body' }, _.div({ class: 'error-message' }, 'There are no milestones defined in this project'));
+	    }
+
 	    var totalDays = milestone.getTotalDays();
 	    var totalHours = milestone.getTotalEstimatedHours();
 	    var milestoneStart = new Date(milestone.startDate);
@@ -12454,32 +12457,19 @@
 	     * Draws the grid
 	     */
 	    var drawGrid = function drawGrid() {
-	        var drawNextX = function drawNextX(x) {
+	        var drawNext = function drawNext(x) {
 	            var xPos = x * CANVAS_WIDTH_UNIT;
 
 	            GraphHelper.drawLine(ctx, xPos, 0, xPos, CANVAS_HEIGHT_UNIT * totalHours, 1, '#999999');
 
 	            if (x < totalDays) {
 	                setTimeout(function () {
-	                    drawNextX(x + 1);
+	                    drawNext(x + 1);
 	                }, 1);
 	            }
 	        };
 
-	        var drawNextY = function drawNextY(y) {
-	            var yPos = y * CANVAS_HEIGHT_UNIT;
-
-	            GraphHelper.drawLine(ctx, 0, yPos, CANVAS_WIDTH_UNIT * totalDays, yPos, 1, '#999999');
-
-	            if (yPos < 400) {
-	                setTimeout(function () {
-	                    drawNextY(y + 1);
-	                }, 1);
-	            }
-	        };
-
-	        drawNextX(0);
-	        //        drawNextY(0);
+	        drawNext(0);
 	    };
 
 	    /**
@@ -12518,11 +12508,11 @@
 	        drawNext(1);
 	    };
 
-	    return _.div({ class: 'burndown-chart analytics-body' }, _.div({ class: 'toolbar' }, _.select({ class: 'milestone-picker' }, _.each(resources.milestones, function (i, milestone) {
+	    return _.div({ class: 'burndown-chart analytics-body' }, _.div({ class: 'toolbar' }, _.h4({}, 'Milestone', _.select({ class: 'milestone-picker' }, _.each(resources.milestones, function (i, milestone) {
 	        return _.option({ value: milestone.index }, milestone.title);
 	    })).val(milestone ? milestone.index : 0).change(function (e) {
 	        _this.onChangeMilestonePicker($(e.target).val());
-	    })), _.div({ class: 'meta' }, _.p('Total days: ' + (totalDays + 1)), _.p('Total hours: ' + totalHours), _.p('Milestone start: ' + milestoneStart), _.p('Milestone end: ' + milestoneEnd)), _.div({ class: 'graph-container' }, _.div({ class: 'graph-y-axis-labels' }, _.label({ style: 'top: 0px' }, Math.round(totalHours) + ' h'), _.label({ style: 'top: 400px' }, '0 h')), _.div({ class: 'graph-canvas' }, $canvas, drawGrid(), drawHours(optimalHours, 'blue'), drawHours(actualHours, 'red'), _.div({ class: 'graph-x-axis-labels' }, _.loop(totalDays, function (i) {
+	    }))), _.div({ class: 'meta' }, _.h4('Total days'), _.p((totalDays + 1).toString()), _.h4('Total hours'), _.p(totalHours.toString()), _.h4('Milestone start'), _.p(milestoneStart.toString()), _.h4('Milestone end'), _.p(milestoneEnd.toString())), _.h4('Chart'), _.div({ class: 'graph-container' }, _.div({ class: 'graph-y-axis-labels' }, _.label({ style: 'top: 0px' }, Math.round(totalHours) + ' h'), _.label({ style: 'top: 400px' }, '0 h')), _.div({ class: 'graph-canvas' }, $canvas, drawGrid(), drawHours(optimalHours, 'blue'), drawHours(actualHours, 'red'), _.div({ class: 'graph-x-axis-labels' }, _.loop(totalDays, function (i) {
 	        i++;
 
 	        if (i % 5 !== 0 && i != 1 && i != totalDays + 1) {
@@ -12621,7 +12611,17 @@
 	    }).then(function () {
 	        $('.workspace').remove();
 
-	        $('.app-container').append(_.div({ class: 'workspace analytics' }, new BurnDownChart().$element));
+	        $('.app-container').append(_.div({ class: 'workspace analytics' }, _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.button({ class: 'tab active' }, 'BURN DOWN CHART').click(function () {
+	            var index = $(this).index();
+
+	            $(this).parent().children().each(function (i) {
+	                $(this).toggleClass('active', i == index);
+	            });
+
+	            $(this).parents('.tabbed-container').find('.panes .pane').each(function (i) {
+	                $(this).toggleClass('active', i == index);
+	            });
+	        })), _.div({ class: 'panes' }, _.div({ class: 'pane active' }, new BurnDownChart().$element)))));
 
 	        navbar.slideIn();
 	    }).catch(displayError);

@@ -1,14 +1,34 @@
 .workspace.analytics {
-    max-width: 900px;
-    margin: 0px auto;
+    .tabbed-container {
+        .panes {
+            .pane {
+                padding: 15px;
+                width: 100%;
+                height: 100%;
+            }
+        }
+    }
+
+    .analytics-body {
+        height: 100%;
+        width: 100%;
+        position: relative;
+    }
 
     .burndown-chart {
+        select {
+            margin-left: 15px;
+        }
+
         .graph-container {
             display: flex;
+            position: absolute;
+            width: 100%;
 
             .graph-canvas {
                 overflow-x: auto;
                 flex-grow: 1;
+                width: 100%;
             }
 
             .graph-y-axis-labels {

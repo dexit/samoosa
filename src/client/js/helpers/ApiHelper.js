@@ -705,7 +705,7 @@ class ApiHelper {
                 return this.addProject(item);
         
             default:
-                alert('Resource "' + resource + '" is unknown');
+                displayError(new Error('Resource "' + resource + '" is unknown'));
         }
     }
     
@@ -745,7 +745,7 @@ class ApiHelper {
                 return this.updateProject(item);
             
             default:
-                alert('Resource "' + resource + '" is unknown');
+                displayError(new Error('Resource "' + resource + '" is unknown'));
         }
     }
 

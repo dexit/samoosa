@@ -116,7 +116,7 @@ class FilterEditor extends View {
                         break;
                     }
                 } catch(e) {
-                    alert(e);
+                    displayError(e);
                     return;
                 }
             }

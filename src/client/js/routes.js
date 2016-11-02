@@ -100,7 +100,28 @@ Router.route('/:user/:project/analytics/', () => {
 
         $('.app-container').append(
             _.div({class: 'workspace analytics'},
-                new BurnDownChart().$element
+                _.div({class: 'tabbed-container vertical'},
+                    _.div({class: 'tabs'},
+                        _.button({class: 'tab active'},
+                            'BURN DOWN CHART'
+                        ).click(function() {
+                            let index = $(this).index();
+                            
+                            $(this).parent().children().each(function(i) {
+                                $(this).toggleClass('active', i == index);
+                            });
+
+                            $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
+                                $(this).toggleClass('active', i == index);
+                            });
+                        })
+                    ),
+                    _.div({class: 'panes'},
+                        _.div({class: 'pane active'},
+                            new BurnDownChart().$element
+                        )
+                    )
+                )
             )
         );
         

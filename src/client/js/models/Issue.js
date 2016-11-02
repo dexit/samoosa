@@ -59,8 +59,8 @@ class Issue {
             milestone: resources.milestones[this.milestone],
             assignee: resources.collaborators[this.assignee],
             estimate: resources.issueEstimates[this.estimate],
-            createdAt: new Date(this.createdAt),
-            closedAt: new Date(this.closedAt)
+            createdAt: this.createdAt ? new Date(this.createdAt) : null,
+            closedAt: this.closedAt ? new Date(this.closedAt) : null
         };
         
         return baked;

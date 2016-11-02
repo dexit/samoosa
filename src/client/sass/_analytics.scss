@@ -1,3 +1,50 @@
 .workspace.analytics {
-    
+    max-width: 900px;
+    margin: 0px auto;
+
+    .burndown-chart {
+        .graph-container {
+            display: flex;
+
+            .graph-canvas {
+                overflow-x: auto;
+                flex-grow: 1;
+            }
+
+            .graph-y-axis-labels {
+                flex-shrink: 0;
+                position: relative;
+                width: 40px;
+
+                label {
+                    position: absolute;
+                    left: 0px;
+                    width: 40px;
+                    display: block;
+
+                    &:last-child {
+                        transform: translateY(-100%);
+                    }
+                }
+            }
+
+            .graph-x-axis-labels {
+                position: relative;
+                white-space: nowrap;
+                height: 20px;
+
+                label {
+                    line-height: 20px;
+                    height: 20px;
+                    position: absolute;
+                    top: 0px;
+                    display: inline-block;
+
+                    &:last-child {
+                        transform: translateX(-100%);
+                    }
+                }
+            }
+        } 
+    }    
 }

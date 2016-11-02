@@ -9,10 +9,14 @@ class GraphHelper {
      * @param {Number} fromY
      * @param {Number} toX
      * @param {Number} toY
+     * @param {Number} lineWidth
+     * @param {String} strokeColor
      */
-    static drawLine(ctx, fromX, fromY, toX, toY) {
+    static drawLine(ctx, fromX, fromY, toX, toY, lineWidth = 2, strokeColor = '#000000') {
        ctx.moveTo(fromX, fromY);
        ctx.lineTo(toX, toY);
+       ctx.lineWidth = lineWidth;
+       ctx.strokeStyle = strokeColor;
        ctx.stroke();
     }
 
@@ -21,10 +25,11 @@ class GraphHelper {
      *
      * @param {Context} ctx
      */
-    static drawCircle(ctx, x, y, radius) {
+    static drawCircle(ctx, x, y, radius = 4, fillColor = '#000000') {
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, 2 * Math.PI);
-        ctx.stroke();
+        ctx.fillStyle = fillColor;
+        ctx.fill();
     }
 
     /**

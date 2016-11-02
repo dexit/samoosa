@@ -33,6 +33,26 @@ class BurnDownChart extends View {
     }
 
     /**
+     * Gets the actual hours remaining
+     *
+     * @returns {Array} Actual hours by day
+     */
+    getActualHours() {
+        let milestone = this.getCurrentMilestone();
+        let actualHours = [];
+
+        if(!milestone) { return actualHours; }
+
+        let totalDays = milestone.getTotalDays();
+
+        for(let day = 0; day <= totalDays; day++) {
+            actualHours[actualHours.length] = milestone.getRemainingEstimatedHoursAtDay(day);
+        }
+
+        return actualHours;
+    }
+
+    /**
      * Gets the optimal hours remaining
      *
      * @returns {Array} Optimal hours by day
@@ -45,13 +65,13 @@ class BurnDownChart extends View {
 
         let totalDays = milestone.getTotalDays();
         let totalHours = milestone.getTotalEstimatedHours();
-        let divider = totalDays - 1;
+        let divider = totalDays;
         if(divider < 1) { divider = 1; }
         let optimalDecline = totalHours / divider;
 
         let currentHours = totalHours;
 
-        for(let day = 0; day < totalDays; day++) {
+        for(let day = 0; day <= totalDays; day++) {
             optimalHours[optimalHours.length] = currentHours;
 
             currentHours -= optimalDecline;

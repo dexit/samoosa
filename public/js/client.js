@@ -967,6 +967,28 @@
 	};
 
 	/**
+	 * Loops a given number of times, rendering elements for each pass
+	 *
+	 * @param {Number} iterations
+	 * @param {Function} callback
+	 *
+	 * @returns {HTMLElement} elements
+	 */
+	FunctionTemplating.loop = function (iterations, callback) {
+	    var elements = [];
+
+	    for (var i = 0; i <= iterations; i++) {
+	        var element = callback(i);
+
+	        if (element) {
+	            elements.push(element);
+	        }
+	    }
+
+	    return elements;
+	};
+
+	/**
 	 * A shorthand for document.querySelector
 	 *
 	 * @param {String} query
@@ -4835,10 +4857,17 @@
 	     * @param {Number} fromY
 	     * @param {Number} toX
 	     * @param {Number} toY
+	     * @param {Number} lineWidth
+	     * @param {String} strokeColor
 	     */
 	    value: function drawLine(ctx, fromX, fromY, toX, toY) {
+	      var lineWidth = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 2;
+	      var strokeColor = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : '#000000';
+
 	      ctx.moveTo(fromX, fromY);
 	      ctx.lineTo(toX, toY);
+	      ctx.lineWidth = lineWidth;
+	      ctx.strokeStyle = strokeColor;
 	      ctx.stroke();
 	    }
 
@@ -4850,10 +4879,14 @@
 
 	  }, {
 	    key: 'drawCircle',
-	    value: function drawCircle(ctx, x, y, radius) {
+	    value: function drawCircle(ctx, x, y) {
+	      var radius = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 4;
+	      var fillColor = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : '#000000';
+
 	      ctx.beginPath();
 	      ctx.arc(x, y, radius, 0, 2 * Math.PI);
-	      ctx.stroke();
+	      ctx.fillStyle = fillColor;
+	      ctx.fill();
 	    }
 
 	    /**
@@ -6317,9 +6350,8 @@
 	                    issue.description = gitHubIssue.body;
 	                    issue.id = gitHubIssue.number;
 	                    issue.reporter = ResourceHelper.getCollaborator(gitHubIssue.user.login);
-	                    issue.createdAt = new Date(gitHubIssue.created_at);
-	                    issue.updatedAt = new Date(gitHubIssue.updated_at);
-	                    issue.closedAt = new Date(gitHubIssue.closed_at);
+	                    issue.createdAt = gitHubIssue.created_at;
+	                    issue.closedAt = gitHubIssue.closed_at;
 
 	                    if (gitHubIssue.assignee) {
 	                        issue.assignee = ResourceHelper.getCollaborator(gitHubIssue.assignee.login);
@@ -9221,8 +9253,8 @@
 	                milestone: resources.milestones[this.milestone],
 	                assignee: resources.collaborators[this.assignee],
 	                estimate: resources.issueEstimates[this.estimate],
-	                createdAt: new Date(this.createdAt),
-	                closedAt: new Date(this.closedAt)
+	                createdAt: this.createdAt ? new Date(this.createdAt) : null,
+	                closedAt: this.closedAt ? new Date(this.closedAt) : null
 	            };
 
 	            return baked;
@@ -9315,6 +9347,10 @@
 	                for (var _iterator = (resources.issues || [])[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	                    var issue = _step.value;
 
+	                    if (!issue) {
+	                        continue;
+	                    }
+
 	                    if (issue.getBakedValues().milestone == this) {
 	                        issues[issues.length] = issue;
 	                    }
@@ -9400,6 +9436,112 @@
 	            }
 
 	            return total;
+	        }
+
+	        /**
+	         * Gets remaining issues at day
+	         *
+	         * @param {Number} day
+	         *
+	         * @returns {Array} Issues
+	         */
+
+	    }, {
+	        key: 'getRemainingIssuesAtDay',
+	        value: function getRemainingIssuesAtDay(day, debug) {
+	            var issues = [];
+
+	            var _iteratorNormalCompletion3 = true;
+	            var _didIteratorError3 = false;
+	            var _iteratorError3 = undefined;
+
+	            try {
+	                for (var _iterator3 = this.getIssues()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                    var issue = _step3.value;
+
+	                    var closedDate = issue.getBakedValues().closedAt;
+
+	                    if (!closedDate) {
+	                        issues[issues.length] = issue;
+
+	                        if (debug) {
+	                            console.log(issue.id, 'has no closed date');
+	                        }
+	                    } else {
+	                        var startDate = new Date(this.startDate);
+	                        var timeDiff = Math.abs(startDate.getTime() - closedDate.getTime());
+	                        var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+	                        if (diffDays > day) {
+	                            issues[issues.length] = issue;
+
+	                            if (debug) {
+	                                console.log(issue.id, 'was overdue');
+	                            }
+	                        } else {
+	                            if (debug) {
+	                                console.log(issue.id, 'closed at (' + diffDays + ' : ' + closedAtDay + ' / ' + startDay + ')');
+	                            }
+	                        }
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError3 = true;
+	                _iteratorError3 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                        _iterator3.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError3) {
+	                        throw _iteratorError3;
+	                    }
+	                }
+	            }
+
+	            return issues;
+	        }
+
+	        /**
+	         * Gets hours left at day
+	         *
+	         * @param {Number} day
+	         *
+	         * @returns {Number} Estimated hours left
+	         */
+
+	    }, {
+	        key: 'getRemainingEstimatedHoursAtDay',
+	        value: function getRemainingEstimatedHoursAtDay(day) {
+	            var hours = 0;
+
+	            var _iteratorNormalCompletion4 = true;
+	            var _didIteratorError4 = false;
+	            var _iteratorError4 = undefined;
+
+	            try {
+	                for (var _iterator4 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                    var issue = _step4.value;
+
+	                    hours += issue.getEstimatedHours();
+	                }
+	            } catch (err) {
+	                _didIteratorError4 = true;
+	                _iteratorError4 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                        _iterator4.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError4) {
+	                        throw _iteratorError4;
+	                    }
+	                }
+	            }
+
+	            return hours;
 	        }
 	    }]);
 
@@ -12212,6 +12354,31 @@
 	        }
 
 	        /**
+	         * Gets the actual hours remaining
+	         *
+	         * @returns {Array} Actual hours by day
+	         */
+
+	    }, {
+	        key: 'getActualHours',
+	        value: function getActualHours() {
+	            var milestone = this.getCurrentMilestone();
+	            var actualHours = [];
+
+	            if (!milestone) {
+	                return actualHours;
+	            }
+
+	            var totalDays = milestone.getTotalDays();
+
+	            for (var day = 0; day <= totalDays; day++) {
+	                actualHours[actualHours.length] = milestone.getRemainingEstimatedHoursAtDay(day);
+	            }
+
+	            return actualHours;
+	        }
+
+	        /**
 	         * Gets the optimal hours remaining
 	         *
 	         * @returns {Array} Optimal hours by day
@@ -12229,7 +12396,7 @@
 
 	            var totalDays = milestone.getTotalDays();
 	            var totalHours = milestone.getTotalEstimatedHours();
-	            var divider = totalDays - 1;
+	            var divider = totalDays;
 	            if (divider < 1) {
 	                divider = 1;
 	            }
@@ -12237,7 +12404,7 @@
 
 	            var currentHours = totalHours;
 
-	            for (var day = 0; day < totalDays; day++) {
+	            for (var day = 0; day <= totalDays; day++) {
 	                optimalHours[optimalHours.length] = currentHours;
 
 	                currentHours -= optimalDecline;
@@ -12267,74 +12434,100 @@
 	    var milestoneStart = new Date(milestone.startDate);
 	    var milestoneEnd = new Date(milestone.endDate);
 
-	    var CANVAS_HEIGHT = 400;
-	    var CANVAS_WIDTH = 800;
-	    var CANVAS_MARGIN = 10;
+	    var CANVAS_HEIGHT_UNIT = 400 / Math.ceil(totalHours);
+	    var CANVAS_WIDTH_UNIT = 80;
+
+	    if (CANVAS_WIDTH_UNIT * totalDays < 860) {
+	        CANVAS_WIDTH_UNIT = 860 / totalDays;
+	    }
 
 	    var optimalHours = this.getOptimalHours();
+	    var actualHours = this.getActualHours();
 
-	    var $canvas = _.canvas({ width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
+	    var $canvas = _.canvas({ width: CANVAS_WIDTH_UNIT * totalDays, height: CANVAS_HEIGHT_UNIT * totalHours });
 	    var ctx = $canvas[0].getContext('2d');
 
 	    /**
 	     * Draws the grid
 	     */
 	    var drawGrid = function drawGrid() {
-	        var xDivider = totalDays - 1;
-	        if (xDivider < 1) {
-	            xDivider = 1;
-	        }
+	        var drawNextX = function drawNextX(x) {
+	            var xPos = x * CANVAS_WIDTH_UNIT;
 
-	        var xUnit = (CANVAS_WIDTH - CANVAS_MARGIN * 2) / xDivider;
-	        var yUnit = CANVAS_HEIGHT - CANVAS_MARGIN * 2;
+	            GraphHelper.drawLine(ctx, xPos, 0, xPos, CANVAS_HEIGHT_UNIT * totalHours, 1, '#999999');
 
-	        for (var i in optimalHours) {
-	            var x = CANVAS_MARGIN + i * xUnit;
-	            var y = CANVAS_MARGIN + (1 - optimalHours[i] / totalHours) * yUnit;
+	            if (x < totalDays) {
+	                setTimeout(function () {
+	                    drawNextX(x + 1);
+	                }, 1);
+	            }
+	        };
 
-	            GraphHelper.drawLine(ctx, x, CANVAS_MARGIN, x, CANVAS_HEIGHT - CANVAS_MARGIN);
-	            GraphHelper.drawLine(ctx, CANVAS_MARGIN, y, CANVAS_WIDTH - CANVAS_MARGIN, y);
-	        }
+	        var drawNextY = function drawNextY(y) {
+	            var yPos = y * CANVAS_HEIGHT_UNIT;
+
+	            GraphHelper.drawLine(ctx, 0, yPos, CANVAS_WIDTH_UNIT * totalDays, yPos, 1, '#999999');
+
+	            if (yPos < 400) {
+	                setTimeout(function () {
+	                    drawNextY(y + 1);
+	                }, 1);
+	            }
+	        };
+
+	        drawNextX(0);
+	        //        drawNextY(0);
 	    };
 
 	    /**
 	     * Draws the optimal hours
+	     *
+	     * @param {Array} hours
+	     * @param {String} color
 	     */
-	    var drawOptimalHours = function drawOptimalHours() {
-	        var xDivider = totalDays - 1;
-	        if (xDivider < 1) {
-	            xDivider = 1;
-	        }
+	    var drawHours = function drawHours(hours, color) {
+	        var drawNext = function drawNext(i) {
+	            var startHours = hours[i - 1];
 
-	        var xUnit = (CANVAS_WIDTH - CANVAS_MARGIN * 2) / xDivider;
-	        var yUnit = CANVAS_HEIGHT - CANVAS_MARGIN * 2;
+	            var startX = (i - 1) * CANVAS_WIDTH_UNIT;
+	            var startY = (totalHours - startHours) * CANVAS_HEIGHT_UNIT;
 
-	        for (var i in optimalHours) {
-	            if (i == 0) {
-	                continue;
+	            var endHours = hours[i];
+
+	            var endX = i * CANVAS_WIDTH_UNIT;
+	            var endY = (totalHours - endHours) * CANVAS_HEIGHT_UNIT;
+
+	            GraphHelper.drawCircle(ctx, startX, startY, 4, color);
+
+	            if (i >= hours.length - 1) {
+	                GraphHelper.drawCircle(ctx, endX, endY, 4, color);
 	            }
 
-	            var startX = CANVAS_MARGIN + (i - 1) * xUnit;
-	            var startY = CANVAS_MARGIN + (1 - optimalHours[i - 1] / totalHours) * yUnit;
+	            GraphHelper.drawLine(ctx, startX, startY, endX, endY, 2, color);
 
-	            var endX = CANVAS_MARGIN + i * xUnit;
-	            var endY = CANVAS_MARGIN + (1 - optimalHours[i] / totalHours) * yUnit;
-
-	            GraphHelper.drawCircle(ctx, startX, startY, 5);
-
-	            if (i >= optimalHours.length - 1) {
-	                GraphHelper.drawCircle(ctx, endX, endY, 5);
+	            if (i < hours.length - 1) {
+	                setTimeout(function () {
+	                    drawNext(i + 1);
+	                }, 1);
 	            }
+	        };
 
-	            GraphHelper.drawLine(ctx, startX, startY, endX, endY);
-	        }
+	        drawNext(1);
 	    };
 
 	    return _.div({ class: 'burndown-chart analytics-body' }, _.div({ class: 'toolbar' }, _.select({ class: 'milestone-picker' }, _.each(resources.milestones, function (i, milestone) {
 	        return _.option({ value: milestone.index }, milestone.title);
 	    })).val(milestone ? milestone.index : 0).change(function (e) {
 	        _this.onChangeMilestonePicker($(e.target).val());
-	    })), _.div({ class: 'graph' }, _.p('Total task estimates: ' + totalHours), _.p('Milestone start: ' + milestoneStart), _.p('Milestone end: ' + milestoneEnd), $canvas, drawGrid(), drawOptimalHours()));
+	    })), _.div({ class: 'meta' }, _.p('Total days: ' + (totalDays + 1)), _.p('Total hours: ' + totalHours), _.p('Milestone start: ' + milestoneStart), _.p('Milestone end: ' + milestoneEnd)), _.div({ class: 'graph-container' }, _.div({ class: 'graph-y-axis-labels' }, _.label({ style: 'top: 0px' }, Math.round(totalHours) + ' h'), _.label({ style: 'top: 400px' }, '0 h')), _.div({ class: 'graph-canvas' }, $canvas, drawGrid(), drawHours(optimalHours, 'blue'), drawHours(actualHours, 'red'), _.div({ class: 'graph-x-axis-labels' }, _.loop(totalDays, function (i) {
+	        i++;
+
+	        if (i % 5 !== 0 && i != 1 && i != totalDays + 1) {
+	            return;
+	        }
+
+	        return _.label({ style: 'left: ' + CANVAS_WIDTH_UNIT * (i - 1) + 'px' }, i.toString() + ' d');
+	    })))));
 	};
 
 /***/ },

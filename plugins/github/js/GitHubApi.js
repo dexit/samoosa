@@ -1085,9 +1085,8 @@ class GitHubApi extends ApiHelper {
             issue.description = gitHubIssue.body;
             issue.id = gitHubIssue.number; 
             issue.reporter =  ResourceHelper.getCollaborator(gitHubIssue.user.login);
-            issue.createdAt = new Date(gitHubIssue.created_at);
-            issue.updatedAt = new Date(gitHubIssue.updated_at);
-            issue.closedAt = new Date(gitHubIssue.closed_at);
+            issue.createdAt = gitHubIssue.created_at;
+            issue.closedAt = gitHubIssue.closed_at;
 
             if(gitHubIssue.assignee) {
                 issue.assignee = ResourceHelper.getCollaborator(gitHubIssue.assignee.login);

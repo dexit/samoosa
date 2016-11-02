@@ -1049,6 +1049,38 @@ body > .plan-item-editor {
         padding: 0px 5px;
         font-family: monospace; }
 
+.workspace.analytics {
+  max-width: 900px;
+  margin: 0px auto; }
+  .workspace.analytics .burndown-chart .graph-container {
+    display: flex; }
+    .workspace.analytics .burndown-chart .graph-container .graph-canvas {
+      overflow-x: auto;
+      flex-grow: 1; }
+    .workspace.analytics .burndown-chart .graph-container .graph-y-axis-labels {
+      flex-shrink: 0;
+      position: relative;
+      width: 40px; }
+      .workspace.analytics .burndown-chart .graph-container .graph-y-axis-labels label {
+        position: absolute;
+        left: 0px;
+        width: 40px;
+        display: block; }
+        .workspace.analytics .burndown-chart .graph-container .graph-y-axis-labels label:last-child {
+          transform: translateY(-100%); }
+    .workspace.analytics .burndown-chart .graph-container .graph-x-axis-labels {
+      position: relative;
+      white-space: nowrap;
+      height: 20px; }
+      .workspace.analytics .burndown-chart .graph-container .graph-x-axis-labels label {
+        line-height: 20px;
+        height: 20px;
+        position: absolute;
+        top: 0px;
+        display: inline-block; }
+        .workspace.analytics .burndown-chart .graph-container .graph-x-axis-labels label:last-child {
+          transform: translateX(-100%); }
+
 /**
  * Colours
  */

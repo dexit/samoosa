@@ -7,61 +7,79 @@ module.exports = function render() {
     let milestoneStart = new Date(milestone.startDate);
     let milestoneEnd = new Date(milestone.endDate);
 
-    const CANVAS_HEIGHT = 400;
-    const CANVAS_WIDTH = 800;
-    const CANVAS_MARGIN = 10;
+    let CANVAS_HEIGHT_UNIT = 400 / Math.ceil(totalHours);
+    let CANVAS_WIDTH_UNIT = 80;
+
+    if(CANVAS_WIDTH_UNIT * totalDays < 860) {
+        CANVAS_WIDTH_UNIT = 860 / totalDays;
+    }
 
     let optimalHours = this.getOptimalHours();
+    let actualHours = this.getActualHours();
 
-    let $canvas = _.canvas({width: CANVAS_WIDTH, height: CANVAS_HEIGHT});
+    let $canvas = _.canvas({width: CANVAS_WIDTH_UNIT * totalDays, height: CANVAS_HEIGHT_UNIT * totalHours});
     let ctx = $canvas[0].getContext('2d');
 
     /**
      * Draws the grid
      */
     let drawGrid = () => {
-        let xDivider = totalDays - 1;
-        if(xDivider < 1) { xDivider = 1; }
-        
-        let xUnit = (CANVAS_WIDTH - (CANVAS_MARGIN * 2)) / xDivider;
-        let yUnit = (CANVAS_HEIGHT - (CANVAS_MARGIN * 2));
-        
-        for(let i in optimalHours) {
-            let x = CANVAS_MARGIN + i * xUnit;
-            let y = CANVAS_MARGIN + (1 - optimalHours[i] / totalHours) * yUnit;
+        let drawNextX = (x) => {
+            let xPos = x * CANVAS_WIDTH_UNIT;
 
-            GraphHelper.drawLine(ctx, x, CANVAS_MARGIN, x, CANVAS_HEIGHT - CANVAS_MARGIN);
-            GraphHelper.drawLine(ctx, CANVAS_MARGIN, y, CANVAS_WIDTH - CANVAS_MARGIN, y);
-        }
+            GraphHelper.drawLine(ctx, xPos, 0, xPos, CANVAS_HEIGHT_UNIT * totalHours, 1, '#999999');
+
+            if(x < totalDays) {
+                setTimeout(() => { drawNextX(x + 1); }, 1);
+            }
+        };
+
+        let drawNextY = (y) => {
+            let yPos = y * CANVAS_HEIGHT_UNIT;
+            
+            GraphHelper.drawLine(ctx, 0, yPos, CANVAS_WIDTH_UNIT * totalDays, yPos, 1, '#999999');
+
+            if(yPos < 400) {
+                setTimeout(() => { drawNextY(y + 1); }, 1);
+            }
+        };
+
+        drawNextX(0);
+//        drawNextY(0);
     };
 
     /**
      * Draws the optimal hours
+     *
+     * @param {Array} hours
+     * @param {String} color
      */
-    let drawOptimalHours = () => {
-        let xDivider = totalDays - 1;
-        if(xDivider < 1) { xDivider = 1; }
-        
-        let xUnit = (CANVAS_WIDTH - (CANVAS_MARGIN * 2)) / xDivider;
-        let yUnit = (CANVAS_HEIGHT - (CANVAS_MARGIN * 2));
+    let drawHours = (hours, color) => {
+        let drawNext = (i) => {
+            let startHours = hours[i - 1];
+            
+            let startX = (i - 1) * CANVAS_WIDTH_UNIT;
+            let startY = (totalHours - startHours) * CANVAS_HEIGHT_UNIT;
 
-        for(let i in optimalHours) {
-            if(i == 0) { continue; }
+            let endHours = hours[i];
 
-            let startX = CANVAS_MARGIN + (i - 1) * xUnit;
-            let startY = CANVAS_MARGIN + (1 - optimalHours[i - 1] / totalHours) * yUnit;
+            let endX = i * CANVAS_WIDTH_UNIT;
+            let endY = (totalHours - endHours) * CANVAS_HEIGHT_UNIT;
 
-            let endX = CANVAS_MARGIN + i * xUnit;
-            let endY = CANVAS_MARGIN + (1 - optimalHours[i] / totalHours) * yUnit;
+            GraphHelper.drawCircle(ctx, startX, startY, 4, color);
 
-            GraphHelper.drawCircle(ctx, startX, startY, 5);
-
-            if(i >= optimalHours.length - 1) {
-                GraphHelper.drawCircle(ctx, endX, endY, 5);
+            if(i >= hours.length - 1) {
+                GraphHelper.drawCircle(ctx, endX, endY, 4, color);
             }
 
-            GraphHelper.drawLine(ctx, startX, startY, endX, endY);
-        }
+            GraphHelper.drawLine(ctx, startX, startY, endX, endY, 2, color);
+
+            if(i < hours.length - 1) {
+                setTimeout(() => { drawNext(i + 1); }, 1);
+            }
+        };
+
+        drawNext(1);
     };
 
     return _.div({class: 'burndown-chart analytics-body'},
@@ -72,14 +90,32 @@ module.exports = function render() {
                 })
             ).val(milestone ? milestone.index : 0).change((e) => { this.onChangeMilestonePicker($(e.target).val()); })
         ),
-        _.div({class: 'graph'},
-            _.p('Total task estimates: ' + totalHours),
+        _.div({class: 'meta'},
+            _.p('Total days: ' + (totalDays + 1)),
+            _.p('Total hours: ' + totalHours),
             _.p('Milestone start: ' + milestoneStart),
             _.p('Milestone end: ' + milestoneEnd),
+        ),
+        _.div({class: 'graph-container'},
+            _.div({class: 'graph-y-axis-labels'},
+                _.label({style: 'top: 0px'}, Math.round(totalHours) + ' h'),
+                _.label({style: 'top: 400px'}, '0 h')
+            ),
+            _.div({class: 'graph-canvas'},
+                $canvas,
+                drawGrid(),
+                drawHours(optimalHours, 'blue'),
+                drawHours(actualHours, 'red'),
+                _.div({class: 'graph-x-axis-labels'},
+                    _.loop(totalDays, (i) => {
+                        i++;
 
-            $canvas,
-            drawGrid(),
-            drawOptimalHours()
+                        if(i % 5 !== 0 && i != 1 && i != totalDays + 1) { return; }
+
+                        return _.label({style: 'left: ' + (CANVAS_WIDTH_UNIT * (i - 1)) + 'px'},i.toString() + ' d');
+                    })
+                )
+            )
         )
     );
 }

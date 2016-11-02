@@ -24,6 +24,19 @@ body, html {
 }
 
 /**
+ * Document page
+ */
+.document-page {
+    .document {
+        max-width: 900px;
+        margin: 0em auto;
+        padding-top: 5em;
+        padding-left: 2em;
+        padding-right: 2em;
+    }
+}
+
+/**
  * A transparent, border-less button
  */
 .btn-transparent {

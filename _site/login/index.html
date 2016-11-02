@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width initial-scale=1"/>
+        <meta name="description" content="The Samoosa issue tracker"/>
+
+        <link href="../public/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+        <link href="../public/css/client.css" rel="stylesheet"/>
+
+        <title>Samoosa</title>
+    </head>
+    <body>
+        <div class="app-container">
+            <form class="login-form">
+                <img class="logo" src="../public/svg/logo-light.svg" />
+                <ul>
+                    <li>
+                        <label for="input-source">Source</label>
+                        <select id="input-source" name="source">
+                            <option value="github">GitHub</option>
+                            <option value="bitbucket">BitBucket</option>
+                        </select>
+                    </li>
+                    <li> 
+                        <label for="input-user">User/team</label>
+                        <input id="input-user" name="user" type="text" />
+                    </li>
+                    <li> 
+                        <label for="input-token">API token</label>
+                        <input id=input-token" type="text" name="token" />
+                    </li>
+                    <li>
+                        <a id="link-new-token" href="#">Create new token</a>
+                    </li>
+                    <li> 
+                        <input type="submit" class="btn" value="Log in"/>
+                    </li>
+                </ul>
+            </form>
+        </div>
+
+        <script src="../public/lib/jquery/jquery.min.js"></script>
+        <script>
+            // Submit action
+            function onSubmit(e) {
+                e.preventDefault();
+                
+                // Update localStorage
+                $('.login-form input:not([type="submit"]), .login-form select').each(function() {
+                    localStorage.setItem($(this).attr('name'), $(this).val());
+                });
+
+                // Change to default view
+                location = '/#/' + localStorage.getItem('user');
+            }
+
+            // New token action
+            function onClickNewToken(e) {
+                e.preventDefault();
+
+                var source = $('#input-source').val();
+                var user = $('#input-user').val();
+
+                switch(source) {
+                    case 'github':
+                        window.open('https://github.com/settings/tokens/new');
+                        break;
+
+                    case 'bitbucket':
+                        let username = prompt('Input username');
+                        let password = prompt('Input password');
+                        let token = btoa(username + ':' + password);
+
+                        $('input[name="token"]').val(token);
+
+                        /*if(!user) {
+                            alert('Please fill out user/team name first');
+                            return;
+                        }
+
+                        url = 'https://bitbucket.org/account/user/' + user + '/app-passwords/new';*/
+                        break;
+                }
+
+            }
+
+            // Event hookups
+            $('.login-form').on('submit', onSubmit);
+            $('#link-new-token').on('click', onClickNewToken);
+        </script>
+    </body>
+</html>

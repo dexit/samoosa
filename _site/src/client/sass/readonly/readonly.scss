@@ -1,0 +1,10 @@
+@import '../_reset';
+@import '../_colors';
+@import '../_main';
+
+@import '../_theme';
+
+.workspace.scope-container {
+    max-width: 50rem;
+    margin: 1rem auto;
+}

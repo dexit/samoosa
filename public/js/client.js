@@ -9596,18 +9596,21 @@
 	            var links = [];
 
 	            links.push({
+	                title: 'Samoosa',
 	                url: '/',
 	                class: 'logo',
 	                handler: this.toggleAboutPanel
 	            });
 
 	            links.push({
+	                title: 'User',
 	                url: '/source/',
 	                handler: this.toggleSourcePanel,
 	                icon: 'user'
 	            });
 
 	            links.push({
+	                title: 'Projects',
 	                url: '/projects/',
 	                handler: this.toggleProjectsList,
 	                icon: 'folder'
@@ -9619,27 +9622,32 @@
 
 	            if (localStorage.getItem('source') != 'bitbucket') {
 	                links.push({
+	                    title: 'Project plan',
 	                    url: '/plan/',
 	                    icon: 'calendar'
 	                });
 	            }
 
 	            links.push({
+	                title: 'Kanban board',
 	                url: '/board/kanban/',
 	                icon: 'columns'
 	            });
 
 	            links.push({
+	                title: 'List board',
 	                url: '/board/list/',
 	                icon: 'list'
 	            });
 
 	            links.push({
+	                title: 'Settings',
 	                url: '/settings/',
 	                icon: 'cog'
 	            });
 
 	            links.push({
+	                title: 'Analytics',
 	                url: '/analytics/',
 	                icon: 'line-chart'
 	            });
@@ -9864,6 +9872,7 @@
 	            return _.div({ class: 'separator' });
 	        } else {
 	            return _.button({
+	                title: link.title,
 	                'data-url': link.url,
 	                class: (link.class || '') + (link.bottom ? ' bottom' : '') + (link.handler ? ' handler' : '')
 	            }, _.if(link.icon, _.span({ class: 'fa fa-' + link.icon })), _.if(link.img, _.img({ src: link.img }))).click(function () {

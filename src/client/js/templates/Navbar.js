@@ -17,6 +17,7 @@ module.exports = function Navbar() {
                 } else {
                     return _.button(
                         {
+                            title: link.title,
                             'data-url': link.url,
                             class:
                                 (link.class || '') +

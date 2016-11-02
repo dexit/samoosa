@@ -18,7 +18,8 @@ Samoosa has the basics covered, but is constantly being expanded with more featu
 - Project picker
 - Customisable issue types, priorities, versions and estimates
 - Printed pages for formal purposes such as scope-of-work documents
+- Issue burndown chart
 
 ### Features to come
 - BitBucket integration
-- Issue burndown chart
+- More analytics charts

@@ -67,8 +67,6 @@ class PlanItemEditor extends View {
         // Update DOM elements to match model
         this.$element.find('.drag-handle').text(this.model.title);
 
-        console.log(dateString, this.model.endDate);
-
         // Start loading
         this.$element.toggleClass('loading', true);
         

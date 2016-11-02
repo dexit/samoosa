@@ -38,6 +38,8 @@ class PlanEditor extends View {
         let milestones = [];
         
         for(let milestone of resources.milestones) {
+            if(!milestone) { continue; }
+
             if(!milestone.endDate) {
                 milestones.push(milestone);
             }

@@ -5882,7 +5882,7 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + (parseInt(milestone.index) + 1), this.convertMilestone(milestone));
+	            return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + milestone.id, this.convertMilestone(milestone));
 	        }
 
 	        /**
@@ -6037,10 +6037,11 @@
 	            window.resources.milestones = [];
 
 	            for (var i in milestones) {
-	                var index = parseInt(milestones[i].number) - 1;
+	                var index = window.resources.milestones.length;
 
 	                var milestone = new Milestone({
 	                    index: index,
+	                    id: milestones[i].number,
 	                    title: milestones[i].title,
 	                    description: milestones[i].description,
 	                    startDate: milestones[i].created_at,
@@ -11372,8 +11373,6 @@
 	            // Update DOM elements to match model
 	            this.$element.find('.drag-handle').text(this.model.title);
 
-	            console.log(dateString, this.model.endDate);
-
 	            // Start loading
 	            this.$element.toggleClass('loading', true);
 
@@ -11693,6 +11692,10 @@
 	            try {
 	                for (var _iterator = resources.milestones[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	                    var milestone = _step.value;
+
+	                    if (!milestone) {
+	                        continue;
+	                    }
 
 	                    if (!milestone.endDate) {
 	                        milestones.push(milestone);

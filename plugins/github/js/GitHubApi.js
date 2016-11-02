@@ -796,7 +796,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateMilestone(milestone) {
-        return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + (parseInt(milestone.index) + 1), this.convertMilestone(milestone));
+        return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + milestone.id, this.convertMilestone(milestone));
     }
     
     /**
@@ -926,10 +926,11 @@ class GitHubApi extends ApiHelper {
         window.resources.milestones = [];
         
         for(let i in milestones) {
-            let index = parseInt(milestones[i].number) - 1;
+            let index = window.resources.milestones.length;
 
             let milestone = new Milestone({
                 index: index,
+                id: milestones[i].number,
                 title: milestones[i].title,
                 description: milestones[i].description,
                 startDate: milestones[i].created_at,

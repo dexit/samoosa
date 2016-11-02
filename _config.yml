@@ -1,2 +1,1 @@
 exclude: [ node_modules ]
-include: [ README.md, LICENSE ]

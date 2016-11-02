@@ -76,6 +76,14 @@ ul {
 /**
  * Main layout elements
  */
+.spinner-backdrop {
+    .spinner-container {
+        .spinner-icon {
+            color: $pink-medium;
+        }
+    }
+}
+
 .navbar {
     &, .obscure {
         background-color: $teal-dark;

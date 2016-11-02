@@ -737,9 +737,14 @@ body, html {
     .navbar.out.about-panel .obscure .content {
       max-width: 50rem;
       left: 50%;
-      top: 10%;
-      height: auto;
-      transform: translateX(-50%); }
+      top: 50%;
+      height: 15rem;
+      transform: translate(-50%, -50%);
+      text-align: center; }
+      .navbar.out.about-panel .obscure .content img {
+        max-width: 10rem; }
+      .navbar.out.about-panel .obscure .content h1 {
+        margin: 0px; }
   .navbar.out.source-panel .obscure {
     max-width: 20rem; }
   .navbar.out.project-list .obscure {

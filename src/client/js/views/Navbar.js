@@ -131,12 +131,10 @@ class Navbar extends View {
      */
     toggleAboutPanel(isActive) {
         this.togglePanel('/', 'about-panel', ($content) => {
-            $.get('/README.md', (res) => {
-                $content
-                .append(
-                        markdownToHtml(res) 
-                );
-            });
+            _.append($content,
+                _.img({class: 'about-logo', src: '/public/svg/logo-medium.svg'}),
+                _.h1('Samoosa')
+            );
         }, isActive);
     }
 

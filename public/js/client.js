@@ -9718,9 +9718,7 @@
 	        key: 'toggleAboutPanel',
 	        value: function toggleAboutPanel(isActive) {
 	            this.togglePanel('/', 'about-panel', function ($content) {
-	                $.get('/README.md', function (res) {
-	                    $content.append(markdownToHtml(res));
-	                });
+	                _.append($content, _.img({ class: 'about-logo', src: '/public/svg/logo-medium.svg' }), _.h1('Samoosa'));
 	            }, isActive);
 	        }
 

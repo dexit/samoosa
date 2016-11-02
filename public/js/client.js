@@ -12432,7 +12432,7 @@
 	    var milestone = this.getCurrentMilestone();
 
 	    if (!milestone) {
-	        return _.div({ class: 'burndown-chart analytics-body' }, _.div({ class: 'error-message' }, 'There are no milestones defined in this project'));
+	        return _.div({ class: 'burndown-chart analytics-body' }, _.h4('There are no milestones defined in this project'));
 	    }
 
 	    var totalDays = milestone.getTotalDays();

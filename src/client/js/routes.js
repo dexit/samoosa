@@ -3,21 +3,6 @@
 // Root
 Router.route('/', () => {
     setTimeout(() => {
-        location.hash = '/' + ApiHelper.getUserName();
-
-        $('.workspace').remove();
-
-        $('.app-container').append(
-            _.div({class: 'workspace logo'},
-                _.img({src: '/public/svg/logo-medium.svg'})
-            )
-        );
-    }, 10);
-});
-
-// User
-Router.route('/:user', () => {
-    setTimeout(() => {
         navbar.toggleProjectsList(true);
         
         $('.workspace').remove();

@@ -316,8 +316,12 @@ ul {
             color: $black;
         }
 
-        .btn-edit, p, span, a {
+        .btn-edit, p, span {
             color: $white;
+        }
+
+        a {
+            color: $pink-medium;
         }
 
         .btn-edit, p, textarea {
@@ -361,6 +365,10 @@ ul {
 
             .collaborator {
                 color: $white;
+            }
+
+            a {
+                color: $pink-medium
             }
         }
     }

@@ -1318,8 +1318,10 @@ ul {
     .issue-editor .body textarea {
       background-color: #fff;
       color: #000; }
-    .issue-editor .body .btn-edit, .issue-editor .body p, .issue-editor .body span, .issue-editor .body a {
+    .issue-editor .body .btn-edit, .issue-editor .body p, .issue-editor .body span {
       color: #fff; }
+    .issue-editor .body a {
+      color: #E70D3B; }
     .issue-editor .body .btn-edit, .issue-editor .body p, .issue-editor .body textarea {
       line-height: 1.5em; }
   .issue-editor .meta {
@@ -1342,6 +1344,8 @@ ul {
       border-radius: 0px; }
     .issue-editor .comments .comment .collaborator, .issue-editor .add-comment .comment .collaborator {
       color: #fff; }
+    .issue-editor .comments .comment a, .issue-editor .add-comment .comment a {
+      color: #E70D3B; }
 
 .plan-container .plan-item-editor {
   background-color: #21303B; }

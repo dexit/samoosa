@@ -9596,13 +9596,6 @@
 	            var links = [];
 
 	            links.push({
-	                title: 'Samoosa',
-	                url: '/',
-	                class: 'logo',
-	                handler: this.toggleAboutPanel
-	            });
-
-	            links.push({
 	                title: 'User',
 	                url: '/source/',
 	                handler: this.toggleSourcePanel,
@@ -11542,22 +11535,8 @@
 	            // Set class on board container
 	            $('.plan-container').toggleClass('dragging', true);
 
-	            // Apply temporary CSS properties
-	            this.$element.css({
-	                top: this.$element.offset().top,
-	                left: this.$element.offset().left,
-	                width: this.$element.outerWidth(),
-	                height: this.$element.outerHeight(),
-	                'pointer-events': 'none',
-	                'z-index': 999
-	            });
-
-	            this.$element.find('button, input').css({
-	                'pointer-events': 'none'
-	            });
-
 	            // Find the offset parent
-	            var $offsetParent = this.$element.parents('.dates');
+	            var $offsetParent = this.$element.offsetParent();
 	            var offsetDOM = $offsetParent.offset();
 
 	            if ($offsetParent.length < 1) {
@@ -11567,10 +11546,26 @@
 	                offsetDOM.top += this.$element.height();
 	            }
 
+	            // Apply temporary CSS properties
+	            var bounds = this.$element[0].getBoundingClientRect();
+
+	            this.$element.css({
+	                top: bounds.top - offsetDOM.top,
+	                left: bounds.left - offsetDOM.left,
+	                width: bounds.width,
+	                height: bounds.height,
+	                'pointer-events': 'none',
+	                'z-index': 999
+	            });
+
+	            this.$element.find('button, input').css({
+	                'pointer-events': 'none'
+	            });
+
 	            // Buffer the offset between mouse cursor and element position
 	            var offset = {
-	                x: this.$element.offset().left - e.pageX - offsetDOM.left,
-	                y: this.$element.offset().top - e.pageY - offsetDOM.top
+	                x: bounds.left - e.pageX - offsetDOM.left,
+	                y: bounds.top - e.pageY - offsetDOM.top
 	            };
 
 	            // Add absolute positioning afterwards to allow getting proper offset
@@ -12552,7 +12547,9 @@
 
 	Router.route('/', function () {
 	    setTimeout(function () {
-	        navbar.toggleAboutPanel(true);
+	        location.hash = '/' + ApiHelper.getUserName();
+
+	        $('.app-container').append(_.div({ class: 'workspace logo' }, _.img({ src: '/public/svg/logo-medium.svg' })));
 	    }, 10);
 	});
 
@@ -12560,6 +12557,8 @@
 	Router.route('/:user', function () {
 	    setTimeout(function () {
 	        navbar.toggleProjectsList(true);
+
+	        $('.app-container').append(_.div({ class: 'workspace logo' }, _.img({ src: '/public/svg/logo-medium.svg' })));
 	    }, 10);
 	});
 

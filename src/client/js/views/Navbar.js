@@ -21,13 +21,6 @@ class Navbar extends View {
         let links = [];
         
         links.push({
-            title: 'Samoosa',
-            url: '/',
-            class: 'logo',
-            handler: this.toggleAboutPanel
-        });
-        
-        links.push({
             title: 'User',
             url: '/source/',
             handler: this.toggleSourcePanel,

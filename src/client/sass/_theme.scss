@@ -82,6 +82,19 @@ ul {
 /**
  * Main layout elements
  */
+.workspace.logo {
+    background-color: $teal-dark;
+    position: relative;
+
+    img {
+        max-width: 200px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+
 .spinner-backdrop {
     .spinner-container {
         .spinner-icon {

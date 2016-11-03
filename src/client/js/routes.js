@@ -3,7 +3,13 @@
 // Root
 Router.route('/', () => {
     setTimeout(() => {
-        navbar.toggleAboutPanel(true);
+        location.hash = '/' + ApiHelper.getUserName();
+
+        $('.app-container').append(
+            _.div({class: 'workspace logo'},
+                _.img({src: '/public/svg/logo-medium.svg'})
+            )
+        );
     }, 10);
 });
 
@@ -11,6 +17,12 @@ Router.route('/', () => {
 Router.route('/:user', () => {
     setTimeout(() => {
         navbar.toggleProjectsList(true);
+        
+        $('.app-container').append(
+            _.div({class: 'workspace logo'},
+                _.img({src: '/public/svg/logo-medium.svg'})
+            )
+        );
     }, 10);
 });
 

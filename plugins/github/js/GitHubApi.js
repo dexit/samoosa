@@ -618,11 +618,15 @@ class GitHubApi extends ApiHelper {
             };
         }
 
-        return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones', this.convertMilestone(milestone))
-            .then(() => {
-                callback();
-            });
+        if(milestone instanceof Milestone === false) {
+            milestone = new Milestone(milestone);
+        }
+            
+        return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones', this.convertMilestone(milestone))
+        .then((gitHubMilestone) => {
+            milestone.id = gitHubMilestone.number;
+
+            return Promise.resolve(milestone);
         });
     }
     
@@ -794,7 +798,7 @@ class GitHubApi extends ApiHelper {
     /**
      * Updates milestone 
      *
-     * @param {Object} milestone
+     * @param {Milestone} milestone
      *
      * @returns {Promise} promise
      */
@@ -1201,7 +1205,7 @@ class GitHubApi extends ApiHelper {
         let gitHubMilestone = {
             title: milestone.title,
             description: milestone.description,
-            due_on: milestone.endDate,
+            due_on: milestone.getEndDate() ? milestone.getEndDate().toISOString() : null,
             state: milestone.closed ? 'closed' : 'open'
         };
 

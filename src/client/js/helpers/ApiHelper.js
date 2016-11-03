@@ -705,7 +705,9 @@ class ApiHelper {
                 return this.addProject(item);
         
             default:
-                displayError(new Error('Resource "' + resource + '" is unknown'));
+                return new Promise((resolve, reject) => {
+                    reject(new Error('Resource "' + resource + '" is unknown'));
+                });
         }
     }
     
@@ -745,7 +747,9 @@ class ApiHelper {
                 return this.updateProject(item);
             
             default:
-                displayError(new Error('Resource "' + resource + '" is unknown'));
+                return new Promise((resolve, reject) => {
+                    reject(new Error('Resource "' + resource + '" is unknown'));
+                });
         }
     }
 
@@ -784,6 +788,11 @@ class ApiHelper {
             
             case 'projects':
                 return this.getIssues();
+
+            default:
+                return new Promise((resolve, reject) => {
+                    reject(new Error('Resource "' + resource + '" is unknown'));
+                });
         }
     }
 

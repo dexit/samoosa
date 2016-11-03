@@ -28,7 +28,7 @@ module.exports = function render() {
                 if(!date) {
                     return _.div({class: 'date-placeholder'});
                 } else {
-                    return _.div({class: 'date', 'data-date': date.getSimpleString()},
+                    return _.div({class: 'date', 'data-date': date.getTime()},
                         _.div({class: 'header'},
                             _.span({class: 'datenumber'}, date.getDate()),
                             _.span({class: 'weeknumber'}, 'w ' + date.getWeek())

@@ -131,17 +131,12 @@ class PlanEditor extends View {
         let dates = [];
 
         for(let i = 1; i <= new Date(year, month, 0).getDate(); i++) {
-            let day = i.toString();
-
-            if(day.length == 1) {
-                day = '0' + day;
-            }
+            let day = i;
+            let date = new Date();
             
-            if(month.toString().length == 1) {
-                month = '0' + month;
-            }
-
-            let date = new Date(year + '-' + month + '-' + day).floor();
+            date.setYear(year);
+            date.setMonth(month - 1);
+            date.setDate(day);
 
             dates.push(date); 
         }

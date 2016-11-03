@@ -4207,7 +4207,6 @@
 	Date.prototype.getWeek = function () {
 	    var date = new Date(this.getTime());
 
-	    date.floor();
 	    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
 
 	    var week1 = new Date(date.getFullYear(), 0, 4);
@@ -4269,8 +4268,6 @@
 	        return prettyDate;
 	    }
 
-	    date.floor();
-
 	    separator = separator || '.';
 
 	    prettyDate = date.getFullYear() + separator + (date.getMonth() + 1) + separator + date.getDate();
@@ -4299,8 +4296,8 @@
 	// Sort array by date
 	window.sortByDate = function (array, key) {
 	    return array.concat().sort(function (a, b) {
-	        a = new Date(a[key]).floor();
-	        b = new Date(b[key]).floor();
+	        a = new Date(a[key]);
+	        b = new Date(b[key]);
 
 	        if (a < b) {
 	            return -1;
@@ -4473,7 +4470,9 @@
 	        key: 'addResource',
 	        value: function addResource(resource, item) {
 	            return new Promise(function (callback) {
-	                ApiHelper.addResource(resource, item).then(function () {
+	                ApiHelper.addResource(resource, item).then(function (newItem) {
+	                    item = newItem || item;
+
 	                    var index = resources[resource].length;
 
 	                    if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object') {
@@ -5704,18 +5703,20 @@
 	    }, {
 	        key: 'addMilestone',
 	        value: function addMilestone(milestone) {
-	            var _this22 = this;
-
 	            if (typeof milestone == 'string') {
 	                milestone = {
 	                    title: milestone
 	                };
 	            }
 
-	            return new Promise(function (callback) {
-	                _this22.post('/repos/' + _this22.getUserName() + '/' + _this22.getProjectName() + '/milestones', _this22.convertMilestone(milestone)).then(function () {
-	                    callback();
-	                });
+	            if (milestone instanceof Milestone === false) {
+	                milestone = new Milestone(milestone);
+	            }
+
+	            return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones', this.convertMilestone(milestone)).then(function (gitHubMilestone) {
+	                milestone.id = gitHubMilestone.number;
+
+	                return Promise.resolve(milestone);
 	            });
 	        }
 
@@ -5730,10 +5731,10 @@
 	    }, {
 	        key: 'addVersion',
 	        value: function addVersion(version) {
-	            var _this23 = this;
+	            var _this22 = this;
 
 	            return new Promise(function (callback) {
-	                _this23.post('/repos/' + _this23.getUserName() + '/' + _this23.getProjectName() + '/labels', {
+	                _this22.post('/repos/' + _this22.getUserName() + '/' + _this22.getProjectName() + '/labels', {
 	                    name: 'version:' + version,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -5775,10 +5776,10 @@
 	    }, {
 	        key: 'removeCollaborator',
 	        value: function removeCollaborator(index) {
-	            var _this24 = this;
+	            var _this23 = this;
 
 	            return new Promise(function (callback) {
-	                _this24.delete('/repos/' + _this24.getUserName() + '/' + _this24.getProjectName() + '/collaborators/' + window.resources.collaborators[index]).then(function () {
+	                _this23.delete('/repos/' + _this23.getUserName() + '/' + _this23.getProjectName() + '/collaborators/' + window.resources.collaborators[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -5795,10 +5796,10 @@
 	    }, {
 	        key: 'removeIssueType',
 	        value: function removeIssueType(index) {
-	            var _this25 = this;
+	            var _this24 = this;
 
 	            return new Promise(function (callback) {
-	                _this25.delete('/repos/' + _this25.getUserName() + '/' + _this25.getProjectName() + '/labels/type:' + window.resources.issueTypes[index]).then(function () {
+	                _this24.delete('/repos/' + _this24.getUserName() + '/' + _this24.getProjectName() + '/labels/type:' + window.resources.issueTypes[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -5815,10 +5816,10 @@
 	    }, {
 	        key: 'removeIssuePriority',
 	        value: function removeIssuePriority(index) {
-	            var _this26 = this;
+	            var _this25 = this;
 
 	            return new Promise(function (callback) {
-	                _this26.delete('/repos/' + _this26.getUserName() + '/' + _this26.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index]).then(function () {
+	                _this25.delete('/repos/' + _this25.getUserName() + '/' + _this25.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -5835,10 +5836,10 @@
 	    }, {
 	        key: 'removeIssueEstimate',
 	        value: function removeIssueEstimate(index) {
-	            var _this27 = this;
+	            var _this26 = this;
 
 	            return new Promise(function (callback) {
-	                _this27.delete('/repos/' + _this27.getUserName() + '/' + _this27.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index]).then(function () {
+	                _this26.delete('/repos/' + _this26.getUserName() + '/' + _this26.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -5855,10 +5856,10 @@
 	    }, {
 	        key: 'removeIssueColumn',
 	        value: function removeIssueColumn(index) {
-	            var _this28 = this;
+	            var _this27 = this;
 
 	            return new Promise(function (callback) {
-	                _this28.delete('/repos/' + _this28.getUserName() + '/' + _this28.getProjectName() + '/labels/column:' + window.resources.issueColumns[index]).then(function () {
+	                _this27.delete('/repos/' + _this27.getUserName() + '/' + _this27.getProjectName() + '/labels/column:' + window.resources.issueColumns[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -5897,10 +5898,10 @@
 	    }, {
 	        key: 'removeVersion',
 	        value: function removeVersion(index) {
-	            var _this29 = this;
+	            var _this28 = this;
 
 	            return new Promise(function (callback) {
-	                _this29.delete('/repos/' + _this29.getUserName() + '/' + _this29.getProjectName() + '/labels/version:' + window.resources.versions[index]).then(function () {
+	                _this28.delete('/repos/' + _this28.getUserName() + '/' + _this28.getProjectName() + '/labels/version:' + window.resources.versions[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -5924,7 +5925,7 @@
 	        /**
 	         * Updates milestone 
 	         *
-	         * @param {Object} milestone
+	         * @param {Milestone} milestone
 	         *
 	         * @returns {Promise} promise
 	         */
@@ -5965,10 +5966,10 @@
 	    }, {
 	        key: 'updateIssuePriority',
 	        value: function updateIssuePriority(priority, previousName) {
-	            var _this30 = this;
+	            var _this29 = this;
 
 	            return new Promise(function (callback) {
-	                _this30.patch('/repos/' + _this30.getUserName() + '/' + _this30.getProjectName() + '/labels/priority:' + previousName, {
+	                _this29.patch('/repos/' + _this29.getUserName() + '/' + _this29.getProjectName() + '/labels/priority:' + previousName, {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -5989,10 +5990,10 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(estimate, previousName) {
-	            var _this31 = this;
+	            var _this30 = this;
 
 	            return new Promise(function (callback) {
-	                _this31.patch('/repos/' + _this31.getUserName() + '/' + _this31.getProjectName() + '/labels/estimate:' + previousName, {
+	                _this30.patch('/repos/' + _this30.getUserName() + '/' + _this30.getProjectName() + '/labels/estimate:' + previousName, {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -6013,10 +6014,10 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            var _this32 = this;
+	            var _this31 = this;
 
 	            return new Promise(function (callback) {
-	                _this32.patch('/repos/' + _this32.getUserName() + '/' + _this32.getProjectName() + '/labels/column:' + previousName, {
+	                _this31.patch('/repos/' + _this31.getUserName() + '/' + _this31.getProjectName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -6037,10 +6038,10 @@
 	    }, {
 	        key: 'updateVersion',
 	        value: function updateVersion(version, previousName) {
-	            var _this33 = this;
+	            var _this32 = this;
 
 	            return new Promise(function (callback) {
-	                _this33.patch('/repos/' + _this33.getUserName() + '/' + _this33.getProjectName() + '/labels/version:' + previousName, {
+	                _this32.patch('/repos/' + _this32.getUserName() + '/' + _this32.getProjectName() + '/labels/version:' + previousName, {
 	                    name: 'version:' + version,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -6563,7 +6564,7 @@
 	            var gitHubMilestone = {
 	                title: milestone.title,
 	                description: milestone.description,
-	                due_on: milestone.endDate,
+	                due_on: milestone.getEndDate() ? milestone.getEndDate().toISOString() : null,
 	                state: milestone.closed ? 'closed' : 'open'
 	            };
 
@@ -6660,10 +6661,10 @@
 	    }, {
 	        key: 'addIssueComment',
 	        value: function addIssueComment(issue, text) {
-	            var _this34 = this;
+	            var _this33 = this;
 
 	            return new Promise(function (callback) {
-	                _this34.post('/repos/' + _this34.getUserName() + '/' + _this34.getProjectName() + '/issues/' + issue.id + '/comments', {
+	                _this33.post('/repos/' + _this33.getUserName() + '/' + _this33.getProjectName() + '/issues/' + issue.id + '/comments', {
 	                    body: text
 	                }).then(function () {
 	                    callback();
@@ -6681,10 +6682,10 @@
 	    }, {
 	        key: 'updateIssueComment',
 	        value: function updateIssueComment(issue, comment) {
-	            var _this35 = this;
+	            var _this34 = this;
 
 	            return new Promise(function (callback) {
-	                _this35.patch('/repos/' + _this35.getUserName() + '/' + _this35.getProjectName() + '/issues/comments/' + comment.index, {
+	                _this34.patch('/repos/' + _this34.getUserName() + '/' + _this34.getProjectName() + '/issues/comments/' + comment.index, {
 	                    body: comment.text
 	                }).then(function () {
 	                    callback();
@@ -6703,10 +6704,10 @@
 	    }, {
 	        key: 'getIssueComments',
 	        value: function getIssueComments(issue) {
-	            var _this36 = this;
+	            var _this35 = this;
 
 	            return new Promise(function (callback) {
-	                _this36.get('/repos/' + _this36.getUserName() + '/' + _this36.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
+	                _this35.get('/repos/' + _this35.getUserName() + '/' + _this35.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
 	                    var comments = [];
 
 	                    var _iteratorNormalCompletion11 = true;
@@ -7609,7 +7610,9 @@
 	                    return this.addProject(item);
 
 	                default:
-	                    displayError(new Error('Resource "' + resource + '" is unknown'));
+	                    return new Promise(function (resolve, reject) {
+	                        reject(new Error('Resource "' + resource + '" is unknown'));
+	                    });
 	            }
 	        }
 
@@ -7652,7 +7655,9 @@
 	                    return this.updateProject(item);
 
 	                default:
-	                    displayError(new Error('Resource "' + resource + '" is unknown'));
+	                    return new Promise(function (resolve, reject) {
+	                        reject(new Error('Resource "' + resource + '" is unknown'));
+	                    });
 	            }
 	        }
 
@@ -7694,6 +7699,11 @@
 
 	                case 'projects':
 	                    return this.getIssues();
+
+	                default:
+	                    return new Promise(function (resolve, reject) {
+	                        reject(new Error('Resource "' + resource + '" is unknown'));
+	                    });
 	            }
 	        }
 
@@ -11608,15 +11618,16 @@
 	            var _this3 = this;
 
 	            var dateString = this.$element.parents('.date').attr('data-date');
+	            var unixDate = parseInt(dateString);
 
 	            // Update model data with new information based on DOM location
 	            this.model.title = this.$element.find('.header input').val();
 	            this.model.description = this.$element.find('.body input').val();
 
 	            if (dateString) {
-	                var date = new Date(dateString);
+	                var date = new Date(unixDate);
 
-	                this.model.endDate = date.getSimpleString();
+	                this.model.endDate = date.toISOString();
 	            }
 
 	            // Update DOM elements to match model
@@ -11754,7 +11765,7 @@
 	                    }
 
 	                    // Convert date to ISO string
-	                    this.model.endDate = endDate.floor().toISOString();
+	                    this.model.endDate = endDate.toISOString();
 
 	                    // Hide element
 	                    this.$element.hide();
@@ -12084,17 +12095,12 @@
 	            var dates = [];
 
 	            for (var i = 1; i <= new Date(year, month, 0).getDate(); i++) {
-	                var day = i.toString();
+	                var day = i;
+	                var date = new Date();
 
-	                if (day.length == 1) {
-	                    day = '0' + day;
-	                }
-
-	                if (month.toString().length == 1) {
-	                    month = '0' + month;
-	                }
-
-	                var date = new Date(year + '-' + month + '-' + day).floor();
+	                date.setYear(year);
+	                date.setMonth(month - 1);
+	                date.setDate(day);
 
 	                dates.push(date);
 	            }
@@ -12186,7 +12192,7 @@
 	        if (!date) {
 	            return _.div({ class: 'date-placeholder' });
 	        } else {
-	            return _.div({ class: 'date', 'data-date': date.getSimpleString() }, _.div({ class: 'header' }, _.span({ class: 'datenumber' }, date.getDate()), _.span({ class: 'weeknumber' }, 'w ' + date.getWeek())), _.div({ class: 'body' }, _.each(window.resources.milestones, function (i, milestone) {
+	            return _.div({ class: 'date', 'data-date': date.getTime() }, _.div({ class: 'header' }, _.span({ class: 'datenumber' }, date.getDate()), _.span({ class: 'weeknumber' }, 'w ' + date.getWeek())), _.div({ class: 'body' }, _.each(window.resources.milestones, function (i, milestone) {
 	                if (milestone.endDate) {
 	                    var dueDate = new Date(milestone.endDate);
 

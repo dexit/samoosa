@@ -61,15 +61,16 @@ class PlanItemEditor extends View {
      */
     onChange() {
         let dateString = this.$element.parents('.date').attr('data-date');
+        let unixDate = parseInt(dateString);
 
         // Update model data with new information based on DOM location
         this.model.title = this.$element.find('.header input').val();
         this.model.description = this.$element.find('.body input').val();
         
         if(dateString) {
-            let date = new Date(dateString);
+            let date = new Date(unixDate);
 
-            this.model.endDate = date.getSimpleString();
+            this.model.endDate = date.toISOString();
         }
 
         // Update DOM elements to match model
@@ -204,7 +205,7 @@ class PlanItemEditor extends View {
                 }
                
                 // Convert date to ISO string
-                this.model.endDate = endDate.floor().toISOString();
+                this.model.endDate = endDate.toISOString();
 
                 // Hide element
                 this.$element.hide();

@@ -115,7 +115,9 @@ class ResourceHelper {
     static addResource(resource, item) {
         return new Promise((callback) => {
             ApiHelper.addResource(resource, item)
-            .then(() => {
+            .then((newItem) => {
+                item = newItem || item;
+
                 let index = resources[resource].length;
 
                 if(typeof item === 'object') {

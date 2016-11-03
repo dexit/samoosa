@@ -133,7 +133,6 @@ Date.prototype.getISODay = function() {
 Date.prototype.getWeek = function() {
     var date = new Date(this.getTime());
     
-    date.floor();
     date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
     
     var week1 = new Date(date.getFullYear(), 0, 4);
@@ -214,8 +213,6 @@ window.prettyDate = function(inputDate, separator) {
         return prettyDate;
     }
 
-    date.floor();
-
     separator = separator || '.';
 
     prettyDate = date.getFullYear() + separator + (date.getMonth() + 1) + separator + date.getDate();
@@ -250,8 +247,8 @@ window.scroll = function(amount) {
 // Sort array by date
 window.sortByDate = function(array, key) {
     return array.concat().sort((a, b) => {
-        a = new Date(a[key]).floor();
-        b = new Date(b[key]).floor();
+        a = new Date(a[key]);
+        b = new Date(b[key]);
 
         if(a < b) {
             return -1;

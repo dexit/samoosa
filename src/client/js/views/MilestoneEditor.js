@@ -47,10 +47,10 @@ class MilestoneEditor extends View {
      * Event: Click toggle button
      */
     onClickToggle() {
-        toggleExpand(this.$element);
-
         let wasCollapsed = this.$element.hasClass('collapsed');
-        let newKey = !wasCollapsed ? 'collapsed' : 'expanded';
+        let newKey = wasCollapsed ? 'expanded' : 'collapsed';
+        
+        toggleExpand(this.$element);
 
         SettingsHelper.set(
             'milestone',

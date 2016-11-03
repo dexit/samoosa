@@ -10115,7 +10115,8 @@
 	                IssueEditor.cancelMultiSelect();
 	            }
 
-	            var wasExpanded = this.$element.hasCLass('expanded');
+	            var wasExpanded = this.$element.hasClass('expanded');
+
 	            toggleExpand(this.$element);
 
 	            if (this.usingMultiEdit()) {
@@ -11054,10 +11055,10 @@
 	    }, {
 	        key: 'onClickToggle',
 	        value: function onClickToggle() {
-	            toggleExpand(this.$element);
-
 	            var wasCollapsed = this.$element.hasClass('collapsed');
-	            var newKey = !wasCollapsed ? 'collapsed' : 'expanded';
+	            var newKey = wasCollapsed ? 'expanded' : 'collapsed';
+
+	            toggleExpand(this.$element);
 
 	            SettingsHelper.set('milestone', this.model.index, newKey);
 	        }

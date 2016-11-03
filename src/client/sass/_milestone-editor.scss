@@ -1,16 +1,13 @@
 .milestone-editor {
+    transition: height 0.5s ease;       
+    overflow-y: hidden;
+
     &.collapsed {
         >.header {
             .title {
                 .btn-toggle {
                     .fa {
-                        &.fa-chevron-down {
-                            display: none;
-                        }
-                        
-                        &.fa-chevron-right {
-                            display: inline-block;
-                        }
+                        transform: translateY(-50%) rotate(0deg);
                     }
                 }
             }
@@ -51,15 +48,8 @@
                     position: absolute;
                     left: 0px;
                     top: 50%;
-                    transform: translateY(-50%);
-
-                    &.fa-chevron-down {
-                        display: inline-block;
-                    }
-                    
-                    &.fa-chevron-right {
-                        display: none;
-                    }
+                    transform: translateY(-50%) rotate(90deg);
+                    transition: transform 0.25s ease;
                 }
             }
         }

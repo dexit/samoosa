@@ -47,8 +47,8 @@ class MilestoneEditor extends View {
      * Event: Click toggle button
      */
     onClickToggle() {
-        this.$element.toggleClass('collapsed');
-      
+        toggleExpand(this.$element);
+
         let isCollapsed = this.$element.hasClass('collapsed');
         let newKey = isCollapsed ? 'collapsed' : 'expanded';
 
@@ -93,11 +93,11 @@ class MilestoneEditor extends View {
         let completedHours = 0;
 
         for(let i in total) {
-            totalHours += total[i].getEstimatedHours();
+            totalHours += total[i].getEstimate();
         }
         
         for(let i in completed) {
-             completedHours += completed[i].getEstimatedHours();
+             completedHours += completed[i].getEstimate();
         }
 
         if(total.length > 0 && completed.length > 0) {
@@ -119,11 +119,11 @@ class MilestoneEditor extends View {
         let completedHours = 0;
 
         for(let issue of total) {
-             totalHours += issue.getEstimatedHours();
+             totalHours += issue.getEstimate();
         }
         
         for(let issue of completed) {
-             completedHours += issue.getEstimatedHours();
+             completedHours += issue.getEstimate();
         }
 
         if(total.length > 0 && completed.length > 0) {

@@ -42,7 +42,6 @@
                 display: block;
                 background-color: transparent;
                 border: 0px;
-                color: material-color('grey', '800');
             }
 
             input {
@@ -73,7 +72,6 @@
                     border-bottom-left-radius: 15px;
                     padding-left: 5px;
                     border-right: 1px solid material-color('grey', '800');
-                    width: 90px;
 
                     select {
                         text-align: left;
@@ -89,6 +87,7 @@
                     
                     select {
                         text-align: left;
+                        padding-right: 2em;
                     }
                 }
 
@@ -121,10 +120,6 @@
 
             span, select, button {
                 flex-shrink: 0;
-            }
-            
-            .btn-remove {
-
             }
         }
     }

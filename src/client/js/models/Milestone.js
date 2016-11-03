@@ -29,7 +29,7 @@ class Milestone {
         for(let issue of resources.issues || []) {
             if(!issue) { continue; }
             
-            if(issue.getBakedValues().milestone == this) {
+            if(issue.getMilestone() == this) {
                 issues[issues.length] = issue;
             }
         }
@@ -65,7 +65,7 @@ class Milestone {
         for(let issue of this.getIssues()) {
             if(!issue) { continue; }
 
-            total += issue.getEstimatedHours();
+            total += issue.getEstimate();
         }
 
         return total;
@@ -78,18 +78,14 @@ class Milestone {
      *
      * @returns {Array} Issues
      */
-    getRemainingIssuesAtDay(day, debug) {
+    getRemainingIssuesAtDay(day) {
         let issues = [];
 
         for(let issue of this.getIssues()) {
-            let closedDate = issue.getBakedValues().closedAt;
+            let closedDate = issue.getClosedDate();
 
             if(!closedDate) {
                 issues[issues.length] = issue;
-
-                if(debug) {
-                    console.log(issue.id, 'has no closed date');
-                }
             
             } else {
                 let startDate = new Date(this.startDate);
@@ -98,15 +94,6 @@ class Milestone {
 
                 if(diffDays > day) {
                     issues[issues.length] = issue;
-                    
-                    if(debug) {
-                        console.log(issue.id, 'was overdue');
-                    }
-                } else {
-                    if(debug) {
-                        console.log(issue.id, 'closed at (' + diffDays + ' : ' + closedAtDay + ' / ' + startDay + ')');
-                    }
-
                 }
 
             }
@@ -126,7 +113,7 @@ class Milestone {
         let hours = 0;
 
         for(let issue of this.getRemainingIssuesAtDay(day)) {
-            hours += issue.getEstimatedHours();
+            hours += issue.getEstimate();
         }
 
         return hours;

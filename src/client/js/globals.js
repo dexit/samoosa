@@ -43,6 +43,51 @@ window.markdownToHtml = function(string) {
     }
 };
 
+// Collapse/expand an HTMLElement
+window.toggleExpand = function($element) {
+    $element.removeAttr('style');
+
+    let wasExpanded = $element.hasClass('expanded');
+
+    $element.removeClass('expanded');
+    $element.addClass('collapsed');
+    
+    let collapsedHeight = $element.outerHeight();
+
+    $element.removeClass('collapsed');
+    $element.addClass('expanded');
+    
+    let expandedHeight = $element.outerHeight();
+
+    if(!wasExpanded) {
+        $element.css('height', collapsedHeight + 'px');
+        
+        setTimeout(() => {
+            $element.css('height', expandedHeight + 'px');
+            
+            setTimeout(() => {
+                $element.removeAttr('style');
+                $element.toggleClass('expanded', !wasExpanded);
+                $element.toggleClass('collapsed', wasExpanded);
+            }, 500);
+        }, 50);
+    
+    } else {
+        $element.css('height', expandedHeight + 'px');
+        
+        setTimeout(() => {
+            $element.css('height', collapsedHeight + 'px');
+            
+            setTimeout(() => {
+                $element.removeAttr('style');
+                $element.toggleClass('expanded', !wasExpanded);
+                $element.toggleClass('collapsed', wasExpanded);
+            }, 500);
+        }, 50);
+
+    }
+}
+
 // Get cookie by name
 window.getCookie = function getCookie(name) {
     let value = "; " + document.cookie;

@@ -13,6 +13,8 @@ class PlanItemEditor extends View {
      * Opens this milestone as a dialog
      */
     openDialog() {
+        $('.app-container').addClass('disabled');
+        
         let prev = {
             x: this.$element.offset().left,
             y: this.$element.offset().top,
@@ -35,6 +37,8 @@ class PlanItemEditor extends View {
             overflow: 'hidden'
         });
 
+        this.$element.toggleClass('opening', true);
+
         setTimeout(() => {
             this.$element.removeAttr('style');
             this.$element.css({
@@ -45,6 +49,10 @@ class PlanItemEditor extends View {
                 transition: 'all 0.5s ease'
             });
         }, 1);
+
+        setTimeout(() => {
+            this.$element.toggleClass('opening', false);
+        }, 550);
 
     }
 
@@ -87,6 +95,8 @@ class PlanItemEditor extends View {
             ViewHelper.removeAll('PlanItemEditor');
             ViewHelper.get('PlanEditor').render();
 
+            $('.app-container').removeClass('disabled');
+
             spinner(false);
         });
     }
@@ -98,6 +108,7 @@ class PlanItemEditor extends View {
         let prev = this.positionBuffer;
     
         this.$element.removeAttr('style');
+        this.$element.toggleClass('closing', true);
         this.$element.css({
             position: 'absolute',
             left: prev.x,
@@ -111,7 +122,10 @@ class PlanItemEditor extends View {
         setTimeout(() => {
             prev.$parent.prepend(this.$element);
             this.$element.removeAttr('style');
+            this.$element.toggleClass('closing', false);
         }, 550);
+
+        $('.app-container').removeClass('disabled');
     }
 
 
@@ -155,10 +169,15 @@ class PlanItemEditor extends View {
             // If the element was dropped onto a date
             if($target.hasClass('date')) {
                 // Place this element into the hovered date container
-                $target.find('.body').prepend(this.$element);
+                let $oldParent = this.$element.parent();
+                let $newParent = $target.find('.body');
                 
-                // Trigger the change event
-                this.onChange();
+                if($newParent[0] != $oldParent[0]) {
+                    $newParent.prepend(this.$element);
+
+                    // Trigger the change event
+                    this.onChange();
+                }
             
             // Special logic for tabs
             } else {

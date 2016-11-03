@@ -54,6 +54,12 @@ body, html {
 .app-container {
     display: flex;
     min-height: 100%;
+    transition: opacity 0.5s ease;
+
+    &.disabled {
+        pointer-events: none;
+        opacity: 0.5;
+    }
 
     .navbar {
         flex-shrink: 0;

@@ -98,7 +98,7 @@ class FilterEditor extends View {
         for(let issueView of issueViews) {
             issueView.$element.toggle(true);
            
-            let issue = new Issue(issueView.model).getBakedValues();
+            let issue = issueView.model.getBakedValues();
 
             for(let filter of this.model) {
                 try {

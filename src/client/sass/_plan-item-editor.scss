@@ -8,8 +8,6 @@ body {
 
         .btn-close, .header, .body, .footer {
             height: auto;
-            opacity: 1;
-            transition-delay: 1s;
         }
 
         .drag-handle {
@@ -39,6 +37,13 @@ body {
         .footer {
             margin-top: 15px;
             text-align: right;
+            
+            .btn-remove {
+                padding-left: 0px;
+                padding-right: 0px;
+                float: left;
+                font-size: 16px;
+            }
         }   
     }
 }
@@ -59,7 +64,7 @@ body {
             opacity: 0.5;
             pointer-event: none;
         }
-            
+        
         .drag-handle {
             display: block;
             cursor: move;
@@ -76,7 +81,14 @@ body {
 }
 
 .plan-item-editor {
+    &.closing, &.opening {
+        .btn-close, .header, .body, .footer {
+            opacity: 0;
+        }
+    }
+            
     .btn-close, .header, .body, .footer {
         transition: opacity 0.25s ease;  
+        opacity: 1;
     }
 }

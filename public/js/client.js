@@ -127,7 +127,7 @@
 
 	module.exports = {
 		"name": "samoosa",
-		"version": "0.2.0",
+		"version": "0.3.0",
 		"description": "",
 		"main": "index.html",
 		"scripts": {
@@ -4119,6 +4119,49 @@
 	    }
 	};
 
+	// Collapse/expand an HTMLElement
+	window.toggleExpand = function ($element) {
+	    $element.removeAttr('style');
+
+	    var wasExpanded = $element.hasClass('expanded');
+
+	    $element.removeClass('expanded');
+	    $element.addClass('collapsed');
+
+	    var collapsedHeight = $element.outerHeight();
+
+	    $element.removeClass('collapsed');
+	    $element.addClass('expanded');
+
+	    var expandedHeight = $element.outerHeight();
+
+	    if (!wasExpanded) {
+	        $element.css('height', collapsedHeight + 'px');
+
+	        setTimeout(function () {
+	            $element.css('height', expandedHeight + 'px');
+
+	            setTimeout(function () {
+	                $element.removeAttr('style');
+	                $element.toggleClass('expanded', !wasExpanded);
+	                $element.toggleClass('collapsed', wasExpanded);
+	            }, 500);
+	        }, 50);
+	    } else {
+	        $element.css('height', expandedHeight + 'px');
+
+	        setTimeout(function () {
+	            $element.css('height', collapsedHeight + 'px');
+
+	            setTimeout(function () {
+	                $element.removeAttr('style');
+	                $element.toggleClass('expanded', !wasExpanded);
+	                $element.toggleClass('collapsed', wasExpanded);
+	            }, 500);
+	        }, 50);
+	    }
+	};
+
 	// Get cookie by name
 	window.getCookie = function getCookie(name) {
 	    var value = "; " + document.cookie;
@@ -5827,13 +5870,15 @@
 	    }, {
 	        key: 'removeMilestone',
 	        value: function removeMilestone(index) {
-	            var _this29 = this;
+	            var milestone = resources.milestones[index];
 
-	            return new Promise(function (callback) {
-	                _this29.delete('/repos/' + _this29.getUserName() + '/' + _this29.getProjectName() + '/milestones/' + (parseInt(index) + 1)).then(function () {
-	                    callback();
+	            if (!milestone) {
+	                return new Promise(function (resolve, reject) {
+	                    reject(new Error('Milestone at index "' + index + '" not found'));
 	                });
-	            });
+	            } else {
+	                return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + milestone.id);
+	            }
 	        }
 
 	        /**
@@ -5847,10 +5892,10 @@
 	    }, {
 	        key: 'removeVersion',
 	        value: function removeVersion(index) {
-	            var _this30 = this;
+	            var _this29 = this;
 
 	            return new Promise(function (callback) {
-	                _this30.delete('/repos/' + _this30.getUserName() + '/' + _this30.getProjectName() + '/labels/version:' + window.resources.versions[index]).then(function () {
+	                _this29.delete('/repos/' + _this29.getUserName() + '/' + _this29.getProjectName() + '/labels/version:' + window.resources.versions[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -5915,10 +5960,10 @@
 	    }, {
 	        key: 'updateIssuePriority',
 	        value: function updateIssuePriority(priority, previousName) {
-	            var _this31 = this;
+	            var _this30 = this;
 
 	            return new Promise(function (callback) {
-	                _this31.patch('/repos/' + _this31.getUserName() + '/' + _this31.getProjectName() + '/labels/priority:' + previousName, {
+	                _this30.patch('/repos/' + _this30.getUserName() + '/' + _this30.getProjectName() + '/labels/priority:' + previousName, {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -5939,10 +5984,10 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(estimate, previousName) {
-	            var _this32 = this;
+	            var _this31 = this;
 
 	            return new Promise(function (callback) {
-	                _this32.patch('/repos/' + _this32.getUserName() + '/' + _this32.getProjectName() + '/labels/estimate:' + previousName, {
+	                _this31.patch('/repos/' + _this31.getUserName() + '/' + _this31.getProjectName() + '/labels/estimate:' + previousName, {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -5963,10 +6008,10 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            var _this33 = this;
+	            var _this32 = this;
 
 	            return new Promise(function (callback) {
-	                _this33.patch('/repos/' + _this33.getUserName() + '/' + _this33.getProjectName() + '/labels/column:' + previousName, {
+	                _this32.patch('/repos/' + _this32.getUserName() + '/' + _this32.getProjectName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -5987,10 +6032,10 @@
 	    }, {
 	        key: 'updateVersion',
 	        value: function updateVersion(version, previousName) {
-	            var _this34 = this;
+	            var _this33 = this;
 
 	            return new Promise(function (callback) {
-	                _this34.patch('/repos/' + _this34.getUserName() + '/' + _this34.getProjectName() + '/labels/version:' + previousName, {
+	                _this33.patch('/repos/' + _this33.getUserName() + '/' + _this33.getProjectName() + '/labels/version:' + previousName, {
 	                    name: 'version:' + version,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -6499,8 +6544,8 @@
 
 	            // Milestone
 	            // GitHub counts numbers from 1, ' + this.getProjectName() + ' counts from 0
-	            if (issue.milestone >= 0) {
-	                gitHubIssue.milestone = parseInt(issue.milestone) + 1;
+	            if (issue.getMilestone()) {
+	                gitHubIssue.milestone = issue.getMilestone().id;
 	            } else {
 	                gitHubIssue.milestone = null;
 	            }
@@ -6556,10 +6601,10 @@
 	    }, {
 	        key: 'addIssueComment',
 	        value: function addIssueComment(issue, text) {
-	            var _this35 = this;
+	            var _this34 = this;
 
 	            return new Promise(function (callback) {
-	                _this35.post('/repos/' + _this35.getUserName() + '/' + _this35.getProjectName() + '/issues/' + issue.id + '/comments', {
+	                _this34.post('/repos/' + _this34.getUserName() + '/' + _this34.getProjectName() + '/issues/' + issue.id + '/comments', {
 	                    body: text
 	                }).then(function () {
 	                    callback();
@@ -6577,10 +6622,10 @@
 	    }, {
 	        key: 'updateIssueComment',
 	        value: function updateIssueComment(issue, comment) {
-	            var _this36 = this;
+	            var _this35 = this;
 
 	            return new Promise(function (callback) {
-	                _this36.patch('/repos/' + _this36.getUserName() + '/' + _this36.getProjectName() + '/issues/comments/' + comment.index, {
+	                _this35.patch('/repos/' + _this35.getUserName() + '/' + _this35.getProjectName() + '/issues/comments/' + comment.index, {
 	                    body: comment.text
 	                }).then(function () {
 	                    callback();
@@ -6599,10 +6644,10 @@
 	    }, {
 	        key: 'getIssueComments',
 	        value: function getIssueComments(issue) {
-	            var _this37 = this;
+	            var _this36 = this;
 
 	            return new Promise(function (callback) {
-	                _this37.get('/repos/' + _this37.getUserName() + '/' + _this37.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
+	                _this36.get('/repos/' + _this36.getUserName() + '/' + _this36.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
 	                    var comments = [];
 
 	                    var _iteratorNormalCompletion10 = true;
@@ -9227,38 +9272,190 @@
 	        this.milestone = properties.milestone;
 	        this.comments = properties.comments || [];
 	        this.assignee = properties.assignee;
+	        this.createdAt = properties.createdAt;
+	        this.closedAt = properties.closedAt;
 	        this.deleted = false;
-
-	        if (properties.createdAt) {
-	            this.createdAt = new Date(properties.createdAt).getUnixTime();
-	        }
-
-	        if (properties.closedAt) {
-	            this.closedAt = new Date(properties.closedAt).getUnixTime();
-	        }
 	    }
 
 	    /**
-	     * Gets an object with all the baked values
+	     * Gets the title
+	     *
+	     * @returns {String} Title
 	     */
 
 
 	    _createClass(Issue, [{
+	        key: 'getTitle',
+	        value: function getTitle() {
+	            return this.title;
+	        }
+
+	        /**
+	         * Gets the description
+	         *
+	         * @returns {String} Description
+	         */
+
+	    }, {
+	        key: 'getDescription',
+	        value: function getDescription() {
+	            return this.description;
+	        }
+
+	        /**
+	         * Gets column
+	         *
+	         * @returns {String} Column name
+	         */
+
+	    }, {
+	        key: 'getColumn',
+	        value: function getColumn() {
+	            return resources.issueColumns[this.column || -1] || 'to do';
+	        }
+
+	        /**
+	         * Gets type
+	         *
+	         * @returns {String} Type name
+	         */
+
+	    }, {
+	        key: 'getType',
+	        value: function getType() {
+	            return resources.issueTypes[this.type || -1];
+	        }
+
+	        /**
+	         * Gets priority
+	         *
+	         * @returns {String} Priority name
+	         */
+
+	    }, {
+	        key: 'getPriority',
+	        value: function getPriority() {
+	            return resources.issuePriorities[this.priority || -1];
+	        }
+
+	        /**
+	         * Gets version
+	         *
+	         * @returns {String} Version name
+	         */
+
+	    }, {
+	        key: 'getVersion',
+	        value: function getVersion() {
+	            return resources.versions[this.version || -1];
+	        }
+
+	        /**
+	         * Gets milestone
+	         *
+	         * @returns {Milestone} Milestone object
+	         */
+
+	    }, {
+	        key: 'getMilestone',
+	        value: function getMilestone() {
+	            return resources.milestones[this.milestone || -1];
+	        }
+
+	        /**
+	         * Gets comments
+	         *
+	         * @returns {Array} Comments
+	         */
+
+	    }, {
+	        key: 'getComments',
+	        value: function getComments() {
+	            return this.comments || [];
+	        }
+
+	        /**
+	         * Gets assignee
+	         *
+	         * @returns {Collaborator} Collaborator object
+	         */
+
+	    }, {
+	        key: 'getAssignee',
+	        value: function getAssignee() {
+	            return resources.collaborators[this.assignee || -1];
+	        }
+
+	        /**
+	         * Gets created at date
+	         *
+	         * @returns {Date} Created at date
+	         */
+
+	    }, {
+	        key: 'getCreatedDate',
+	        value: function getCreatedDate() {
+	            var date = new Date(this.createdAt);
+
+	            if (!date || isNaN(date.getTime())) {
+	                return null;
+	            } else {
+	                return date;
+	            }
+	        }
+
+	        /**
+	         * Gets closed at date
+	         *
+	         * @returns {Date} Closed at date
+	         */
+
+	    }, {
+	        key: 'getClosedDate',
+	        value: function getClosedDate() {
+	            var date = new Date(this.closedAt);
+
+	            if (!date || isNaN(date.getTime())) {
+	                return null;
+	            } else {
+	                return date;
+	            }
+	        }
+
+	        /**
+	         * Get estimated hours
+	         *
+	         * @returns {Number} Hours
+	         */
+
+	    }, {
+	        key: 'getEstimate',
+	        value: function getEstimate() {
+	            var estimate = window.resources.issueEstimates[this.estimate];
+
+	            if (estimate) {
+	                return parseFloat(estimate);
+	            } else {
+	                return 0;
+	            }
+	        }
+
+	        /**
+	         * Gets an object with all the baked values
+	         */
+
+	    }, {
 	        key: 'getBakedValues',
 	        value: function getBakedValues() {
-	            var baked = {
-	                column: resources.issueColumns[this.column],
-	                type: resources.issueTypes[this.type],
-	                priority: resources.issuePriorities[this.priority],
-	                version: resources.versions[this.version],
-	                milestone: resources.milestones[this.milestone],
-	                assignee: resources.collaborators[this.assignee],
-	                estimate: resources.issueEstimates[this.estimate],
-	                createdAt: this.createdAt ? new Date(this.createdAt) : null,
-	                closedAt: this.closedAt ? new Date(this.closedAt) : null
+	            return {
+	                column: this.getColumn(),
+	                type: this.getType(),
+	                priority: this.getPriority(),
+	                version: this.getVersion(),
+	                milestone: this.getMilestone() ? this.getMilestone().title : null,
+	                assignee: this.getAssignee() ? this.getAssignee().name : null,
+	                estimate: resources.issueEstimates[this.estimate || -1]
 	            };
-
-	            return baked;
 	        }
 
 	        /**
@@ -9271,24 +9468,6 @@
 	        key: 'isClosed',
 	        value: function isClosed() {
 	            return this.column == window.resources.issueColumns.length - 1;
-	        }
-
-	        /**
-	         * Get estimated hours
-	         *
-	         * @returns {Number} hours
-	         */
-
-	    }, {
-	        key: 'getEstimatedHours',
-	        value: function getEstimatedHours() {
-	            var estimate = window.resources.issueEstimates[this.estimate];
-
-	            if (estimate) {
-	                return parseFloat(estimate);
-	            } else {
-	                return 0;
-	            }
 	        }
 	    }]);
 
@@ -9352,7 +9531,7 @@
 	                        continue;
 	                    }
 
-	                    if (issue.getBakedValues().milestone == this) {
+	                    if (issue.getMilestone() == this) {
 	                        issues[issues.length] = issue;
 	                    }
 	                }
@@ -9419,7 +9598,7 @@
 	                        continue;
 	                    }
 
-	                    total += issue.getEstimatedHours();
+	                    total += issue.getEstimate();
 	                }
 	            } catch (err) {
 	                _didIteratorError2 = true;
@@ -9449,7 +9628,7 @@
 
 	    }, {
 	        key: 'getRemainingIssuesAtDay',
-	        value: function getRemainingIssuesAtDay(day, debug) {
+	        value: function getRemainingIssuesAtDay(day) {
 	            var issues = [];
 
 	            var _iteratorNormalCompletion3 = true;
@@ -9460,14 +9639,10 @@
 	                for (var _iterator3 = this.getIssues()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
 	                    var issue = _step3.value;
 
-	                    var closedDate = issue.getBakedValues().closedAt;
+	                    var closedDate = issue.getClosedDate();
 
 	                    if (!closedDate) {
 	                        issues[issues.length] = issue;
-
-	                        if (debug) {
-	                            console.log(issue.id, 'has no closed date');
-	                        }
 	                    } else {
 	                        var startDate = new Date(this.startDate);
 	                        var timeDiff = Math.abs(startDate.getTime() - closedDate.getTime());
@@ -9475,14 +9650,6 @@
 
 	                        if (diffDays > day) {
 	                            issues[issues.length] = issue;
-
-	                            if (debug) {
-	                                console.log(issue.id, 'was overdue');
-	                            }
-	                        } else {
-	                            if (debug) {
-	                                console.log(issue.id, 'closed at (' + diffDays + ' : ' + closedAtDay + ' / ' + startDay + ')');
-	                            }
 	                        }
 	                    }
 	                }
@@ -9525,7 +9692,7 @@
 	                for (var _iterator4 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
 	                    var issue = _step4.value;
 
-	                    hours += issue.getEstimatedHours();
+	                    hours += issue.getEstimate();
 	                }
 	            } catch (err) {
 	                _didIteratorError4 = true;
@@ -9936,8 +10103,6 @@
 	    }, {
 	        key: 'onClickToggle',
 	        value: function onClickToggle(e) {
-	            var _this3 = this;
-
 	            e.preventDefault();
 	            e.stopPropagation();
 
@@ -9945,38 +10110,7 @@
 	                IssueEditor.cancelMultiSelect();
 	            }
 
-	            this.$element.removeAttr('style');
-
-	            var wasExpanded = this.$element.hasClass('expanded');
-
-	            this.$element.removeClass('expanded');
-
-	            var collapsedHeight = this.$element.outerHeight();
-
-	            this.$element.addClass('expanded');
-
-	            var expandedHeight = this.$element.outerHeight();
-
-	            this.$element.removeClass('expanded');
-
-	            if (!wasExpanded) {
-	                this.$element.addClass('expanded');
-	                this.$element.css('height', collapsedHeight + 'px');
-
-	                setTimeout(function () {
-	                    _this3.$element.css('height', expandedHeight + 'px');
-	                }, 50);
-	            } else {
-	                this.$element.css('height', expandedHeight + 'px');
-
-	                setTimeout(function () {
-	                    _this3.$element.css('height', collapsedHeight + 'px');
-
-	                    setTimeout(function () {
-	                        _this3.$element.removeAttr('style');
-	                    }, 500);
-	                }, 50);
-	            }
+	            toggleExpand(this.$element);
 
 	            if (this.usingMultiEdit()) {
 	                $('.issue-editor .multi-edit-toggle').each(function () {
@@ -10022,7 +10156,7 @@
 	        key: 'getProperty',
 	        value: function getProperty(key, useCheckboxes) {
 	            var $property = this.$element.find('*[data-property="' + key + '"]');
-	            var value = $property.val() || $property.text();
+	            var value = $property.val();
 
 	            if (useCheckboxes) {
 	                var $checkbox = this.$element.find('*[data-property="' + key + '"]').siblings('.multi-edit-toggle');
@@ -10110,14 +10244,14 @@
 	    }, {
 	        key: 'sync',
 	        value: function sync() {
-	            var _this4 = this;
+	            var _this3 = this;
 
 	            // Start loading
 	            this.$element.toggleClass('loading', true);
 
 	            // Update the issue though the API
 	            ApiHelper.updateIssue(this.model).then(function () {
-	                _this4.$element.toggleClass('loading', false);
+	                _this3.$element.toggleClass('loading', false);
 	            });
 	        }
 
@@ -10128,7 +10262,7 @@
 	    }, {
 	        key: 'onClickDragHandle',
 	        value: function onClickDragHandle(e) {
-	            var _this5 = this;
+	            var _this4 = this;
 
 	            if (ApiHelper.isSpectating()) {
 	                return;
@@ -10140,9 +10274,9 @@
 	                    $('.board-container').toggleClass('dragging', true);
 
 	                    // Set element
-	                    var $element = _this5.$element;
+	                    var $element = _this4.$element;
 
-	                    if (_this5.usingMultiEdit()) {
+	                    if (_this4.usingMultiEdit()) {
 	                        $element = $('.issue-editor.selected');
 	                    } else {}
 	                    //IssueEditor.cancelMultiSelect();
@@ -10151,10 +10285,10 @@
 	                    // Apply temporary CSS properties
 	                    $element.each(function (i, element) {
 	                        $(element).css({
-	                            top: _this5.$element.offset().top,
-	                            left: _this5.$element.offset().left,
-	                            width: _this5.$element.outerWidth(),
-	                            height: _this5.$element.outerHeight(),
+	                            top: _this4.$element.offset().top,
+	                            left: _this4.$element.offset().left,
+	                            width: _this4.$element.outerWidth(),
+	                            height: _this4.$element.outerHeight(),
 	                            'pointer-events': 'none',
 	                            'z-index': 999,
 	                            'margin-top': i * 15 + 'px'
@@ -10163,8 +10297,8 @@
 
 	                    // Buffer the offset between mouse cursor and element position
 	                    var offset = {
-	                        x: _this5.$element.offset().left - e.pageX,
-	                        y: _this5.$element.offset().top - e.pageY
+	                        x: _this4.$element.offset().left - e.pageX,
+	                        y: _this4.$element.offset().top - e.pageY
 	                    };
 
 	                    // Add absolute positioning afterwards to allow getting proper offset
@@ -10213,7 +10347,7 @@
 
 	                    // Document pointer release mouse button logic
 	                    $(document).off('mouseup').on('mouseup', function (e) {
-	                        _this5.onReleaseDragHandle(e);
+	                        _this4.onReleaseDragHandle(e);
 	                    });
 	                })();
 	            }
@@ -10486,7 +10620,7 @@
 	    }, {
 	        key: 'onClickComment',
 	        value: function onClickComment() {
-	            var _this6 = this;
+	            var _this5 = this;
 
 	            if (ApiHelper.isSpectating()) {
 	                return;
@@ -10499,7 +10633,7 @@
 	            this.$element.find('.add-comment textarea').val('');
 
 	            ApiHelper.addIssueComment(this.model, text).then(function () {
-	                _this6.getComments();
+	                _this5.getComments();
 	            });
 	        }
 
@@ -10653,30 +10787,30 @@
 	    }, {
 	        key: 'getComments',
 	        value: function getComments() {
-	            var _this7 = this;
+	            var _this6 = this;
 
 	            var $comments = this.$element.find('.comments');
 
 	            ApiHelper.getUser().then(function (user) {
-	                ApiHelper.getIssueComments(_this7.model).then(function (comments) {
-	                    _this7.$element.toggleClass('loading', false);
+	                ApiHelper.getIssueComments(_this6.model).then(function (comments) {
+	                    _this6.$element.toggleClass('loading', false);
 
 	                    $comments.html(_.each(comments, function (i, comment) {
 	                        var collaborator = window.resources.collaborators[comment.collaborator];
 	                        var text = markdownToHtml(comment.text);
 	                        var isUser = collaborator.name == user.name;
 
-	                        return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.name)), _.if(isUser, _.div({ class: 'btn-edit' }, text).click(_this7.onClickEdit), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
-	                            _this7.$element.toggleClass('loading', true);
+	                        return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.name)), _.if(isUser, _.div({ class: 'btn-edit' }, text).click(_this6.onClickEdit), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
+	                            _this6.$element.toggleClass('loading', true);
 
-	                            comment.text = _this7.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
+	                            comment.text = _this6.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
 
-	                            _this7.$element.find('.comments .comment[data-index="' + comment.index + '"] .btn-edit').html(markdownToHtml(comment.text) || '');
+	                            _this6.$element.find('.comments .comment[data-index="' + comment.index + '"] .btn-edit').html(markdownToHtml(comment.text) || '');
 
-	                            ApiHelper.updateIssueComment(_this7.model, comment).then(function () {
-	                                _this7.$element.toggleClass('loading', false);
+	                            ApiHelper.updateIssueComment(_this6.model, comment).then(function () {
+	                                _this6.$element.toggleClass('loading', false);
 	                            });
-	                        }).blur(_this7.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
+	                        }).blur(_this6.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
 	                    }));
 	                });
 	            });
@@ -10914,7 +11048,7 @@
 	    }, {
 	        key: 'onClickToggle',
 	        value: function onClickToggle() {
-	            this.$element.toggleClass('collapsed');
+	            toggleExpand(this.$element);
 
 	            var isCollapsed = this.$element.hasClass('collapsed');
 	            var newKey = isCollapsed ? 'collapsed' : 'expanded';
@@ -10962,11 +11096,11 @@
 	            var completedHours = 0;
 
 	            for (var i in total) {
-	                totalHours += total[i].getEstimatedHours();
+	                totalHours += total[i].getEstimate();
 	            }
 
 	            for (var _i in completed) {
-	                completedHours += completed[_i].getEstimatedHours();
+	                completedHours += completed[_i].getEstimate();
 	            }
 
 	            if (total.length > 0 && completed.length > 0) {
@@ -10998,7 +11132,7 @@
 	                for (var _iterator = total[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	                    var issue = _step.value;
 
-	                    totalHours += issue.getEstimatedHours();
+	                    totalHours += issue.getEstimate();
 	                }
 	            } catch (err) {
 	                _didIteratorError = true;
@@ -11023,7 +11157,7 @@
 	                for (var _iterator2 = completed[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 	                    var _issue = _step2.value;
 
-	                    completedHours += _issue.getEstimatedHours();
+	                    completedHours += _issue.getEstimate();
 	                }
 	            } catch (err) {
 	                _didIteratorError2 = true;
@@ -11181,7 +11315,7 @@
 	        state = 'collapsed';
 	    }
 
-	    return _.div({ class: 'milestone-editor ' + state, 'data-index': this.model.index, 'data-end-date': this.model.endDate }, _.div({ class: 'header' }, _.div({ class: 'progress-bar', style: 'width: ' + this.getPercentComplete() + '%' }), _.div({ class: 'title' }, _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa fa-chevron-right' }), _.span({ class: 'fa fa-chevron-down' }), _.h4(this.model.title), _.p(this.model.description)).click(function () {
+	    return _.div({ class: 'milestone-editor ' + state, 'data-index': this.model.index, 'data-end-date': this.model.endDate }, _.div({ class: 'header' }, _.div({ class: 'progress-bar', style: 'width: ' + this.getPercentComplete() + '%' }), _.div({ class: 'title' }, _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa fa-chevron-right' }), _.h4(this.model.title), _.p(this.model.description)).click(function () {
 	        _this.onClickToggle();
 	    })), _.div({ class: 'stats' }, _.span({ class: 'progress-amounts' }, _.span({ class: 'fa fa-exclamation-circle' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })), _.span({ class: 'progress-hours' }, _.span({ class: 'fa fa-clock-o' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })))), _.div({ class: 'columns' }, _.each(window.resources.issueColumns, function (columnIndex, column) {
 	        return _.div({ class: 'column', 'data-index': columnIndex }, _.div({ class: 'header' }, _.h4(column)), _.div({ class: 'body' }, _.each(window.resources.issues, function (issueIndex, issue) {
@@ -11325,6 +11459,8 @@
 	        value: function openDialog() {
 	            var _this2 = this;
 
+	            $('.app-container').addClass('disabled');
+
 	            var prev = {
 	                x: this.$element.offset().left,
 	                y: this.$element.offset().top,
@@ -11347,6 +11483,8 @@
 	                overflow: 'hidden'
 	            });
 
+	            this.$element.toggleClass('opening', true);
+
 	            setTimeout(function () {
 	                _this2.$element.removeAttr('style');
 	                _this2.$element.css({
@@ -11357,6 +11495,10 @@
 	                    transition: 'all 0.5s ease'
 	                });
 	            }, 1);
+
+	            setTimeout(function () {
+	                _this2.$element.toggleClass('opening', false);
+	            }, 550);
 	        }
 
 	        /**
@@ -11404,6 +11546,8 @@
 	                ViewHelper.removeAll('PlanItemEditor');
 	                ViewHelper.get('PlanEditor').render();
 
+	                $('.app-container').removeClass('disabled');
+
 	                spinner(false);
 	            });
 	        }
@@ -11420,6 +11564,7 @@
 	            var prev = this.positionBuffer;
 
 	            this.$element.removeAttr('style');
+	            this.$element.toggleClass('closing', true);
 	            this.$element.css({
 	                position: 'absolute',
 	                left: prev.x,
@@ -11433,7 +11578,10 @@
 	            setTimeout(function () {
 	                prev.$parent.prepend(_this4.$element);
 	                _this4.$element.removeAttr('style');
+	                _this4.$element.toggleClass('closing', false);
 	            }, 550);
+
+	            $('.app-container').removeClass('disabled');
 	        }
 
 	        /**
@@ -11476,10 +11624,15 @@
 	                // If the element was dropped onto a date
 	                if ($target.hasClass('date')) {
 	                    // Place this element into the hovered date container
-	                    $target.find('.body').prepend(this.$element);
+	                    var $oldParent = this.$element.parent();
+	                    var $newParent = $target.find('.body');
 
-	                    // Trigger the change event
-	                    this.onChange();
+	                    if ($newParent[0] != $oldParent[0]) {
+	                        $newParent.prepend(this.$element);
+
+	                        // Trigger the change event
+	                        this.onChange();
+	                    }
 
 	                    // Special logic for tabs
 	                } else {
@@ -11629,9 +11782,9 @@
 	        _this.onClickDragHandle(e);
 	    }), _.button({ class: 'btn-close btn-transparent' }, _.span({ class: 'fa fa-remove' })).click(function () {
 	        _this.onClickClose();
-	    }), _.div({ class: 'header' }, _.h4('Title'), _.input({ class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title })), _.div({ class: 'body' }, _.h4('Description'), _.input({ class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description })), _.div({ class: 'footer' }, _.button({ class: 'btn' }, 'Delete', _.span({ class: 'fa fa-remove' })).click(function () {
+	    }), _.div({ class: 'header' }, _.h4('Title'), _.input({ class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title })), _.div({ class: 'body' }, _.h4('Description'), _.input({ class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description })), _.div({ class: 'footer' }, _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
 	        _this.onClickDelete();
-	    }), _.button({ class: 'btn' }, 'OK', _.span({ class: 'fa fa-check' })).click(function () {
+	    }), _.button({ class: 'btn' }, 'OK').click(function () {
 	        _this.onClickOK();
 	    })));
 	};
@@ -12157,7 +12310,7 @@
 
 	                    issueView.$element.toggle(true);
 
-	                    var issue = new Issue(issueView.model).getBakedValues();
+	                    var issue = issueView.model.getBakedValues();
 
 	                    var _iteratorNormalCompletion2 = true;
 	                    var _didIteratorError2 = false;
@@ -12258,6 +12411,7 @@
 	            resource = resources[resourceKey];
 	        }
 
+	        var $valueSelect = void 0;
 	        var $filter = _.div({ class: 'filter' }, _.div({ class: 'select-container key' }, _.select({}, _.each(issueKeys, function (i, key) {
 	            return _.option({
 	                value: key,
@@ -12274,7 +12428,7 @@
 	            filter.operator = $filter.find('.operator select').val();
 
 	            _this.onChange(i);
-	        })), _.div({ class: 'select-container value' }, _.select({}, _.each(resource, function (i, value) {
+	        })), _.div({ class: 'select-container value', style: 'min-width: ' + filter.value.length * 8 + 'px' }, _.select({}, _.each(resource, function (i, value) {
 	            var valueName = value;
 
 	            if (value.title) {
@@ -12299,12 +12453,12 @@
 	            filter.value = $filter.find('.value select').val();
 
 	            _this.onChange(i);
-	        })), _.button({ class: 'btn-remove btn-transparent' }, _.span({ class: 'fa fa-remove' })).click(function () {
+	        })), _.button({ class: 'btn-remove' }, _.span({ class: 'fa fa-remove' })).click(function () {
 	            _this.onClickRemove(i);
 	        }));
 
 	        return $filter;
-	    })), _.div({ class: 'button-container' }, _.if(this.model.length < this.MAX_FILTERS, _.button({ class: 'btn' }, 'Add filter', _.span({ class: 'fa fa-plus' })).click(function () {
+	    })), _.div({ class: 'button-container' }, _.if(this.model.length < this.MAX_FILTERS, _.button({ class: 'btn btn-add-filter' }, 'Add filter', _.span({ class: 'fa fa-plus' })).click(function () {
 	        _this.onClickAdd();
 	    }))));
 	};
@@ -12549,6 +12703,8 @@
 	    setTimeout(function () {
 	        location.hash = '/' + ApiHelper.getUserName();
 
+	        $('.workspace').remove();
+
 	        $('.app-container').append(_.div({ class: 'workspace logo' }, _.img({ src: '/public/svg/logo-medium.svg' })));
 	    }, 10);
 	});
@@ -12557,6 +12713,8 @@
 	Router.route('/:user', function () {
 	    setTimeout(function () {
 	        navbar.toggleProjectsList(true);
+
+	        $('.workspace').remove();
 
 	        $('.app-container').append(_.div({ class: 'workspace logo' }, _.img({ src: '/public/svg/logo-medium.svg' })));
 	    }, 10);

@@ -752,12 +752,15 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeMilestone(index) {
-        return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + (parseInt(index) + 1))
-            .then(() => {
-                callback();
+        let milestone = resources.milestones[index];
+
+        if(!milestone) {
+            return new Promise((resolve, reject) => {
+                reject(new Error('Milestone at index "' + index + '" not found'));
             });
-        });
+        } else {
+            return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + milestone.id);
+        }
     }
     
     /**
@@ -1202,8 +1205,8 @@ class GitHubApi extends ApiHelper {
 
         // Milestone
         // GitHub counts numbers from 1, ' + this.getProjectName() + ' counts from 0
-        if(issue.milestone >= 0) {
-            gitHubIssue.milestone = parseInt(issue.milestone) + 1;
+        if(issue.getMilestone()) {
+            gitHubIssue.milestone = issue.getMilestone().id;
         } else {
             gitHubIssue.milestone = null;
         }

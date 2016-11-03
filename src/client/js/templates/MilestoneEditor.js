@@ -13,7 +13,6 @@ module.exports = function render() {
             _.div({class: 'title'}, 
                 _.button({class: 'btn-toggle btn-transparent'},
                     _.span({class: 'fa fa-chevron-right'}),
-                    _.span({class: 'fa fa-chevron-down'}),
                     _.h4(this.model.title),
                     _.p(this.model.description)
                 ).click(() => { this.onClickToggle(); })

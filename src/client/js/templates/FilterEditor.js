@@ -32,6 +32,7 @@ module.exports = function render() {
                     resource = resources[resourceKey];
                 }
 
+                let $valueSelect;
                 let $filter = _.div({class: 'filter'},
                     _.div({class: 'select-container key'},
                         _.select({},
@@ -59,7 +60,7 @@ module.exports = function render() {
                             this.onChange(i);
                         })
                     ),
-                    _.div({class: 'select-container value'},
+                    _.div({class: 'select-container value', style: 'min-width: ' + (filter.value.length * 8) + 'px'},
                         _.select({},
                             _.each(resource, (i, value) => {
                                 let valueName = value;
@@ -89,7 +90,7 @@ module.exports = function render() {
                             this.onChange(i);
                         })
                     ),
-                    _.button({class: 'btn-remove btn-transparent'},
+                    _.button({class: 'btn-remove'},
                         _.span({class: 'fa fa-remove'})
                     ).click(() => { this.onClickRemove(i); })
                 );
@@ -99,7 +100,7 @@ module.exports = function render() {
         ),
         _.div({class: 'button-container'},
             _.if(this.model.length < this.MAX_FILTERS,
-                _.button({class: 'btn'},
+                _.button({class: 'btn btn-add-filter'},
                     'Add filter',
                     _.span({class: 'fa fa-plus'})
                 ).click(() => { this.onClickAdd(); })

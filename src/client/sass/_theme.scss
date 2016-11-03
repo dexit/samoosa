@@ -216,6 +216,21 @@ ul {
                 font-family: 'Bree Serif';
                 font-size: 16px;
             }
+
+            .select-container {
+                &, select {
+                    background-color: $teal-darker;
+                    color: $white;
+                }
+                
+                &:first-of-type, &:last-of-type {
+                    min-width: 90px;
+                }
+
+                &, &:first-of-type, &:last-of-type {
+                    border-radius: 0px;
+                }
+            }
         }
     }
 }

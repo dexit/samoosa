@@ -35,35 +35,155 @@ class Issue {
         this.milestone = properties.milestone;
         this.comments = properties.comments || [];
         this.assignee = properties.assignee;
+        this.createdAt = properties.createdAt;
+        this.closedAt = properties.closedAt;
         this.deleted = false;
+
+    }
+
+    /**
+     * Gets the title
+     *
+     * @returns {String} Title
+     */
+    getTitle() {
+        return this.title;
+    }
+    
+    /**
+     * Gets the description
+     *
+     * @returns {String} Description
+     */
+    getDescription() {
+        return this.description;
+    }
+    
+    /**
+     * Gets column
+     *
+     * @returns {String} Column name
+     */
+    getColumn() {
+        return resources.issueColumns[this.column || -1] || 'to do';
+    }
+    
+    /**
+     * Gets type
+     *
+     * @returns {String} Type name
+     */
+    getType() {
+        return resources.issueTypes[this.type || -1];
+    }
+
+    /**
+     * Gets priority
+     *
+     * @returns {String} Priority name
+     */
+    getPriority() {
+        return resources.issuePriorities[this.priority || -1];
+    }
+
+    /**
+     * Gets version
+     *
+     * @returns {String} Version name
+     */
+    getVersion() {
+        return resources.versions[this.version || -1];
+    }
+
+    /**
+     * Gets milestone
+     *
+     * @returns {Milestone} Milestone object
+     */
+    getMilestone() {
+        return resources.milestones[this.milestone || -1];
+    }
+
+    /**
+     * Gets comments
+     *
+     * @returns {Array} Comments
+     */
+    getComments() {
+        return this.comments || [];
+    }
+
+    /**
+     * Gets assignee
+     *
+     * @returns {Collaborator} Collaborator object
+     */
+    getAssignee() {
+        return resources.collaborators[this.assignee || -1];
+    }
+
+    /**
+     * Gets created at date
+     *
+     * @returns {Date} Created at date
+     */
+    getCreatedDate() {
+        let date = new Date(this.createdAt);
+
+        if(!date || isNaN(date.getTime())) {
+            return null;
         
-        if(properties.createdAt) {
-            this.createdAt = new Date(properties.createdAt).getUnixTime();
+        } else {
+            return date;
+                
         }
+    }
+    
+    /**
+     * Gets closed at date
+     *
+     * @returns {Date} Closed at date
+     */
+    getClosedDate() {
+        let date = new Date(this.closedAt);
 
-        if(properties.closedAt) {
-            this.closedAt = new Date(properties.closedAt).getUnixTime();
+        if(!date || isNaN(date.getTime())) {
+            return null;
+        
+        } else {
+            return date;
+                
         }
+    }
 
+    /**
+     * Get estimated hours
+     *
+     * @returns {Number} Hours
+     */
+    getEstimate() {
+        let estimate = window.resources.issueEstimates[this.estimate];
+
+        if(estimate) {
+            return parseFloat(estimate);
+        } else {
+            return 0;
+        }
     }
 
     /**
      * Gets an object with all the baked values
      */
     getBakedValues() {
-        let baked = {
-            column: resources.issueColumns[this.column],
-            type: resources.issueTypes[this.type],
-            priority: resources.issuePriorities[this.priority],
-            version: resources.versions[this.version],
-            milestone: resources.milestones[this.milestone],
-            assignee: resources.collaborators[this.assignee],
-            estimate: resources.issueEstimates[this.estimate],
-            createdAt: this.createdAt ? new Date(this.createdAt) : null,
-            closedAt: this.closedAt ? new Date(this.closedAt) : null
+        return {
+            column: this.getColumn(),
+            type: this.getType(),
+            priority: this.getPriority(),
+            version: this.getVersion(),
+            milestone: this.getMilestone() ? this.getMilestone().title : null,
+            assignee: this.getAssignee() ? this.getAssignee().name : null,
+            estimate: resources.issueEstimates[this.estimate || -1]
         };
-        
-        return baked;
     }
 
     /**
@@ -73,21 +193,6 @@ class Issue {
      */
     isClosed() {
         return this.column == window.resources.issueColumns.length - 1;
-    }
-
-    /**
-     * Get estimated hours
-     *
-     * @returns {Number} hours
-     */
-    getEstimatedHours() {
-        let estimate = window.resources.issueEstimates[this.estimate];
-
-        if(estimate) {
-            return parseFloat(estimate);
-        } else {
-            return 0;
-        }
     }
 }
 

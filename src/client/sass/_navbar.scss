@@ -12,6 +12,7 @@
 
                 .content {
                     max-width: 50rem;
+                    padding: 15px;
                     left: 50%;
                     top: 50%;
                     height: 15rem;
@@ -131,7 +132,6 @@
         max-width: 100%;
 
         >.content {
-            padding: 15px;
             position: absolute;
             height: 100%;
             top: 0px;

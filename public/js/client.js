@@ -5276,7 +5276,7 @@
 	            var _this7 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                _this7.get('/users/' + _this7.getUserName() + '/repos').then(function (repos) {
+	                _this7.get('/user/repos').then(function (repos) {
 	                    _this7.processProjects(repos);
 
 	                    resolve();
@@ -6068,7 +6068,8 @@
 	                    index: i,
 	                    title: projects[i].name,
 	                    description: projects[i].description,
-	                    cloneUrl: projects[i].clone_url
+	                    cloneUrl: projects[i].clone_url,
+	                    owner: projects[i].owner.login
 	                };
 
 	                window.resources.projects[i] = project;
@@ -12153,11 +12154,11 @@
 	        key: 'onClick',
 	        value: function onClick() {
 	            if (this.overrideUrl) {
-	                location = '/#/' + ApiHelper.getUserName() + '/' + this.model.title + this.overrideUrl;
+	                location = '/#/' + this.model.owner + '/' + this.model.title + this.overrideUrl;
 	            } else if (Router.params.project) {
-	                location = '/#' + location.hash.replace('#', '').replace(Router.params.project, this.model.title);
+	                location = '/#' + location.hash.replace('#', '').replace(Router.params.project, this.model.title).replace(Router.params.user, this.model.owner);
 	            } else {
-	                location = '/#/' + ApiHelper.getUserName() + '/' + this.model.title + '/board/kanban/';
+	                location = '/#/' + this.model.owner + '/' + this.model.title + '/board/kanban/';
 	            }
 
 	            location.reload(true);

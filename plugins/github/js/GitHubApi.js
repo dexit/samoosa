@@ -260,7 +260,7 @@ class GitHubApi extends ApiHelper {
      */
     getProjects() {
         return new Promise((resolve, reject) => {
-            this.get('/users/' + this.getUserName() + '/repos')
+            this.get('/user/repos')
             .then((repos) => {
                 this.processProjects(repos);
 
@@ -913,9 +913,10 @@ class GitHubApi extends ApiHelper {
                 index: i,
                 title: projects[i].name,
                 description: projects[i].description,
-                cloneUrl: projects[i].clone_url
+                cloneUrl: projects[i].clone_url,
+                owner: projects[i].owner.login
             };
-
+            
             window.resources.projects[i] = project;
         }
     }

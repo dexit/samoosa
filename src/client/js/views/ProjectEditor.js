@@ -11,15 +11,17 @@ class ProjectEditor extends View {
 
     onClick() {
         if(this.overrideUrl) {
-            location.hash = '/' + ApiHelper.getUserName() + '/' + this.model.title + this.overrideUrl;
+            location = '/#/' + ApiHelper.getUserName() + '/' + this.model.title + this.overrideUrl;
 
         } else if(Router.params.project) {
-            location.hash = location.hash.replace('#', '').replace(Router.params.project, this.model.title);
+            location = '/#' + location.hash.replace('#', '').replace(Router.params.project, this.model.title);
         
         } else {
-            location.hash = '/' + ApiHelper.getUserName() + '/' + this.model.title + '/board/kanban/';
+            location = '/#/' + ApiHelper.getUserName() + '/' + this.model.title + '/board/kanban/';
         
         }
+
+        location.reload(true);
     }   
 }
 

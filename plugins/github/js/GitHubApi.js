@@ -174,9 +174,9 @@ class GitHubApi extends ApiHelper {
 
                 default:
                     if(error.responseJSON) {
-                        alert(error.responseJSON.message);
+                        displayError(error.responseJSON.message);
                     } else {
-                        alert(error.statusText);
+                        displayError(error.statusText);
                     } 
                     break;
             }

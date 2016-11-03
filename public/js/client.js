@@ -4282,6 +4282,8 @@
 	window.spinner = function (active) {
 	    $('.spinner-backdrop').remove();
 
+	    $('.app-container').toggleClass('disabled', active);
+
 	    if (active) {
 	        $('body').append(_.div({ class: 'spinner-backdrop' }, _.div({ class: 'spinner-container' }, _.span({ class: 'spinner-icon fa fa-refresh' }))));
 	    }
@@ -4315,6 +4317,9 @@
 	// Displays an error
 	window.displayError = function (error) {
 	    if (error instanceof Error == false) {
+	        return;
+	    }
+	    if (error.name === 'error' && !error.message) {
 	        return;
 	    }
 
@@ -5173,9 +5178,9 @@
 
 	                    default:
 	                        if (_error.responseJSON) {
-	                            alert(_error.responseJSON.message);
+	                            displayError(_error.responseJSON.message);
 	                        } else {
-	                            alert(_error.statusText);
+	                            displayError(_error.statusText);
 	                        }
 	                        break;
 	                }
@@ -12146,12 +12151,14 @@
 	        key: 'onClick',
 	        value: function onClick() {
 	            if (this.overrideUrl) {
-	                location.hash = '/' + ApiHelper.getUserName() + '/' + this.model.title + this.overrideUrl;
+	                location = '/#/' + ApiHelper.getUserName() + '/' + this.model.title + this.overrideUrl;
 	            } else if (Router.params.project) {
-	                location.hash = location.hash.replace('#', '').replace(Router.params.project, this.model.title);
+	                location = '/#' + location.hash.replace('#', '').replace(Router.params.project, this.model.title);
 	            } else {
-	                location.hash = '/' + ApiHelper.getUserName() + '/' + this.model.title + '/board/kanban/';
+	                location = '/#/' + ApiHelper.getUserName() + '/' + this.model.title + '/board/kanban/';
 	            }
+
+	            location.reload(true);
 	        }
 	    }]);
 

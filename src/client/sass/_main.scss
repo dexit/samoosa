@@ -168,9 +168,10 @@ body, html {
         width: 32px;
         height: 32px;
         position: absolute;
-        bottom: 32px;
-        right: 32px;
+        top: 50%;
+        left: 50%;
         text-align: center;
+        transform: translate(-50%, -50%);
 
         .spinner-icon {
             color: material-color('blue', '500');

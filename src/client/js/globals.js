@@ -226,7 +226,9 @@ window.prettyDate = function(inputDate, separator) {
 // Spinner
 window.spinner = function(active) {
     $('.spinner-backdrop').remove();
-       
+   
+    $('.app-container').toggleClass('disabled', active);
+
     if(active) { 
         $('body').append(
             _.div({class: 'spinner-backdrop'},
@@ -266,6 +268,7 @@ window.sortByDate = function(array, key) {
 // Displays an error
 window.displayError = function(error) {
     if(error instanceof Error == false) { return; }
+    if(error.name === 'error' && !error.message) { return; }
 
     let alertString = error.name + '\n\n' + error.message;
 

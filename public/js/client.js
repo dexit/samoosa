@@ -12596,6 +12596,58 @@
 
 	        _this.template = __webpack_require__(45);
 
+	        // Find most relevant milestone
+	        var nearest = void 0;
+	        var now = new Date();
+
+	        var _iteratorNormalCompletion = true;
+	        var _didIteratorError = false;
+	        var _iteratorError = undefined;
+
+	        try {
+	            for (var _iterator = resources.milestones[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                var milestone = _step.value;
+
+	                if (!nearest) {
+	                    nearest = milestone;
+	                } else {
+	                    var thisStartDate = milestone.getStartDate();
+	                    var thisEndDate = milestone.getEndDate();
+
+	                    var nearestStartDate = nearest.getStartDate();
+	                    var nearestEndDate = nearest.getEndDate();
+
+	                    // Found perfect scenario
+	                    if (thisStartDate < now && thisEndDate > now) {
+	                        nearest = milestone;
+	                        break;
+	                    }
+
+	                    // Found nearest start date
+	                    if (Math.abs(thisStartDate.getTime() - now.getTime()) < Math.abs(nearestStartDate.getTime() - now.getTime())) {
+	                        nearest = milestone;
+	                    }
+	                }
+	            }
+	        } catch (err) {
+	            _didIteratorError = true;
+	            _iteratorError = err;
+	        } finally {
+	            try {
+	                if (!_iteratorNormalCompletion && _iterator.return) {
+	                    _iterator.return();
+	                }
+	            } finally {
+	                if (_didIteratorError) {
+	                    throw _iteratorError;
+	                }
+	            }
+	        }
+
+	        if (nearest) {
+	            currentMilestoneIndex = nearest.index;
+	        }
+
 	        _this.fetch();
 	        return _this;
 	    }

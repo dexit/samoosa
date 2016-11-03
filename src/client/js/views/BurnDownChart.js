@@ -9,6 +9,38 @@ class BurnDownChart extends View {
 
         this.template = require('../templates/BurnDownChart');
 
+        // Find most relevant milestone
+        let nearest;
+        let now = new Date();
+
+        for(let milestone of resources.milestones) {
+            if(!nearest) {
+                nearest = milestone;
+            
+            } else {
+                let thisStartDate = milestone.getStartDate();
+                let thisEndDate = milestone.getEndDate();
+
+                let nearestStartDate = nearest.getStartDate();
+                let nearestEndDate = nearest.getEndDate();
+
+                // Found perfect scenario
+                if(thisStartDate < now && thisEndDate > now) {
+                    nearest = milestone;
+                    break;
+                }
+
+                // Found nearest start date
+                if(Math.abs(thisStartDate.getTime() - now.getTime()) < Math.abs(nearestStartDate.getTime() - now.getTime())) {
+                    nearest = milestone;
+                }
+            }
+        }
+
+        if(nearest) {
+            currentMilestoneIndex = nearest.index;
+        }   
+
         this.fetch();
     }
 

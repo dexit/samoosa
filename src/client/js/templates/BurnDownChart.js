@@ -11,8 +11,8 @@ module.exports = function render() {
 
     let totalDays = milestone.getTotalDays();
     let totalHours = milestone.getTotalEstimatedHours();
-    let milestoneStart = new Date(milestone.startDate);
-    let milestoneEnd = new Date(milestone.endDate);
+    let milestoneStart = milestone.getStartDate();
+    let milestoneEnd = milestone.getEndDate();
 
     let CANVAS_HEIGHT_UNIT = 400 / Math.ceil(totalHours);
     let CANVAS_WIDTH_UNIT = 40;
@@ -83,7 +83,7 @@ module.exports = function render() {
             _.h4({},
                 'Milestone',
                 _.select({class: 'milestone-picker'},
-                    _.each(resources.milestones, (i, milestone) => {
+                    _.each(resources.milestones.concat().sort(this.sortMilestones), (i, milestone) => {
                         return _.option({value: milestone.index}, milestone.title);
                     })
                 ).val(milestone ? milestone.index : 0).change((e) => { this.onChangeMilestonePicker($(e.target).val()); })

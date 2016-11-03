@@ -24,6 +24,25 @@ class BurnDownChart extends View {
     }
 
     /**
+     * Sorts milestones by end date
+     *
+     * @param {Milestone} a
+     * @param {Milestone} b
+     */
+    sortMilestones(a, b) {
+        if(a.getEndDate() > b.getEndDate()) {
+            return 1;
+        }
+        
+        if(a.getEndDate() < b.getEndDate()) {
+            return -1;
+        }
+
+        return 0;
+    }
+
+
+    /**
      * Gets the currently selected milestone
      *
      * @returns {Milestone} Current milestone 

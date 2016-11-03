@@ -6085,21 +6085,74 @@
 	    }, {
 	        key: 'processMilestones',
 	        value: function processMilestones(milestones) {
-	            window.resources.milestones = [];
+	            // Find milestone start date based on first closed issue
+	            // This is terrible, but so is GitHubs issue system
+	            var getStartDate = function getStartDate() {
+	                if (this.startDate) {
+	                    return new Date(this.startDate);
+	                }
+
+	                var earliest = void 0;
+
+	                var _iteratorNormalCompletion2 = true;
+	                var _didIteratorError2 = false;
+	                var _iteratorError2 = undefined;
+
+	                try {
+	                    for (var _iterator2 = this.getIssues()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                        var issue = _step2.value;
+
+	                        if (issue.getClosedDate()) {
+	                            if (!earliest) {
+	                                earliest = issue;
+	                            } else if (issue.getClosedDate() < earliest.getClosedDate()) {
+	                                earliest = issue;
+	                            }
+	                        }
+	                    }
+	                } catch (err) {
+	                    _didIteratorError2 = true;
+	                    _iteratorError2 = err;
+	                } finally {
+	                    try {
+	                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                            _iterator2.return();
+	                        }
+	                    } finally {
+	                        if (_didIteratorError2) {
+	                            throw _iteratorError2;
+	                        }
+	                    }
+	                }
+
+	                if (earliest) {
+	                    this.startDate = earliest.closedAt;
+
+	                    return new Date(this.startDate);
+	                } else {
+	                    debug.log('Could not find start date for milestone "' + milestone.title + '"', this);
+	                    return;
+	                }
+	            };
+
+	            resources.milestones = [];
 
 	            for (var i in milestones) {
-	                var index = window.resources.milestones.length;
+	                var index = resources.milestones.length;
 
-	                var milestone = new Milestone({
+	                var _milestone = new Milestone({
 	                    index: index,
 	                    id: milestones[i].number,
 	                    title: milestones[i].title,
 	                    description: milestones[i].description,
-	                    startDate: milestones[i].created_at,
+	                    startDate: null,
 	                    endDate: milestones[i].due_on
 	                });
 
-	                window.resources.milestones[index] = milestone;
+	                resources.milestones[index] = _milestone;
+
+	                // Override the getStartDate method
+	                _milestone.getStartDate = getStartDate;
 	            }
 	        }
 
@@ -6114,49 +6167,6 @@
 	        value: function processVersions(labels) {
 	            window.resources.versions = [];
 
-	            var _iteratorNormalCompletion2 = true;
-	            var _didIteratorError2 = false;
-	            var _iteratorError2 = undefined;
-
-	            try {
-	                for (var _iterator2 = labels[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                    var label = _step2.value;
-
-	                    var versionIndex = label.name.indexOf('version:');
-
-	                    if (versionIndex > -1) {
-	                        var versionName = label.name.replace('version:', '');
-
-	                        window.resources.versions.push(versionName);
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError2 = true;
-	                _iteratorError2 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                        _iterator2.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError2) {
-	                        throw _iteratorError2;
-	                    }
-	                }
-	            }
-	        }
-
-	        /**
-	         * Process issue priotities
-	         *
-	         * @param {Array} labels
-	         */
-
-	    }, {
-	        key: 'processIssuePriorities',
-	        value: function processIssuePriorities(labels) {
-	            window.resources.issuePriorities = [];
-
 	            var _iteratorNormalCompletion3 = true;
 	            var _didIteratorError3 = false;
 	            var _iteratorError3 = undefined;
@@ -6165,12 +6175,12 @@
 	                for (var _iterator3 = labels[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
 	                    var label = _step3.value;
 
-	                    var index = label.name.indexOf('priority:');
+	                    var versionIndex = label.name.indexOf('version:');
 
-	                    if (index > -1) {
-	                        var name = label.name.replace('priority:', '');
+	                    if (versionIndex > -1) {
+	                        var versionName = label.name.replace('version:', '');
 
-	                        window.resources.issuePriorities.push(name);
+	                        window.resources.versions.push(versionName);
 	                    }
 	                }
 	            } catch (err) {
@@ -6190,15 +6200,15 @@
 	        }
 
 	        /**
-	         * Process issue estimates
+	         * Process issue priotities
 	         *
 	         * @param {Array} labels
 	         */
 
 	    }, {
-	        key: 'processIssueEstimates',
-	        value: function processIssueEstimates(labels) {
-	            window.resources.issueEstimates = [];
+	        key: 'processIssuePriorities',
+	        value: function processIssuePriorities(labels) {
+	            window.resources.issuePriorities = [];
 
 	            var _iteratorNormalCompletion4 = true;
 	            var _didIteratorError4 = false;
@@ -6208,12 +6218,12 @@
 	                for (var _iterator4 = labels[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
 	                    var label = _step4.value;
 
-	                    var index = label.name.indexOf('estimate:');
+	                    var index = label.name.indexOf('priority:');
 
 	                    if (index > -1) {
-	                        var name = label.name.replace('estimate:', '');
+	                        var name = label.name.replace('priority:', '');
 
-	                        window.resources.issueEstimates.push(name);
+	                        window.resources.issuePriorities.push(name);
 	                    }
 	                }
 	            } catch (err) {
@@ -6227,6 +6237,49 @@
 	                } finally {
 	                    if (_didIteratorError4) {
 	                        throw _iteratorError4;
+	                    }
+	                }
+	            }
+	        }
+
+	        /**
+	         * Process issue estimates
+	         *
+	         * @param {Array} labels
+	         */
+
+	    }, {
+	        key: 'processIssueEstimates',
+	        value: function processIssueEstimates(labels) {
+	            window.resources.issueEstimates = [];
+
+	            var _iteratorNormalCompletion5 = true;
+	            var _didIteratorError5 = false;
+	            var _iteratorError5 = undefined;
+
+	            try {
+	                for (var _iterator5 = labels[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                    var label = _step5.value;
+
+	                    var index = label.name.indexOf('estimate:');
+
+	                    if (index > -1) {
+	                        var name = label.name.replace('estimate:', '');
+
+	                        window.resources.issueEstimates.push(name);
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError5 = true;
+	                _iteratorError5 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	                        _iterator5.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError5) {
+	                        throw _iteratorError5;
 	                    }
 	                }
 	            }
@@ -6260,13 +6313,13 @@
 
 	            window.resources.issueColumns.push('to do');
 
-	            var _iteratorNormalCompletion5 = true;
-	            var _didIteratorError5 = false;
-	            var _iteratorError5 = undefined;
+	            var _iteratorNormalCompletion6 = true;
+	            var _didIteratorError6 = false;
+	            var _iteratorError6 = undefined;
 
 	            try {
-	                for (var _iterator5 = labels[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	                    var label = _step5.value;
+	                for (var _iterator6 = labels[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+	                    var label = _step6.value;
 
 	                    var index = label.name.indexOf('column:');
 
@@ -6277,16 +6330,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError5 = true;
-	                _iteratorError5 = err;
+	                _didIteratorError6 = true;
+	                _iteratorError6 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
-	                        _iterator5.return();
+	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
+	                        _iterator6.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError5) {
-	                        throw _iteratorError5;
+	                    if (_didIteratorError6) {
+	                        throw _iteratorError6;
 	                    }
 	                }
 	            }
@@ -6305,13 +6358,13 @@
 	        value: function processIssueTypes(labels) {
 	            window.resources.issueTypes = [];
 
-	            var _iteratorNormalCompletion6 = true;
-	            var _didIteratorError6 = false;
-	            var _iteratorError6 = undefined;
+	            var _iteratorNormalCompletion7 = true;
+	            var _didIteratorError7 = false;
+	            var _iteratorError7 = undefined;
 
 	            try {
-	                for (var _iterator6 = labels[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-	                    var label = _step6.value;
+	                for (var _iterator7 = labels[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+	                    var label = _step7.value;
 
 	                    var index = label.name.indexOf('type:');
 
@@ -6320,46 +6373,6 @@
 
 	                        window.resources.issueTypes.push(name);
 	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError6 = true;
-	                _iteratorError6 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
-	                        _iterator6.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError6) {
-	                        throw _iteratorError6;
-	                    }
-	                }
-	            }
-	        }
-
-	        /**
-	         * Process collaborators
-	         *
-	         * @param {Array} collaborators
-	         */
-
-	    }, {
-	        key: 'processCollaborators',
-	        value: function processCollaborators(collaborators) {
-	            window.resources.collaborators = [];
-
-	            var _iteratorNormalCompletion7 = true;
-	            var _didIteratorError7 = false;
-	            var _iteratorError7 = undefined;
-
-	            try {
-	                for (var _iterator7 = collaborators[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-	                    var collaborator = _step7.value;
-
-	                    window.resources.collaborators.push({
-	                        name: collaborator.login,
-	                        avatar: collaborator.avatar_url
-	                    });
 	                }
 	            } catch (err) {
 	                _didIteratorError7 = true;
@@ -6378,6 +6391,46 @@
 	        }
 
 	        /**
+	         * Process collaborators
+	         *
+	         * @param {Array} collaborators
+	         */
+
+	    }, {
+	        key: 'processCollaborators',
+	        value: function processCollaborators(collaborators) {
+	            window.resources.collaborators = [];
+
+	            var _iteratorNormalCompletion8 = true;
+	            var _didIteratorError8 = false;
+	            var _iteratorError8 = undefined;
+
+	            try {
+	                for (var _iterator8 = collaborators[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+	                    var collaborator = _step8.value;
+
+	                    window.resources.collaborators.push({
+	                        name: collaborator.login,
+	                        avatar: collaborator.avatar_url
+	                    });
+	                }
+	            } catch (err) {
+	                _didIteratorError8 = true;
+	                _iteratorError8 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
+	                        _iterator8.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError8) {
+	                        throw _iteratorError8;
+	                    }
+	                }
+	            }
+	        }
+
+	        /**
 	         * Process issues
 	         *
 	         * @param {Array} issues
@@ -6388,13 +6441,13 @@
 	        value: function processIssues(issues) {
 	            window.resources.issues = [];
 
-	            var _iteratorNormalCompletion8 = true;
-	            var _didIteratorError8 = false;
-	            var _iteratorError8 = undefined;
+	            var _iteratorNormalCompletion9 = true;
+	            var _didIteratorError9 = false;
+	            var _iteratorError9 = undefined;
 
 	            try {
-	                for (var _iterator8 = issues[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-	                    var gitHubIssue = _step8.value;
+	                for (var _iterator9 = issues[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+	                    var gitHubIssue = _step9.value;
 
 	                    var issue = new Issue();
 
@@ -6411,13 +6464,13 @@
 
 	                    issue.labels = issue.labels || [];
 
-	                    var _iteratorNormalCompletion9 = true;
-	                    var _didIteratorError9 = false;
-	                    var _iteratorError9 = undefined;
+	                    var _iteratorNormalCompletion10 = true;
+	                    var _didIteratorError10 = false;
+	                    var _iteratorError10 = undefined;
 
 	                    try {
-	                        for (var _iterator9 = gitHubIssue.labels[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-	                            var label = _step9.value;
+	                        for (var _iterator10 = gitHubIssue.labels[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+	                            var label = _step10.value;
 
 	                            var typeIndex = label.name.indexOf('type:');
 	                            var priorityIndex = label.name.indexOf('priority:');
@@ -6452,16 +6505,16 @@
 	                            }
 	                        }
 	                    } catch (err) {
-	                        _didIteratorError9 = true;
-	                        _iteratorError9 = err;
+	                        _didIteratorError10 = true;
+	                        _iteratorError10 = err;
 	                    } finally {
 	                        try {
-	                            if (!_iteratorNormalCompletion9 && _iterator9.return) {
-	                                _iterator9.return();
+	                            if (!_iteratorNormalCompletion10 && _iterator10.return) {
+	                                _iterator10.return();
 	                            }
 	                        } finally {
-	                            if (_didIteratorError9) {
-	                                throw _iteratorError9;
+	                            if (_didIteratorError10) {
+	                                throw _iteratorError10;
 	                            }
 	                        }
 	                    }
@@ -6483,16 +6536,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError8 = true;
-	                _iteratorError8 = err;
+	                _didIteratorError9 = true;
+	                _iteratorError9 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
-	                        _iterator8.return();
+	                    if (!_iteratorNormalCompletion9 && _iterator9.return) {
+	                        _iterator9.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError8) {
-	                        throw _iteratorError8;
+	                    if (_didIteratorError9) {
+	                        throw _iteratorError9;
 	                    }
 	                }
 	            }
@@ -6656,13 +6709,13 @@
 	                _this36.get('/repos/' + _this36.getUserName() + '/' + _this36.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
 	                    var comments = [];
 
-	                    var _iteratorNormalCompletion10 = true;
-	                    var _didIteratorError10 = false;
-	                    var _iteratorError10 = undefined;
+	                    var _iteratorNormalCompletion11 = true;
+	                    var _didIteratorError11 = false;
+	                    var _iteratorError11 = undefined;
 
 	                    try {
-	                        for (var _iterator10 = gitHubComments[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-	                            var gitHubComment = _step10.value;
+	                        for (var _iterator11 = gitHubComments[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+	                            var gitHubComment = _step11.value;
 
 	                            var comment = {
 	                                collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
@@ -6673,16 +6726,16 @@
 	                            comments.push(comment);
 	                        }
 	                    } catch (err) {
-	                        _didIteratorError10 = true;
-	                        _iteratorError10 = err;
+	                        _didIteratorError11 = true;
+	                        _iteratorError11 = err;
 	                    } finally {
 	                        try {
-	                            if (!_iteratorNormalCompletion10 && _iterator10.return) {
-	                                _iterator10.return();
+	                            if (!_iteratorNormalCompletion11 && _iterator11.return) {
+	                                _iterator11.return();
 	                            }
 	                        } finally {
-	                            if (_didIteratorError10) {
-	                                throw _iteratorError10;
+	                            if (_didIteratorError11) {
+	                                throw _iteratorError11;
 	                            }
 	                        }
 	                    }
@@ -9403,7 +9456,7 @@
 	        value: function getCreatedDate() {
 	            var date = new Date(this.createdAt);
 
-	            if (!date || isNaN(date.getTime())) {
+	            if (!this.createdAt || !date || isNaN(date.getTime())) {
 	                return null;
 	            } else {
 	                return date;
@@ -9421,7 +9474,7 @@
 	        value: function getClosedDate() {
 	            var date = new Date(this.closedAt);
 
-	            if (!date || isNaN(date.getTime())) {
+	            if (!this.closedAt || !date || isNaN(date.getTime())) {
 	                return null;
 	            } else {
 	                return date;
@@ -9514,13 +9567,49 @@
 	    }
 
 	    /**
-	     * Gets a list of all issues under this milestone
+	     * Gets the start date
 	     *
-	     * @returns {Array} Issues
+	     * @returns {Date} Start date
 	     */
 
 
 	    _createClass(Milestone, [{
+	        key: 'getStartDate',
+	        value: function getStartDate() {
+	            var date = new Date(this.startDate);
+
+	            if (!this.startDate || !date || isNaN(date.getTime())) {
+	                return null;
+	            } else {
+	                return date;
+	            }
+	        }
+
+	        /**
+	         * Gets the end date
+	         *
+	         * @returns {Date} End date
+	         */
+
+	    }, {
+	        key: 'getEndDate',
+	        value: function getEndDate() {
+	            var date = new Date(this.endDate);
+
+	            if (!this.endDate || !date || isNaN(date.getTime())) {
+	                return null;
+	            } else {
+	                return date;
+	            }
+	        }
+
+	        /**
+	         * Gets a list of all issues under this milestone
+	         *
+	         * @returns {Array} Issues
+	         */
+
+	    }, {
 	        key: 'getIssues',
 	        value: function getIssues() {
 	            var issues = [];
@@ -9568,8 +9657,8 @@
 	    }, {
 	        key: 'getTotalDays',
 	        value: function getTotalDays() {
-	            var start = new Date(this.startDate);
-	            var end = new Date(this.endDate);
+	            var start = this.getStartDate();
+	            var end = this.getEndDate();
 
 	            if (isNaN(start) || isNaN(end)) {
 	                return 0;
@@ -9650,11 +9739,11 @@
 	                    if (!closedDate) {
 	                        issues[issues.length] = issue;
 	                    } else {
-	                        var startDate = new Date(this.startDate);
+	                        var startDate = this.getStartDate();
 	                        var timeDiff = Math.abs(startDate.getTime() - closedDate.getTime());
 	                        var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
-	                        if (diffDays > day) {
+	                        if (diffDays > day + 1) {
 	                            issues[issues.length] = issue;
 	                        }
 	                    }
@@ -12521,6 +12610,27 @@
 	        }
 
 	        /**
+	         * Sorts milestones by end date
+	         *
+	         * @param {Milestone} a
+	         * @param {Milestone} b
+	         */
+
+	    }, {
+	        key: 'sortMilestones',
+	        value: function sortMilestones(a, b) {
+	            if (a.getEndDate() > b.getEndDate()) {
+	                return 1;
+	            }
+
+	            if (a.getEndDate() < b.getEndDate()) {
+	                return -1;
+	            }
+
+	            return 0;
+	        }
+
+	        /**
 	         * Gets the currently selected milestone
 	         *
 	         * @returns {Milestone} Current milestone 
@@ -12615,8 +12725,8 @@
 
 	    var totalDays = milestone.getTotalDays();
 	    var totalHours = milestone.getTotalEstimatedHours();
-	    var milestoneStart = new Date(milestone.startDate);
-	    var milestoneEnd = new Date(milestone.endDate);
+	    var milestoneStart = milestone.getStartDate();
+	    var milestoneEnd = milestone.getEndDate();
 
 	    var CANVAS_HEIGHT_UNIT = 400 / Math.ceil(totalHours);
 	    var CANVAS_WIDTH_UNIT = 40;
@@ -12686,7 +12796,7 @@
 	        drawNext(1);
 	    };
 
-	    return _.div({ class: 'burndown-chart analytics-body' }, _.div({ class: 'toolbar' }, _.h4({}, 'Milestone', _.select({ class: 'milestone-picker' }, _.each(resources.milestones, function (i, milestone) {
+	    return _.div({ class: 'burndown-chart analytics-body' }, _.div({ class: 'toolbar' }, _.h4({}, 'Milestone', _.select({ class: 'milestone-picker' }, _.each(resources.milestones.concat().sort(this.sortMilestones), function (i, milestone) {
 	        return _.option({ value: milestone.index }, milestone.title);
 	    })).val(milestone ? milestone.index : 0).change(function (e) {
 	        _this.onChangeMilestonePicker($(e.target).val());

@@ -130,7 +130,7 @@ class Issue {
     getCreatedDate() {
         let date = new Date(this.createdAt);
 
-        if(!date || isNaN(date.getTime())) {
+        if(!this.createdAt || !date || isNaN(date.getTime())) {
             return null;
         
         } else {
@@ -147,7 +147,7 @@ class Issue {
     getClosedDate() {
         let date = new Date(this.closedAt);
 
-        if(!date || isNaN(date.getTime())) {
+        if(!this.closedAt || !date || isNaN(date.getTime())) {
             return null;
         
         } else {

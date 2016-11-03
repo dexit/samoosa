@@ -19,6 +19,40 @@ class Milestone {
     }
 
     /**
+     * Gets the start date
+     *
+     * @returns {Date} Start date
+     */
+    getStartDate() {
+        let date = new Date(this.startDate);
+
+        if(!this.startDate || !date || isNaN(date.getTime())) {
+            return null;
+        
+        } else {
+            return date;
+                
+        }
+    }
+    
+    /**
+     * Gets the end date
+     *
+     * @returns {Date} End date
+     */
+    getEndDate() {
+        let date = new Date(this.endDate);
+
+        if(!this.endDate || !date || isNaN(date.getTime())) {
+            return null;
+        
+        } else {
+            return date;
+                
+        }
+    }
+
+    /**
      * Gets a list of all issues under this milestone
      *
      * @returns {Array} Issues
@@ -43,8 +77,8 @@ class Milestone {
      * @returns {Number} Days
      */
     getTotalDays() {
-        let start = new Date(this.startDate);
-        let end = new Date(this.endDate);
+        let start = this.getStartDate();
+        let end = this.getEndDate();
 
         if(isNaN(start) || isNaN(end)) { return 0; }
 
@@ -88,11 +122,11 @@ class Milestone {
                 issues[issues.length] = issue;
             
             } else {
-                let startDate = new Date(this.startDate);
+                let startDate = this.getStartDate();
                 let timeDiff = Math.abs(startDate.getTime() - closedDate.getTime());
                 let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
 
-                if(diffDays > day) {
+                if(diffDays > day + 1) {
                     issues[issues.length] = issue;
                 }
 

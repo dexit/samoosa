@@ -1,3 +1,8 @@
+---
+permalink: /about/
+layout: document-page
+---
+
 <img class="logo" src="https://rawgit.com/Putaitu/samoosa/gh-pages/public/svg/logo-medium.svg" width="128" />
 
 # Samoosa

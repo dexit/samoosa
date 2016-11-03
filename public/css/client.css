@@ -123,11 +123,11 @@ body, html {
  * Document page
  */
 .document-page .document {
-  max-width: 900px;
+  max-width: 800px;
   margin: 0em auto;
-  padding-top: 5em;
-  padding-left: 2em;
-  padding-right: 2em; }
+  padding: 5em 2em; }
+  .document-page .document h1, .document-page .document h2, .document-page .document h3, .document-page .document h4, .document-page .document h5, .document-page .document h6 {
+    line-height: 1em; }
 
 /**
  * A transparent, border-less button

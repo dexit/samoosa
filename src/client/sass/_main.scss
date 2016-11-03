@@ -28,11 +28,13 @@ body, html {
  */
 .document-page {
     .document {
-        max-width: 900px;
+        h1, h2, h3, h4, h5, h6 {
+            line-height: 1em;
+        }    
+
+        max-width: 800px;
         margin: 0em auto;
-        padding-top: 5em;
-        padding-left: 2em;
-        padding-right: 2em;
+        padding: 5em 2em;
     }
 }
 

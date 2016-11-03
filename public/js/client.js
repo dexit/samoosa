@@ -11055,8 +11055,8 @@
 	        value: function onClickToggle() {
 	            toggleExpand(this.$element);
 
-	            var isCollapsed = this.$element.hasClass('collapsed');
-	            var newKey = isCollapsed ? 'collapsed' : 'expanded';
+	            var wasCollapsed = this.$element.hasClass('collapsed');
+	            var newKey = !wasCollapsed ? 'collapsed' : 'expanded';
 
 	            SettingsHelper.set('milestone', this.model.index, newKey);
 	        }

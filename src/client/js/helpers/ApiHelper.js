@@ -811,8 +811,6 @@ class ApiHelper {
         function get(resource) {
             window.resources[resource] = [];
           
-            debug.log('Getting ' + resource + '...', helper);
-
             // If this resource is excluded, just proceed
             if(excludeResources && Array.isArray(excludeResources) && excludeResources.indexOf(resource) > -1) {
                 return new Promise((resolve) => {

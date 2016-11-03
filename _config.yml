@@ -1,4 +1,5 @@
 exclude: [ node_modules ]
+url: http://samoosa.rocks
 defaults:
   -
     scope:

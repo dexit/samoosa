@@ -40,20 +40,20 @@ class Navbar extends View {
 
         if(localStorage.getItem('source') != 'bitbucket') {
             links.push({
-                title: 'Project plan',
+                title: 'Schedule',
                 url: '/plan/',
                 icon: 'calendar'
             });
         }
         
         links.push({
-            title: 'Kanban board',
+            title: 'Kanban',
             url: '/board/kanban/',
             icon: 'columns'
         });
 
         links.push({
-            title: 'List board',
+            title: 'List',
             url: '/board/list/',
             icon: 'list'
         });

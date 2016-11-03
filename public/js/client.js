@@ -7725,8 +7725,6 @@
 	            function get(resource) {
 	                window.resources[resource] = [];
 
-	                debug.log('Getting ' + resource + '...', helper);
-
 	                // If this resource is excluded, just proceed
 	                if (excludeResources && Array.isArray(excludeResources) && excludeResources.indexOf(resource) > -1) {
 	                    return new Promise(function (resolve) {
@@ -9887,20 +9885,20 @@
 
 	            if (localStorage.getItem('source') != 'bitbucket') {
 	                links.push({
-	                    title: 'Project plan',
+	                    title: 'Schedule',
 	                    url: '/plan/',
 	                    icon: 'calendar'
 	                });
 	            }
 
 	            links.push({
-	                title: 'Kanban board',
+	                title: 'Kanban',
 	                url: '/board/kanban/',
 	                icon: 'columns'
 	            });
 
 	            links.push({
-	                title: 'List board',
+	                title: 'List',
 	                url: '/board/list/',
 	                icon: 'list'
 	            });
@@ -12987,7 +12985,7 @@
 	            }
 
 	            // Not editable in resource editor
-	            if (name == 'issues' || name == 'projects') {
+	            if (name == 'collaborators' || name == 'issues' || name == 'projects') {
 	                return;
 	            }
 

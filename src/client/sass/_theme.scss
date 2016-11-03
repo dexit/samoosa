@@ -68,7 +68,16 @@ h6 {
 
 ul {
     padding-left: 1.2em;
-    list-style-type: initial;
+    list-style-type: disc;
+}
+
+ol {
+    padding-left: 1.2em;
+    list-style-type: decimal;
+}
+
+a {
+    color: $pink-medium;
 }
 
 /**
@@ -113,6 +122,10 @@ ul {
                 background-color: $teal-darker;
                 border: 0px;
                 box-shadow: none;
+
+                &:hover {
+                    outline-color: $pink-medium;
+                }
 
                 .content {
                     .header {

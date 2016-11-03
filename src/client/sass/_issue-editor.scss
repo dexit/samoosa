@@ -146,7 +146,6 @@
     >.header {
         background-color: material-color('grey', '800');
         color: material-color('grey', '200');
-        padding: 0px 15px 5px 15px;
         position: relative;
 
         &:before {
@@ -159,49 +158,98 @@
             top: 0px;
         }
 
-        img, .unassigned {
-            float: left;
-            margin-right: 10px;
-            width: 30px;
-            height: 30px;
-        }
-
-        .unassigned {
-            background-color: material-color('grey', '500');
-            text-align: center;
-
-            .fa {
-                font-size: 24px;
-            }
-        }
-
-        .header-top-right {
-            position: absolute;
-            top: 0px;
-            right: 0px;
+        .header-content {
             display: flex;
-            
-            .issue-index {
-                border-bottom-left-radius: 5px;
-                padding: 2px 5px;
-                font-size: 12px;
+            padding: 5px 0px;
+
+            .header-left {
+                padding: 0px 10px;
+                flex-shrink: 0;
+
+                .issue-id {
+                    border-bottom-left-radius: 5px;
+                    padding: 2px 5px;
+                    font-size: 12px;
+                }
+                
+                .assignee-avatar {
+                    img, .unassigned {
+                        width: 20px;
+                        height: 20px;
+                    }
+                    
+                    .unassigned {
+                        background-color: material-color('grey', '500');
+                        text-align: center;
+
+                        .fa {
+                            font-size: 24px;
+                        }
+                    }
+                }
+                
+                .priority-indicator {
+                    font-size: 10px;
+                    text-align: center;
+                    margin-bottom: 5px;
+
+                    &.low, &.trival {
+                        color: material-color('green', '500');
+                    }
+                    
+                    &.medium, &.minor {
+                        color: material-color('grey', '500');
+                    }
+                    
+                    &.high, &.critical {
+                        color: material-color('yellow', '500');
+                    }
+                    
+                    &.blocker {
+                        color: material-color('red', '500');
+                    }
+                }
             }
+            
+            .header-center {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding-top: 15px;
+                padding-bottom: 15px;
 
-            .btn-remove {
-                padding: 2px 5px;
-                line-height: 13px;
-                height: auto;
-
-                span {
+                .issue-title {
                     margin: 0px;
-                    line-height: inherit;
+                    display: inline;
+                    
+                    span, input {
+                        font-size: 1em;
+                        line-height: 1em;
+                    }
+
+                    input {
+                        background-color: transparent;
+                        color: #fff;
+                        border: 0px;
+                        padding: 0px;
+                        margin: 0px;
+                        display: block;
+                        width: 100%; 
+                        
+                        &, &:focus, &:hover, &:active {
+                            outline: 0px;
+                        }   
+                    }
                 }
             }
         }
 
         .drag-handle {
             cursor: move;
-
+            position: absolute;
+            width: 100%;
+                    
             .fa {
                 text-align: center;
                 display: block;
@@ -214,11 +262,15 @@
 
         .btn-toggle {
             width: 100%;
-            line-height: 14px;
-            height: 14px;
+            line-height: 15px;
+            height: 15px;
             display: block;
             text-align: center;
             padding: 0px;
+            position: absolute;
+            bottom: 0px;
+            left: 0px;
+            font-size: 10px;
 
             &, &:focus, &:hover, &:active {
                 outline: none;
@@ -230,35 +282,8 @@
             }
         }
 
-        .priority-indicator {
-            font-size: 10px;
-
-            &.low, &.trival {
-                color: material-color('green', '500');
-            }
-            
-            &.medium, &.minor {
-                color: material-color('grey', '500');
-            }
-            
-            &.high, &.critical {
-                color: material-color('yellow', '500');
-            }
-            
-            &.blocker {
-                color: material-color('red', '500');
-            }
-        }
-
-        h4 {
-            margin: 0px;
-            display: inline;
-            margin-left: 5px;
-            line-height: 30px;
-        }
-
         span, input, h4 {
-            line-height: 30px;
+            line-height: 1em;
             
             &.icon-close {
                 display: none;
@@ -385,6 +410,19 @@
         
         button {
             margin-top: 15px;
+        }
+        
+        .btn-remove {
+            padding: 10px 5px;
+            line-height: 13px;
+            height: auto;
+            float: left;
+            font-size: 16px;
+
+            span {
+                margin: 0px;
+                line-height: inherit;
+            }
         }
     }
 }

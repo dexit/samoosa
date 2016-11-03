@@ -55,9 +55,7 @@ h3 {
 }
 
 h4 {
-    &, input, a, span {
-        font-size: 1.1rem;
-    }
+    font-size: 1rem;
 }
 
 h5 {
@@ -248,7 +246,7 @@ ul {
             }
         }
         
-        .issue-index {
+        .issue-id {
             font-family: 'Bree Serif';
             padding: 4px 8px;
             font-size: 11px;
@@ -260,6 +258,12 @@ ul {
 
         .btn-remove {
             background-color: $teal-darker;
+        }
+
+        .btn-toggle {
+            &:hover {
+                color: $pink-medium;
+            }
         }
     }
 
@@ -399,7 +403,11 @@ button.btn, input[type="submit"].btn {
 
 button.btn-remove {
     background-color: transparent;
-    color: $pink-medium;
+    color: $white;
+    
+    &:hover {
+        color: $pink-medium;
+    }
 }
 
 .tabbed-container {

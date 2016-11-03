@@ -59,6 +59,11 @@
                     position: absolute;
                     top: 0px;
                     display: inline-block;
+                    transform: translateX(-50%);
+                    
+                    &:first-child {
+                        transform: translateX(0%);
+                    }
 
                     &:last-child {
                         transform: translateX(-100%);

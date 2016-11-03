@@ -15,7 +15,7 @@ module.exports = function render() {
     let milestoneEnd = new Date(milestone.endDate);
 
     let CANVAS_HEIGHT_UNIT = 400 / Math.ceil(totalHours);
-    let CANVAS_WIDTH_UNIT = 80;
+    let CANVAS_WIDTH_UNIT = 40;
 
     if(CANVAS_WIDTH_UNIT * totalDays < 860) {
         CANVAS_WIDTH_UNIT = 860 / totalDays;
@@ -103,7 +103,7 @@ module.exports = function render() {
         _.div({class: 'graph-container'},
             _.div({class: 'graph-y-axis-labels'},
                 _.label({style: 'top: 0px'}, Math.round(totalHours) + ' h'),
-                _.label({style: 'top: 400px'}, '0 h')
+                _.label({style: 'top: 380px'}, '0 h')
             ),
             _.div({class: 'graph-canvas'},
                 $canvas,

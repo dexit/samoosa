@@ -10721,26 +10721,24 @@
 	        _this.onClickDragHandle(e);
 	    }),
 
-	    // Assignee avatar
-	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())),
+	    // Header content
+	    _.div({ class: 'header-content' },
 
-	    // Top right section
-	    _.div({ class: 'header-top-right' },
-
-	    // Issue id
-	    // TODO Rename this class to "issue-id" and find similar occurences
-	    _.div({ class: 'issue-index' }, (this.model.id || this.model.index).toString()),
-
-	    // Remove button
-	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-remove' })).click(function () {
-	        _this.onClickRemove();
-	    }))),
-
+	    // Left section
+	    _.div({ class: 'header-left' },
 	    // Priority indicator
 	    this.getPriorityIndicator(),
 
+	    // Issue id
+	    _.span({ class: 'issue-id' }, (this.model.id || this.model.index).toString()),
+
+	    // Assignee avatar
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar()))),
+
+	    // Center section
+	    _.div({ class: 'header-center' },
 	    // Title
-	    _.h4({}, _.span({ class: 'btn-edit' }, this.model.title).click(this.onClickEdit), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
+	    _.h4({ class: 'issue-title' }, _.span({ class: 'btn-edit' }, this.model.title).click(this.onClickEdit), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
 	        _this.onChange();
 
 	        _this.$element.find('.header .btn-edit').html(_this.model.title);
@@ -10748,7 +10746,7 @@
 	        if (e.which == 13) {
 	            _this.onBlur(e);
 	        }
-	    })),
+	    })))),
 
 	    // Expand/collapse button
 	    _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-up' }), _.span({ class: 'fa icon-open fa-chevron-down' })).click(function (e) {
@@ -10829,7 +10827,17 @@
 	    _.div({ class: 'comments' }),
 
 	    // Add comment
-	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' }, _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp), _.button({ class: 'btn' }, 'Comment').click(function () {
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' },
+	    // Add comment input
+	    _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp),
+
+	    // Remove button
+	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
+	        _this.onClickRemove();
+	    })),
+
+	    // Add comment button
+	    _.button({ class: 'btn' }, 'Comment').click(function () {
 	        _this.onClickComment();
 	    }))));
 	};
@@ -12448,7 +12456,7 @@
 	    var milestoneEnd = new Date(milestone.endDate);
 
 	    var CANVAS_HEIGHT_UNIT = 400 / Math.ceil(totalHours);
-	    var CANVAS_WIDTH_UNIT = 80;
+	    var CANVAS_WIDTH_UNIT = 40;
 
 	    if (CANVAS_WIDTH_UNIT * totalDays < 860) {
 	        CANVAS_WIDTH_UNIT = 860 / totalDays;
@@ -12519,7 +12527,7 @@
 	        return _.option({ value: milestone.index }, milestone.title);
 	    })).val(milestone ? milestone.index : 0).change(function (e) {
 	        _this.onChangeMilestonePicker($(e.target).val());
-	    }))), _.div({ class: 'meta' }, _.h4('Total days'), _.p((totalDays + 1).toString()), _.h4('Total hours'), _.p(totalHours.toString()), _.h4('Milestone start'), _.p(milestoneStart.toString()), _.h4('Milestone end'), _.p(milestoneEnd.toString())), _.h4('Chart'), _.div({ class: 'graph-container' }, _.div({ class: 'graph-y-axis-labels' }, _.label({ style: 'top: 0px' }, Math.round(totalHours) + ' h'), _.label({ style: 'top: 400px' }, '0 h')), _.div({ class: 'graph-canvas' }, $canvas, drawGrid(), drawHours(optimalHours, 'blue'), drawHours(actualHours, 'red'), _.div({ class: 'graph-x-axis-labels' }, _.loop(totalDays, function (i) {
+	    }))), _.div({ class: 'meta' }, _.h4('Total days'), _.p((totalDays + 1).toString()), _.h4('Total hours'), _.p(totalHours.toString()), _.h4('Milestone start'), _.p(milestoneStart.toString()), _.h4('Milestone end'), _.p(milestoneEnd.toString())), _.h4('Chart'), _.div({ class: 'graph-container' }, _.div({ class: 'graph-y-axis-labels' }, _.label({ style: 'top: 0px' }, Math.round(totalHours) + ' h'), _.label({ style: 'top: 380px' }, '0 h')), _.div({ class: 'graph-canvas' }, $canvas, drawGrid(), drawHours(optimalHours, 'blue'), drawHours(actualHours, 'red'), _.div({ class: 'graph-x-axis-labels' }, _.loop(totalDays, function (i) {
 	        i++;
 
 	        if (i % 5 !== 0 && i != 1 && i != totalDays + 1) {

@@ -11,52 +11,50 @@ module.exports = function render() {
                 _.span({class: 'fa fa-bars'})
             ).on('mousedown', (e) => { this.onClickDragHandle(e) }),
 
-            // Assignee avatar
-            _.if(!ApiHelper.isSpectating(),
-                _.div({class: 'assignee-avatar'},
-                    this.getAssigneeAvatar()
-                )
-            ),
+            // Header content
+            _.div({class: 'header-content'},
 
-            // Top right section
-            _.div({class: 'header-top-right'},
+                // Left section
+                _.div({class: 'header-left'},
+                    // Priority indicator
+                    this.getPriorityIndicator(),
 
-                // Issue id
-                // TODO Rename this class to "issue-id" and find similar occurences
-                _.div({class: 'issue-index'},
-                    (this.model.id || this.model.index).toString()
+                    // Issue id
+                    _.span({class: 'issue-id'},
+                        (this.model.id || this.model.index).toString()
+                    ),
+                    
+                    // Assignee avatar
+                    _.if(!ApiHelper.isSpectating(),
+                        _.div({class: 'assignee-avatar'},
+                            this.getAssigneeAvatar()
+                        )
+                    )
                 ),
 
-                // Remove button
-                _.if(!ApiHelper.isSpectating(),
-                    _.button({class: 'btn btn-remove'},
-                        _.span({class: 'fa fa-remove'})
-                    ).click(() => { this.onClickRemove(); })
-                )
-            ),
-
-            // Priority indicator
-            this.getPriorityIndicator(),
-
-            // Title
-            _.h4({},
-                _.span({class: 'btn-edit'},
-                    this.model.title
-                ).click(this.onClickEdit),
-                _.input({type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title})
-                    .change(() => {
-                        this.onChange();
-                        
-                        this.$element.find('.header .btn-edit').html(
+                // Center section
+                _.div({class: 'header-center'},
+                    // Title
+                    _.h4({class: 'issue-title'},
+                        _.span({class: 'btn-edit'},
                             this.model.title
-                        );
-                    })
-                    .blur(this.onBlur)
-                    .keyup((e) => {
-                        if(e.which == 13) {
-                            this.onBlur(e);
-                        }
-                    })
+                        ).click(this.onClickEdit),
+                        _.input({type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title})
+                            .change(() => {
+                                this.onChange();
+                                
+                                this.$element.find('.header .btn-edit').html(
+                                    this.model.title
+                                );
+                            })
+                            .blur(this.onBlur)
+                            .keyup((e) => {
+                                if(e.which == 13) {
+                                    this.onBlur(e);
+                                }
+                            })
+                    )
+                )
             ),
             
             // Expand/collapse button
@@ -175,8 +173,18 @@ module.exports = function render() {
         // Add comment
         _.if(!ApiHelper.isSpectating(),
             _.div({class: 'add-comment'},
+                // Add comment input
                 _.textarea({class: 'btn-transparent', placeholder: 'Add comment here...'})
                     .keyup(this.onKeyUp),
+
+                // Remove button
+                _.if(!ApiHelper.isSpectating(),
+                    _.button({class: 'btn btn-remove'},
+                        _.span({class: 'fa fa-trash'})
+                    ).click(() => { this.onClickRemove(); })
+                ),
+
+                // Add comment button
                 _.button({class: 'btn'},
                     'Comment'
                 ).click(() => { this.onClickComment(); })

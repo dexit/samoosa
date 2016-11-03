@@ -339,7 +339,6 @@ body, html {
   .issue-editor > .header {
     background-color: #424242;
     color: #eeeeee;
-    padding: 0px 15px 5px 15px;
     position: relative; }
     .issue-editor > .header:before {
       content: '';
@@ -349,34 +348,63 @@ body, html {
       position: absolute;
       left: 0px;
       top: 0px; }
-    .issue-editor > .header img, .issue-editor > .header .unassigned {
-      float: left;
-      margin-right: 10px;
-      width: 30px;
-      height: 30px; }
-    .issue-editor > .header .unassigned {
-      background-color: #9e9e9e;
-      text-align: center; }
-      .issue-editor > .header .unassigned .fa {
-        font-size: 24px; }
-    .issue-editor > .header .header-top-right {
-      position: absolute;
-      top: 0px;
-      right: 0px;
-      display: flex; }
-      .issue-editor > .header .header-top-right .issue-index {
-        border-bottom-left-radius: 5px;
-        padding: 2px 5px;
-        font-size: 12px; }
-      .issue-editor > .header .header-top-right .btn-remove {
-        padding: 2px 5px;
-        line-height: 13px;
-        height: auto; }
-        .issue-editor > .header .header-top-right .btn-remove span {
+    .issue-editor > .header .header-content {
+      display: flex;
+      padding: 5px 0px; }
+      .issue-editor > .header .header-content .header-left {
+        padding: 0px 10px;
+        flex-shrink: 0; }
+        .issue-editor > .header .header-content .header-left .issue-id {
+          border-bottom-left-radius: 5px;
+          padding: 2px 5px;
+          font-size: 12px; }
+        .issue-editor > .header .header-content .header-left .assignee-avatar img, .issue-editor > .header .header-content .header-left .assignee-avatar .unassigned {
+          width: 20px;
+          height: 20px; }
+        .issue-editor > .header .header-content .header-left .assignee-avatar .unassigned {
+          background-color: #9e9e9e;
+          text-align: center; }
+          .issue-editor > .header .header-content .header-left .assignee-avatar .unassigned .fa {
+            font-size: 24px; }
+        .issue-editor > .header .header-content .header-left .priority-indicator {
+          font-size: 10px;
+          text-align: center;
+          margin-bottom: 5px; }
+          .issue-editor > .header .header-content .header-left .priority-indicator.low, .issue-editor > .header .header-content .header-left .priority-indicator.trival {
+            color: #4caf50; }
+          .issue-editor > .header .header-content .header-left .priority-indicator.medium, .issue-editor > .header .header-content .header-left .priority-indicator.minor {
+            color: #9e9e9e; }
+          .issue-editor > .header .header-content .header-left .priority-indicator.high, .issue-editor > .header .header-content .header-left .priority-indicator.critical {
+            color: #ffeb3b; }
+          .issue-editor > .header .header-content .header-left .priority-indicator.blocker {
+            color: #f44336; }
+      .issue-editor > .header .header-content .header-center {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-top: 15px;
+        padding-bottom: 15px; }
+        .issue-editor > .header .header-content .header-center .issue-title {
           margin: 0px;
-          line-height: inherit; }
+          display: inline; }
+          .issue-editor > .header .header-content .header-center .issue-title span, .issue-editor > .header .header-content .header-center .issue-title input {
+            font-size: 1em;
+            line-height: 1em; }
+          .issue-editor > .header .header-content .header-center .issue-title input {
+            background-color: transparent;
+            color: #fff;
+            border: 0px;
+            padding: 0px;
+            margin: 0px;
+            display: block;
+            width: 100%; }
+            .issue-editor > .header .header-content .header-center .issue-title input, .issue-editor > .header .header-content .header-center .issue-title input:focus, .issue-editor > .header .header-content .header-center .issue-title input:hover, .issue-editor > .header .header-content .header-center .issue-title input:active {
+              outline: 0px; }
     .issue-editor > .header .drag-handle {
-      cursor: move; }
+      cursor: move;
+      position: absolute;
+      width: 100%; }
       .issue-editor > .header .drag-handle .fa {
         text-align: center;
         display: block;
@@ -386,33 +414,22 @@ body, html {
         color: #9e9e9e; }
     .issue-editor > .header .btn-toggle {
       width: 100%;
-      line-height: 14px;
-      height: 14px;
+      line-height: 15px;
+      height: 15px;
       display: block;
       text-align: center;
-      padding: 0px; }
+      padding: 0px;
+      position: absolute;
+      bottom: 0px;
+      left: 0px;
+      font-size: 10px; }
       .issue-editor > .header .btn-toggle, .issue-editor > .header .btn-toggle:focus, .issue-editor > .header .btn-toggle:hover, .issue-editor > .header .btn-toggle:active {
         outline: none; }
       .issue-editor > .header .btn-toggle .fa {
         line-height: 1em;
         margin: 0px; }
-    .issue-editor > .header .priority-indicator {
-      font-size: 10px; }
-      .issue-editor > .header .priority-indicator.low, .issue-editor > .header .priority-indicator.trival {
-        color: #4caf50; }
-      .issue-editor > .header .priority-indicator.medium, .issue-editor > .header .priority-indicator.minor {
-        color: #9e9e9e; }
-      .issue-editor > .header .priority-indicator.high, .issue-editor > .header .priority-indicator.critical {
-        color: #ffeb3b; }
-      .issue-editor > .header .priority-indicator.blocker {
-        color: #f44336; }
-    .issue-editor > .header h4 {
-      margin: 0px;
-      display: inline;
-      margin-left: 5px;
-      line-height: 30px; }
     .issue-editor > .header span, .issue-editor > .header input, .issue-editor > .header h4 {
-      line-height: 30px; }
+      line-height: 1em; }
       .issue-editor > .header span.icon-close, .issue-editor > .header input.icon-close, .issue-editor > .header h4.icon-close {
         display: none; }
       .issue-editor > .header span.icon-open, .issue-editor > .header input.icon-open, .issue-editor > .header h4.icon-open {
@@ -493,6 +510,15 @@ body, html {
       background-color: #f5f5f5; }
     .issue-editor .add-comment button {
       margin-top: 15px; }
+    .issue-editor .add-comment .btn-remove {
+      padding: 10px 5px;
+      line-height: 13px;
+      height: auto;
+      float: left;
+      font-size: 16px; }
+      .issue-editor .add-comment .btn-remove span {
+        margin: 0px;
+        line-height: inherit; }
 
 .filter-editor {
   display: flex;
@@ -1107,7 +1133,10 @@ body > .plan-item-editor {
       height: 20px;
       position: absolute;
       top: 0px;
-      display: inline-block; }
+      display: inline-block;
+      transform: translateX(-50%); }
+      .workspace.analytics .burndown-chart .graph-container .graph-x-axis-labels label:first-child {
+        transform: translateX(0%); }
       .workspace.analytics .burndown-chart .graph-container .graph-x-axis-labels label:last-child {
         transform: translateX(-100%); }
 
@@ -1137,8 +1166,8 @@ h2 {
 h3 {
   font-size: 1.6rem; }
 
-h4, h4 input, h4 a, h4 span {
-  font-size: 1.1rem; }
+h4 {
+  font-size: 1rem; }
 
 h5 {
   font-size: 1rem; }
@@ -1243,7 +1272,7 @@ ul {
     background-color: transparent; }
     .issue-editor > .header h4, .issue-editor > .header h4 input {
       color: #fff; }
-    .issue-editor > .header .issue-index {
+    .issue-editor > .header .issue-id {
       font-family: 'Bree Serif';
       padding: 4px 8px;
       font-size: 11px;
@@ -1253,6 +1282,8 @@ ul {
       color: #5b84a2; }
     .issue-editor > .header .btn-remove {
       background-color: #171e23; }
+    .issue-editor > .header .btn-toggle:hover {
+      color: #E70D3B; }
   .issue-editor .meta, .issue-editor .body {
     color: #5b84a2; }
   .issue-editor .body {
@@ -1339,7 +1370,9 @@ button.btn, input[type="submit"].btn {
 
 button.btn-remove {
   background-color: transparent;
-  color: #E70D3B; }
+  color: #fff; }
+  button.btn-remove:hover {
+    color: #E70D3B; }
 
 .tabbed-container.vertical .tabs {
   padding-top: 0rem;

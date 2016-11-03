@@ -43,6 +43,8 @@ class IssueEditor extends View {
             IssueEditor.cancelMultiSelect();
         }
 
+        let wasExpanded = this.$element.hasClass('expanded');
+
         toggleExpand(this.$element);
 
         if(this.usingMultiEdit()) {

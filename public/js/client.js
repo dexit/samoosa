@@ -10115,6 +10115,7 @@
 	                IssueEditor.cancelMultiSelect();
 	            }
 
+	            var wasExpanded = this.$element.hasCLass('expanded');
 	            toggleExpand(this.$element);
 
 	            if (this.usingMultiEdit()) {

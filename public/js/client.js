@@ -9978,6 +9978,10 @@
 
 	                setTimeout(function () {
 	                    _this3.$element.css('height', collapsedHeight + 'px');
+
+	                    setTimeout(function () {
+	                        _this3.$element.removeAttr('style');
+	                    }, 500);
 	                }, 50);
 	            }
 

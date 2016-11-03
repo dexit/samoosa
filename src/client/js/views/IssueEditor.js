@@ -70,6 +70,10 @@ class IssueEditor extends View {
             
             setTimeout(() => {
                 this.$element.css('height', collapsedHeight + 'px');
+                
+                setTimeout(() => {
+                    this.$element.removeAttr('style');
+                }, 500);
             }, 50);
 
         }

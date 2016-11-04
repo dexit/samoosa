@@ -3,7 +3,7 @@
 
 <div class="document-header">
 
-<img class="logo" src="https://rawgit.com/Putaitu/samoosa/gh-pages/public/svg/logo-medium.svg" width="128" />
+<img class="logo" src="https://rawgit.com/Putaitu/samoosa/gh-pages/public/img/logo.png" width="128" />
 
 <h1>Samoosa</h1>
 <p>A free and open-source issue tracker frontend</p>

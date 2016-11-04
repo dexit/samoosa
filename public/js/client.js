@@ -12897,8 +12897,8 @@
 
 	// Plan
 	Router.route('/:user/:project/plan/', function () {
-	    ApiHelper.checkConnection(true).then(function () {
-	        return ApiHelper.getResources();
+	    ApiHelper.checkConnection().then(function () {
+	        return ApiHelper.getResources(true);
 	    }).then(function () {
 	        $('.workspace').remove();
 

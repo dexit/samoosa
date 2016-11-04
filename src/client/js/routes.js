@@ -22,9 +22,9 @@ Router.route('/:user/:project', () => {
 
 // Plan
 Router.route('/:user/:project/plan/', () => {
-    ApiHelper.checkConnection(true)
+    ApiHelper.checkConnection()
     .then(() => {
-        return ApiHelper.getResources();
+        return ApiHelper.getResources(true);
     })
     .then(() => {
         $('.workspace').remove();

@@ -6131,7 +6131,7 @@
 
 	                    return new Date(this.startDate);
 	                } else {
-	                    debug.log('Could not find start date for milestone "' + milestone.title + '"', this);
+	                    debug.log('Could not find start date for milestone "' + this.title + '"', this);
 	                    return;
 	                }
 	            };
@@ -6141,7 +6141,7 @@
 	            for (var i in milestones) {
 	                var index = resources.milestones.length;
 
-	                var _milestone = new Milestone({
+	                var milestone = new Milestone({
 	                    index: index,
 	                    id: milestones[i].number,
 	                    title: milestones[i].title,
@@ -6150,10 +6150,10 @@
 	                    endDate: milestones[i].due_on
 	                });
 
-	                resources.milestones[index] = _milestone;
+	                resources.milestones[index] = milestone;
 
 	                // Override the getStartDate method
-	                _milestone.getStartDate = getStartDate;
+	                milestone.getStartDate = getStartDate;
 	            }
 	        }
 

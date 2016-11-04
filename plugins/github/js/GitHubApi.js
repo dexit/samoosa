@@ -956,7 +956,7 @@ class GitHubApi extends ApiHelper {
                 return new Date(this.startDate);
 
             } else {
-                debug.log('Could not find start date for milestone "' + milestone.title + '"', this);
+                debug.log('Could not find start date for milestone "' + this.title + '"', this);
                 return;
             
             }

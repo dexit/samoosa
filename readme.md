@@ -6,6 +6,13 @@
 # Samoosa
 A free and open-source issue tracker frontend
 
+## Screenshots
+![Project list]({{ site.url }}/public/img/screenshots/project-list.jpg)
+![Kanban board]({{ site.url }}/public/img/screenshots/kanban-board.jpg)
+![Burn down chart]({{ site.url }}/public/img/screenshots/burn-down-chart.jpg)
+![Schedule]({{ site.url }}/public/img/screenshots/schedule.jpg)
+![Settings]({{ site.url }}/public/img/screenshots/settings.jpg)
+
 ## Introduction
 Samoosa can be set up to work with GitHub, Bitbucket, your own custom backend, you name it. The support is added through plugins that reshape the content of their API sources into the Samoosa format. In the case of the GitHub plugin, labels are being used to track version numbers, estimates, issue types and columns.
 

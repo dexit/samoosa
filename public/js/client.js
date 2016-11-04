@@ -6089,10 +6089,6 @@
 	            // Find milestone start date based on first closed issue
 	            // This is terrible, but so is GitHubs issue system
 	            var getStartDate = function getStartDate() {
-	                if (this.startDate) {
-	                    return new Date(this.startDate);
-	                }
-
 	                var earliest = void 0;
 
 	                var _iteratorNormalCompletion2 = true;
@@ -6130,6 +6126,8 @@
 	                    this.startDate = earliest.closedAt;
 
 	                    return new Date(this.startDate);
+	                } else if (this.startDate) {
+	                    return new Date(this.startDate);
 	                } else {
 	                    debug.log('Could not find start date for milestone "' + this.title + '"', this);
 	                    return;
@@ -6146,7 +6144,7 @@
 	                    id: milestones[i].number,
 	                    title: milestones[i].title,
 	                    description: milestones[i].description,
-	                    startDate: null,
+	                    startDate: milestones[i].created_at,
 	                    endDate: milestones[i].due_on
 	                });
 

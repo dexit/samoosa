@@ -87,6 +87,14 @@ a {
     background-color: $teal-dark;
     color: $white;
 
+    pre {
+        margin: 5px 0px;
+        padding: 5px 10px;
+        background-color: $teal-darker;
+        color: $white;
+        font-family: monospace;
+    }
+
     &.screenshot-active {
         .document {
             &:after {

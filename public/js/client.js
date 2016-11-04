@@ -12576,7 +12576,7 @@
 	            filter.operator = $filter.find('.operator select').val();
 
 	            _this.onChange(i);
-	        })), _.div({ class: 'select-container value', style: 'min-width: ' + filter.value.length * 8 + 'px' }, _.select({}, _.each(resource, function (i, value) {
+	        })), _.div({ class: 'select-container value', style: 'min-width: ' + (filter.value || '').length * 8 + 'px' }, _.select({}, _.each(resource, function (i, value) {
 	            var valueName = value;
 
 	            if (value.title) {

@@ -365,9 +365,17 @@ a {
 .milestone-editor {
     >.header {
         border-bottom: 1px solid $grey-light;
- 
-        .fa {
-            color: $grey-medium;
+
+        .btn-toggle { 
+            .fa {
+                color: $grey-medium;
+            }
+        }
+
+        .stats {
+            .fa {
+                color: $white;
+            }
         }
 
         .progress-bar {

@@ -60,7 +60,7 @@ module.exports = function render() {
                             this.onChange(i);
                         })
                     ),
-                    _.div({class: 'select-container value', style: 'min-width: ' + (filter.value.length * 8) + 'px'},
+                    _.div({class: 'select-container value', style: 'min-width: ' + ((filter.value || '').length * 8) + 'px'},
                         _.select({},
                             _.each(resource, (i, value) => {
                                 let valueName = value;

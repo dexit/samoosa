@@ -1354,8 +1354,10 @@ a {
 
 .milestone-editor > .header {
   border-bottom: 1px solid #cccccc; }
-  .milestone-editor > .header .fa {
+  .milestone-editor > .header .btn-toggle .fa {
     color: #888888; }
+  .milestone-editor > .header .stats .fa {
+    color: #fff; }
   .milestone-editor > .header .progress-bar {
     background-color: #e8e8e8; }
 

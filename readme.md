@@ -27,6 +27,7 @@ No server software, such as Node.js or PHP, is needed to run Samoosa. It's built
 ## Screenshots
 ![Project list]({{ site.url }}/public/img/screenshots/project-list.jpg)
 ![Kanban board]({{ site.url }}/public/img/screenshots/kanban-board.jpg)
+![Kanban board with open issue]({{ site.url }}/public/img/screenshots/kanban-board-issue-open.jpg)
 ![Burn down chart]({{ site.url }}/public/img/screenshots/burn-down-chart.jpg)
 ![Schedule]({{ site.url }}/public/img/screenshots/schedule.jpg)
 ![Settings]({{ site.url }}/public/img/screenshots/settings.jpg)

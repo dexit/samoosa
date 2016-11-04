@@ -32,13 +32,6 @@ No server software, such as Node.js or PHP, is needed to run Samoosa. It's built
 ![Schedule](/public/img/screenshots/schedule.jpg)
 ![Settings](/public/img/screenshots/settings.jpg)
 
-## Demo account
-You can access a demo account using this API token:  
-
-```
-3c632e542f7e5b9da1dc486f6dab11cfb8be1f4e
-```
-
 ## Quick start
 1. Make sure you have a [GitHub](https://github.com) account and at least one repository.
 2. Go to the [Samoosa login page]({{ site.url }}/login).

@@ -35,7 +35,7 @@ No server software, such as Node.js or PHP, is needed to run Samoosa. It's built
 ## Quick start
 1. Make sure you have a [GitHub](https://github.com) account and at least one repository.
 2. Go to the [Samoosa login page]({{ site.url }}/login).
-3. Type in your username and click "Create new token". You might be prompted to log in.
+3. Click "Create new token". You might be prompted to log in.
 4. Name your token something like "samoosa-token".
 5. Tick the "repo" scope.
 6. Click "Generate token"

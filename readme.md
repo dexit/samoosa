@@ -7,7 +7,7 @@
 
 <h1>Samoosa</h1>
 <p>A free and open-source issue tracker frontend</p>
-<p><a href="https://github.com/Putaitu/samoosa">Gitub repo</a></p>
+<p><a href="https://github.com/Putaitu/samoosa">GitHub repo</a></p>
 
 </div>
 

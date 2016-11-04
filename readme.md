@@ -33,7 +33,8 @@ No server software, such as Node.js or PHP, is needed to run Samoosa. It's built
 ![Settings](/public/img/screenshots/settings.jpg)
 
 ## Demo account
-You can access a demo account using this API token:
+You can access a demo account using this API token:  
+
 ```
 3c632e542f7e5b9da1dc486f6dab11cfb8be1f4e
 ```

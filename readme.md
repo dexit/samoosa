@@ -35,7 +35,7 @@ No server software, such as Node.js or PHP, is needed to run Samoosa. It's built
 ## Demo account
 You can access a demo account using this API token:
 ```
-5c4ef47cdb131090918db7a41249c583b4fc2c8c
+3c632e542f7e5b9da1dc486f6dab11cfb8be1f4e
 ```
 
 ## Quick start

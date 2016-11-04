@@ -13,25 +13,27 @@ module.exports = function render() {
 
             // Header content
             _.div({class: 'header-content'},
-
-                // Left section
-                _.div({class: 'header-left'},
+                // Icons                
+                _.div({class: 'header-icons'},
+                    // Type indicator
+                    this.getTypeIndicator(),
+                    
                     // Priority indicator
                     this.getPriorityIndicator(),
 
                     // Issue id
                     _.span({class: 'issue-id'},
                         (this.model.id || this.model.index).toString()
-                    ),
-                    
-                    // Assignee avatar
-                    _.if(!ApiHelper.isSpectating(),
-                        _.div({class: 'assignee-avatar'},
-                            this.getAssigneeAvatar()
-                        )
                     )
                 ),
 
+                // Assignee avatar
+                _.if(!ApiHelper.isSpectating(),
+                    _.div({class: 'assignee-avatar'},
+                        this.getAssigneeAvatar()
+                    )
+                ),
+                
                 // Center section
                 _.div({class: 'header-center'},
                     // Title

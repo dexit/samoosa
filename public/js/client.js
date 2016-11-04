@@ -10859,8 +10859,12 @@
 	    }, {
 	        key: 'getPriorityIndicator',
 	        value: function getPriorityIndicator() {
-	            var priority = resources.issuePriorities[this.model.priority];
+	            var priority = this.model.getPriority();
 	            var icon = '';
+
+	            if (!priority) {
+	                return null;
+	            }
 
 	            switch (priority) {
 	                case 'low':case 'trivial':
@@ -10881,6 +10885,47 @@
 	            }
 
 	            return _.span({ class: 'priority-indicator fa fa-' + icon + ' ' + priority });
+	        }
+
+	        /**
+	         * Gets type icon
+	         *
+	         * @returns {String} icon
+	         */
+
+	    }, {
+	        key: 'getTypeIndicator',
+	        value: function getTypeIndicator() {
+	            var type = this.model.getType();
+	            var icon = '';
+
+	            if (!type) {
+	                return null;
+	            }
+
+	            switch (type) {
+	                case 'bug':
+	                    icon = 'bug';
+	                    break;
+
+	                case 'improvement':case 'enhancement':
+	                    icon = 'arrow-circle-o-up';
+	                    break;
+
+	                case 'feature':case 'new feature':
+	                    icon = 'plus';
+	                    break;
+
+	                case 'task':
+	                    icon = 'check';
+	                    break;
+
+	                case 'question':
+	                    icon = 'question';
+	                    break;
+	            }
+
+	            return _.span({ class: 'type-indicator fa fa-' + icon + ' ' + type });
 	        }
 
 	        /**
@@ -10957,17 +11002,19 @@
 
 	    // Header content
 	    _.div({ class: 'header-content' },
+	    // Icons                
+	    _.div({ class: 'header-icons' },
+	    // Type indicator
+	    this.getTypeIndicator(),
 
-	    // Left section
-	    _.div({ class: 'header-left' },
 	    // Priority indicator
 	    this.getPriorityIndicator(),
 
 	    // Issue id
-	    _.span({ class: 'issue-id' }, (this.model.id || this.model.index).toString()),
+	    _.span({ class: 'issue-id' }, (this.model.id || this.model.index).toString())),
 
 	    // Assignee avatar
-	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar()))),
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())),
 
 	    // Center section
 	    _.div({ class: 'header-center' },

@@ -13,47 +13,6 @@
     transition: height 0.5s ease;       
     overflow-y: hidden; 
 
-    // Type indicators
-    &[data-type="bug"] {
-        >.header {
-            &:before {
-                background-color: material-color('red', '500');
-            }
-        }
-    }
-    
-    &[data-type="improvement"], &[data-type="enhancement"] {
-        >.header {
-            &:before {
-                background-color: material-color('cyan', '500');
-            }
-        }
-    }
-    
-    &[data-type="feature"], &[data-type="new feature"] {
-        >.header {
-            &:before {
-                background-color: material-color('green', '500');
-            }
-        }
-    }
-    
-    &[data-type="task"] {
-        >.header {
-            &:before {
-                background-color: material-color('blue', '700');
-            }
-        }
-    }
-    
-    &[data-type="question"] {
-        >.header {
-            &:before {
-                background-color: material-color('yellow', '500');
-            }
-        }
-    }
-
     // States
     &.selected {
         outline: 2px solid material-color('blue', '500');
@@ -159,39 +118,51 @@
         }
 
         .header-content {
-            display: flex;
             padding: 5px 0px;
+            position: relative;
 
-            .header-left {
-                padding: 0px 5px 0px 15px;
-                flex-shrink: 0;
+            .header-icons {
+                position: absolute;
+                top: 5px;
+                left: 10px;
 
                 .issue-id {
-                    border-bottom-left-radius: 5px;
-                    padding: 2px 5px;
+                    padding: 2px 5px 2px 0px;
                     font-size: 12px;
                 }
                 
-                .assignee-avatar {
-                    img, .unassigned {
-                        width: 20px;
-                        height: 20px;
-                    }
-                    
-                    .unassigned {
-                        background-color: material-color('grey', '500');
-                        text-align: center;
-
-                        .fa {
-                            font-size: 20px;
-                        }
-                    }
-                }
-                
-                .priority-indicator {
+                .type-indicator, .priority-indicator {
                     font-size: 10px;
                     text-align: center;
                     margin-bottom: 5px;
+                    margin-right: 5px;
+                }
+
+                .type-indicator {
+                    &.bug {
+                        color: material-color('red', '500');
+                    }
+                
+                    &.improvement, &.enhancement {
+                        color: material-color('cyan', '500');
+                    }
+                    
+                    &.feature, &.new feature {
+                        color: material-color('green', '500');
+                    }
+                    
+                    &.task {
+                        color: material-color('blue', '700');
+                    }
+                    
+                    &.question {
+                        color: material-color('yellow', '500');
+                    }
+                }
+
+                .priority-indicator {
+                    position: relative;
+                    top: -1px;
 
                     &.low, &.trival {
                         color: material-color('green', '500');
@@ -210,14 +181,29 @@
                     }
                 }
             }
+
+            .assignee-avatar {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                
+                img, .unassigned {
+                    width: 20px;
+                    height: 20px;
+                }
+                
+                .unassigned {
+                    background-color: material-color('grey', '500');
+                    text-align: center;
+
+                    .fa {
+                        font-size: 20px;
+                    }
+                }
+            }
             
             .header-center {
-                flex-grow: 1;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                padding-top: 15px;
-                padding-bottom: 15px;
+                padding: 20px 35px 15px 10px;
 
                 .issue-title {
                     margin: 0px;
@@ -261,15 +247,16 @@
         }
 
         .btn-toggle {
-            width: 100%;
-            line-height: 15px;
-            height: 15px;
+            width: 30px;
+            line-height: 20px;
+            height: 20px;
             display: block;
             text-align: center;
             padding: 0px;
             position: absolute;
             bottom: 0px;
-            left: 0px;
+            left: 50%;
+            margin-left: -15px;
             font-size: 10px;
 
             &, &:focus, &:hover, &:active {

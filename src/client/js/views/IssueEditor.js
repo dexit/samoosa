@@ -527,8 +527,10 @@ class IssueEditor extends View {
      * @returns {String} icon
      */
     getPriorityIndicator() {
-        let priority = resources.issuePriorities[this.model.priority];
+        let priority = this.model.getPriority();
         let icon = '';
+
+        if(!priority) { return null; }
 
         switch(priority) {
             case 'low': case 'trivial':
@@ -550,6 +552,43 @@ class IssueEditor extends View {
 
         return _.span({class: 'priority-indicator fa fa-' + icon + ' ' + priority});
     }
+
+    /**
+     * Gets type icon
+     *
+     * @returns {String} icon
+     */
+    getTypeIndicator() {
+        let type = this.model.getType();
+        let icon = '';
+
+        if(!type) { return null; }
+
+        switch(type) {
+            case 'bug':
+                icon = 'bug';
+                break;
+
+            case 'improvement': case 'enhancement':
+                icon = 'arrow-circle-o-up';
+                break;
+            
+            case 'feature': case 'new feature':
+                icon = 'plus';
+                break;
+            
+            case 'task':
+                icon = 'check';
+                break;
+            
+            case 'question':
+                icon = 'question';
+                break;
+        }
+
+        return _.span({class: 'type-indicator fa fa-' + icon + ' ' + type});
+    }
+
 
     /**
      * Lazy-load the comments

@@ -637,6 +637,8 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     removeResource(resource, index) {
+        debug.log('Removing item from ' + resource + '...', this);
+        
         switch(resource) {
             case 'collaborators':
                 return this.removeCollaborator(index);
@@ -676,6 +678,8 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     addResource(resource, item) {
+        debug.log('Adding item to ' + resource + '...', this);
+        
         switch(resource) {
             case 'collaborators':
                 return this.addCollaborator(item);
@@ -721,6 +725,8 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateResource(resource, item, identifier) {
+        debug.log('Updating item for ' + resource + '...', this);
+
         switch(resource) {
             case 'issueTypes':
                 return this.updateIssueType(item, identifier);
@@ -761,6 +767,8 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     getResource(resource) {
+        debug.log('Getting ' + resource + '...', this);
+        
         switch(resource) {
             case 'collaborators':
                 return this.getCollaborators();
@@ -772,7 +780,12 @@ class ApiHelper {
                 return this.getIssuePriorities();
 
             case 'issueEstimates':
-                return this.getIssueEstimates();
+                return this.getIssueEstimates().
+                then(() => {
+                    ResourceHelper.sortResource('issueEstimates');
+
+                    return Promise.resolve();  
+                });
 
             case 'issueColumns':
                 return this.getIssueColumns();
@@ -799,27 +812,22 @@ class ApiHelper {
     /**
      * Gets all resources
      *
-     * @param {Array} excludeResources
+     * @param {Boolean} dontOverwrite
      *
      * @returns {Promise} promise
      */
-    getResources(excludeResources) {
-        let helper = this;
-        
+    getResources(dontOverwrite) {
         spinner(true);
 
-        function get(resource) {
-            window.resources[resource] = [];
-          
-            // If this resource is excluded, just proceed
-            if(excludeResources && Array.isArray(excludeResources) && excludeResources.indexOf(resource) > -1) {
-                return new Promise((resolve) => {
-                    resolve();
-                });
-
-            // If not, fetch it normally
+        let get = (resource) => {
+            // If "don't overwrite" is in effect, check if resource is already loaded
+            if(dontOverwrite == true && resources[resource] && resources[resource].length > 0) {
+                return Promise.resolve();
+            
             } else {
-                return helper.getResource(resource);
+                resources[resource] = [];
+              
+                return this.getResource(resource);
             }
         }
 

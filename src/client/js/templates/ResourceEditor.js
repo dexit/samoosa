@@ -1,17 +1,24 @@
 'use strict';
 
 module.exports = function render() {
+    // Set regex for individual cases
+    let regex;
+
+    switch(this.name) {
+        case 'issueEstimates':
+            regex = '(\\d+.\\d+|\\d+)(d|h|m)';
+            break;
+    }
+
     return _.div({class: 'resource-editor'},
         _.div({class: 'body'},
             _.each(this.model, (i, item) => {
-                // Special cases
-                if(this.name == 'issueColumns' && (item == 'to do' || item == 'done')) {
-                    return;
-                }
+                // Do not handle issue columns "to do" and "done"
+                if(this.name == 'issueColumns' && (item == 'to do' || item == 'done')) { return; }
 
                 return _.div({class: 'item'},
                     _.if(typeof item === 'string',
-                        _.input({class: 'selectable', value: item, placeholder: 'Input name', type: 'text'})
+                        _.input({pattern: regex, class: 'selectable', value: item, placeholder: 'Input name', type: 'text'})
                             .change(() => { this.onChange(i, item); })
                     ),
                     _.if(typeof item !== 'string',
@@ -24,12 +31,14 @@ module.exports = function render() {
             })
         ),
         _.div({class: 'footer'},
-            _.input({type: 'text'}),
+            _.input({type: 'text', pattern: regex}),
             _.button({class: 'btn btn-add'},
                 'Add',
                 _.span({class: 'fa fa-plus'})
             ).click(() => {
-                this.onClickAdd(this.$element.find('.footer input').val());
+                let $input = this.$element.find('.footer input');
+
+                this.onClickAdd($input.val(), regex);
             })
         )
     );

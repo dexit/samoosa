@@ -234,8 +234,6 @@ class Navbar extends View {
             if(url != Router.url) {
                 this.$element.toggleClass('out', true);
                 
-                resources = {};
-
                 setTimeout(() => {
                     location.hash = url;
                 }, 400);
@@ -251,6 +249,10 @@ class Navbar extends View {
             let url = Router.url
                 .replace('/' + ApiHelper.getUserName(), '')
                 .replace('/' + ApiHelper.getProjectName(), '');
+
+            if(Router.params.resource) {
+                url = url.replace(Router.params.resource, '');
+            }
 
             this.$element.find('button.active').removeClass('active');
             this.$element.find('button[data-url*="' + url + '"]').toggleClass('active', true);

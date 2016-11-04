@@ -4,8 +4,8 @@ window.resources = {};
 
 class ResourceHelper {
     static getCollaborator(name) {
-        for(let i in window.resources.collaborators) {
-            let collaborator = window.resources.collaborators[i];
+        for(let i in resources.collaborators) {
+            let collaborator = resources.collaborators[i];
             
             if(collaborator.name == name) {
                 return i;
@@ -14,8 +14,8 @@ class ResourceHelper {
     }
     
     static getIssuePriority(name) {
-        for(let i in window.resources.issuePriorities) {
-            let type = window.resources.issuePriorities[i];
+        for(let i in resources.issuePriorities) {
+            let type = resources.issuePriorities[i];
             
             if(type == name) {
                 return i;
@@ -24,8 +24,8 @@ class ResourceHelper {
     }
     
     static getIssueEstimate(name) {
-        for(let i in window.resources.issueEstimates) {
-            let estimate = window.resources.issueEstimates[i];
+        for(let i in resources.issueEstimates) {
+            let estimate = resources.issueEstimates[i];
 
             if(estimate == name) {
                 return i;
@@ -34,8 +34,8 @@ class ResourceHelper {
     }
     
     static getIssueColumn(name) {
-        for(let i in window.resources.issueColumns) {
-            let type = window.resources.issueColumns[i];
+        for(let i in resources.issueColumns) {
+            let type = resources.issueColumns[i];
             
             if(type == name) {
                 return i;
@@ -46,8 +46,8 @@ class ResourceHelper {
     }
     
     static getIssueType(name) {
-        for(let i in window.resources.issueTypes) {
-            let type = window.resources.issueTypes[i];
+        for(let i in resources.issueTypes) {
+            let type = resources.issueTypes[i];
             
             if(type == name) {
                 return i;
@@ -56,8 +56,8 @@ class ResourceHelper {
     }
     
     static getVersion(name) {
-        for(let i in window.resources.versions) {
-            let version = window.resources.versions[i];
+        for(let i in resources.versions) {
+            let version = resources.versions[i];
             
             if(version == name) {
                 return i;
@@ -66,8 +66,8 @@ class ResourceHelper {
     }
     
     static getMilestone(name) {
-        for(let i in window.resources.milestones) {
-            let milestone = window.resources.milestones[i];
+        for(let i in resources.milestones) {
+            let milestone = resources.milestones[i];
             
             if(milestone.title == name) {
                 return i;
@@ -75,59 +75,79 @@ class ResourceHelper {
         }
     }
 
-    static reloadResource(resource) {
-        return new Promise((callback) => {
-            window.resources[resource] = [];
+    static sortResource(resource) {
+        switch(resource) {
+            case 'issueEstimates':
+                resources.issueEstimates.sort((a, b) => {
+                    a = estimateToFloat(a);
+                    b = estimateToFloat(b);
 
-            ApiHelper.getResource(resource)
-            .then(() => {
-                callback();
-            });
-        });
+                    if(a < b) {
+                        return -1;
+                    }
+                    
+                    if(a > b) {
+                        return 1;
+                    }
+
+                    return 0;
+                });
+                break;
+        }   
+    }
+
+    static reloadResource(resource) {
+        resources[resource] = [];
+
+        return ApiHelper.getResource(resource);
     }
 
     static updateResource(resource, item, index, identifier) {
-        return new Promise((callback) => {
-            ApiHelper.updateResource(resource, item, identifier)
-            .then(() => {
-                if(!index) {
-                    index = item.index || resources[resource].indexOf(item);
-                }
+        spinner(true);
 
-                resources[resource][index] = item;
-               
-                callback();
-            });
+        return ApiHelper.updateResource(resource, item, identifier)
+        .then(() => {
+            index = index || item.index;
+
+            resources[resource][index] = item;
+
+            spinner(false);
+            
+            ResourceHelper.sortResource(resource);
+
+            return Promise.resolve();
         });
     }
 
     static removeResource(resource, index) {
-        return new Promise((callback) => {
-            ApiHelper.removeResource(resource, index)
-            .then(() => {
-                resources[resource].splice(index, 1);
-                
-                callback();
-            });
+        spinner(true);
+
+        return ApiHelper.removeResource(resource, index)
+        .then(() => {
+            resources[resource].splice(index, 1);
+            
+            spinner(false);
+            
+            ResourceHelper.sortResource(resource);
+
+            return Promise.resolve();
         });
     }
 
     static addResource(resource, item) {
-        return new Promise((callback) => {
-            ApiHelper.addResource(resource, item)
-            .then((newItem) => {
-                item = newItem || item;
+        spinner(true);
 
-                let index = resources[resource].length;
+        return ApiHelper.addResource(resource, item)
+        .then((newItem) => {
+            item = newItem || item;
 
-                if(typeof item === 'object') {
-                    item.index = index;            
-                }
+            resources[resource].push(item);
 
-                resources[resource][index] = item;
+            spinner(false);
 
-                callback();
-            });
+            ResourceHelper.sortResource(resource);
+
+            return Promise.resolve();
         });
     }
 }

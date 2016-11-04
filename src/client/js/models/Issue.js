@@ -162,13 +162,7 @@ class Issue {
      * @returns {Number} Hours
      */
     getEstimate() {
-        let estimate = window.resources.issueEstimates[this.estimate];
-
-        if(estimate) {
-            return parseFloat(estimate);
-        } else {
-            return 0;
-        }
+        return estimateToFloat(window.resources.issueEstimates[this.estimate]);
     }
 
     /**

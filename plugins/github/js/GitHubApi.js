@@ -215,29 +215,22 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getUser() {
-        return new Promise((resolve, reject) => {
-            this.get('/user')
-            .then((gitHubUser) => {
-                if(Array.isArray(gitHubUser)) {
-                    gitHubUser = gitHubUser[0];
-                }
+        if(this.isSpectating()) {
+            return Promise.resolve({name: '', avatar: ''});
+        }
 
-                let user = {
-                    name: gitHubUser.login,
-                    avatar: gitHubUser.avatar_url
-                };
+        return this.get('/user')
+        .then((gitHubUser) => {
+            if(Array.isArray(gitHubUser)) {
+                gitHubUser = gitHubUser[0];
+            }
 
-                resolve(user);
-            })
-            .catch((e) => {
-                if(this.isSpectating()) {
-                    resolve({name: '', avatar: ''});
-                
-                } else {
-                    reject(e);
+            let user = {
+                name: gitHubUser.login,
+                avatar: gitHubUser.avatar_url
+            };
 
-                }  
-            });   
+            return Promise.resolve(user);
         });
     }
 
@@ -259,14 +252,11 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getProjects() {
-        return new Promise((resolve, reject) => {
-            this.get('/user/repos')
-            .then((repos) => {
-                this.processProjects(repos);
-
-                resolve();
-            })
-            .catch(reject);
+        return this.get('/user/repos')
+        .then((repos) => {
+            this.processProjects(repos);
+            
+            return Promise.resolve();
         });
     }
     
@@ -276,22 +266,13 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getCollaborators() {
-        return new Promise((resolve, reject) => {
-            this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators')
-            .then((collaborators) => {
-                this.processCollaborators(collaborators);
+        if(this.isSpectating()) {
+            return Promise.resolve([]);
+        }
 
-                resolve();
-            })
-            .catch((e) => {
-                if(this.isSpectating()) {
-                    resolve([]);
-                
-                } else {
-                    reject(e);
-
-                }
-            });
+        return this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators')
+        .then((collaborators) => {
+            this.processCollaborators(collaborators);
         });
     }
 
@@ -301,13 +282,11 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssues() {
-        return new Promise((callback) => {
-            this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues', 'state=all', true)
-            .then((issues) => {
-                this.processIssues(issues);
+        return this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues', 'state=all', true)
+        .then((issues) => {
+            this.processIssues(issues);
 
-                callback();
-            });
+            return Promise.resolve();
         });
     }
     
@@ -318,17 +297,13 @@ class GitHubApi extends ApiHelper {
      */
     ensureMandatoryLabels() {
         if(!labelCache) { 
-            return new Promise((resolve, reject) => {
-                reject(new Error('Label cache not initialised'));
-            });
+            return Promise.reject(new Error('Label cache not initialised'));
         
         } else {
             // Check if "deleted" label exists
             for(let label of labelCache) {
                 if(label.name == 'deleted') {
-                    return new Promise((resolve, reject) => {
-                        resolve();
-                    });
+                    return Promise.resolve();
                 }
             }
         
@@ -336,9 +311,7 @@ class GitHubApi extends ApiHelper {
             .then((newLabel) => {
                 labelCache.push(newLabel);
 
-                return new Promise((resolve, reject) => {
-                    resolve();
-                });
+                return Promise.resolve();
             });
         }
     }
@@ -358,15 +331,11 @@ class GitHubApi extends ApiHelper {
                 return this.ensureMandatoryLabels();
             })
             .then(() => {
-                return new Promise((resolve, reject) => {
-                    resolve(labelCache);
-                });
+                return Promise.resolve(labelCache);
             });
 
         } else {
-            return new Promise((resolve, reject) => {
-                resolve(labelCache);
-            });
+            return Promise.resolve(labelCache);
         }
     }
 
@@ -376,13 +345,11 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssueTypes() {
-        return new Promise((callback) => {
-            this.getLabels()
-            .then((labels) => {
-                this.processIssueTypes(labels);
+        return this.getLabels()
+        .then((labels) => {
+            this.processIssueTypes(labels);
 
-                callback();
-            });
+            return Promise.resolve();
         });
     }
     
@@ -392,13 +359,11 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssueColumns() {
-        return new Promise((callback) => {
-            this.getLabels()
-            .then((labels) => {
-                this.processIssueColumns(labels);
+        return this.getLabels()
+        .then((labels) => {
+            this.processIssueColumns(labels);
 
-                callback();
-            });
+            return Promise.resolve();
         });
     }
     
@@ -408,13 +373,11 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssuePriorities() {
-        return new Promise((callback) => {
-            this.getLabels()
-            .then((labels) => {
-                this.processIssuePriorities(labels);
+        return this.getLabels()
+        .then((labels) => {
+            this.processIssuePriorities(labels);
 
-                callback();
-            });
+            return Promise.resolve();
         });
     }
     
@@ -424,13 +387,11 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssueEstimates() {
-        return new Promise((callback) => {
-            this.getLabels()
-            .then((labels) => {
-                this.processIssueEstimates(labels);
+        return this.getLabels()
+        .then((labels) => {
+            this.processIssueEstimates(labels);
 
-                callback();
-            });
+            return Promise.resolve();
         });
     }
     
@@ -440,13 +401,11 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getVersions() {
-        return new Promise((callback) => {
-            this.getLabels()
-            .then((labels) => {
-                this.processVersions(labels);
+        return this.getLabels()
+        .then((labels) => {
+            this.processVersions(labels);
 
-                callback();
-            });
+            return Promise.resolve();
         });
     }
 
@@ -456,14 +415,12 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getMilestones() {
-        return new Promise((callback) => {
-            this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones')
-            .then((milestones) => {
-                this.processMilestones(milestones);
-                
-                callback();
-            });    
-        });
+        return this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones')
+        .then((milestones) => {
+            this.processMilestones(milestones);
+            
+            return Promise.resolve();
+        });    
     }
 
     // ----------
@@ -489,11 +446,8 @@ class GitHubApi extends ApiHelper {
             .then((gitHubIssue) => {
                 issue.id = gitHubIssue.number;
 
-                return new Promise((resolve, reject) => {
-                    resolve();
-                });  
+                return Promise.resolve();
             });
-    
         }
     }
     
@@ -505,12 +459,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addCollaborator(collaborator) {
-        return new Promise((callback) => {
-            this.put('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators/' + collaborator)
-            .then(() => {
-                callback();
-            });    
-        });
+        return this.put('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators/' + collaborator);
     }
     
     /**
@@ -536,14 +485,12 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addIssueType(type) {
-        return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
-                name: 'type:' + type,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
+        return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            name: 'type:' + type,
+            color: 'ffffff'
+        })
+        .then(() => {
+            return Promise.resolve(type);  
         });
     }
     
@@ -555,14 +502,12 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addIssuePriority(priority) {
-        return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
-                name: 'priority:' + priority,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
+        return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            name: 'priority:' + priority,
+            color: 'ffffff'
+        })
+        .then(() => {
+            return Promise.resolve(priority);  
         });
     }
     
@@ -574,14 +519,12 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addIssueEstimate(estimate) {
-        return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
-                name: 'estimate:' + estimate,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
+        return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            name: 'estimate:' + estimate,
+            color: 'ffffff'
+        })
+        .then(() => {
+            return Promise.resolve(estimate);  
         });
     }
     
@@ -593,14 +536,12 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addIssueColumn(column) {
-        return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
-                name: 'column:' + column,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
+        return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            name: 'column:' + column,
+            color: 'ffffff'
+        })
+        .then(() => {
+            return Promise.resolve(column);  
         });
     }
     
@@ -638,14 +579,12 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addVersion(version) {
-        return new Promise((callback) => {
-            this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
-                name: 'version:' + version,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
+        return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            name: 'version:' + version,
+            color: 'ffffff'
+        })
+        .then(() => {
+            return Promise.resolve(version);  
         });
     }
 
@@ -676,12 +615,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeCollaborator(index) {
-        return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index])
-            .then(() => {
-                callback();
-            });
-        });
+        return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index]);
     }
     
     /**
@@ -692,12 +626,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeIssueType(index) {
-        return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/type:' + window.resources.issueTypes[index])
-            .then(() => {
-                callback();
-            });
-        });
+        return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/type:' + window.resources.issueTypes[index]);
     }
     
     /**
@@ -708,12 +637,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeIssuePriority(index) {
-        return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index])
-            .then(() => {
-                callback();
-            });
-        });
+        return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index]);
     }
     
     /**
@@ -724,12 +648,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeIssueEstimate(index) {
-        return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index])
-            .then(() => {
-                callback();
-            });
-        });
+        return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index]);
     }
     
     /**
@@ -740,12 +659,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeIssueColumn(index) {
-        return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index])
-            .then(() => {
-                callback();
-            });
-        });
+        return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index]);
     }
     
     /**
@@ -759,9 +673,7 @@ class GitHubApi extends ApiHelper {
         let milestone = resources.milestones[index];
 
         if(!milestone) {
-            return new Promise((resolve, reject) => {
-                reject(new Error('Milestone at index "' + index + '" not found'));
-            });
+            return Promise.reject(new Error('Milestone at index "' + index + '" not found'));
         } else {
             return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + milestone.id);
         }
@@ -775,12 +687,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeVersion(index) {
-        return new Promise((callback) => {
-            this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/version:' + window.resources.versions[index])
-            .then(() => {
-                callback();
-            });
-        });
+        return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/version:' + window.resources.versions[index]);
     }
 
     // ----------
@@ -830,14 +737,9 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateIssuePriority(priority, previousName) {
-        return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/priority:' + previousName, {
-                name: 'priority:' + priority,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
+        return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/priority:' + previousName, {
+            name: 'priority:' + priority,
+            color: 'ffffff'
         });
     }
     
@@ -850,14 +752,9 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateIssueEstimate(estimate, previousName) {
-        return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/estimate:' + previousName, {
-                name: 'estimate:' + estimate,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
+        return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/estimate:' + previousName, {
+            name: 'estimate:' + estimate,
+            color: 'ffffff'
         });
     }
     
@@ -870,14 +767,9 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateIssueColumn(column, previousName) {
-        return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/column:' + previousName, {
-                name: 'column:' + column,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
+        return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/column:' + previousName, {
+            name: 'column:' + column,
+            color: 'ffffff'
         });
     }
     
@@ -890,14 +782,9 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateVersion(version, previousName) {
-        return new Promise((callback) => {
-            this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/version:' + previousName, {
-                name: 'version:' + version,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
+        return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/version:' + previousName, {
+            name: 'version:' + version,
+            color: 'ffffff'
         });
     }
 
@@ -1039,21 +926,6 @@ class GitHubApi extends ApiHelper {
                 window.resources.issueEstimates.push(name);
             }
         }
-
-        window.resources.issueEstimates.sort((a, b) => {
-            a = parseFloat(a);
-            b = parseFloat(b);
-
-            if(a < b) {
-                return -1;
-            }
-            
-            if(a > b) {
-                return 1;
-            }
-
-            return 0;
-        });
     }
 
     /**

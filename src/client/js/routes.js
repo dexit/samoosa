@@ -22,7 +22,7 @@ Router.route('/:user/:project', () => {
 
 // Plan
 Router.route('/:user/:project/plan/', () => {
-    ApiHelper.checkConnection()
+    ApiHelper.checkConnection(true)
     .then(() => {
         return ApiHelper.getResources();
     })
@@ -43,7 +43,7 @@ Router.route('/:user/:project/plan/', () => {
 Router.route('/:user/:project/board/:mode', () => {
     ApiHelper.checkConnection()
     .then(() => {
-        return ApiHelper.getResources();
+        return ApiHelper.getResources(true);
     })
     .then(() => {
         $('.workspace').remove();
@@ -94,7 +94,7 @@ Router.route('/:user/:project/board/:mode', () => {
 Router.route('/:user/:project/analytics/', () => {
     ApiHelper.checkConnection()
     .then(() => {
-        return ApiHelper.getResources();
+        return ApiHelper.getResources(true);
     })
     .then(() => {
         $('.workspace').remove();
@@ -133,15 +133,16 @@ Router.route('/:user/:project/analytics/', () => {
 
 // Settings
 Router.route('/:user/:project/settings/', () => {
+    location = '/#/' + Router.params.user + '/' + Router.params.project + '/settings/issueTypes';
+});
+
+Router.route('/:user/:project/settings/:resource', () => {
     ApiHelper.checkConnection()
     .then(() => {
-        return ApiHelper.getResources();
+        return ApiHelper.getResources(true);
     })
     .then(() => {
         $('.workspace').remove();
-
-        let tabCounter = 0;
-        let paneCounter = 0;
 
         $('.app-container').append(
             _.div({class: 'workspace settings-container'},
@@ -158,20 +159,10 @@ Router.route('/:user/:project/settings/', () => {
                                 return;
                             }
 
-                            tabCounter++;
-                            
-                            return _.button({class: 'tab' + (tabCounter == 1 ? ' active' : '')},
+                            return _.button({class: 'tab' + (Router.params.resource == name ? ' active' : '')},
                                 prettyName(name)
-                            ).click(function() {
-                                let index = $(this).index();
-                                
-                                $(this).parent().children().each(function(i) {
-                                    $(this).toggleClass('active', i == index);
-                                });
-
-                                $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
-                                    $(this).toggleClass('active', i == index);
-                                });
+                            ).click(() => {
+                                location = '/#/' + Router.params.user + '/' + Router.params.project + '/settings/' + name;
                             });
                         })
                     ),
@@ -183,13 +174,11 @@ Router.route('/:user/:project/settings/', () => {
                             }
                             
                             // Not editable in resource editor
-                            if(name == 'issues' || name == 'projects') {
+                            if(name == 'issues' || name == 'projects' || name == 'collaborators') {
                                 return;
                             }
                             
-                            paneCounter++;
-                            
-                            return _.div({class: 'pane' + (paneCounter == 1 ? ' active' : '')},
+                            return _.div({class: 'pane' + (Router.params.resource == name ? ' active' : '')},
                                 new ResourceEditor({
                                     name: name,
                                     model: resource

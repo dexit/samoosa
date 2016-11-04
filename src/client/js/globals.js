@@ -277,3 +277,37 @@ window.displayError = function(error) {
 
     throw error;
 };
+
+// Convert estimate string to float
+window.estimateToFloat = function estimateToFloat(estimate) {
+    if(estimate) {
+        let regex = /(\d+.\d+|\d+)(d|h|m)|(\d+.\d+|\d+)/;
+        let matches = regex.exec(estimate);
+
+        // Found estimate with suffix, multiply hours as needed
+        if(matches && matches.length > 2) {
+            let number = parseFloat(matches[1]);
+            let unit = matches[2];
+
+            switch(unit) {
+                case 'm': // Minutes
+                    number /= 60;
+                    break;
+
+                case 'd': // Days
+                    number *= 24;
+                    break;
+            }
+
+            return number;
+        }
+
+        // Found float
+        if(matches && matches.length > 1) {
+            return parseFloat(matches[1]);            
+        }   
+    }
+
+    // Invaild or no estimate
+    return 0;
+}

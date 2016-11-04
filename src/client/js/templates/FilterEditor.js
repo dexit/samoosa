@@ -51,8 +51,8 @@ module.exports = function render() {
                     ),
                     _.div({class: 'select-container operator'},
                         _.select({},
-                            _.each(this.getOperators(), (i, operator) => {
-                                return _.option({value: operator}, operator)
+                            _.each(this.getOperators(), (operator, label) => {
+                                return _.option({value: operator}, label)
                             })
                         ).val(filter.operator || '!=').change((e) => {
                             filter.operator = $filter.find('.operator select').val();

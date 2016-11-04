@@ -67,7 +67,7 @@
                 align-items: center;
                 justify-content: center;
 
-                &:first-of-type {
+                &.key {
                     border-top-left-radius: 15px;
                     border-bottom-left-radius: 15px;
                     padding-left: 5px;
@@ -78,7 +78,15 @@
                     }
                 }
                 
-                &:last-of-type {
+                &.operator {
+                    width: 48px;
+
+                    select {
+                        text-align: center;
+                    }
+                }
+
+                &.value {
                     border-top-right-radius: 15px;
                     border-bottom-right-radius: 15px;
                     padding-right: 5px;

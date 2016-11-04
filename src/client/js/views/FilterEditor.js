@@ -82,10 +82,10 @@ class FilterEditor extends View {
      * @param {Array} operators
      */
     getOperators() {
-        return [
-            '!=',
-            '=='
-        ];
+        return {
+            '==': 'is',
+            '!=': 'is not'
+        };
     }
 
 

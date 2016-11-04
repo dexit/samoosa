@@ -581,20 +581,24 @@ body, html {
         display: flex;
         align-items: center;
         justify-content: center; }
-        .filter-editor .filters .filter .select-container:first-of-type {
+        .filter-editor .filters .filter .select-container.key {
           border-top-left-radius: 15px;
           border-bottom-left-radius: 15px;
           padding-left: 5px;
           border-right: 1px solid #424242; }
-          .filter-editor .filters .filter .select-container:first-of-type select {
+          .filter-editor .filters .filter .select-container.key select {
             text-align: left; }
-        .filter-editor .filters .filter .select-container:last-of-type {
+        .filter-editor .filters .filter .select-container.operator {
+          width: 48px; }
+          .filter-editor .filters .filter .select-container.operator select {
+            text-align: center; }
+        .filter-editor .filters .filter .select-container.value {
           border-top-right-radius: 15px;
           border-bottom-right-radius: 15px;
           padding-right: 5px;
           border-left: 1px solid #424242;
           width: 90px; }
-          .filter-editor .filters .filter .select-container:last-of-type select {
+          .filter-editor .filters .filter .select-container.value select {
             text-align: left;
             padding-right: 2em; }
         .filter-editor .filters .filter .select-container select {
@@ -738,7 +742,6 @@ body, html {
       position: absolute;
       padding-right: 30px; }
     .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header {
-      padding: 5px 30px 5px 15px;
       position: relative; }
       .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header .drag-handle {
         position: absolute;

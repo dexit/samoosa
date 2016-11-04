@@ -12436,7 +12436,10 @@
 	    }, {
 	        key: 'getOperators',
 	        value: function getOperators() {
-	            return ['!=', '=='];
+	            return {
+	                '==': 'is',
+	                '!=': 'is not'
+	            };
 	        }
 
 	        /**
@@ -12570,8 +12573,8 @@
 	            filter.value = null;
 
 	            _this.onChange(i);
-	        })), _.div({ class: 'select-container operator' }, _.select({}, _.each(_this.getOperators(), function (i, operator) {
-	            return _.option({ value: operator }, operator);
+	        })), _.div({ class: 'select-container operator' }, _.select({}, _.each(_this.getOperators(), function (operator, label) {
+	            return _.option({ value: operator }, label);
 	        })).val(filter.operator || '!=').change(function (e) {
 	            filter.operator = $filter.find('.operator select').val();
 

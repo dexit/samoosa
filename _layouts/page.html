@@ -19,5 +19,21 @@
             {{ content }}
         
         </div>
+
+        <script>
+            var images = document.querySelectorAll('img:not(.logo)');
+
+            if(images) {
+                for(var i = 0; i < images.length; i++) {
+                    let image = images[i];
+
+                    image.addEventListener('click', function() {
+                        this.classList.toggle('active');
+
+                        document.body.classList.toggle('screenshot-active', this.classList.contains('active'));
+                    });
+                }
+            }
+        </script>
     </body>
 </html>

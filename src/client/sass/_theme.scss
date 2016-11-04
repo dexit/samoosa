@@ -303,6 +303,18 @@ a {
 
 .board-container {
     padding-top: 56px;
+
+    &.dragging {
+        .milestone-editor {
+            .columns {
+                .column {
+                    &.hovering {
+                        outline-color: $pink-medium;
+                    }
+                }
+            }
+        }
+    }
 }
 
 .filter-editor {
@@ -482,12 +494,20 @@ a {
     }
 }
 
-.plan-container .plan-item-editor {
-    background-color: $teal-dark;
+.plan-container {
+    .plan-editor {
+        .years button.hovering, .months button.hovering, .dates .date.hovering {
+            outline-color: $pink-medium;
+        }
+    }
+    
+    .plan-item-editor {
+        background-color: $teal-dark;
 
-    .drag-handle {
-        padding: 0.5rem 1rem 0.9em 1em;
-        font-family: 'Bree Serif';
+        .drag-handle {
+            padding: 0.5rem 1rem 0.9em 1em;
+            font-family: 'Bree Serif';
+        }
     }
 }
 

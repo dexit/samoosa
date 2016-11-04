@@ -220,12 +220,9 @@
         .milestone-editor {
             .columns {
                 .column {
-                    outline: 2px solid material-color('grey', '300');
-                    background-color: 2px solid material-color('grey', '100');
-
                     &.hovering {
-                        outline: 2px solid material-color('green', '300');
-                        background-color: 2px solid material-color('green', '100');
+                        outline: 4px solid material-color('green', '300');
+                        outline-offset: -4px;
                     }
                 }
             }

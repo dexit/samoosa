@@ -1086,16 +1086,10 @@ body > .plan-item-editor {
   .project-editor .content .header h4 {
     font-weight: bold;
     margin-top: 0px; }
-  .project-editor .content .footer {
+  .project-editor .content .owner {
+    float: right;
     font-size: 12px;
-    margin-top: 10px; }
-    .project-editor .content .footer .clone-url {
-      margin-bottom: 10px; }
-      .project-editor .content .footer .clone-url span {
-        border-radius: 2px;
-        background-color: #e0e0e0;
-        padding: 0px 5px;
-        font-family: monospace; }
+    text-align: right; }
 
 .workspace.analytics .tabbed-container .panes .pane {
   padding: 15px;
@@ -1196,7 +1190,13 @@ a {
  */
 .document-page {
   background-color: #21303B;
-  color: #fff; }
+  color: #fff;
+  font-size: 14px; }
+  .document-page .document-header {
+    text-align: center; }
+  .document-page h2 {
+    margin-top: 2em;
+    margin-bottom: 0.5em; }
   .document-page pre {
     margin: 5px 0px;
     padding: 5px 10px;
@@ -1212,6 +1212,36 @@ a {
     top: 0px;
     width: 100%;
     height: 100%; }
+  @media (min-width: 660px) {
+    .document-page ol {
+      list-style-type: none;
+      padding-left: 0px;
+      margin-top: 1rem;
+      margin-bottom: 1rem; }
+      .document-page ol > li {
+        counter-increment: item;
+        position: relative;
+        margin-bottom: 2rem;
+        padding-left: 3rem; }
+        .document-page ol > li:before {
+          position: absolute;
+          left: 0px;
+          top: -0.4rem;
+          color: #21303B;
+          font-family: 'Bree Serif';
+          font-size: 1.4em;
+          content: counter(item);
+          border-radius: 50%;
+          background-color: #fff;
+          width: 2rem;
+          height: 2rem;
+          line-height: 2rem;
+          display: inline-block;
+          text-align: center;
+          margin-right: 15px; }
+        .document-page ol > li ul {
+          padding-left: 2rem;
+          line-height: 1.5em; } }
   .document-page img:not(.logo) {
     max-width: 25%;
     cursor: pointer;
@@ -1253,6 +1283,8 @@ a {
       outline-color: #E70D3B; }
     .navbar .content .project-editor .content .header h4, .navbar .obscure .content .project-editor .content .header h4 {
       font-weight: normal; }
+    .navbar .content .project-editor .content .owner, .navbar .obscure .content .project-editor .content .owner {
+      color: #5b84a2; }
 
 .navbar.out button.active.handler:before {
   width: 80%;

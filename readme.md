@@ -1,12 +1,15 @@
 ---
 ---
 
+<div class="document-header">
+
 <img class="logo" src="https://rawgit.com/Putaitu/samoosa/gh-pages/public/svg/logo-medium.svg" width="128" />
 
-# Samoosa
-A free and open-source issue tracker frontend  
+<h1>Samoosa</h1>
+<p>A free and open-source issue tracker frontend</p>
+<p><a href="https://github.com/Putaitu/samoosa">Gitub repo</a></p>
 
-[GitHub repo](https://github.com/Putaitu/samoosa)
+</div>
 
 ## Introduction
 Samoosa can be set up to work with GitHub, Bitbucket, your own custom backend, you name it. The support is added through plugins that reshape the content of their API sources into the Samoosa format. In the case of the GitHub plugin, labels are being used to track version numbers, estimates, issue types and columns.

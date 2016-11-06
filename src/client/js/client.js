@@ -50,6 +50,8 @@ switch(getSource()) {
 // Models
 window.Issue = require('./models/Issue');
 window.Milestone = require('./models/Milestone');
+window.User = require('./models/User');
+window.Project = require('./models/Project');
 
 // Views
 window.Navbar = require('./views/Navbar');

@@ -2,7 +2,8 @@
 
 // Root
 Router.route('/', () => {
-    setTimeout(() => {
+    ApiHelper.checkConnection()
+    .then(() => {
         navbar.toggleProjectsList(true);
         
         $('.workspace').remove();
@@ -12,7 +13,7 @@ Router.route('/', () => {
                 _.img({src: '/public/svg/logo-medium.svg'})
             )
         );
-    }, 10);
+    });
 });
 
 // Project

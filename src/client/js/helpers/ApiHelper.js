@@ -24,8 +24,19 @@ class ApiHelper {
      * Check whether the connection to the source has been made
      */
     checkConnection() {
-        return new Promise((callback) => {
-            callback();
+        debug.log('Getting user...', this);
+
+        return this.getUser()
+        .then((user) => {
+            if(!user) {
+                return Promise.reject(new Error('User could not be retrieved'));
+            }
+
+            debug.log('Found user "' + user.name + '"', this);
+
+            localStorage.setItem('user', user.name);
+
+            return Promise.resolve(user);
         });
     }
 
@@ -60,31 +71,43 @@ class ApiHelper {
      * Get user name
      */
     getUserName() {
-        let user = Router.params && Router.params.user ? Router.params.user : localStorage.getItem('user');;
+        let user = User.getCurrent();
         
         if(!user) {
             location = '/login';
 
-            debug.error('No username found', this);
-        
-        } else {
-            localStorage.setItem('user', user)
+            debug.warning('No user found', this);
 
-            return user;
+            return '';
         }
+        
+        return user.name;
+    }
+    
+    /**
+     * Gets project owner
+     *
+     * @returns {String} Owner
+     */    
+    getProjectOwner() {
+        let project = Project.getCurrent();
+        
+        if(!project) { return ''; }
+
+        return project.owner;
     }
 
     /**
      * Gets project name
+     *
+     * @returns {String} Project name
      */    
     getProjectName() {
-        let project = null;
+        let project = Project.getCurrent();
         
-        if(Router.params && Router.params.project) {
-            project = Router.params.project;
-        }
-   
-        return project;
+        if(!project) { return ''; }
+
+        return project.title;
     }
 
     /**
@@ -800,7 +823,7 @@ class ApiHelper {
                 return this.getIssues();
             
             case 'projects':
-                return this.getIssues();
+                return this.getProjects();
 
             default:
                 return new Promise((resolve, reject) => {
@@ -831,7 +854,10 @@ class ApiHelper {
             }
         }
 
-        return get('issueTypes')
+        return get('projects')
+        .then(() => {
+            return get('issueTypes');
+        })
         .then(() => {
             return get('issuePriorities');
         })

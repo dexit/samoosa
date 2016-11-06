@@ -17,9 +17,11 @@ window.markdownToHtml = function(string) {
         try {
             let html = marked(string);
 
+            // Check boxes
             html = html.replace(/\[ \]/g, '<input type="checkbox" disabled readonly>');
             html = html.replace(/\[x\]/g, '<input type="checkbox" checked="checked" disabled readonly>');
 
+            // Collaborator reference
             html = html.replace(/@[a-zA-Z0-9-_]+/g, (string) => {
                 let typedName = string.replace('@', '');
 

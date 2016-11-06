@@ -225,10 +225,11 @@ class GitHubApi extends ApiHelper {
                 gitHubUser = gitHubUser[0];
             }
 
-            let user = {
+            let user = new User({
+                id: gitHubUser.id,
                 name: gitHubUser.login,
                 avatar: gitHubUser.avatar_url
-            };
+            });
 
             return Promise.resolve(user);
         });

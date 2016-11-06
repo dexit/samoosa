@@ -184,7 +184,7 @@ class BitBucketApi extends ApiHelper {
         return new Promise((resolve, reject) => {
             $.ajax({
                 url: 'https://api.bitbucket.org/1.0' + url,
-                type: 'POST',
+                type: 'PUT',
                 data: data,
                 cache: false,
                 success: (result) => {
@@ -216,9 +216,9 @@ class BitBucketApi extends ApiHelper {
 
                 default:
                     if(error.responseJSON) {
-                        alert(error.responseJSON.message);
+                        displayError(new Error(error.responseJSON.error.message));
                     } else {
-                        alert(error.statusText);
+                        displayError(new Error(error.statusText));
                     } 
                     break;
             }
@@ -234,30 +234,30 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getUser() {
-        return new Promise((resolve, reject) => {
-            this.get('/user')
-            .then((gitHubUser) => {
-                if(Array.isArray(gitHubUser)) {
-                    gitHubUser = gitHubUser[0];
-                }
+        if(this.isSpectating()) {
+            return Promise.resolve({name: '', avatar: ''});
+        }
 
-                let user = {
-                    name: gitHubUser.login,
-                    avatar: gitHubUser.avatar_url
-                };
+        return this.get('/user')
+        .then((response) => {
+            if(response[0]) {
+                response = response[0];
+            }
 
-                resolve(user);
-            })
-            .catch((e) => {
-                if(this.isSpectating()) {
-                    resolve({name: '', avatar: ''});
+            if(response.user) {
+                response = response.user;
+            }
+
+            let bitBucketUser = response;
                 
-                } else {
-                    reject(e);
+            let user = new User({
+                name: bitBucketUser.username,
+                id: bitBucketUser.username,
+                avatar: bitBucketUser.avatar
+            });
 
-                }  
-            });   
-        });
+            return Promise.resolve(user);
+        })
     }
 
     // ----------
@@ -286,22 +286,15 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getCollaborators() {
-        return new Promise((resolve, reject) => {
-            this.get('/privileges/' + this.getUserName() + '/' + this.getProjectName())
-            .then((collaborators) => {
-                this.processCollaborators(collaborators);
+        if(this.isSpectating()) {
+            return Promise.resolve([]);
+        }
 
-                resolve();
-            })
-            .catch((e) => {
-                if(this.isSpectating()) {
-                    resolve([]);
-                
-                } else {
-                    reject(e);
+        return this.get('/privileges/' + this.getProjectOwner() + '/' + this.getProjectName())
+        .then((privileges) => {
+            this.processCollaborators(privileges);
 
-                }
-            });
+            return Promise.resolve();
         });
     }
 
@@ -311,14 +304,11 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssues() {
-        return new Promise((resolve, reject) => {
-            this.get('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues', 'issues', false)
-            .then((res) => {
-                this.processIssues(res);
+        return this.get('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', 'issues', false)
+        .then((res) => {
+            this.processIssues(res);
 
-                resolve();
-            })
-            .catch(reject);
+            return Promise.resolve();
         });
     }
     
@@ -328,16 +318,14 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssueTypes() {
-        return new Promise((resolve, reject) => {
-            window.resources.issueTypes = [
-                'bug',
-                'enhancement',
-                'proposal',
-                'task'
-            ];
+        resources.issueTypes = [
+            'bug',
+            'enhancement',
+            'proposal',
+            'task'
+        ];
             
-            resolve();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -346,15 +334,14 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssueColumns() {
-        return new Promise((resolve, reject) => {
-            window.resources.issueColumns = [
-                'open',
-                'resolved',
-                'closed'
-            ];
+        resources.issueColumns = [
+            'new',
+            'open',
+            'resolved',
+            'closed'
+        ];
             
-            resolve();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -363,17 +350,15 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssuePriorities() {
-        return new Promise((resolve, reject) => {
-            window.resources.issuePriorities = [
-                'trivial',
-                'minor',
-                'major',
-                'critical',
-                'blocker'
-            ];
+        resources.issuePriorities = [
+            'trivial',
+            'minor',
+            'major',
+            'critical',
+            'blocker'
+        ];
 
-            resolve();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -382,22 +367,20 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssueEstimates() {
-        return new Promise((resolve, reject) => {
-            window.resources.issueEstimates = [
-                '0.25h',
-                '0.5h',
-                '1h',
-                '2h',
-                '3h',
-                '4h',
-                '5h',
-                '6h',
-                '7h',
-                '8h'
-            ];
+        resources.issueEstimates = [
+            '0.25h',
+            '0.5h',
+            '1h',
+            '2h',
+            '3h',
+            '4h',
+            '5h',
+            '6h',
+            '7h',
+            '8h'
+        ];
 
-            resolve();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -408,13 +391,11 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getVersions() {
-        return new Promise((callback) => {
-            this.get('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/versions')
-            .then((versions) => {
-                this.processVersions(versions);
-                
-                callback();
-            });    
+        return this.get('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions')
+        .then((versions) => {
+            this.processVersions(versions);
+            
+            return Promise.resolve();
         });
     }
 
@@ -424,14 +405,12 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getMilestones() {
-        return new Promise((callback) => {
-            this.get('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/milestones')
-            .then((milestones) => {
-                this.processMilestones(milestones);
-                
-                callback();
-            });    
-        });
+        return this.get('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones')
+        .then((milestones) => {
+            this.processMilestones(milestones);
+            
+            return Promise.resolve();
+        });    
     }
 
     // ----------
@@ -445,12 +424,7 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addIssue(issue) {
-        return new Promise((callback) => {
-            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue))
-            .then(() => {
-                callback(issue);
-            });
-        });
+        return this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue));
     }
     
     /**
@@ -462,7 +436,7 @@ class BitBucketApi extends ApiHelper {
      */
     addCollaborator(collaborator) {
         return new Promise((callback) => {
-            this.put('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators/' + collaborator)
+            this.put('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + collaborator)
             .then(() => {
                 callback();
             });    
@@ -478,7 +452,7 @@ class BitBucketApi extends ApiHelper {
      */
     addIssueType(type) {
         return new Promise((callback) => {
-            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
                 name: 'type:' + type,
                 color: 'ffffff'
             })
@@ -497,7 +471,7 @@ class BitBucketApi extends ApiHelper {
      */
     addIssuePriority(priority) {
         return new Promise((callback) => {
-            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
                 name: 'priority:' + priority,
                 color: 'ffffff'
             })
@@ -516,7 +490,7 @@ class BitBucketApi extends ApiHelper {
      */
     addIssueEstimate(estimate) {
         return new Promise((callback) => {
-            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
                 name: 'estimate:' + estimate,
                 color: 'ffffff'
             })
@@ -535,7 +509,7 @@ class BitBucketApi extends ApiHelper {
      */
     addIssueColumn(column) {
         return new Promise((callback) => {
-            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
                 name: 'column:' + column,
                 color: 'ffffff'
             })
@@ -560,7 +534,7 @@ class BitBucketApi extends ApiHelper {
         }
 
         return new Promise((callback) => {
-            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/milestones', this.convertMilestone(milestone))
+            this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones', this.convertMilestone(milestone))
             .then(() => {
                 callback();
             });
@@ -576,7 +550,7 @@ class BitBucketApi extends ApiHelper {
      */
     addVersion(version) {
         return new Promise((callback) => {
-            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+            this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
                 name: 'version:' + version,
                 color: 'ffffff'
             })
@@ -598,7 +572,7 @@ class BitBucketApi extends ApiHelper {
      */
     removeCollaborator(index) {
         return new Promise((callback) => {
-            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index])
+            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index])
             .then(() => {
                 callback();
             });
@@ -614,7 +588,7 @@ class BitBucketApi extends ApiHelper {
      */
     removeIssueType(index) {
         return new Promise((callback) => {
-            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/type:' + window.resources.issueTypes[index])
+            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/type:' + window.resources.issueTypes[index])
             .then(() => {
                 callback();
             });
@@ -630,7 +604,7 @@ class BitBucketApi extends ApiHelper {
      */
     removeIssuePriority(index) {
         return new Promise((callback) => {
-            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index])
+            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index])
             .then(() => {
                 callback();
             });
@@ -646,7 +620,7 @@ class BitBucketApi extends ApiHelper {
      */
     removeIssueEstimate(index) {
         return new Promise((callback) => {
-            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index])
+            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index])
             .then(() => {
                 callback();
             });
@@ -662,7 +636,7 @@ class BitBucketApi extends ApiHelper {
      */
     removeIssueColumn(index) {
         return new Promise((callback) => {
-            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index])
+            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index])
             .then(() => {
                 callback();
             });
@@ -680,7 +654,7 @@ class BitBucketApi extends ApiHelper {
         let milestone = resources.milestones[index];
 
         return new Promise((callback) => {
-            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/milestones/' + milestone.id)
+            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones/' + milestone.id)
             .then(() => {
                 callback();
             });
@@ -696,7 +670,7 @@ class BitBucketApi extends ApiHelper {
      */
     removeVersion(index) {
         return new Promise((callback) => {
-            this.delete('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/version:' + window.resources.versions[index])
+            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/version:' + window.resources.versions[index])
             .then(() => {
                 callback();
             });
@@ -712,12 +686,7 @@ class BitBucketApi extends ApiHelper {
      * @param {Object} issue
      */
     updateIssue(issue) {
-        return new Promise((callback) => {
-            this.put('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + issue.id, this.convertIssue(issue))
-            .then(() => {
-                callback();
-            });
-        });
+        return this.put('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id, this.convertIssue(issue));
     }
 
     /**
@@ -729,7 +698,7 @@ class BitBucketApi extends ApiHelper {
      */
     updateMilestone(milestone) {
         return new Promise((callback) => {
-            this.put('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/milestones/' + milestone.id, this.convertMilestone(milestone))
+            this.put('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones/' + milestone.id, this.convertMilestone(milestone))
             .then(() => {
                 callback();
             });
@@ -746,7 +715,7 @@ class BitBucketApi extends ApiHelper {
      */
     updateIssueType(type, previousName) {
         return new Promise((callback) => {
-            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/type:' + previousName, {
+            this.patch('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/type:' + previousName, {
                 name: 'type:' + type,
                 color: 'ffffff'
             })
@@ -766,7 +735,7 @@ class BitBucketApi extends ApiHelper {
      */
     updateIssuePriority(priority, previousName) {
         return new Promise((callback) => {
-            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/priority:' + previousName, {
+            this.patch('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/priority:' + previousName, {
                 name: 'priority:' + priority,
                 color: 'ffffff'
             })
@@ -786,7 +755,7 @@ class BitBucketApi extends ApiHelper {
      */
     updateIssueEstimate(estimate, previousName) {
         return new Promise((callback) => {
-            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/estimate:' + previousName, {
+            this.patch('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/estimate:' + previousName, {
                 name: 'estimate:' + estimate,
                 color: 'ffffff'
             })
@@ -806,7 +775,7 @@ class BitBucketApi extends ApiHelper {
      */
     updateIssueColumn(column, previousName) {
         return new Promise((callback) => {
-            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/column:' + previousName, {
+            this.patch('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/column:' + previousName, {
                 name: 'column:' + column,
                 color: 'ffffff'
             })
@@ -826,7 +795,7 @@ class BitBucketApi extends ApiHelper {
      */
     updateVersion(version, previousName) {
         return new Promise((callback) => {
-            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/labels/version:' + previousName, {
+            this.patch('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/version:' + previousName, {
                 name: 'version:' + version,
                 color: 'ffffff'
             })
@@ -848,11 +817,13 @@ class BitBucketApi extends ApiHelper {
         window.resources.projects = [];
 
         for(let i in projects) {
-            let project = {
+            let project = new Project({
                 index: i,
+                id: projects[i].slug,
                 title: projects[i].slug,
-                description: projects[i].description
-            };
+                description: projects[i].description,
+                owner: projects[i].owner
+            });
 
             window.resources.projects[i] = project;
         }
@@ -993,16 +964,19 @@ class BitBucketApi extends ApiHelper {
     /**
      * Process collaborators
      *
-     * @param {Array} collaborators
+     * @param {Array} privileges
      */
-    processCollaborators(collaborators) {
-        window.resources.collaborators = [];
+    processCollaborators(privileges) {
+        resources.collaborators = [];
 
-        for(let collaborator of collaborators) {
-            console.log('COLLABORATOR', collaborator);
+        resources.collaborators.push(User.getCurrent());
 
-            window.resources.collaborators.push({
-                name: collaborator.login,
+        for(let privilege of privileges) {
+            let collaborator = privilege.user;
+
+            resources.collaborators.push({
+                id: collaborator.username,
+                name: collaborator.username,
                 avatar: collaborator.avatar_url,
             });
         }
@@ -1035,27 +1009,21 @@ class BitBucketApi extends ApiHelper {
             issue.milestone = ResourceHelper.getMilestone(bitBucketIssue.metadata.milestone);
             issue.type = ResourceHelper.getIssueType(bitBucketIssue.metadata.kind);
             issue.version = ResourceHelper.getVersion(bitBucketIssue.metadata.version);
+            issue.column = ResourceHelper.getIssueColumn(bitBucketIssue.status);
 
+            // Remove meta
+            issue.description = issue.description.replace(/\n\n---\[Samoosa\]---\n\n/g, '');
+            
             // Parse for estimate
-            let estimateMatches = /{% estimate: ([0-9](\.[0-9])?h) %}/.exec(issue.content || '');
+            let estimateRegex = /{% estimate: ((\d+.\d+|\d+)(d|h|m)|(\d+.\d+|\d+)) %}/g;
+            let estimateMatches = estimateRegex.exec(issue.content || '');
 
             if(estimateMatches && estimateMatches.length > 0) {
                 issue.estimate = ResourceHelper.getIssueEstimates(estimateMatches[0]);
             }
 
-            switch(bitBucketIssue.status) {
-                case 'open': default:
-                    issue.column = 0;
-                    break;
-
-                case 'resolved': 
-                    issue.column = 1;
-                    break;
-
-                case 'closed':
-                    issue.column = 2;
-                    break;
-            }
+            // Remove estimate markup
+            issue.description = issue.description.replace(estimateRegex, '');
 
             issue.index = indexCounter;
 
@@ -1125,13 +1093,14 @@ class BitBucketApi extends ApiHelper {
 
         bitBucketIssue.version = version;
        
+        // Description meta
+        bitBucketIssue.content += '\n\n---[Samoosa]---\n\n';
+
         // Estimate
         let issueEstimate = resources.issueEstimates[issue.estimate];
         let estimateString = '{% estimate: ' + issueEstimate + ' %}';
 
-        bitBucketIssue.content = bitBucketIssue.content.replace(/\n\n{% estimate: ([0-9](\.[0-9])?h) %}/g, '');
-        bitBucketIssue.content = bitBucketIssue.content.replace(/{% estimate: ([0-9](\.[0-9])?h) %}/g, '');
-        bitBucketIssue.content += '\n\n' + estimateString;
+        bitBucketIssue.content += estimateString;
 
         // Priority
         let issuePriority = resources.issuePriorities[issue.type];
@@ -1148,13 +1117,8 @@ class BitBucketApi extends ApiHelper {
      * @param {String} text
      */
     addIssueComment(issue, text) {
-        return new Promise((callback) => {
-            this.post('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + (issue.index + 1) + '/comments', {
-                body: text
-            })
-            .then(() => {
-                callback(); 
-            });
+        return this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments', {
+            content: text
         });
     }
 
@@ -1165,13 +1129,8 @@ class BitBucketApi extends ApiHelper {
      * @param {Object} comment
      */
     updateIssueComment(issue, comment) {
-        return new Promise((callback) => {
-            this.patch('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/comments/' + comment.index, {
-                body: comment.text
-            })
-            .then(() => {
-                callback(); 
-            });
+        return this.put('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments/' + comment.index, {
+            content: comment.text
         });
     }
 
@@ -1183,23 +1142,21 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssueComments(issue) {
-        return new Promise((callback) => {
-            this.get('/repositories/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + (issue.index + 1) + '/comments')
-            .then((gitHubComments) => {
-                let comments = [];
+        return this.get('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments')
+        .then((bitBucketComments) => {
+            let comments = [];
 
-                for(let gitHubComment of gitHubComments) {
-                    let comment = {
-                        collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
-                        text: gitHubComment.body,
-                        index: gitHubComment.id
-                    };
+            for(let bitBucketComment of bitBucketComments) {
+                let comment = {
+                    collaborator: ResourceHelper.getCollaborator(bitBucketComment.auther_info.username),
+                    text: bitBucketComment.content,
+                    index: bitBucketComment.comment_id
+                };
 
-                    comments.push(comment);
-                }
+                comments.push(comment);
+            }
 
-                callback(comments);            
-            });
+            return Promise.resolve(comments);            
         });
     }
 }

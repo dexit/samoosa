@@ -65,7 +65,7 @@ class Issue {
      * @returns {String} Column name
      */
     getColumn() {
-        return resources.issueColumns[this.column || -1] || 'to do';
+        return resources.issueColumns[this.column || 0];
     }
     
     /**

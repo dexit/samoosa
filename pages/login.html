@@ -44,6 +44,19 @@ layout: ~
 
         <script src="../public/lib/jquery/jquery.min.js"></script>
         <script>
+            // Get parameter by name
+            function getParameterByName(name, url) {
+                if (!url) {
+                    url = window.location.href;
+                }
+                name = name.replace(/[\[\]]/g, "\\$&");
+                var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                    results = regex.exec(url);
+                if (!results) return null;
+                if (!results[2]) return '';
+                return decodeURIComponent(results[2].replace(/\+/g, " "));
+            }
+
             // Submit action
             function onSubmit(e) {
                 e.preventDefault();
@@ -62,34 +75,27 @@ layout: ~
                 e.preventDefault();
 
                 var source = $('#input-source').val();
-                var user = $('#input-user').val();
 
-                switch(source) {
-                    case 'github':
-                        window.open('https://github.com/settings/tokens/new');
-                        break;
-
-                    case 'bitbucket':
-                        let username = prompt('Input username');
-                        let password = prompt('Input password');
-                        let token = btoa(username + ':' + password);
-
-                        $('input[name="token"]').val(token);
-
-                        /*if(!user) {
-                            alert('Please fill out user/team name first');
-                            return;
-                        }
-
-                        url = 'https://bitbucket.org/account/user/' + user + '/app-passwords/new';*/
-                        break;
-                }
-
+                location = 'https://samoosa-api.herokuapp.com/oauth/' + source;
             }
 
             // Event hookups
             $('.login-form').on('submit', onSubmit);
             $('#link-new-token').on('click', onClickNewToken);
+
+            // Receive token parameter
+            var token = getParameterByName('token');
+
+            if(token) {
+                $('input[name="token"]').val(token);
+            }
+
+            // Receive source parameter
+            var source = getParameterByName('source');
+
+            if(token) {
+                $('#input-source').val(source);
+            }
         </script>
     </body>
 </html>

@@ -7771,7 +7771,7 @@
 	                            }
 	                        },
 	                        beforeSend: function beforeSend(xhr) {
-	                            xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+	                            xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                        },
 	                        error: function error(e) {
 	                            self.error(e);
@@ -7809,7 +7809,7 @@
 	                        resolve(result);
 	                    },
 	                    beforeSend: function beforeSend(xhr) {
-	                        xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+	                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                    },
 	                    error: function error(e) {
 	                        _this2.error(e);
@@ -7843,7 +7843,7 @@
 	                        resolve(result);
 	                    },
 	                    beforeSend: function beforeSend(xhr) {
-	                        xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+	                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                    },
 	                    error: function error(e) {
 	                        reject(new Error(e.responseText));
@@ -7876,7 +7876,7 @@
 	                        resolve(result);
 	                    },
 	                    beforeSend: function beforeSend(xhr) {
-	                        xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+	                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                    },
 	                    error: function error(e) {
 	                        reject(new Error(e.responseText));
@@ -7909,7 +7909,7 @@
 	                        resolve(result);
 	                    },
 	                    beforeSend: function beforeSend(xhr) {
-	                        xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+	                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                    },
 	                    error: function error(e) {
 	                        reject(new Error(e.responseText));

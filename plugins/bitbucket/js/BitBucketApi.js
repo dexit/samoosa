@@ -67,7 +67,7 @@ class BitBucketApi extends ApiHelper {
                         }
                     },
                     beforeSend: (xhr) => {
-                        xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
                     },
                     error: (e) => {
                         self.error(e);
@@ -100,7 +100,7 @@ class BitBucketApi extends ApiHelper {
                     resolve(result);
                 },
                 beforeSend: (xhr) => {
-                    xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
                 },
                 error: (e) => {
                     this.error(e);
@@ -131,7 +131,7 @@ class BitBucketApi extends ApiHelper {
                     resolve(result);
                 },
                 beforeSend: (xhr) => {
-                    xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
                 },
                 error: (e) => {
                     reject(new Error(e.responseText));
@@ -161,7 +161,7 @@ class BitBucketApi extends ApiHelper {
                     resolve(result);
                 },
                 beforeSend: (xhr) => {
-                    xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
                 },
                 error: (e) => {
                     reject(new Error(e.responseText));
@@ -191,7 +191,7 @@ class BitBucketApi extends ApiHelper {
                     resolve(result);
                 },
                 beforeSend: (xhr) => {
-                    xhr.setRequestHeader('Authorization', 'Basic ' + self.getApiToken());
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
                 },
                 error: (e) => {
                     reject(new Error(e.responseText));

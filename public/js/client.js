@@ -4379,6 +4379,8 @@
 
 	'use strict';
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4538,7 +4540,13 @@
 	            return ApiHelper.addResource(resource, item).then(function (newItem) {
 	                item = newItem || item;
 
-	                resources[resource].push(item);
+	                var index = resources[resource].length;
+
+	                if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) === 'object' && !item.index) {
+	                    item.index = index;
+	                }
+
+	                resources[resource][index] = item;
 
 	                spinner(false);
 
@@ -6021,54 +6029,6 @@
 	    }, {
 	        key: 'processMilestones',
 	        value: function processMilestones(milestones) {
-	            // Find milestone start date based on first closed issue
-	            // This is terrible, but so is GitHubs issue system
-	            var getStartDate = function getStartDate() {
-	                var earliest = void 0;
-
-	                var _iteratorNormalCompletion2 = true;
-	                var _didIteratorError2 = false;
-	                var _iteratorError2 = undefined;
-
-	                try {
-	                    for (var _iterator2 = this.getIssues()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                        var issue = _step2.value;
-
-	                        if (issue.getClosedDate()) {
-	                            if (!earliest) {
-	                                earliest = issue;
-	                            } else if (issue.getClosedDate() < earliest.getClosedDate()) {
-	                                earliest = issue;
-	                            }
-	                        }
-	                    }
-	                } catch (err) {
-	                    _didIteratorError2 = true;
-	                    _iteratorError2 = err;
-	                } finally {
-	                    try {
-	                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                            _iterator2.return();
-	                        }
-	                    } finally {
-	                        if (_didIteratorError2) {
-	                            throw _iteratorError2;
-	                        }
-	                    }
-	                }
-
-	                if (earliest) {
-	                    this.startDate = earliest.closedAt;
-
-	                    return new Date(this.startDate);
-	                } else if (this.startDate) {
-	                    return new Date(this.startDate);
-	                } else {
-	                    debug.log('Could not find start date for milestone "' + this.title + '"', this);
-	                    return;
-	                }
-	            };
-
 	            resources.milestones = [];
 
 	            for (var i in milestones) {
@@ -6084,9 +6044,6 @@
 	                });
 
 	                resources.milestones[index] = milestone;
-
-	                // Override the getStartDate method
-	                milestone.getStartDate = getStartDate;
 	            }
 	        }
 
@@ -6101,6 +6058,49 @@
 	        value: function processVersions(labels) {
 	            window.resources.versions = [];
 
+	            var _iteratorNormalCompletion2 = true;
+	            var _didIteratorError2 = false;
+	            var _iteratorError2 = undefined;
+
+	            try {
+	                for (var _iterator2 = labels[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                    var label = _step2.value;
+
+	                    var versionIndex = label.name.indexOf('version:');
+
+	                    if (versionIndex > -1) {
+	                        var versionName = label.name.replace('version:', '');
+
+	                        window.resources.versions.push(versionName);
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError2 = true;
+	                _iteratorError2 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                        _iterator2.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError2) {
+	                        throw _iteratorError2;
+	                    }
+	                }
+	            }
+	        }
+
+	        /**
+	         * Process issue priotities
+	         *
+	         * @param {Array} labels
+	         */
+
+	    }, {
+	        key: 'processIssuePriorities',
+	        value: function processIssuePriorities(labels) {
+	            window.resources.issuePriorities = [];
+
 	            var _iteratorNormalCompletion3 = true;
 	            var _didIteratorError3 = false;
 	            var _iteratorError3 = undefined;
@@ -6109,12 +6109,12 @@
 	                for (var _iterator3 = labels[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
 	                    var label = _step3.value;
 
-	                    var versionIndex = label.name.indexOf('version:');
+	                    var index = label.name.indexOf('priority:');
 
-	                    if (versionIndex > -1) {
-	                        var versionName = label.name.replace('version:', '');
+	                    if (index > -1) {
+	                        var name = label.name.replace('priority:', '');
 
-	                        window.resources.versions.push(versionName);
+	                        window.resources.issuePriorities.push(name);
 	                    }
 	                }
 	            } catch (err) {
@@ -6134,15 +6134,15 @@
 	        }
 
 	        /**
-	         * Process issue priotities
+	         * Process issue estimates
 	         *
 	         * @param {Array} labels
 	         */
 
 	    }, {
-	        key: 'processIssuePriorities',
-	        value: function processIssuePriorities(labels) {
-	            window.resources.issuePriorities = [];
+	        key: 'processIssueEstimates',
+	        value: function processIssueEstimates(labels) {
+	            window.resources.issueEstimates = [];
 
 	            var _iteratorNormalCompletion4 = true;
 	            var _didIteratorError4 = false;
@@ -6152,12 +6152,12 @@
 	                for (var _iterator4 = labels[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
 	                    var label = _step4.value;
 
-	                    var index = label.name.indexOf('priority:');
+	                    var index = label.name.indexOf('estimate:');
 
 	                    if (index > -1) {
-	                        var name = label.name.replace('priority:', '');
+	                        var name = label.name.replace('estimate:', '');
 
-	                        window.resources.issuePriorities.push(name);
+	                        window.resources.issueEstimates.push(name);
 	                    }
 	                }
 	            } catch (err) {
@@ -6177,15 +6177,17 @@
 	        }
 
 	        /**
-	         * Process issue estimates
+	         * Process issue columns
 	         *
 	         * @param {Array} labels
 	         */
 
 	    }, {
-	        key: 'processIssueEstimates',
-	        value: function processIssueEstimates(labels) {
-	            window.resources.issueEstimates = [];
+	        key: 'processIssueColumns',
+	        value: function processIssueColumns(labels) {
+	            window.resources.issueColumns = [];
+
+	            window.resources.issueColumns.push('to do');
 
 	            var _iteratorNormalCompletion5 = true;
 	            var _didIteratorError5 = false;
@@ -6195,12 +6197,12 @@
 	                for (var _iterator5 = labels[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
 	                    var label = _step5.value;
 
-	                    var index = label.name.indexOf('estimate:');
+	                    var index = label.name.indexOf('column:');
 
 	                    if (index > -1) {
-	                        var name = label.name.replace('estimate:', '');
+	                        var name = label.name.replace('column:', '');
 
-	                        window.resources.issueEstimates.push(name);
+	                        window.resources.issueColumns.push(name);
 	                    }
 	                }
 	            } catch (err) {
@@ -6214,51 +6216,6 @@
 	                } finally {
 	                    if (_didIteratorError5) {
 	                        throw _iteratorError5;
-	                    }
-	                }
-	            }
-	        }
-
-	        /**
-	         * Process issue columns
-	         *
-	         * @param {Array} labels
-	         */
-
-	    }, {
-	        key: 'processIssueColumns',
-	        value: function processIssueColumns(labels) {
-	            window.resources.issueColumns = [];
-
-	            window.resources.issueColumns.push('to do');
-
-	            var _iteratorNormalCompletion6 = true;
-	            var _didIteratorError6 = false;
-	            var _iteratorError6 = undefined;
-
-	            try {
-	                for (var _iterator6 = labels[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-	                    var label = _step6.value;
-
-	                    var index = label.name.indexOf('column:');
-
-	                    if (index > -1) {
-	                        var name = label.name.replace('column:', '');
-
-	                        window.resources.issueColumns.push(name);
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError6 = true;
-	                _iteratorError6 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
-	                        _iterator6.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError6) {
-	                        throw _iteratorError6;
 	                    }
 	                }
 	            }
@@ -6277,13 +6234,13 @@
 	        value: function processIssueTypes(labels) {
 	            window.resources.issueTypes = [];
 
-	            var _iteratorNormalCompletion7 = true;
-	            var _didIteratorError7 = false;
-	            var _iteratorError7 = undefined;
+	            var _iteratorNormalCompletion6 = true;
+	            var _didIteratorError6 = false;
+	            var _iteratorError6 = undefined;
 
 	            try {
-	                for (var _iterator7 = labels[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-	                    var label = _step7.value;
+	                for (var _iterator6 = labels[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+	                    var label = _step6.value;
 
 	                    var index = label.name.indexOf('type:');
 
@@ -6292,6 +6249,46 @@
 
 	                        window.resources.issueTypes.push(name);
 	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError6 = true;
+	                _iteratorError6 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
+	                        _iterator6.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError6) {
+	                        throw _iteratorError6;
+	                    }
+	                }
+	            }
+	        }
+
+	        /**
+	         * Process collaborators
+	         *
+	         * @param {Array} collaborators
+	         */
+
+	    }, {
+	        key: 'processCollaborators',
+	        value: function processCollaborators(collaborators) {
+	            window.resources.collaborators = [];
+
+	            var _iteratorNormalCompletion7 = true;
+	            var _didIteratorError7 = false;
+	            var _iteratorError7 = undefined;
+
+	            try {
+	                for (var _iterator7 = collaborators[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+	                    var collaborator = _step7.value;
+
+	                    window.resources.collaborators.push({
+	                        name: collaborator.login,
+	                        avatar: collaborator.avatar_url
+	                    });
 	                }
 	            } catch (err) {
 	                _didIteratorError7 = true;
@@ -6310,46 +6307,6 @@
 	        }
 
 	        /**
-	         * Process collaborators
-	         *
-	         * @param {Array} collaborators
-	         */
-
-	    }, {
-	        key: 'processCollaborators',
-	        value: function processCollaborators(collaborators) {
-	            window.resources.collaborators = [];
-
-	            var _iteratorNormalCompletion8 = true;
-	            var _didIteratorError8 = false;
-	            var _iteratorError8 = undefined;
-
-	            try {
-	                for (var _iterator8 = collaborators[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-	                    var collaborator = _step8.value;
-
-	                    window.resources.collaborators.push({
-	                        name: collaborator.login,
-	                        avatar: collaborator.avatar_url
-	                    });
-	                }
-	            } catch (err) {
-	                _didIteratorError8 = true;
-	                _iteratorError8 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
-	                        _iterator8.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError8) {
-	                        throw _iteratorError8;
-	                    }
-	                }
-	            }
-	        }
-
-	        /**
 	         * Process issues
 	         *
 	         * @param {Array} issues
@@ -6360,13 +6317,13 @@
 	        value: function processIssues(issues) {
 	            window.resources.issues = [];
 
-	            var _iteratorNormalCompletion9 = true;
-	            var _didIteratorError9 = false;
-	            var _iteratorError9 = undefined;
+	            var _iteratorNormalCompletion8 = true;
+	            var _didIteratorError8 = false;
+	            var _iteratorError8 = undefined;
 
 	            try {
-	                for (var _iterator9 = issues[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-	                    var gitHubIssue = _step9.value;
+	                for (var _iterator8 = issues[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+	                    var gitHubIssue = _step8.value;
 
 	                    var issue = new Issue();
 
@@ -6383,13 +6340,13 @@
 
 	                    issue.labels = issue.labels || [];
 
-	                    var _iteratorNormalCompletion10 = true;
-	                    var _didIteratorError10 = false;
-	                    var _iteratorError10 = undefined;
+	                    var _iteratorNormalCompletion9 = true;
+	                    var _didIteratorError9 = false;
+	                    var _iteratorError9 = undefined;
 
 	                    try {
-	                        for (var _iterator10 = gitHubIssue.labels[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-	                            var label = _step10.value;
+	                        for (var _iterator9 = gitHubIssue.labels[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+	                            var label = _step9.value;
 
 	                            var typeIndex = label.name.indexOf('type:');
 	                            var priorityIndex = label.name.indexOf('priority:');
@@ -6424,16 +6381,16 @@
 	                            }
 	                        }
 	                    } catch (err) {
-	                        _didIteratorError10 = true;
-	                        _iteratorError10 = err;
+	                        _didIteratorError9 = true;
+	                        _iteratorError9 = err;
 	                    } finally {
 	                        try {
-	                            if (!_iteratorNormalCompletion10 && _iterator10.return) {
-	                                _iterator10.return();
+	                            if (!_iteratorNormalCompletion9 && _iterator9.return) {
+	                                _iterator9.return();
 	                            }
 	                        } finally {
-	                            if (_didIteratorError10) {
-	                                throw _iteratorError10;
+	                            if (_didIteratorError9) {
+	                                throw _iteratorError9;
 	                            }
 	                        }
 	                    }
@@ -6455,16 +6412,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError9 = true;
-	                _iteratorError9 = err;
+	                _didIteratorError8 = true;
+	                _iteratorError8 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion9 && _iterator9.return) {
-	                        _iterator9.return();
+	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
+	                        _iterator8.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError9) {
-	                        throw _iteratorError9;
+	                    if (_didIteratorError8) {
+	                        throw _iteratorError8;
 	                    }
 	                }
 	            }
@@ -6628,13 +6585,13 @@
 	                _this18.get('/repos/' + _this18.getUserName() + '/' + _this18.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
 	                    var comments = [];
 
-	                    var _iteratorNormalCompletion11 = true;
-	                    var _didIteratorError11 = false;
-	                    var _iteratorError11 = undefined;
+	                    var _iteratorNormalCompletion10 = true;
+	                    var _didIteratorError10 = false;
+	                    var _iteratorError10 = undefined;
 
 	                    try {
-	                        for (var _iterator11 = gitHubComments[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-	                            var gitHubComment = _step11.value;
+	                        for (var _iterator10 = gitHubComments[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+	                            var gitHubComment = _step10.value;
 
 	                            var comment = {
 	                                collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
@@ -6645,16 +6602,16 @@
 	                            comments.push(comment);
 	                        }
 	                    } catch (err) {
-	                        _didIteratorError11 = true;
-	                        _iteratorError11 = err;
+	                        _didIteratorError10 = true;
+	                        _iteratorError10 = err;
 	                    } finally {
 	                        try {
-	                            if (!_iteratorNormalCompletion11 && _iterator11.return) {
-	                                _iterator11.return();
+	                            if (!_iteratorNormalCompletion10 && _iterator10.return) {
+	                                _iterator10.return();
 	                            }
 	                        } finally {
-	                            if (_didIteratorError11) {
-	                                throw _iteratorError11;
+	                            if (_didIteratorError10) {
+	                                throw _iteratorError10;
 	                            }
 	                        }
 	                    }
@@ -8143,8 +8100,6 @@
 	        /**
 	         * Gets versions
 	         *
-	         * TODO: This only returns empty arrays, why?
-	         *
 	         * @returns {Promise} promise
 	         */
 
@@ -8319,9 +8274,9 @@
 	        key: 'addMilestone',
 	        value: function addMilestone(milestone) {
 	            if (typeof milestone == 'string') {
-	                milestone = {
+	                milestone = new Milestone({
 	                    title: milestone
-	                };
+	                });
 	            }
 
 	            return this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones', this.convertMilestone(milestone)).then(function (bitBucketMilestone) {
@@ -8342,14 +8297,12 @@
 	    }, {
 	        key: 'addVersion',
 	        value: function addVersion(version) {
-	            var _this13 = this;
-
-	            return new Promise(function (callback) {
-	                _this13.post('/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/labels', {
-	                    name: 'version:' + version,
-	                    color: 'ffffff'
-	                }).then(function () {
-	                    callback();
+	            return this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions', {
+	                name: version
+	            }).then(function (bitBucketVersion) {
+	                return Promise.resolve({
+	                    title: version,
+	                    id: bitBucketVersion.id
 	                });
 	            });
 	        }
@@ -8357,6 +8310,20 @@
 	        // ----------
 	        // Resource removers
 	        // ----------
+	        /**
+	         * Removes issue
+	         *
+	         * @param {Issue} issue
+	         *
+	         * @returns {Promise} Promise
+	         */
+
+	    }, {
+	        key: 'removeIssue',
+	        value: function removeIssue(issue) {
+	            return this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id);
+	        }
+
 	        /**
 	         * Removes collaborator
 	         *
@@ -8368,93 +8335,7 @@
 	    }, {
 	        key: 'removeCollaborator',
 	        value: function removeCollaborator(index) {
-	            var _this14 = this;
-
-	            return new Promise(function (callback) {
-	                _this14.delete('/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/collaborators/' + window.resources.collaborators[index]).then(function () {
-	                    callback();
-	                });
-	            });
-	        }
-
-	        /**
-	         * Removes issue type
-	         *
-	         * @param {Number} index
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'removeIssueType',
-	        value: function removeIssueType(index) {
-	            var _this15 = this;
-
-	            return new Promise(function (callback) {
-	                _this15.delete('/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels/type:' + window.resources.issueTypes[index]).then(function () {
-	                    callback();
-	                });
-	            });
-	        }
-
-	        /**
-	         * Removes issue priority
-	         *
-	         * @param {Number} index
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'removeIssuePriority',
-	        value: function removeIssuePriority(index) {
-	            var _this16 = this;
-
-	            return new Promise(function (callback) {
-	                _this16.delete('/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index]).then(function () {
-	                    callback();
-	                });
-	            });
-	        }
-
-	        /**
-	         * Removes issue estimate
-	         *
-	         * @param {Number} index
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'removeIssueEstimate',
-	        value: function removeIssueEstimate(index) {
-	            var _this17 = this;
-
-	            return new Promise(function (callback) {
-	                _this17.delete('/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index]).then(function () {
-	                    callback();
-	                });
-	            });
-	        }
-
-	        /**
-	         * Removes issue column
-	         *
-	         * @param {Number} index
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'removeIssueColumn',
-	        value: function removeIssueColumn(index) {
-	            var _this18 = this;
-
-	            return new Promise(function (callback) {
-	                _this18.delete('/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/labels/column:' + window.resources.issueColumns[index]).then(function () {
-	                    callback();
-	                });
-	            });
+	            return this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index]);
 	        }
 
 	        /**
@@ -8468,12 +8349,12 @@
 	    }, {
 	        key: 'removeMilestone',
 	        value: function removeMilestone(index) {
-	            var _this19 = this;
+	            var _this13 = this;
 
 	            var milestone = resources.milestones[index];
 
 	            return new Promise(function (callback) {
-	                _this19.delete('/repositories/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
+	                _this13.delete('/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8490,13 +8371,9 @@
 	    }, {
 	        key: 'removeVersion',
 	        value: function removeVersion(index) {
-	            var _this20 = this;
+	            var version = resources.versions[index];
 
-	            return new Promise(function (callback) {
-	                _this20.delete('/repositories/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/labels/version:' + window.resources.versions[index]).then(function () {
-	                    callback();
-	                });
-	            });
+	            return this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions/' + version.id);
 	        }
 
 	        // ----------
@@ -8525,10 +8402,10 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            var _this21 = this;
+	            var _this14 = this;
 
 	            return new Promise(function (callback) {
-	                _this21.put('/repositories/' + _this21.getProjectOwner() + '/' + _this21.getProjectName() + '/issues/milestones/' + milestone.id, _this21.convertMilestone(milestone)).then(function () {
+	                _this14.put('/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/issues/milestones/' + milestone.id, _this14.convertMilestone(milestone)).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8546,10 +8423,10 @@
 	    }, {
 	        key: 'updateIssueType',
 	        value: function updateIssueType(type, previousName) {
-	            var _this22 = this;
+	            var _this15 = this;
 
 	            return new Promise(function (callback) {
-	                _this22.patch('/repositories/' + _this22.getProjectOwner() + '/' + _this22.getProjectName() + '/labels/type:' + previousName, {
+	                _this15.patch('/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels/type:' + previousName, {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8570,10 +8447,10 @@
 	    }, {
 	        key: 'updateIssuePriority',
 	        value: function updateIssuePriority(priority, previousName) {
-	            var _this23 = this;
+	            var _this16 = this;
 
 	            return new Promise(function (callback) {
-	                _this23.patch('/repositories/' + _this23.getProjectOwner() + '/' + _this23.getProjectName() + '/labels/priority:' + previousName, {
+	                _this16.patch('/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/labels/priority:' + previousName, {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8594,10 +8471,10 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(estimate, previousName) {
-	            var _this24 = this;
+	            var _this17 = this;
 
 	            return new Promise(function (callback) {
-	                _this24.patch('/repositories/' + _this24.getProjectOwner() + '/' + _this24.getProjectName() + '/labels/estimate:' + previousName, {
+	                _this17.patch('/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/labels/estimate:' + previousName, {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8618,10 +8495,10 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            var _this25 = this;
+	            var _this18 = this;
 
 	            return new Promise(function (callback) {
-	                _this25.patch('/repositories/' + _this25.getProjectOwner() + '/' + _this25.getProjectName() + '/labels/column:' + previousName, {
+	                _this18.patch('/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8641,16 +8518,13 @@
 
 	    }, {
 	        key: 'updateVersion',
-	        value: function updateVersion(version, previousName) {
-	            var _this26 = this;
+	        value: function updateVersion(newName, previousName) {
+	            var version = resources.versions.filter(function (v) {
+	                return v.title == previousName;
+	            })[0];
 
-	            return new Promise(function (callback) {
-	                _this26.patch('/repositories/' + _this26.getProjectOwner() + '/' + _this26.getProjectName() + '/labels/version:' + previousName, {
-	                    name: 'version:' + version,
-	                    color: 'ffffff'
-	                }).then(function () {
-	                    callback();
-	                });
+	            return this.put('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions/' + version.id, {
+	                name: newName
 	            });
 	        }
 
@@ -8700,16 +8574,6 @@
 	                    originalName: milestones[i].name
 	                });
 
-	                // Parse start date
-	                var startDateRegex = /{% startDate: (\d+) %}/g;
-	                var startDateMatches = startDateRegex.exec(milestone.title || '');
-
-	                if (startDateMatches && startDateMatches.length > 1) {
-	                    milestone.startDate = startDateMatches[1];
-	                }
-
-	                milestone.title = milestone.title.replace(startDateRegex, '');
-
 	                // Parse end date
 	                var endDateRegex = /{% endDate: (\d+) %}/g;
 	                var endDateMatches = endDateRegex.exec(milestone.title || '');
@@ -8739,7 +8603,8 @@
 	            for (var i in versions) {
 	                var version = {
 	                    index: i,
-	                    title: versions[i].name
+	                    title: versions[i].name,
+	                    id: versions[i].id
 	                };
 
 	                window.resources.versions[i] = version;
@@ -9080,13 +8945,6 @@
 	                name: milestone.title,
 	                id: milestone.id
 	            };
-
-	            // Start date
-	            if (milestone.getStartDate()) {
-	                var startDateString = '{% startDate: ' + milestone.getStartDate().getTime() + ' %}';
-
-	                bitBucketMilestone.name += startDateString;
-	            }
 
 	            // End date
 	            if (milestone.getEndDate()) {
@@ -9528,13 +9386,67 @@
 	    }
 
 	    /**
-	     * Gets the start date
-	     *
-	     * @returns {Date} Start date
+	     * Finds the start date based on the first created issue
 	     */
 
 
 	    _createClass(Milestone, [{
+	        key: 'findStartDate',
+	        value: function findStartDate() {
+	            if (this.startDate) {
+	                return new Date(this.startDate);
+	            }
+
+	            var earliest = void 0;
+
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = this.getIssues()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var issue = _step.value;
+
+	                    if (issue.getCreatedDate()) {
+	                        if (!earliest) {
+	                            earliest = issue;
+	                        } else if (issue.getCreatedDate() < earliest.getCreatedDate()) {
+	                            earliest = issue;
+	                        }
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+
+	            if (earliest) {
+	                this.startDate = earliest.createdAt;
+
+	                return new Date(this.startDate);
+	            } else {
+	                debug.log('Could not find start date for milestone "' + this.title + '"', this);
+	                return;
+	            }
+	        }
+
+	        /**
+	         * Gets the start date
+	         *
+	         * @returns {Date} Start date
+	         */
+
+	    }, {
 	        key: 'getStartDate',
 	        value: function getStartDate() {
 	            var date = void 0;
@@ -9546,7 +9458,7 @@
 	            }
 
 	            if (!this.startDate || !date || isNaN(date.getTime())) {
-	                return null;
+	                return this.findStartDate();
 	            } else {
 	                return date;
 	            }
@@ -9587,13 +9499,13 @@
 	        value: function getIssues() {
 	            var issues = [];
 
-	            var _iteratorNormalCompletion = true;
-	            var _didIteratorError = false;
-	            var _iteratorError = undefined;
+	            var _iteratorNormalCompletion2 = true;
+	            var _didIteratorError2 = false;
+	            var _iteratorError2 = undefined;
 
 	            try {
-	                for (var _iterator = (resources.issues || [])[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                    var issue = _step.value;
+	                for (var _iterator2 = (resources.issues || [])[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                    var issue = _step2.value;
 
 	                    if (!issue) {
 	                        continue;
@@ -9604,16 +9516,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError = true;
-	                _iteratorError = err;
+	                _didIteratorError2 = true;
+	                _iteratorError2 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion && _iterator.return) {
-	                        _iterator.return();
+	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                        _iterator2.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError) {
-	                        throw _iteratorError;
+	                    if (_didIteratorError2) {
+	                        throw _iteratorError2;
 	                    }
 	                }
 	            }
@@ -9654,13 +9566,13 @@
 	        value: function getTotalEstimatedHours() {
 	            var total = 0;
 
-	            var _iteratorNormalCompletion2 = true;
-	            var _didIteratorError2 = false;
-	            var _iteratorError2 = undefined;
+	            var _iteratorNormalCompletion3 = true;
+	            var _didIteratorError3 = false;
+	            var _iteratorError3 = undefined;
 
 	            try {
-	                for (var _iterator2 = this.getIssues()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                    var issue = _step2.value;
+	                for (var _iterator3 = this.getIssues()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                    var issue = _step3.value;
 
 	                    if (!issue) {
 	                        continue;
@@ -9669,16 +9581,16 @@
 	                    total += issue.getEstimate();
 	                }
 	            } catch (err) {
-	                _didIteratorError2 = true;
-	                _iteratorError2 = err;
+	                _didIteratorError3 = true;
+	                _iteratorError3 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                        _iterator2.return();
+	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                        _iterator3.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError2) {
-	                        throw _iteratorError2;
+	                    if (_didIteratorError3) {
+	                        throw _iteratorError3;
 	                    }
 	                }
 	            }
@@ -9699,20 +9611,25 @@
 	        value: function getRemainingIssuesAtDay(day) {
 	            var issues = [];
 
-	            var _iteratorNormalCompletion3 = true;
-	            var _didIteratorError3 = false;
-	            var _iteratorError3 = undefined;
+	            var startDate = this.getStartDate();
+
+	            if (!startDate) {
+	                return issues;
+	            }
+
+	            var _iteratorNormalCompletion4 = true;
+	            var _didIteratorError4 = false;
+	            var _iteratorError4 = undefined;
 
 	            try {
-	                for (var _iterator3 = this.getIssues()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                    var issue = _step3.value;
+	                for (var _iterator4 = this.getIssues()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                    var issue = _step4.value;
 
 	                    var closedDate = issue.getClosedDate();
 
 	                    if (!closedDate) {
 	                        issues[issues.length] = issue;
 	                    } else {
-	                        var startDate = this.getStartDate();
 	                        var timeDiff = Math.abs(startDate.getTime() - closedDate.getTime());
 	                        var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
@@ -9722,16 +9639,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError3 = true;
-	                _iteratorError3 = err;
+	                _didIteratorError4 = true;
+	                _iteratorError4 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	                        _iterator3.return();
+	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                        _iterator4.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError3) {
-	                        throw _iteratorError3;
+	                    if (_didIteratorError4) {
+	                        throw _iteratorError4;
 	                    }
 	                }
 	            }
@@ -9752,27 +9669,27 @@
 	        value: function getRemainingEstimatedHoursAtDay(day) {
 	            var hours = 0;
 
-	            var _iteratorNormalCompletion4 = true;
-	            var _didIteratorError4 = false;
-	            var _iteratorError4 = undefined;
+	            var _iteratorNormalCompletion5 = true;
+	            var _didIteratorError5 = false;
+	            var _iteratorError5 = undefined;
 
 	            try {
-	                for (var _iterator4 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	                    var issue = _step4.value;
+	                for (var _iterator5 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                    var issue = _step5.value;
 
 	                    hours += issue.getEstimate();
 	                }
 	            } catch (err) {
-	                _didIteratorError4 = true;
-	                _iteratorError4 = err;
+	                _didIteratorError5 = true;
+	                _iteratorError5 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-	                        _iterator4.return();
+	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	                        _iterator5.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError4) {
-	                        throw _iteratorError4;
+	                    if (_didIteratorError5) {
+	                        throw _iteratorError5;
 	                    }
 	                }
 	            }
@@ -10427,6 +10344,9 @@
 	            // Update avatar image
 	            this.$element.find('.header .assignee-avatar').html(this.getAssigneeAvatar());
 
+	            // Update type indicator
+	            this.$element.find('.type-indicator').replaceWith(this.getTypeIndicator());
+
 	            // Update priority indicator
 	            this.$element.find('.priority-indicator').replaceWith(this.getPriorityIndicator());
 	        }
@@ -11007,6 +10927,10 @@
 	            }
 
 	            switch (type) {
+	                case 'proposal':
+	                    icon = 'lightbulb-o';
+	                    break;
+
 	                case 'bug':
 	                    icon = 'bug';
 	                    break;
@@ -12801,7 +12725,7 @@
 	            for (var _iterator = resources.milestones[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	                var milestone = _step.value;
 
-	                if (!nearest) {
+	                if (!nearest || !nearest.getStartDate()) {
 	                    nearest = milestone;
 	                } else {
 	                    var thisStartDate = milestone.getStartDate();
@@ -12984,6 +12908,7 @@
 	    var milestoneEnd = milestone.getEndDate();
 
 	    var CANVAS_HEIGHT_UNIT = 400 / Math.ceil(totalHours);
+
 	    var CANVAS_WIDTH_UNIT = 40;
 
 	    if (CANVAS_WIDTH_UNIT * totalDays < 860) {
@@ -13169,7 +13094,7 @@
 
 	// Settings
 	Router.route('/:user/:project/settings/', function () {
-	    location = '/#/' + Router.params.user + '/' + Router.params.project + '/settings/issueTypes';
+	    location = '/#/' + Router.params.user + '/' + Router.params.project + '/settings/versions';
 	});
 
 	Router.route('/:user/:project/settings/:resource', function () {

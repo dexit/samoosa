@@ -19,6 +19,38 @@ class Milestone {
     }
 
     /**
+     * Finds the start date based on the first created issue
+     */
+    findStartDate() {
+        if(this.startDate) { return new Date(this.startDate); }
+
+        let earliest;
+
+        for(let issue of this.getIssues()) {
+            if(issue.getCreatedDate()) {
+                if(!earliest) {
+                    earliest = issue;
+                
+                } else if(issue.getCreatedDate() < earliest.getCreatedDate()) {
+                    earliest = issue;
+
+                }
+            }
+        }
+
+        if(earliest) {
+            this.startDate = earliest.createdAt;
+
+            return new Date(this.startDate);
+
+        } else {
+            debug.log('Could not find start date for milestone "' + this.title + '"', this);
+            return;
+        
+        }
+    }
+
+    /**
      * Gets the start date
      *
      * @returns {Date} Start date
@@ -33,7 +65,7 @@ class Milestone {
         }
 
         if(!this.startDate || !date || isNaN(date.getTime())) {
-            return null;
+            return this.findStartDate();
         
         } else {
             return date;
@@ -127,6 +159,10 @@ class Milestone {
     getRemainingIssuesAtDay(day) {
         let issues = [];
 
+        let startDate = this.getStartDate();
+
+        if(!startDate) { return issues; }
+
         for(let issue of this.getIssues()) {
             let closedDate = issue.getClosedDate();
 
@@ -134,7 +170,6 @@ class Milestone {
                 issues[issues.length] = issue;
             
             } else {
-                let startDate = this.getStartDate();
                 let timeDiff = Math.abs(startDate.getTime() - closedDate.getTime());
                 let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
 

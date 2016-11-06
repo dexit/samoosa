@@ -147,7 +147,7 @@
                         color: material-color('blue', '700');
                     }
                     
-                    &.question {
+                    &.question, &.proposal {
                         color: material-color('yellow', '500');
                     }
                 }

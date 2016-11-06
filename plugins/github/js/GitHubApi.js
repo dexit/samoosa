@@ -819,38 +819,6 @@ class GitHubApi extends ApiHelper {
      * @param {Array} milestones
      */
     processMilestones(milestones) {
-        // Find milestone start date based on first closed issue
-        // This is terrible, but so is GitHubs issue system
-        let getStartDate = function() {
-            let earliest;
-
-            for(let issue of this.getIssues()) {
-                if(issue.getClosedDate()) {
-                    if(!earliest) {
-                        earliest = issue;
-                    
-                    } else if(issue.getClosedDate() < earliest.getClosedDate()) {
-                        earliest = issue;
-
-                    }
-                }
-            }
-
-            if(earliest) {
-                this.startDate = earliest.closedAt;
-
-                return new Date(this.startDate);
-
-            } else if(this.startDate) {
-                return new Date(this.startDate);
-
-            } else {
-                debug.log('Could not find start date for milestone "' + this.title + '"', this);
-                return;
-            
-            }
-        }
-        
         resources.milestones = [];
         
         for(let i in milestones) {
@@ -866,9 +834,6 @@ class GitHubApi extends ApiHelper {
             });
 
             resources.milestones[index] = milestone;
-      
-            // Override the getStartDate method
-            milestone.getStartDate = getStartDate;
         }
     }
 

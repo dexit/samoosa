@@ -362,7 +362,7 @@ body, html {
           color: #4caf50; }
         .issue-editor > .header .header-content .header-icons .type-indicator.task {
           color: #1976d2; }
-        .issue-editor > .header .header-content .header-icons .type-indicator.question {
+        .issue-editor > .header .header-content .header-icons .type-indicator.question, .issue-editor > .header .header-content .header-icons .type-indicator.proposal {
           color: #ffeb3b; }
         .issue-editor > .header .header-content .header-icons .priority-indicator {
           position: relative;

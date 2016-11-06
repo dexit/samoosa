@@ -145,6 +145,9 @@ class IssueEditor extends View {
         this.$element.find('.header .assignee-avatar').html(
             this.getAssigneeAvatar()
         );
+        
+        // Update type indicator
+        this.$element.find('.type-indicator').replaceWith(this.getTypeIndicator());
 
         // Update priority indicator
         this.$element.find('.priority-indicator').replaceWith(this.getPriorityIndicator());
@@ -565,6 +568,10 @@ class IssueEditor extends View {
         if(!type) { return null; }
 
         switch(type) {
+            case 'proposal':
+                icon = 'lightbulb-o';
+                break;
+
             case 'bug':
                 icon = 'bug';
                 break;

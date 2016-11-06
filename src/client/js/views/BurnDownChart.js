@@ -14,7 +14,7 @@ class BurnDownChart extends View {
         let now = new Date();
 
         for(let milestone of resources.milestones) {
-            if(!nearest) {
+            if(!nearest || !nearest.getStartDate()) {
                 nearest = milestone;
             
             } else {

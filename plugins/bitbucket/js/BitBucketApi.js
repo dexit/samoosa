@@ -386,8 +386,6 @@ class BitBucketApi extends ApiHelper {
     /**
      * Gets versions
      *
-     * TODO: This only returns empty arrays, why?
-     *
      * @returns {Promise} promise
      */
     getVersions() {
@@ -528,9 +526,9 @@ class BitBucketApi extends ApiHelper {
      */
     addMilestone(milestone) {
         if(typeof milestone == 'string') {
-            milestone = {
+            milestone = new Milestone({
                 title: milestone
-            };
+            });
         }
 
         return this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones', this.convertMilestone(milestone))
@@ -549,13 +547,13 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addVersion(version) {
-        return new Promise((callback) => {
-            this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
-                name: 'version:' + version,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
+        return this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions', {
+            name: version
+        })
+        .then((bitBucketVersion) => {
+            return Promise.resolve({
+                title: version,
+                id: bitBucketVersion.id
             });
         });
     }
@@ -564,6 +562,17 @@ class BitBucketApi extends ApiHelper {
     // Resource removers
     // ----------
     /**
+     * Removes issue
+     *
+     * @param {Issue} issue
+     *
+     * @returns {Promise} Promise
+     */ 
+    removeIssue(issue) {
+        return this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id);
+    }
+    
+    /**
      * Removes collaborator
      *
      * @param {Number} index
@@ -571,76 +580,7 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeCollaborator(index) {
-        return new Promise((callback) => {
-            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index])
-            .then(() => {
-                callback();
-            });
-        });
-    }
-    
-    /**
-     * Removes issue type
-     *
-     * @param {Number} index
-     *
-     * @returns {Promise} promise
-     */
-    removeIssueType(index) {
-        return new Promise((callback) => {
-            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/type:' + window.resources.issueTypes[index])
-            .then(() => {
-                callback();
-            });
-        });
-    }
-    
-    /**
-     * Removes issue priority
-     *
-     * @param {Number} index
-     *
-     * @returns {Promise} promise
-     */
-    removeIssuePriority(index) {
-        return new Promise((callback) => {
-            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index])
-            .then(() => {
-                callback();
-            });
-        });
-    }
-    
-    /**
-     * Removes issue estimate
-     *
-     * @param {Number} index
-     *
-     * @returns {Promise} promise
-     */
-    removeIssueEstimate(index) {
-        return new Promise((callback) => {
-            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index])
-            .then(() => {
-                callback();
-            });
-        });
-    }
-    
-    /**
-     * Removes issue column
-     *
-     * @param {Number} index
-     *
-     * @returns {Promise} promise
-     */
-    removeIssueColumn(index) {
-        return new Promise((callback) => {
-            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index])
-            .then(() => {
-                callback();
-            });
-        });
+        return this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index]);
     }
     
     /**
@@ -669,12 +609,9 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeVersion(index) {
-        return new Promise((callback) => {
-            this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/version:' + window.resources.versions[index])
-            .then(() => {
-                callback();
-            });
-        });
+        let version = resources.versions[index];
+        
+        return this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions/' + version.id);
     }
 
     // ----------
@@ -793,15 +730,13 @@ class BitBucketApi extends ApiHelper {
      *
      * @returns {Promise} promise
      */
-    updateVersion(version, previousName) {
-        return new Promise((callback) => {
-            this.patch('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/version:' + previousName, {
-                name: 'version:' + version,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
+    updateVersion(newName, previousName) {
+        let version = resources.versions.filter((v) => {
+            return v.title == previousName;
+        })[0];
+
+        return this.put('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions/' + version.id, {
+            name: newName
         });
     }
 
@@ -845,16 +780,6 @@ class BitBucketApi extends ApiHelper {
                 originalName: milestones[i].name
             });
 
-            // Parse start date
-            let startDateRegex = /{% startDate: (\d+) %}/g;
-            let startDateMatches = startDateRegex.exec(milestone.title || '');
-
-            if(startDateMatches && startDateMatches.length > 1) {
-                milestone.startDate = startDateMatches[1];
-            }
-
-            milestone.title = milestone.title.replace(startDateRegex, '');
-
             // Parse end date
             let endDateRegex = /{% endDate: (\d+) %}/g;
             let endDateMatches = endDateRegex.exec(milestone.title || '');
@@ -881,7 +806,8 @@ class BitBucketApi extends ApiHelper {
         for(let i in versions) {
             let version = {
                 index: i,
-                title: versions[i].name
+                title: versions[i].name,
+                id: versions[i].id
             };
 
             window.resources.versions[i] = version;
@@ -1076,13 +1002,6 @@ class BitBucketApi extends ApiHelper {
             id: milestone.id
         };
 
-        // Start date
-        if(milestone.getStartDate()) {
-            let startDateString = '{% startDate: ' + milestone.getStartDate().getTime() + ' %}';
-
-            bitBucketMilestone.name += startDateString;
-        }
-        
         // End date
         if(milestone.getEndDate()) {
             let endDateString = '{% endDate: ' + milestone.getEndDate().getTime() + ' %}';

@@ -141,7 +141,13 @@ class ResourceHelper {
         .then((newItem) => {
             item = newItem || item;
 
-            resources[resource].push(item);
+            let index = resources[resource].length;
+
+            if(typeof item === 'object' && !item.index) {
+                item.index = index;
+            }
+
+            resources[resource][index] = item;
 
             spinner(false);
 

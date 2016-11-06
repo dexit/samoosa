@@ -15,6 +15,7 @@ module.exports = function render() {
     let milestoneEnd = milestone.getEndDate();
 
     let CANVAS_HEIGHT_UNIT = 400 / Math.ceil(totalHours);
+    
     let CANVAS_WIDTH_UNIT = 40;
 
     if(CANVAS_WIDTH_UNIT * totalDays < 860) {

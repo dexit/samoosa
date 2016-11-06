@@ -134,7 +134,7 @@ Router.route('/:user/:project/analytics/', () => {
 
 // Settings
 Router.route('/:user/:project/settings/', () => {
-    location = '/#/' + Router.params.user + '/' + Router.params.project + '/settings/issueTypes';
+    location = '/#/' + Router.params.user + '/' + Router.params.project + '/settings/versions';
 });
 
 Router.route('/:user/:project/settings/:resource', () => {

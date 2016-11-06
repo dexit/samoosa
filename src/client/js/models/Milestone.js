@@ -24,7 +24,13 @@ class Milestone {
      * @returns {Date} Start date
      */
     getStartDate() {
-        let date = new Date(this.startDate);
+        let date;
+       
+        if(!isNaN(this.startDate)) {
+            date = new Date(parseInt(this.startDate));
+        } else {
+            date = new Date(this.startDate);
+        }
 
         if(!this.startDate || !date || isNaN(date.getTime())) {
             return null;
@@ -41,7 +47,13 @@ class Milestone {
      * @returns {Date} End date
      */
     getEndDate() {
-        let date = new Date(this.endDate);
+        let date;
+       
+        if(!isNaN(this.endDate)) {
+            date = new Date(parseInt(this.endDate));
+        } else {
+            date = new Date(this.endDate);
+        }
 
         if(!this.endDate || !date || isNaN(date.getTime())) {
             return null;
@@ -80,7 +92,7 @@ class Milestone {
         let start = this.getStartDate();
         let end = this.getEndDate();
 
-        if(isNaN(start) || isNaN(end)) { return 0; }
+        if(!start || !end) { return 0; }
 
         let timeDiff = Math.abs(start.getTime() - end.getTime());
         let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 

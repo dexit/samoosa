@@ -24,6 +24,8 @@ class BurnDownChart extends View {
                 let nearestStartDate = nearest.getStartDate();
                 let nearestEndDate = nearest.getEndDate();
 
+                if(!thisStartDate || !thisEndDate) { continue; }
+
                 // Found perfect scenario
                 if(thisStartDate < now && thisEndDate > now) {
                     nearest = milestone;

@@ -95,9 +95,9 @@ module.exports = function render() {
             _.h4('Total hours'),
             _.p(totalHours.toString()),
             _.h4('Milestone start'),
-            _.p(milestoneStart.toString()),
+            _.p(milestoneStart ? milestoneStart.toString() : '(invalid)'),
             _.h4('Milestone end'),
-            _.p(milestoneEnd.toString())
+            _.p(milestoneEnd ? milestoneEnd.toString() : '(invalid)')
         ),
         _.h4('Chart'),
         _.div({class: 'graph-container'},

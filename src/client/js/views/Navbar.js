@@ -38,13 +38,11 @@ class Navbar extends View {
             separator: true
         });
 
-        if(localStorage.getItem('source') != 'bitbucket') {
-            links.push({
-                title: 'Schedule',
-                url: '/plan/',
-                icon: 'calendar'
-            });
-        }
+        links.push({
+            title: 'Schedule',
+            url: '/plan/',
+            icon: 'calendar'
+        });
         
         links.push({
             title: 'Kanban',

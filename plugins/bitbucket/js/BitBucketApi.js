@@ -533,11 +533,11 @@ class BitBucketApi extends ApiHelper {
             };
         }
 
-        return new Promise((callback) => {
-            this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones', this.convertMilestone(milestone))
-            .then(() => {
-                callback();
-            });
+        return this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones', this.convertMilestone(milestone))
+        .then((bitBucketMilestone) => {
+            milestone.id = bitBucketMilestone.id;
+
+            return Promise.resolve(milestone);  
         });
     }
     
@@ -835,16 +835,38 @@ class BitBucketApi extends ApiHelper {
      * @param {Array} milestones
      */
     processMilestones(milestones) {
-        window.resources.milestones = [];
+        resources.milestones = [];
         
         for(let i in milestones) {
-            let milestone = {
+            let milestone = new Milestone({
                 index: i,
                 title: milestones[i].name,
-                id: milestones[i].id
-            };
+                id: milestones[i].id,
+                originalName: milestones[i].name
+            });
 
-            window.resources.milestones[i] = milestone;
+            // Parse start date
+            let startDateRegex = /{% startDate: (\d+) %}/g;
+            let startDateMatches = startDateRegex.exec(milestone.title || '');
+
+            if(startDateMatches && startDateMatches.length > 1) {
+                milestone.startDate = startDateMatches[1];
+            }
+
+            milestone.title = milestone.title.replace(startDateRegex, '');
+
+            // Parse end date
+            let endDateRegex = /{% endDate: (\d+) %}/g;
+            let endDateMatches = endDateRegex.exec(milestone.title || '');
+            
+            if(endDateMatches && endDateMatches.length > 1) {
+                milestone.endDate = endDateMatches[1];
+            }
+            
+            milestone.title = milestone.title.replace(endDateRegex, '');
+
+            // Add to resources list
+            resources.milestones[i] = milestone;
         }
     }
 
@@ -998,12 +1020,22 @@ class BitBucketApi extends ApiHelper {
             issue.title = bitBucketIssue.title;
             issue.description = bitBucketIssue.content;
             issue.id = bitBucketIssue.local_id;
+            issue.createdAt = bitBucketIssue.utc_created_on;
+
+            if(bitBucketIssue.status == 'closed') {
+                issue.closedAt = bitBucketIssue.utc_last_updated;
+            }
             
             issue.reporter = ResourceHelper.getCollaborator(bitBucketIssue.reported_by.username);
 
             if(bitBucketIssue.responsible) {
                 issue.assignee = ResourceHelper.getCollaborator(bitBucketIssue.responsible.username);
             }
+
+            // Clean up milestone name
+            let milestoneDateRegex = /{% (start|end)Date: (\d+) %}/g;
+
+            bitBucketIssue.metadata.milestone = (bitBucketIssue.metadata.milestone || '').replace(milestoneDateRegex, '');
 
             issue.priority = ResourceHelper.getIssuePriority(bitBucketIssue.priority);
             issue.milestone = ResourceHelper.getMilestone(bitBucketIssue.metadata.milestone);
@@ -1044,6 +1076,20 @@ class BitBucketApi extends ApiHelper {
             id: milestone.id
         };
 
+        // Start date
+        if(milestone.getStartDate()) {
+            let startDateString = '{% startDate: ' + milestone.getStartDate().getTime() + ' %}';
+
+            bitBucketMilestone.name += startDateString;
+        }
+        
+        // End date
+        if(milestone.getEndDate()) {
+            let endDateString = '{% endDate: ' + milestone.getEndDate().getTime() + ' %}';
+
+            bitBucketMilestone.name += endDateString;
+        }
+        
         return bitBucketMilestone;
     }
 
@@ -1061,7 +1107,7 @@ class BitBucketApi extends ApiHelper {
         };
 
         // Assignee
-        let assignee = resources.collaborators[issue.assignee];
+        let assignee = issue.getAssignee();
 
         if(assignee) {
             bitBucketIssue.responsible = assignee.name;
@@ -1072,24 +1118,24 @@ class BitBucketApi extends ApiHelper {
         }
 
         // State
-        let issueColumn = resources.issueColumns[issue.column];
+        let issueColumn = issue.getColumn();
 
         bitBucketIssue.status = issueColumn;
 
         // Milestone
-        let milestone = resources.milestones[issue.milestone];
+        let milestone = issue.getMilestone();
         
         if(milestone) {
-            bitBucketIssue.milestone = milestone.title;
+            bitBucketIssue.milestone = milestone.originalName;
         }
 
         // Type
-        let issueType = resources.issueTypes[issue.type];
+        let issueType = issue.getType();
 
         bitBucketIssue.kind = issueType;
 
         // Version
-        let version = resources.versions[issue.version];
+        let version = issue.getVersion();
 
         bitBucketIssue.version = version;
        
@@ -1097,13 +1143,13 @@ class BitBucketApi extends ApiHelper {
         bitBucketIssue.content += '\n\n---[Samoosa]---\n\n';
 
         // Estimate
-        let issueEstimate = resources.issueEstimates[issue.estimate];
+        let issueEstimate = issue.getEstimate();
         let estimateString = '{% estimate: ' + issueEstimate + ' %}';
 
         bitBucketIssue.content += estimateString;
 
         // Priority
-        let issuePriority = resources.issuePriorities[issue.type];
+        let issuePriority = issue.getPriority();
 
         bitBucketIssue.priority = issuePriority;
 
@@ -1148,7 +1194,7 @@ class BitBucketApi extends ApiHelper {
 
             for(let bitBucketComment of bitBucketComments) {
                 let comment = {
-                    collaborator: ResourceHelper.getCollaborator(bitBucketComment.auther_info.username),
+                    collaborator: ResourceHelper.getCollaborator(bitBucketComment.author_info.username),
                     text: bitBucketComment.content,
                     index: bitBucketComment.comment_id
                 };

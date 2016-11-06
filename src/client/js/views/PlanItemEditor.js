@@ -89,6 +89,8 @@ class PlanItemEditor extends View {
      * Event: Click delete button
      */
     onClickDelete() {
+        if(!confirm('Are you sure you want to delete the milestone "' + this.model.title + '"?')) { return; }
+
         spinner(true);
 
         ResourceHelper.removeResource('milestones', this.model.index)

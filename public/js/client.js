@@ -4256,18 +4256,20 @@
 	        return prettyDate;
 	    }
 
-	    if (typeof date === 'string' || typeof date === 'number') {
+	    if (!isNaN(date)) {
+	        date = new Date(parseInt(date));
+	    } else if (typeof date === 'string') {
 	        date = new Date(date);
 	    }
 
 	    if (date instanceof Date == false) {
-	        debug.warning('Date is of incorrect object type (' + (typeof inputDate === 'undefined' ? 'undefined' : _typeof(inputDate)) + ')');
+	        debug.warning('Date is of incorrect object type (' + (typeof inputDate === 'undefined' ? 'undefined' : _typeof(inputDate)) + ')', this);
 
 	        return prettyDate;
 	    }
 
 	    if (isNaN(date.getTime())) {
-	        debug.warning('Date is invalid (' + inputDate + ')');
+	        debug.warning('Date is invalid (' + inputDate + ')', this);
 
 	        return prettyDate;
 	    }
@@ -8316,18 +8318,16 @@
 	    }, {
 	        key: 'addMilestone',
 	        value: function addMilestone(milestone) {
-	            var _this13 = this;
-
 	            if (typeof milestone == 'string') {
 	                milestone = {
 	                    title: milestone
 	                };
 	            }
 
-	            return new Promise(function (callback) {
-	                _this13.post('/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/issues/milestones', _this13.convertMilestone(milestone)).then(function () {
-	                    callback();
-	                });
+	            return this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones', this.convertMilestone(milestone)).then(function (bitBucketMilestone) {
+	                milestone.id = bitBucketMilestone.id;
+
+	                return Promise.resolve(milestone);
 	            });
 	        }
 
@@ -8342,10 +8342,10 @@
 	    }, {
 	        key: 'addVersion',
 	        value: function addVersion(version) {
-	            var _this14 = this;
+	            var _this13 = this;
 
 	            return new Promise(function (callback) {
-	                _this14.post('/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/labels', {
+	                _this13.post('/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/labels', {
 	                    name: 'version:' + version,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8368,10 +8368,10 @@
 	    }, {
 	        key: 'removeCollaborator',
 	        value: function removeCollaborator(index) {
-	            var _this15 = this;
+	            var _this14 = this;
 
 	            return new Promise(function (callback) {
-	                _this15.delete('/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/collaborators/' + window.resources.collaborators[index]).then(function () {
+	                _this14.delete('/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/collaborators/' + window.resources.collaborators[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8388,10 +8388,10 @@
 	    }, {
 	        key: 'removeIssueType',
 	        value: function removeIssueType(index) {
-	            var _this16 = this;
+	            var _this15 = this;
 
 	            return new Promise(function (callback) {
-	                _this16.delete('/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/labels/type:' + window.resources.issueTypes[index]).then(function () {
+	                _this15.delete('/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels/type:' + window.resources.issueTypes[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8408,10 +8408,10 @@
 	    }, {
 	        key: 'removeIssuePriority',
 	        value: function removeIssuePriority(index) {
-	            var _this17 = this;
+	            var _this16 = this;
 
 	            return new Promise(function (callback) {
-	                _this17.delete('/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index]).then(function () {
+	                _this16.delete('/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8428,10 +8428,10 @@
 	    }, {
 	        key: 'removeIssueEstimate',
 	        value: function removeIssueEstimate(index) {
-	            var _this18 = this;
+	            var _this17 = this;
 
 	            return new Promise(function (callback) {
-	                _this18.delete('/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index]).then(function () {
+	                _this17.delete('/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8448,10 +8448,10 @@
 	    }, {
 	        key: 'removeIssueColumn',
 	        value: function removeIssueColumn(index) {
-	            var _this19 = this;
+	            var _this18 = this;
 
 	            return new Promise(function (callback) {
-	                _this19.delete('/repositories/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/labels/column:' + window.resources.issueColumns[index]).then(function () {
+	                _this18.delete('/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/labels/column:' + window.resources.issueColumns[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8468,12 +8468,12 @@
 	    }, {
 	        key: 'removeMilestone',
 	        value: function removeMilestone(index) {
-	            var _this20 = this;
+	            var _this19 = this;
 
 	            var milestone = resources.milestones[index];
 
 	            return new Promise(function (callback) {
-	                _this20.delete('/repositories/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
+	                _this19.delete('/repositories/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8490,10 +8490,10 @@
 	    }, {
 	        key: 'removeVersion',
 	        value: function removeVersion(index) {
-	            var _this21 = this;
+	            var _this20 = this;
 
 	            return new Promise(function (callback) {
-	                _this21.delete('/repositories/' + _this21.getProjectOwner() + '/' + _this21.getProjectName() + '/labels/version:' + window.resources.versions[index]).then(function () {
+	                _this20.delete('/repositories/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/labels/version:' + window.resources.versions[index]).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8525,10 +8525,10 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            var _this22 = this;
+	            var _this21 = this;
 
 	            return new Promise(function (callback) {
-	                _this22.put('/repositories/' + _this22.getProjectOwner() + '/' + _this22.getProjectName() + '/issues/milestones/' + milestone.id, _this22.convertMilestone(milestone)).then(function () {
+	                _this21.put('/repositories/' + _this21.getProjectOwner() + '/' + _this21.getProjectName() + '/issues/milestones/' + milestone.id, _this21.convertMilestone(milestone)).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8546,10 +8546,10 @@
 	    }, {
 	        key: 'updateIssueType',
 	        value: function updateIssueType(type, previousName) {
-	            var _this23 = this;
+	            var _this22 = this;
 
 	            return new Promise(function (callback) {
-	                _this23.patch('/repositories/' + _this23.getProjectOwner() + '/' + _this23.getProjectName() + '/labels/type:' + previousName, {
+	                _this22.patch('/repositories/' + _this22.getProjectOwner() + '/' + _this22.getProjectName() + '/labels/type:' + previousName, {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8570,10 +8570,10 @@
 	    }, {
 	        key: 'updateIssuePriority',
 	        value: function updateIssuePriority(priority, previousName) {
-	            var _this24 = this;
+	            var _this23 = this;
 
 	            return new Promise(function (callback) {
-	                _this24.patch('/repositories/' + _this24.getProjectOwner() + '/' + _this24.getProjectName() + '/labels/priority:' + previousName, {
+	                _this23.patch('/repositories/' + _this23.getProjectOwner() + '/' + _this23.getProjectName() + '/labels/priority:' + previousName, {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8594,10 +8594,10 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(estimate, previousName) {
-	            var _this25 = this;
+	            var _this24 = this;
 
 	            return new Promise(function (callback) {
-	                _this25.patch('/repositories/' + _this25.getProjectOwner() + '/' + _this25.getProjectName() + '/labels/estimate:' + previousName, {
+	                _this24.patch('/repositories/' + _this24.getProjectOwner() + '/' + _this24.getProjectName() + '/labels/estimate:' + previousName, {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8618,10 +8618,10 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            var _this26 = this;
+	            var _this25 = this;
 
 	            return new Promise(function (callback) {
-	                _this26.patch('/repositories/' + _this26.getProjectOwner() + '/' + _this26.getProjectName() + '/labels/column:' + previousName, {
+	                _this25.patch('/repositories/' + _this25.getProjectOwner() + '/' + _this25.getProjectName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8642,10 +8642,10 @@
 	    }, {
 	        key: 'updateVersion',
 	        value: function updateVersion(version, previousName) {
-	            var _this27 = this;
+	            var _this26 = this;
 
 	            return new Promise(function (callback) {
-	                _this27.patch('/repositories/' + _this27.getProjectOwner() + '/' + _this27.getProjectName() + '/labels/version:' + previousName, {
+	                _this26.patch('/repositories/' + _this26.getProjectOwner() + '/' + _this26.getProjectName() + '/labels/version:' + previousName, {
 	                    name: 'version:' + version,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8690,16 +8690,38 @@
 	    }, {
 	        key: 'processMilestones',
 	        value: function processMilestones(milestones) {
-	            window.resources.milestones = [];
+	            resources.milestones = [];
 
 	            for (var i in milestones) {
-	                var milestone = {
+	                var milestone = new Milestone({
 	                    index: i,
 	                    title: milestones[i].name,
-	                    id: milestones[i].id
-	                };
+	                    id: milestones[i].id,
+	                    originalName: milestones[i].name
+	                });
 
-	                window.resources.milestones[i] = milestone;
+	                // Parse start date
+	                var startDateRegex = /{% startDate: (\d+) %}/g;
+	                var startDateMatches = startDateRegex.exec(milestone.title || '');
+
+	                if (startDateMatches && startDateMatches.length > 1) {
+	                    milestone.startDate = startDateMatches[1];
+	                }
+
+	                milestone.title = milestone.title.replace(startDateRegex, '');
+
+	                // Parse end date
+	                var endDateRegex = /{% endDate: (\d+) %}/g;
+	                var endDateMatches = endDateRegex.exec(milestone.title || '');
+
+	                if (endDateMatches && endDateMatches.length > 1) {
+	                    milestone.endDate = endDateMatches[1];
+	                }
+
+	                milestone.title = milestone.title.replace(endDateRegex, '');
+
+	                // Add to resources list
+	                resources.milestones[i] = milestone;
 	            }
 	        }
 
@@ -8986,12 +9008,22 @@
 	                    issue.title = bitBucketIssue.title;
 	                    issue.description = bitBucketIssue.content;
 	                    issue.id = bitBucketIssue.local_id;
+	                    issue.createdAt = bitBucketIssue.utc_created_on;
+
+	                    if (bitBucketIssue.status == 'closed') {
+	                        issue.closedAt = bitBucketIssue.utc_last_updated;
+	                    }
 
 	                    issue.reporter = ResourceHelper.getCollaborator(bitBucketIssue.reported_by.username);
 
 	                    if (bitBucketIssue.responsible) {
 	                        issue.assignee = ResourceHelper.getCollaborator(bitBucketIssue.responsible.username);
 	                    }
+
+	                    // Clean up milestone name
+	                    var milestoneDateRegex = /{% (start|end)Date: (\d+) %}/g;
+
+	                    bitBucketIssue.metadata.milestone = (bitBucketIssue.metadata.milestone || '').replace(milestoneDateRegex, '');
 
 	                    issue.priority = ResourceHelper.getIssuePriority(bitBucketIssue.priority);
 	                    issue.milestone = ResourceHelper.getMilestone(bitBucketIssue.metadata.milestone);
@@ -9049,6 +9081,20 @@
 	                id: milestone.id
 	            };
 
+	            // Start date
+	            if (milestone.getStartDate()) {
+	                var startDateString = '{% startDate: ' + milestone.getStartDate().getTime() + ' %}';
+
+	                bitBucketMilestone.name += startDateString;
+	            }
+
+	            // End date
+	            if (milestone.getEndDate()) {
+	                var endDateString = '{% endDate: ' + milestone.getEndDate().getTime() + ' %}';
+
+	                bitBucketMilestone.name += endDateString;
+	            }
+
 	            return bitBucketMilestone;
 	        }
 
@@ -9069,7 +9115,7 @@
 	            };
 
 	            // Assignee
-	            var assignee = resources.collaborators[issue.assignee];
+	            var assignee = issue.getAssignee();
 
 	            if (assignee) {
 	                bitBucketIssue.responsible = assignee.name;
@@ -9078,24 +9124,24 @@
 	            }
 
 	            // State
-	            var issueColumn = resources.issueColumns[issue.column];
+	            var issueColumn = issue.getColumn();
 
 	            bitBucketIssue.status = issueColumn;
 
 	            // Milestone
-	            var milestone = resources.milestones[issue.milestone];
+	            var milestone = issue.getMilestone();
 
 	            if (milestone) {
-	                bitBucketIssue.milestone = milestone.title;
+	                bitBucketIssue.milestone = milestone.originalName;
 	            }
 
 	            // Type
-	            var issueType = resources.issueTypes[issue.type];
+	            var issueType = issue.getType();
 
 	            bitBucketIssue.kind = issueType;
 
 	            // Version
-	            var version = resources.versions[issue.version];
+	            var version = issue.getVersion();
 
 	            bitBucketIssue.version = version;
 
@@ -9103,13 +9149,13 @@
 	            bitBucketIssue.content += '\n\n---[Samoosa]---\n\n';
 
 	            // Estimate
-	            var issueEstimate = resources.issueEstimates[issue.estimate];
+	            var issueEstimate = issue.getEstimate();
 	            var estimateString = '{% estimate: ' + issueEstimate + ' %}';
 
 	            bitBucketIssue.content += estimateString;
 
 	            // Priority
-	            var issuePriority = resources.issuePriorities[issue.type];
+	            var issuePriority = issue.getPriority();
 
 	            bitBucketIssue.priority = issuePriority;
 
@@ -9169,7 +9215,7 @@
 	                        var bitBucketComment = _step7.value;
 
 	                        var comment = {
-	                            collaborator: ResourceHelper.getCollaborator(bitBucketComment.auther_info.username),
+	                            collaborator: ResourceHelper.getCollaborator(bitBucketComment.author_info.username),
 	                            text: bitBucketComment.content,
 	                            index: bitBucketComment.comment_id
 	                        };
@@ -9491,7 +9537,13 @@
 	    _createClass(Milestone, [{
 	        key: 'getStartDate',
 	        value: function getStartDate() {
-	            var date = new Date(this.startDate);
+	            var date = void 0;
+
+	            if (!isNaN(this.startDate)) {
+	                date = new Date(parseInt(this.startDate));
+	            } else {
+	                date = new Date(this.startDate);
+	            }
 
 	            if (!this.startDate || !date || isNaN(date.getTime())) {
 	                return null;
@@ -9509,7 +9561,13 @@
 	    }, {
 	        key: 'getEndDate',
 	        value: function getEndDate() {
-	            var date = new Date(this.endDate);
+	            var date = void 0;
+
+	            if (!isNaN(this.endDate)) {
+	                date = new Date(parseInt(this.endDate));
+	            } else {
+	                date = new Date(this.endDate);
+	            }
 
 	            if (!this.endDate || !date || isNaN(date.getTime())) {
 	                return null;
@@ -9575,7 +9633,7 @@
 	            var start = this.getStartDate();
 	            var end = this.getEndDate();
 
-	            if (isNaN(start) || isNaN(end)) {
+	            if (!start || !end) {
 	                return 0;
 	            }
 
@@ -9932,13 +9990,11 @@
 	                separator: true
 	            });
 
-	            if (localStorage.getItem('source') != 'bitbucket') {
-	                links.push({
-	                    title: 'Schedule',
-	                    url: '/plan/',
-	                    icon: 'calendar'
-	                });
-	            }
+	            links.push({
+	                title: 'Schedule',
+	                url: '/plan/',
+	                icon: 'calendar'
+	            });
 
 	            links.push({
 	                title: 'Kanban',
@@ -11778,6 +11834,10 @@
 	    }, {
 	        key: 'onClickDelete',
 	        value: function onClickDelete() {
+	            if (!confirm('Are you sure you want to delete the milestone "' + this.model.title + '"?')) {
+	                return;
+	            }
+
 	            spinner(true);
 
 	            ResourceHelper.removeResource('milestones', this.model.index).then(function () {
@@ -12100,7 +12160,7 @@
 	                        continue;
 	                    }
 
-	                    if (!milestone.endDate) {
+	                    if (!milestone.getEndDate()) {
 	                        milestones.push(milestone);
 	                    }
 	                }
@@ -12172,10 +12232,10 @@
 
 	            spinner(true);
 
-	            ResourceHelper.addResource('milestones', {
+	            ResourceHelper.addResource('milestones', new Milestone({
 	                title: 'New milestone',
 	                endDate: date.toISOString()
-	            }).then(function () {
+	            })).then(function () {
 	                _this2.render();
 
 	                spinner(false);
@@ -12323,8 +12383,8 @@
 	            return _.div({ class: 'date-placeholder' });
 	        } else {
 	            return _.div({ class: 'date', 'data-date': date.getTime() }, _.div({ class: 'header' }, _.span({ class: 'datenumber' }, date.getDate()), _.span({ class: 'weeknumber' }, 'w ' + date.getWeek())), _.div({ class: 'body' }, _.each(window.resources.milestones, function (i, milestone) {
-	                if (milestone.endDate) {
-	                    var dueDate = new Date(milestone.endDate);
+	                if (milestone.getEndDate()) {
+	                    var dueDate = milestone.getEndDate();
 
 	                    dueDate.setHours(0);
 	                    dueDate.setMinutes(0);
@@ -12750,6 +12810,10 @@
 	                    var nearestStartDate = nearest.getStartDate();
 	                    var nearestEndDate = nearest.getEndDate();
 
+	                    if (!thisStartDate || !thisEndDate) {
+	                        continue;
+	                    }
+
 	                    // Found perfect scenario
 	                    if (thisStartDate < now && thisEndDate > now) {
 	                        nearest = milestone;
@@ -12991,7 +13055,7 @@
 	        return _.option({ value: milestone.index }, milestone.title);
 	    })).val(milestone ? milestone.index : 0).change(function (e) {
 	        _this.onChangeMilestonePicker($(e.target).val());
-	    }))), _.div({ class: 'meta' }, _.h4('Total days'), _.p((totalDays + 1).toString()), _.h4('Total hours'), _.p(totalHours.toString()), _.h4('Milestone start'), _.p(milestoneStart.toString()), _.h4('Milestone end'), _.p(milestoneEnd.toString())), _.h4('Chart'), _.div({ class: 'graph-container' }, _.div({ class: 'graph-y-axis-labels' }, _.label({ style: 'top: 0px' }, Math.round(totalHours) + ' h'), _.label({ style: 'top: 380px' }, '0 h')), _.div({ class: 'graph-canvas' }, $canvas, drawGrid(), drawHours(optimalHours, 'blue'), drawHours(actualHours, 'red'), _.div({ class: 'graph-x-axis-labels' }, _.loop(totalDays, function (i) {
+	    }))), _.div({ class: 'meta' }, _.h4('Total days'), _.p((totalDays + 1).toString()), _.h4('Total hours'), _.p(totalHours.toString()), _.h4('Milestone start'), _.p(milestoneStart ? milestoneStart.toString() : '(invalid)'), _.h4('Milestone end'), _.p(milestoneEnd ? milestoneEnd.toString() : '(invalid)')), _.h4('Chart'), _.div({ class: 'graph-container' }, _.div({ class: 'graph-y-axis-labels' }, _.label({ style: 'top: 0px' }, Math.round(totalHours) + ' h'), _.label({ style: 'top: 380px' }, '0 h')), _.div({ class: 'graph-canvas' }, $canvas, drawGrid(), drawHours(optimalHours, 'blue'), drawHours(actualHours, 'red'), _.div({ class: 'graph-x-axis-labels' }, _.loop(totalDays, function (i) {
 	        i++;
 
 	        if (i % 5 !== 0 && i != 1 && i != totalDays + 1) {

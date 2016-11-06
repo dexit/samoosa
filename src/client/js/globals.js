@@ -200,17 +200,23 @@ window.prettyDate = function(inputDate, separator) {
     let prettyDate = '';
 
     if(!date) { return prettyDate; }
+   
+    if(!isNaN(date)) {
+        date = new Date(parseInt(date));
     
-    if(typeof date === 'string' || typeof date === 'number') { date = new Date(date); }
+    } else if (typeof date === 'string') {
+        date = new Date(date);
+
+    }
 
     if(date instanceof Date == false) {
-        debug.warning('Date is of incorrect object type (' + typeof inputDate + ')');
+        debug.warning('Date is of incorrect object type (' + typeof inputDate + ')', this);
 
         return prettyDate;
     }
     
     if(isNaN(date.getTime())) {
-        debug.warning('Date is invalid (' + inputDate + ')');
+        debug.warning('Date is invalid (' + inputDate + ')', this);
 
         return prettyDate;
     }

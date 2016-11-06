@@ -40,7 +40,7 @@ class PlanEditor extends View {
         for(let milestone of resources.milestones) {
             if(!milestone) { continue; }
 
-            if(!milestone.endDate) {
+            if(!milestone.getEndDate()) {
                 milestones.push(milestone);
             }
         }
@@ -100,10 +100,10 @@ class PlanEditor extends View {
         
         spinner(true);
 
-        ResourceHelper.addResource('milestones', {
+        ResourceHelper.addResource('milestones', new Milestone({
             title: 'New milestone',
             endDate: date.toISOString()
-        })
+        }))
         .then(() => {
             this.render();
 

@@ -35,8 +35,8 @@ module.exports = function render() {
                         ),
                         _.div({class: 'body'},
                             _.each(window.resources.milestones, (i, milestone) => {
-                                if(milestone.endDate) {
-                                    let dueDate = new Date(milestone.endDate);
+                                if(milestone.getEndDate()) {
+                                    let dueDate = milestone.getEndDate();
 
                                     dueDate.setHours(0);
                                     dueDate.setMinutes(0);

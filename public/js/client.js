@@ -5361,7 +5361,7 @@
 	                return Promise.resolve([]);
 	            }
 
-	            return this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators').then(function (collaborators) {
+	            return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators').then(function (collaborators) {
 	                _this7.processCollaborators(collaborators);
 	            });
 	        }
@@ -5377,7 +5377,7 @@
 	        value: function getIssues() {
 	            var _this8 = this;
 
-	            return this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues', 'state=all', true).then(function (issues) {
+	            return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', 'state=all', true).then(function (issues) {
 	                _this8.processIssues(issues);
 
 	                return Promise.resolve();
@@ -5444,7 +5444,7 @@
 	            var _this9 = this;
 
 	            if (!labelCache) {
-	                return this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels').then(function (labels) {
+	                return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels').then(function (labels) {
 	                    labelCache = labels || [];
 
 	                    return _this9.ensureMandatoryLabels();
@@ -5557,7 +5557,7 @@
 	        value: function getMilestones() {
 	            var _this15 = this;
 
-	            return this.get('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones').then(function (milestones) {
+	            return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones').then(function (milestones) {
 	                _this15.processMilestones(milestones);
 
 	                return Promise.resolve();
@@ -5585,7 +5585,7 @@
 
 	                return this.updateIssue(issue);
 	            } else {
-	                return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue)).then(function (gitHubIssue) {
+	                return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue)).then(function (gitHubIssue) {
 	                    issue.id = gitHubIssue.number;
 
 	                    return Promise.resolve();
@@ -5604,7 +5604,7 @@
 	    }, {
 	        key: 'addCollaborator',
 	        value: function addCollaborator(collaborator) {
-	            return this.put('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators/' + collaborator);
+	            return this.put('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + collaborator);
 	        }
 
 	        /**
@@ -5619,7 +5619,7 @@
 	    }, {
 	        key: 'addLabel',
 	        value: function addLabel(name, color) {
-	            return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
 	                name: name,
 	                color: color || 'ffffff'
 	            });
@@ -5636,7 +5636,7 @@
 	    }, {
 	        key: 'addIssueType',
 	        value: function addIssueType(type) {
-	            return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
 	                name: 'type:' + type,
 	                color: 'ffffff'
 	            }).then(function () {
@@ -5655,7 +5655,7 @@
 	    }, {
 	        key: 'addIssuePriority',
 	        value: function addIssuePriority(priority) {
-	            return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
 	                name: 'priority:' + priority,
 	                color: 'ffffff'
 	            }).then(function () {
@@ -5674,7 +5674,7 @@
 	    }, {
 	        key: 'addIssueEstimate',
 	        value: function addIssueEstimate(estimate) {
-	            return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
 	                name: 'estimate:' + estimate,
 	                color: 'ffffff'
 	            }).then(function () {
@@ -5693,7 +5693,7 @@
 	    }, {
 	        key: 'addIssueColumn',
 	        value: function addIssueColumn(column) {
-	            return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
 	                name: 'column:' + column,
 	                color: 'ffffff'
 	            }).then(function () {
@@ -5722,7 +5722,7 @@
 	                milestone = new Milestone(milestone);
 	            }
 
-	            return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones', this.convertMilestone(milestone)).then(function (gitHubMilestone) {
+	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones', this.convertMilestone(milestone)).then(function (gitHubMilestone) {
 	                milestone.id = gitHubMilestone.number;
 
 	                return Promise.resolve(milestone);
@@ -5740,7 +5740,7 @@
 	    }, {
 	        key: 'addVersion',
 	        value: function addVersion(version) {
-	            return this.post('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels', {
+	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
 	                name: 'version:' + version,
 	                color: 'ffffff'
 	            }).then(function () {
@@ -5781,7 +5781,7 @@
 	    }, {
 	        key: 'removeCollaborator',
 	        value: function removeCollaborator(index) {
-	            return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index]);
+	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index]);
 	        }
 
 	        /**
@@ -5795,7 +5795,7 @@
 	    }, {
 	        key: 'removeIssueType',
 	        value: function removeIssueType(index) {
-	            return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/type:' + window.resources.issueTypes[index]);
+	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/type:' + window.resources.issueTypes[index]);
 	        }
 
 	        /**
@@ -5809,7 +5809,7 @@
 	    }, {
 	        key: 'removeIssuePriority',
 	        value: function removeIssuePriority(index) {
-	            return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index]);
+	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index]);
 	        }
 
 	        /**
@@ -5823,7 +5823,7 @@
 	    }, {
 	        key: 'removeIssueEstimate',
 	        value: function removeIssueEstimate(index) {
-	            return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index]);
+	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index]);
 	        }
 
 	        /**
@@ -5837,7 +5837,7 @@
 	    }, {
 	        key: 'removeIssueColumn',
 	        value: function removeIssueColumn(index) {
-	            return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index]);
+	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index]);
 	        }
 
 	        /**
@@ -5856,7 +5856,7 @@
 	            if (!milestone) {
 	                return Promise.reject(new Error('Milestone at index "' + index + '" not found'));
 	            } else {
-	                return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + milestone.id);
+	                return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones/' + milestone.id);
 	            }
 	        }
 
@@ -5871,7 +5871,7 @@
 	    }, {
 	        key: 'removeVersion',
 	        value: function removeVersion(index) {
-	            return this.delete('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/version:' + window.resources.versions[index]);
+	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/version:' + window.resources.versions[index]);
 	        }
 
 	        // ----------
@@ -5886,7 +5886,7 @@
 	    }, {
 	        key: 'updateIssue',
 	        value: function updateIssue(issue) {
-	            return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/issues/' + issue.id, this.convertIssue(issue));
+	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id, this.convertIssue(issue));
 	        }
 
 	        /**
@@ -5900,7 +5900,7 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/milestones/' + milestone.id, this.convertMilestone(milestone));
+	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones/' + milestone.id, this.convertMilestone(milestone));
 	        }
 
 	        /**
@@ -5915,7 +5915,7 @@
 	    }, {
 	        key: 'updateIssueType',
 	        value: function updateIssueType(type, previousName) {
-	            return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/type:' + previousName, {
+	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/type:' + previousName, {
 	                name: 'type:' + type,
 	                color: 'ffffff'
 	            });
@@ -5933,7 +5933,7 @@
 	    }, {
 	        key: 'updateIssuePriority',
 	        value: function updateIssuePriority(priority, previousName) {
-	            return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/priority:' + previousName, {
+	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/priority:' + previousName, {
 	                name: 'priority:' + priority,
 	                color: 'ffffff'
 	            });
@@ -5951,7 +5951,7 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(estimate, previousName) {
-	            return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/estimate:' + previousName, {
+	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/estimate:' + previousName, {
 	                name: 'estimate:' + estimate,
 	                color: 'ffffff'
 	            });
@@ -5969,7 +5969,7 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/column:' + previousName, {
+	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/column:' + previousName, {
 	                name: 'column:' + column,
 	                color: 'ffffff'
 	            });
@@ -5987,7 +5987,7 @@
 	    }, {
 	        key: 'updateVersion',
 	        value: function updateVersion(version, previousName) {
-	            return this.patch('/repos/' + this.getUserName() + '/' + this.getProjectName() + '/labels/version:' + previousName, {
+	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/version:' + previousName, {
 	                name: 'version:' + version,
 	                color: 'ffffff'
 	            });
@@ -6539,7 +6539,7 @@
 	            var _this16 = this;
 
 	            return new Promise(function (callback) {
-	                _this16.post('/repos/' + _this16.getUserName() + '/' + _this16.getProjectName() + '/issues/' + issue.id + '/comments', {
+	                _this16.post('/repos/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/issues/' + issue.id + '/comments', {
 	                    body: text
 	                }).then(function () {
 	                    callback();
@@ -6560,7 +6560,7 @@
 	            var _this17 = this;
 
 	            return new Promise(function (callback) {
-	                _this17.patch('/repos/' + _this17.getUserName() + '/' + _this17.getProjectName() + '/issues/comments/' + comment.index, {
+	                _this17.patch('/repos/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/issues/comments/' + comment.index, {
 	                    body: comment.text
 	                }).then(function () {
 	                    callback();
@@ -6582,7 +6582,7 @@
 	            var _this18 = this;
 
 	            return new Promise(function (callback) {
-	                _this18.get('/repos/' + _this18.getUserName() + '/' + _this18.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
+	                _this18.get('/repos/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
 	                    var comments = [];
 
 	                    var _iteratorNormalCompletion10 = true;

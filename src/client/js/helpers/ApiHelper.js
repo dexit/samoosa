@@ -786,12 +786,17 @@ class ApiHelper {
      * Gets a resource
      *
      * @param {String} resource
+     * @param {Boolean} dontOverwrite
      *
      * @returns {Promise} promise
      */
-    getResource(resource) {
-        debug.log('Getting ' + resource + '...', this);
+    getResource(resource, dontOverwrite) {
+        if(dontOverwrite && resources[resource] && resources[resource].length > 0) {
+            return Promise.resolve();
+        }
         
+        debug.log('Getting ' + resource + '...', this);
+
         switch(resource) {
             case 'collaborators':
                 return this.getCollaborators();

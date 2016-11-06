@@ -7578,13 +7578,18 @@
 	         * Gets a resource
 	         *
 	         * @param {String} resource
+	         * @param {Boolean} dontOverwrite
 	         *
 	         * @returns {Promise} promise
 	         */
 
 	    }, {
 	        key: 'getResource',
-	        value: function getResource(resource) {
+	        value: function getResource(resource, dontOverwrite) {
+	            if (dontOverwrite && resources[resource] && resources[resource].length > 0) {
+	                return Promise.resolve();
+	            }
+
 	            debug.log('Getting ' + resource + '...', this);
 
 	            switch (resource) {
@@ -7923,20 +7928,16 @@
 	        key: 'error',
 	        value: function error(_error) {
 	            if (_error) {
-	                console.log(_error);
+	                console.log(JSON.stringify(_error));
 
-	                switch (_error.status) {
-	                    //case 401: case 403:
-	                    //    this.resetApiToken();
-	                    //    break;
+	                if (_error.status == 0) {
+	                    return;
+	                }
 
-	                    default:
-	                        if (_error.responseJSON) {
-	                            displayError(new Error(_error.responseJSON.error.message));
-	                        } else {
-	                            displayError(new Error(_error.statusText));
-	                        }
-	                        break;
+	                if (_error.responseJSON) {
+	                    displayError(new Error(_error.responseJSON.error.message));
+	                } else {
+	                    displayError(new Error(_error.statusText));
 	                }
 	            }
 	        }
@@ -10046,16 +10047,18 @@
 	                    });
 	                };
 
-	                _.append($content.empty(), _.div({ class: 'project-list-search' }, _.input({ type: 'text', placeholder: 'Search in projects...' }).on('change keyup paste', function (e) {
-	                    var query = e.target.value;
+	                ApiHelper.getResource('projects', true).then(function () {
+	                    _.append($content.empty(), _.div({ class: 'project-list-search' }, _.input({ type: 'text', placeholder: 'Search in projects...' }).on('change keyup paste', function (e) {
+	                        var query = e.target.value;
 
-	                    filterProjects(query);
-	                })), _.div({ class: 'project-list-items' }, _.each(window.resources.projects, function (i, project) {
-	                    return new ProjectEditor({
-	                        model: project,
-	                        overrideUrl: overrideUrl
-	                    }).$element;
-	                })));
+	                        filterProjects(query);
+	                    })), _.div({ class: 'project-list-items' }, _.each(window.resources.projects, function (i, project) {
+	                        return new ProjectEditor({
+	                            model: project,
+	                            overrideUrl: overrideUrl
+	                        }).$element;
+	                    })));
+	                });
 	            }, isActive);
 	        }
 

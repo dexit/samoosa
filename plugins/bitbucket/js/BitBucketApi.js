@@ -207,20 +207,14 @@ class BitBucketApi extends ApiHelper {
      */
     error(error) {
         if(error) {
-            console.log(error);
+            console.log(JSON.stringify(error));
 
-            switch(error.status) {
-                //case 401: case 403:
-                //    this.resetApiToken();
-                //    break;
-
-                default:
-                    if(error.responseJSON) {
-                        displayError(new Error(error.responseJSON.error.message));
-                    } else {
-                        displayError(new Error(error.statusText));
-                    } 
-                    break;
+            if(error.status == 0) { return; }
+            
+            if(error.responseJSON) {
+                displayError(new Error(error.responseJSON.error.message));
+            } else {
+                displayError(new Error(error.statusText));
             }
         }
     }

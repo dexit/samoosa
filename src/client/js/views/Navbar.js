@@ -170,24 +170,27 @@ class Navbar extends View {
                 });       
             };
 
-            _.append($content.empty(),
-                _.div({class: 'project-list-search'},
-                    _.input({type: 'text', placeholder: 'Search in projects...'})
-                        .on('change keyup paste', (e) => {
-                            let query = e.target.value;
+            ApiHelper.getResource('projects', true)
+            .then(() => {
+                _.append($content.empty(),
+                    _.div({class: 'project-list-search'},
+                        _.input({type: 'text', placeholder: 'Search in projects...'})
+                            .on('change keyup paste', (e) => {
+                                let query = e.target.value;
 
-                            filterProjects(query);
+                                filterProjects(query);
+                            })
+                    ),
+                    _.div({class: 'project-list-items'},
+                        _.each(window.resources.projects, (i, project) => {
+                            return new ProjectEditor({
+                                model: project,
+                                overrideUrl: overrideUrl
+                            }).$element;
                         })
-                ),
-                _.div({class: 'project-list-items'},
-                    _.each(window.resources.projects, (i, project) => {
-                        return new ProjectEditor({
-                            model: project,
-                            overrideUrl: overrideUrl
-                        }).$element;
-                    })
-                )
-            );
+                    )
+                );
+            });
         }, isActive);
     }
 

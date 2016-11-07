@@ -480,15 +480,9 @@ a {
         background-color: transparent;
  
         .comment {   
-            .btn-edit {
+            .btn-edit, .text {
                 background-color: $teal-darker;
                 color: $teal-light;
-            }
-
-            .text {
-                background-color: $white;
-                color: $black;
-                border-radius: 0px;
             }
 
             .collaborator {

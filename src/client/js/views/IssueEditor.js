@@ -598,7 +598,7 @@ class IssueEditor extends View {
 
 
     /**
-     * Lazy-load the comments
+     * Lazy load the comments
      */
     getComments() {
         let $comments = this.$element.find('.comments');
@@ -618,7 +618,7 @@ class IssueEditor extends View {
                         return _.div({class: 'comment', 'data-index': comment.index},
                             _.div({class: 'collaborator'},
                                 _.img({src: collaborator.avatar}),
-                                _.p(collaborator.name)    
+                                _.p(collaborator.displayName || collaborator.name)    
                             ),
                             _.if(isUser, 
                                 _.div({class: 'btn-edit'},

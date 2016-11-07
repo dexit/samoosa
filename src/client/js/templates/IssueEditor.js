@@ -107,7 +107,7 @@ module.exports = function render() {
                     _.select({'data-property': 'assignee', disabled: ApiHelper.isSpectating()},
                         _.option({value: null}, '(unassigned)'),
                         _.each(window.resources.collaborators, (i, collaborator) => {
-                            return _.option({value: i}, collaborator.name);
+                            return _.option({value: i}, collaborator.displayName || collaborator.name);
                         })
                     ).change(() => { this.onChange(); }).val(this.model.assignee)
                 )

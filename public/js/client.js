@@ -4095,7 +4095,7 @@
 	                        }
 
 	                        if (typedName == collaborator.name) {
-	                            return '<span class="collaborator-reference"><img src="' + collaborator.avatar + '" />' + string + '</span>';
+	                            return '<span class="collaborator-reference"><img src="' + collaborator.avatar + '" />' + (collaborator.displayName || collaborator.name) + '</span>';
 	                        }
 	                    }
 	                } catch (err) {
@@ -10970,7 +10970,7 @@
 	        }
 
 	        /**
-	         * Lazy-load the comments
+	         * Lazy load the comments
 	         */
 
 	    }, {
@@ -10989,7 +10989,7 @@
 	                        var text = markdownToHtml(comment.text);
 	                        var isUser = collaborator.name == user.name;
 
-	                        return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.name)), _.if(isUser, _.div({ class: 'btn-edit' }, text).click(_this6.onClickEdit), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
+	                        return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.displayName || collaborator.name)), _.if(isUser, _.div({ class: 'btn-edit' }, text).click(_this6.onClickEdit), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
 	                            _this6.$element.toggleClass('loading', true);
 
 	                            comment.text = _this6.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
@@ -11105,7 +11105,7 @@
 	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
-	        return _.option({ value: i }, collaborator.name);
+	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
 	    })).change(function () {
 	        _this.onChange();
 	    }).val(this.model.assignee))),

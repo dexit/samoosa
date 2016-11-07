@@ -29,7 +29,7 @@ window.markdownToHtml = function(string) {
                     if(!collaborator) { continue; }
 
                     if(typedName == collaborator.name) {
-                        return '<span class="collaborator-reference"><img src="' + collaborator.avatar + '" />' + string + '</span>';
+                        return '<span class="collaborator-reference"><img src="' + collaborator.avatar + '" />' + (collaborator.displayName || collaborator.name) + '</span>';
                     }
                 }
 

@@ -7733,6 +7733,8 @@
 	    }, {
 	        key: 'refresh',
 	        value: function refresh() {
+	            debug.log('Refreshing API token...', this);
+
 	            return new Promise(function (resolve, reject) {
 	                var apiUrl = 'http://api.samoosa.rocks/oauth/bitbucket/?refresh=' + localStorage.getItem('refresh');
 
@@ -7764,6 +7766,7 @@
 	        key: 'shouldRefresh',
 	        value: function shouldRefresh(error) {
 	            if (error.responseJSON && error.responseJSON.error, error.responseJSON.error.message && error.responseJSON.error.message.indexOf('Access token expired') == 0) {
+	                debug.log('API token needs a refresh', this);
 
 	                return true;
 	            }

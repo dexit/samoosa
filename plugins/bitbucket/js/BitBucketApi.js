@@ -26,6 +26,8 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} Promise
      */
     refresh() {
+        debug.log('Refreshing API token...', this)
+
         return new Promise((resolve, reject) => {
             let apiUrl = 'http://api.samoosa.rocks/oauth/bitbucket/?refresh=' + localStorage.getItem('refresh');
 
@@ -60,6 +62,7 @@ class BitBucketApi extends ApiHelper {
             error.responseJSON.error.message &&
             error.responseJSON.error.message.indexOf('Access token expired') == 0
         ) {
+            debug.log('API token needs a refresh', this);
 
             return true;
         }

@@ -1,0 +1,11 @@
+{
+    "allowedOrigin": "http://samoosa.rocks",
+    "bitbucket": {
+        "key": "abcdefghijklmn",
+        "secret": "abcdefghijklmnopqrstuvwxyz"
+    },
+    "github": {
+        "id": "abcdefghijklmn",
+        "secret": "abcdefghijklmnopqrstuvwxyz"
+    }
+}

@@ -8031,10 +8031,10 @@
 	                    return;
 	                }
 
-	                if (_error.responseJSON) {
+	                if (_error.responseJSON && _error.responseJSON.error && _error.responseJSON.error.message) {
 	                    displayError(new Error(_error.responseJSON.error.message));
 	                } else {
-	                    displayError(new Error(_error.statusText));
+	                    displayError(new Error(_error.responseText));
 	                }
 	            }
 	        }

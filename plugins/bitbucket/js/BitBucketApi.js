@@ -320,10 +320,10 @@ class BitBucketApi extends ApiHelper {
 
             if(error.status == 0) { return; }
             
-            if(error.responseJSON) {
+            if(error.responseJSON && error.responseJSON.error && error.responseJSON.error.message) {
                 displayError(new Error(error.responseJSON.error.message));
             } else {
-                displayError(new Error(error.statusText));
+                displayError(new Error(error.responseText));
             }
         }
     }

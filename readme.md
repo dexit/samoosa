@@ -22,8 +22,11 @@ Samoosa can be set up to work with GitHub, Bitbucket, your own custom backend, y
 - Printed pages for formal purposes such as scope-of-work documents
 - Issue burndown chart
 
+### Supported services
+- GitHub
+- BitBucket
+
 ### Features to come
-- BitBucket integration
 - More analytics charts
 
 ## Screenshots

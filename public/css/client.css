@@ -323,10 +323,6 @@ body, html {
     display: none; }
   .issue-editor .multi-edit-toggle, .issue-editor .multi-edit-notification, .issue-editor .multi-edit-actions {
     display: none; }
-  .issue-editor .btn-edit {
-    cursor: text; }
-    .issue-editor .btn-edit:hover {
-      outline: 1px solid #2196f3; }
   .issue-editor > .header {
     background-color: #424242;
     color: #eeeeee;
@@ -479,17 +475,22 @@ body, html {
   .issue-editor .body {
     padding-top: 0px;
     position: relative; }
+    .issue-editor .body .btn-edit {
+      position: absolute;
+      top: 36px;
+      right: 20px; }
     .issue-editor .body label {
       display: block;
       width: 100%; }
-    .issue-editor .body textarea, .issue-editor .body .btn-edit {
+    .issue-editor .body textarea, .issue-editor .body .rendered {
       resize: none;
       display: block;
       width: 100%;
       min-height: 100px; }
   .issue-editor .comments .comment {
     display: flex;
-    margin-top: 15px; }
+    margin-top: 15px;
+    position: relative; }
     .issue-editor .comments .comment:first-child {
       margin-top: 0px; }
     .issue-editor .comments .comment .collaborator {
@@ -498,7 +499,12 @@ body, html {
       flex-shrink: 0; }
       .issue-editor .comments .comment .collaborator img {
         max-width: 30px; }
-    .issue-editor .comments .comment .text, .issue-editor .comments .comment .btn-edit, .issue-editor .comments .comment .edit {
+    .issue-editor .comments .comment .btn-edit {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      color: #fff; }
+    .issue-editor .comments .comment .text, .issue-editor .comments .comment .rendered, .issue-editor .comments .comment .edit {
       resize: none;
       flex-grow: 1;
       padding: 10px;
@@ -1366,6 +1372,13 @@ a {
   margin-bottom: 0.5rem; }
   .issue-editor.selected {
     outline-color: #E70D3B; }
+  .issue-editor textarea, .issue-editor .rendered {
+    border: 2px solid transparent; }
+    .issue-editor textarea:focus, .issue-editor .rendered:focus {
+      outline: none;
+      border: 2px solid #E70D3B; }
+  .issue-editor .btn-edit:hover .fa {
+    color: #E70D3B; }
   .issue-editor > .header {
     background-color: transparent; }
     .issue-editor > .header h4, .issue-editor > .header h4 input {
@@ -1388,17 +1401,20 @@ a {
     background-color: #21303B; }
     .issue-editor .body label {
       line-height: 2rem; }
-    .issue-editor .body textarea, .issue-editor .body .btn-edit {
-      outline: 1px solid #5b84a2;
-      padding: 10px; }
+    .issue-editor .body textarea, .issue-editor .body .rendered {
+      padding: 10px;
+      border-radius: 5px; }
+    .issue-editor .body .rendered {
+      background-color: #171e23;
+      color: #5b84a2; }
     .issue-editor .body textarea {
       background-color: #fff;
       color: #000; }
-    .issue-editor .body .btn-edit, .issue-editor .body p, .issue-editor .body span {
+    .issue-editor .body .rendered, .issue-editor .body p, .issue-editor .body span {
       color: #fff; }
     .issue-editor .body a {
       color: #E70D3B; }
-    .issue-editor .body .btn-edit, .issue-editor .body p, .issue-editor .body textarea {
+    .issue-editor .body .rendered, .issue-editor .body p, .issue-editor .body textarea {
       line-height: 1.5em; }
   .issue-editor .meta {
     background-color: transparent; }
@@ -1411,9 +1427,12 @@ a {
     color: #E70D3B !important; }
   .issue-editor .comments, .issue-editor .add-comment {
     background-color: transparent; }
-    .issue-editor .comments .comment .btn-edit, .issue-editor .comments .comment .text, .issue-editor .add-comment .comment .btn-edit, .issue-editor .add-comment .comment .text {
+    .issue-editor .comments .comment .rendered, .issue-editor .add-comment .comment .rendered {
       background-color: #171e23;
-      color: #5b84a2; }
+      color: #fff; }
+    .issue-editor .comments .comment textarea, .issue-editor .add-comment .comment textarea {
+      background-color: #fff;
+      color: #000; }
     .issue-editor .comments .comment .collaborator, .issue-editor .add-comment .comment .collaborator {
       color: #fff; }
     .issue-editor .comments .comment a, .issue-editor .add-comment .comment a {

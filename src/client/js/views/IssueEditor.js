@@ -420,6 +420,8 @@ class IssueEditor extends View {
         if(!InputHelper.isShiftDown && !$(this).parents('.issue-editor').hasClass('selected')) {
             $(this)
             .toggleClass('hidden', true)
+            .siblings('.rendered')
+            .toggleClass('hidden', true)
             .siblings('.edit')
             .toggleClass('hidden', false)
             .focus()
@@ -502,6 +504,8 @@ class IssueEditor extends View {
         
         $(e.target)
             .toggleClass('hidden', true)
+            .siblings('.rendered')
+            .toggleClass('hidden', false) 
             .siblings('.btn-edit')
             .toggleClass('hidden', false); 
     }
@@ -624,9 +628,12 @@ class IssueEditor extends View {
                                 _.p(collaborator.displayName || collaborator.name)    
                             ),
                             _.if(isUser, 
-                                _.div({class: 'btn-edit'},
-                                    text
+                                _.button({class: 'btn-edit'},
+                                    _.span({class: 'fa fa-edit'})
                                 ).click(this.onClickEdit),
+                                _.div({class: 'rendered'},
+                                    text
+                                ),
                                 _.textarea({class: 'edit selectable hidden text btn-transparent'},
                                     comment.text
                                 ).change(() => {
@@ -634,7 +641,7 @@ class IssueEditor extends View {
                                     
                                     comment.text = this.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
 
-                                    this.$element.find('.comments .comment[data-index="' + comment.index + '"] .btn-edit').html(
+                                    this.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(
                                         markdownToHtml(comment.text) || ''
                                     );
 

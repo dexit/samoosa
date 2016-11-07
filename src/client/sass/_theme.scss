@@ -393,6 +393,23 @@ a {
         outline-color: $pink-medium;
     }
 
+    textarea, .rendered {
+        border: 2px solid transparent;
+        
+        &:focus {
+            outline: none;
+            border: 2px solid $pink-medium;
+        }
+    }
+
+    .btn-edit {
+        &:hover {
+            .fa {
+                color: $pink-medium;
+            }
+        }
+    }
+
     >.header {
         background-color: transparent;
 
@@ -434,9 +451,14 @@ a {
             line-height: 2rem;
         }
 
-        textarea, .btn-edit {
-            outline: 1px solid $teal-light;
+        textarea, .rendered {
             padding: 10px;
+            border-radius: 5px;
+        }
+
+        .rendered {
+            background-color: $teal-darker;
+            color: $teal-light;
         }
 
         textarea {
@@ -444,7 +466,7 @@ a {
             color: $black;
         }
 
-        .btn-edit, p, span {
+        .rendered, p, span {
             color: $white;
         }
 
@@ -452,7 +474,7 @@ a {
             color: $pink-medium;
         }
 
-        .btn-edit, p, textarea {
+        .rendered, p, textarea {
             line-height: 1.5em;
         }
     }
@@ -480,9 +502,14 @@ a {
         background-color: transparent;
  
         .comment {   
-            .btn-edit, .text {
+            .rendered {
                 background-color: $teal-darker;
-                color: $teal-light;
+                color: $white;
+            }
+
+            textarea {
+                background-color: $white;
+                color: $black;
             }
 
             .collaborator {

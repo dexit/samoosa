@@ -45,7 +45,7 @@ module.exports = function render() {
                             .change(() => {
                                 this.onChange();
                                 
-                                this.$element.find('.header .btn-edit').html(
+                                this.$element.find('.header .rendered').html(
                                     this.model.title
                                 );
                             })
@@ -152,16 +152,19 @@ module.exports = function render() {
         _.div({class: 'body'},
             
             // Description
-            _.label('Description'),
-            _.div({class: 'btn-edit'},
-                markdownToHtml(this.model.description)
+            _.button({class: 'btn-edit'},
+                _.span({class: 'fa fa-edit'})
             ).click(this.onClickEdit),
+            _.label('Description'),
+            _.div({class: 'rendered'},
+                markdownToHtml(this.model.description)
+            ),
             _.textarea({class: 'selectable edit hidden btn-transparent', 'data-property': 'description'},
                 this.model.description
             ).change(() => {
                 this.onChange();
                 
-                this.$element.find('.body .btn-edit').html(
+                this.$element.find('.body .rendered').html(
                     markdownToHtml(this.model.description) || ''
                 );
             })

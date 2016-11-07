@@ -10846,7 +10846,7 @@
 	            }
 
 	            if (!InputHelper.isShiftDown && !$(this).parents('.issue-editor').hasClass('selected')) {
-	                $(this).toggleClass('hidden', true).siblings('.edit').toggleClass('hidden', false).focus().select();
+	                $(this).toggleClass('hidden', true).siblings('.rendered').toggleClass('hidden', true).siblings('.edit').toggleClass('hidden', false).focus().select();
 	            }
 	        }
 
@@ -10957,7 +10957,7 @@
 	                return;
 	            }
 
-	            $(e.target).toggleClass('hidden', true).siblings('.btn-edit').toggleClass('hidden', false);
+	            $(e.target).toggleClass('hidden', true).siblings('.rendered').toggleClass('hidden', false).siblings('.btn-edit').toggleClass('hidden', false);
 	        }
 
 	        /**
@@ -11088,12 +11088,12 @@
 	                        var text = markdownToHtml(comment.text);
 	                        var isUser = collaborator.name == user.name;
 
-	                        return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.displayName || collaborator.name)), _.if(isUser, _.div({ class: 'btn-edit' }, text).click(_this6.onClickEdit), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
+	                        return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.displayName || collaborator.name)), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this6.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
 	                            _this6.$element.toggleClass('loading', true);
 
 	                            comment.text = _this6.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
 
-	                            _this6.$element.find('.comments .comment[data-index="' + comment.index + '"] .btn-edit').html(markdownToHtml(comment.text) || '');
+	                            _this6.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(markdownToHtml(comment.text) || '');
 
 	                            ApiHelper.updateIssueComment(_this6.model, comment).then(function () {
 	                                _this6.$element.toggleClass('loading', false);
@@ -11162,7 +11162,7 @@
 	    _.h4({ class: 'issue-title' }, _.span({ class: 'btn-edit' }, this.model.title).click(this.onClickEdit), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
 	        _this.onChange();
 
-	        _this.$element.find('.header .btn-edit').html(_this.model.title);
+	        _this.$element.find('.header .rendered').html(_this.model.title);
 	    }).blur(this.onBlur).keyup(function (e) {
 	        if (e.which == 13) {
 	            _this.onBlur(e);
@@ -11238,10 +11238,10 @@
 	    _.div({ class: 'body' },
 
 	    // Description
-	    _.label('Description'), _.div({ class: 'btn-edit' }, markdownToHtml(this.model.description)).click(this.onClickEdit), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
+	    _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(this.onClickEdit), _.label('Description'), _.div({ class: 'rendered' }, markdownToHtml(this.model.description)), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
 	        _this.onChange();
 
-	        _this.$element.find('.body .btn-edit').html(markdownToHtml(_this.model.description) || '');
+	        _this.$element.find('.body .rendered').html(markdownToHtml(_this.model.description) || '');
 	    }).blur(this.onBlur).keyup(this.onKeyUp)),
 
 	    // Comments

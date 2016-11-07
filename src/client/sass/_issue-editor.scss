@@ -86,14 +86,6 @@
         display: none;
     }
 
-    .btn-edit {
-        cursor: text;
-
-        &:hover {
-            outline: 1px solid material-color('blue', '500');
-        }
-    }
-
     >.header {
         background-color: material-color('grey', '800');
         color: material-color('grey', '200');
@@ -333,12 +325,18 @@
         padding-top: 0px;
         position: relative;
 
+        .btn-edit {
+            position: absolute;
+            top: 36px;
+            right: 20px;
+        }
+
         label {
             display: block;
             width: 100%;
         }
         
-        textarea, .btn-edit {
+        textarea, .rendered {
             resize: none;
             display: block;
             width: 100%;
@@ -350,6 +348,7 @@
         .comment {
             display: flex;
             margin-top: 15px;
+            position: relative;
 
             &:first-child {
                 margin-top: 0px;
@@ -365,7 +364,14 @@
                 }
             }
 
-            .text, .btn-edit, .edit {
+            .btn-edit {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                color: #fff;
+            }
+
+            .text, .rendered, .edit {
                 resize: none;
                 flex-grow: 1;
                 padding: 10px;

@@ -7955,7 +7955,7 @@
 	                    error: function error(e) {
 	                        if (_this4.shouldRefresh(e)) {
 	                            _this4.refresh().then(function () {
-	                                return _this4.patch(url, data);
+	                                return _this4.post(url, data);
 	                            }).then(function (result) {
 	                                resolve(result);
 	                            });
@@ -7999,7 +7999,7 @@
 	                    error: function error(e) {
 	                        if (_this5.shouldRefresh(e)) {
 	                            _this5.refresh().then(function () {
-	                                return _this5.patch(url, data);
+	                                return _this5.put(url, data);
 	                            }).then(function (result) {
 	                                resolve(result);
 	                            });

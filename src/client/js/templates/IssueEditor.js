@@ -23,7 +23,7 @@ module.exports = function render() {
 
                     // Issue id
                     _.span({class: 'issue-id'},
-                        (this.model.id || this.model.index).toString()
+                        this.model.id
                     )
                 ),
 

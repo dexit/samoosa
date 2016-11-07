@@ -11041,7 +11041,7 @@
 	    this.getPriorityIndicator(),
 
 	    // Issue id
-	    _.span({ class: 'issue-id' }, (this.model.id || this.model.index).toString())),
+	    _.span({ class: 'issue-id' }, this.model.id)),
 
 	    // Assignee avatar
 	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())),

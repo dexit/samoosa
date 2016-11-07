@@ -153,7 +153,7 @@ class ResourceHelper {
 
             ResourceHelper.sortResource(resource);
 
-            return Promise.resolve();
+            return Promise.resolve(item);
         });
     }
 }

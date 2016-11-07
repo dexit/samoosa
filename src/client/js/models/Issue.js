@@ -8,14 +8,9 @@ class Issue {
      * Create a new issue and push it to the remote source
      */
     static create(properties) {
-        return new Promise((callback) => {
-            let issue = new Issue(properties);
+        let issue = new Issue(properties);
 
-            ResourceHelper.addResource('issues', issue)
-            .then(() => {
-                callback(issue);
-            });
-        });
+        return ResourceHelper.addResource('issues', issue);
     }
 
     constructor(properties) {

@@ -4552,7 +4552,7 @@
 
 	                ResourceHelper.sortResource(resource);
 
-	                return Promise.resolve();
+	                return Promise.resolve(item);
 	            });
 	        }
 	    }]);
@@ -7743,7 +7743,7 @@
 	                var items = [];
 
 	                function getPage(page) {
-	                    var apiUrl = 'https://api.bitbucket.org/1.0' + url;
+	                    var apiUrl = 'https://api.bitbucket.org/' + url;
 
 	                    if (recursePages) {
 	                        apiUrl += '?limit=50&start=' + page;
@@ -7802,7 +7802,7 @@
 
 	            return new Promise(function (resolve, reject) {
 	                $.ajax({
-	                    url: 'https://api.bitbucket.org/1.0' + url + '?' + (param ? param + '&' : ''),
+	                    url: 'https://api.bitbucket.org/' + url + '?' + (param ? param + '&' : ''),
 	                    type: 'DELETE',
 	                    cache: false,
 	                    success: function success(result) {
@@ -7835,7 +7835,7 @@
 
 	            return new Promise(function (resolve, reject) {
 	                $.ajax({
-	                    url: 'https://api.bitbucket.org/1.0' + url,
+	                    url: 'https://api.bitbucket.org/' + url,
 	                    type: 'POST',
 	                    data: data,
 	                    cache: false,
@@ -7868,7 +7868,7 @@
 
 	            return new Promise(function (resolve, reject) {
 	                $.ajax({
-	                    url: 'https://api.bitbucket.org/1.0' + url,
+	                    url: 'https://api.bitbucket.org/' + url,
 	                    type: 'POST',
 	                    data: data,
 	                    cache: false,
@@ -7901,7 +7901,7 @@
 
 	            return new Promise(function (resolve, reject) {
 	                $.ajax({
-	                    url: 'https://api.bitbucket.org/1.0' + url,
+	                    url: 'https://api.bitbucket.org/' + url,
 	                    type: 'PUT',
 	                    data: data,
 	                    cache: false,
@@ -7958,7 +7958,7 @@
 	                return Promise.resolve({ name: '', avatar: '' });
 	            }
 
-	            return this.get('/user').then(function (response) {
+	            return this.get('1.0/user').then(function (response) {
 	                if (response[0]) {
 	                    response = response[0];
 	                }
@@ -7994,7 +7994,7 @@
 	            var _this3 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                _this3.get('/user/repositories').then(function (repositories) {
+	                _this3.get('1.0/user/repositories').then(function (repositories) {
 	                    _this3.processProjects(repositories);
 
 	                    resolve();
@@ -8017,8 +8017,22 @@
 	                return Promise.resolve([]);
 	            }
 
-	            return this.get('/privileges/' + this.getProjectOwner() + '/' + this.getProjectName()).then(function (privileges) {
-	                _this4.processCollaborators(privileges);
+	            return this.get('2.0/teams/' + this.getProjectOwner() + '/members').then(function (res) {
+	                if (Array.isArray(res)) {
+	                    res = res[0];
+	                }
+
+	                _this4.processMembers(res.values);
+
+	                return Promise.resolve();
+	            }).catch(function (e) {
+	                // TODO try something else to retrieve collaborators
+
+	                displayError(e);
+	            }).finally(function () {
+	                if (resources.collaborators.length < 1) {
+	                    resources.collaborators.push(User.getCurrent());
+	                }
 
 	                return Promise.resolve();
 	            });
@@ -8035,7 +8049,7 @@
 	        value: function getIssues() {
 	            var _this5 = this;
 
-	            return this.get('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', 'issues', false).then(function (res) {
+	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', 'issues', false).then(function (res) {
 	                _this5.processIssues(res);
 
 	                return Promise.resolve();
@@ -8109,7 +8123,7 @@
 	        value: function getVersions() {
 	            var _this6 = this;
 
-	            return this.get('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions').then(function (versions) {
+	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions').then(function (versions) {
 	                _this6.processVersions(versions);
 
 	                return Promise.resolve();
@@ -8127,7 +8141,7 @@
 	        value: function getMilestones() {
 	            var _this7 = this;
 
-	            return this.get('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones').then(function (milestones) {
+	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones').then(function (milestones) {
 	                _this7.processMilestones(milestones);
 
 	                return Promise.resolve();
@@ -8148,7 +8162,11 @@
 	    }, {
 	        key: 'addIssue',
 	        value: function addIssue(issue) {
-	            return this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue));
+	            return this.post('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue)).then(function (bitBucketIssue) {
+	                issue.id = bitBucketIssue.local_id;
+
+	                return Promise.resolve(new Issue(issue));
+	            });
 	        }
 
 	        /**
@@ -8165,7 +8183,7 @@
 	            var _this8 = this;
 
 	            return new Promise(function (callback) {
-	                _this8.put('/repositories/' + _this8.getProjectOwner() + '/' + _this8.getProjectName() + '/collaborators/' + collaborator).then(function () {
+	                _this8.put('1.0/repositories/' + _this8.getProjectOwner() + '/' + _this8.getProjectName() + '/collaborators/' + collaborator).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8185,7 +8203,7 @@
 	            var _this9 = this;
 
 	            return new Promise(function (callback) {
-	                _this9.post('/repositories/' + _this9.getProjectOwner() + '/' + _this9.getProjectName() + '/labels', {
+	                _this9.post('1.0/repositories/' + _this9.getProjectOwner() + '/' + _this9.getProjectName() + '/labels', {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8208,7 +8226,7 @@
 	            var _this10 = this;
 
 	            return new Promise(function (callback) {
-	                _this10.post('/repositories/' + _this10.getProjectOwner() + '/' + _this10.getProjectName() + '/labels', {
+	                _this10.post('1.0/repositories/' + _this10.getProjectOwner() + '/' + _this10.getProjectName() + '/labels', {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8231,7 +8249,7 @@
 	            var _this11 = this;
 
 	            return new Promise(function (callback) {
-	                _this11.post('/repositories/' + _this11.getProjectOwner() + '/' + _this11.getProjectName() + '/labels', {
+	                _this11.post('1.0/repositories/' + _this11.getProjectOwner() + '/' + _this11.getProjectName() + '/labels', {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8254,7 +8272,7 @@
 	            var _this12 = this;
 
 	            return new Promise(function (callback) {
-	                _this12.post('/repositories/' + _this12.getProjectOwner() + '/' + _this12.getProjectName() + '/labels', {
+	                _this12.post('1.0/repositories/' + _this12.getProjectOwner() + '/' + _this12.getProjectName() + '/labels', {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8280,7 +8298,7 @@
 	                });
 	            }
 
-	            return this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones', this.convertMilestone(milestone)).then(function (bitBucketMilestone) {
+	            return this.post('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones', this.convertMilestone(milestone)).then(function (bitBucketMilestone) {
 	                milestone.id = bitBucketMilestone.id;
 
 	                return Promise.resolve(milestone);
@@ -8298,7 +8316,7 @@
 	    }, {
 	        key: 'addVersion',
 	        value: function addVersion(version) {
-	            return this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions', {
+	            return this.post('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions', {
 	                name: version
 	            }).then(function (bitBucketVersion) {
 	                return Promise.resolve({
@@ -8322,7 +8340,7 @@
 	    }, {
 	        key: 'removeIssue',
 	        value: function removeIssue(issue) {
-	            return this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id);
+	            return this.delete('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id);
 	        }
 
 	        /**
@@ -8336,7 +8354,7 @@
 	    }, {
 	        key: 'removeCollaborator',
 	        value: function removeCollaborator(index) {
-	            return this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index]);
+	            return this.delete('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index]);
 	        }
 
 	        /**
@@ -8355,7 +8373,7 @@
 	            var milestone = resources.milestones[index];
 
 	            return new Promise(function (callback) {
-	                _this13.delete('/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
+	                _this13.delete('1.0/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8374,7 +8392,7 @@
 	        value: function removeVersion(index) {
 	            var version = resources.versions[index];
 
-	            return this.delete('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions/' + version.id);
+	            return this.delete('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions/' + version.id);
 	        }
 
 	        // ----------
@@ -8389,7 +8407,7 @@
 	    }, {
 	        key: 'updateIssue',
 	        value: function updateIssue(issue) {
-	            return this.put('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id, this.convertIssue(issue));
+	            return this.put('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id, this.convertIssue(issue));
 	        }
 
 	        /**
@@ -8406,7 +8424,7 @@
 	            var _this14 = this;
 
 	            return new Promise(function (callback) {
-	                _this14.put('/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/issues/milestones/' + milestone.id, _this14.convertMilestone(milestone)).then(function () {
+	                _this14.put('1.0/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/issues/milestones/' + milestone.id, _this14.convertMilestone(milestone)).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8427,7 +8445,7 @@
 	            var _this15 = this;
 
 	            return new Promise(function (callback) {
-	                _this15.patch('/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels/type:' + previousName, {
+	                _this15.patch('1.0/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels/type:' + previousName, {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8451,7 +8469,7 @@
 	            var _this16 = this;
 
 	            return new Promise(function (callback) {
-	                _this16.patch('/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/labels/priority:' + previousName, {
+	                _this16.patch('1.0/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/labels/priority:' + previousName, {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8475,7 +8493,7 @@
 	            var _this17 = this;
 
 	            return new Promise(function (callback) {
-	                _this17.patch('/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/labels/estimate:' + previousName, {
+	                _this17.patch('1.0/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/labels/estimate:' + previousName, {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8499,7 +8517,7 @@
 	            var _this18 = this;
 
 	            return new Promise(function (callback) {
-	                _this18.patch('/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/labels/column:' + previousName, {
+	                _this18.patch('1.0/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8524,7 +8542,7 @@
 	                return v.title == previousName;
 	            })[0];
 
-	            return this.put('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions/' + version.id, {
+	            return this.put('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions/' + version.id, {
 	                name: newName
 	            });
 	        }
@@ -8804,32 +8822,29 @@
 	        }
 
 	        /**
-	         * Process collaborators
+	         * Process team members
 	         *
-	         * @param {Array} privileges
+	         * @param {Array} members
 	         */
 
 	    }, {
-	        key: 'processCollaborators',
-	        value: function processCollaborators(privileges) {
+	        key: 'processMembers',
+	        value: function processMembers(members) {
 	            resources.collaborators = [];
-
-	            resources.collaborators.push(User.getCurrent());
 
 	            var _iteratorNormalCompletion5 = true;
 	            var _didIteratorError5 = false;
 	            var _iteratorError5 = undefined;
 
 	            try {
-	                for (var _iterator5 = privileges[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	                    var privilege = _step5.value;
-
-	                    var collaborator = privilege.user;
+	                for (var _iterator5 = (members || [])[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                    var member = _step5.value;
 
 	                    resources.collaborators.push({
-	                        id: collaborator.username,
-	                        name: collaborator.username,
-	                        avatar: collaborator.avatar_url
+	                        id: member.username,
+	                        name: member.username,
+	                        displayName: member.display_name,
+	                        avatar: member.links.avatar.href
 	                    });
 	                }
 	            } catch (err) {
@@ -9008,7 +9023,7 @@
 	            bitBucketIssue.content += '\n\n---[Samoosa]---\n\n';
 
 	            // Estimate
-	            var issueEstimate = issue.getEstimate();
+	            var issueEstimate = resources.issueEstimates[issue.estimate];
 	            var estimateString = '{% estimate: ' + issueEstimate + ' %}';
 
 	            bitBucketIssue.content += estimateString;
@@ -9031,7 +9046,7 @@
 	    }, {
 	        key: 'addIssueComment',
 	        value: function addIssueComment(issue, text) {
-	            return this.post('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments', {
+	            return this.post('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments', {
 	                content: text
 	            });
 	        }
@@ -9046,7 +9061,7 @@
 	    }, {
 	        key: 'updateIssueComment',
 	        value: function updateIssueComment(issue, comment) {
-	            return this.put('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments/' + comment.index, {
+	            return this.put('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments/' + comment.index, {
 	                content: comment.text
 	            });
 	        }
@@ -9062,7 +9077,7 @@
 	    }, {
 	        key: 'getIssueComments',
 	        value: function getIssueComments(issue) {
-	            return this.get('/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments').then(function (bitBucketComments) {
+	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments').then(function (bitBucketComments) {
 	                var comments = [];
 
 	                var _iteratorNormalCompletion7 = true;
@@ -9128,13 +9143,9 @@
 	         * Create a new issue and push it to the remote source
 	         */
 	        value: function create(properties) {
-	            return new Promise(function (callback) {
-	                var issue = new Issue(properties);
+	            var issue = new Issue(properties);
 
-	                ResourceHelper.addResource('issues', issue).then(function () {
-	                    callback(issue);
-	                });
-	            });
+	            return ResourceHelper.addResource('issues', issue);
 	        }
 	    }]);
 

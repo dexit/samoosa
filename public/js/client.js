@@ -7725,6 +7725,50 @@
 	        // Generic API methods
 	        // ----------
 	        /**
+	         * Refresh API token
+	         *
+	         * @returns {Promise} Promise
+	         */
+
+	    }, {
+	        key: 'refresh',
+	        value: function refresh() {
+	            return new Promise(function (resolve, reject) {
+	                $.ajax({
+	                    url: apiUrl,
+	                    type: 'GET',
+	                    success: function success(result) {
+	                        if (result.token) {
+	                            localStorage.setItem('token', result.token);
+
+	                            resolve();
+	                        } else {
+	                            reject(new Error(result));
+	                        }
+	                    }
+	                });
+	            });
+	        }
+
+	        /**
+	         * Check for refresh
+	         *
+	         * @param {Object} error
+	         *
+	         * @returns {Boolean} Whether or not we should refresh
+	         */
+
+	    }, {
+	        key: 'shouldRefresh',
+	        value: function shouldRefresh(error) {
+	            if (error.responseJSON && error.responseJSON.message && error.responseJSON.message.indexOf('Access token expired') == 0) {
+	                return true;
+	            }
+
+	            return false;
+	        }
+
+	        /**
 	         * GET method
 	         *
 	         * @param {String} url
@@ -7774,8 +7818,14 @@
 	                            xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                        },
 	                        error: function error(e) {
-	                            self.error(e);
-	                            reject(new Error(e.responseText));
+	                            if (self.shouldRefresh(e)) {
+	                                self.refresh().then(function () {
+	                                    getPage(page);
+	                                });
+	                            } else {
+	                                self.error(e);
+	                                reject(new Error(e.responseText));
+	                            }
 	                        }
 	                    });
 	                }
@@ -7812,8 +7862,16 @@
 	                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                    },
 	                    error: function error(e) {
-	                        _this2.error(e);
-	                        reject(new Error(e.responseText));
+	                        if (_this2.shouldRefresh(e)) {
+	                            _this2.refresh().then(function () {
+	                                return _this2.delete(url, param);
+	                            }).then(function (result) {
+	                                resolve(result);
+	                            });
+	                        } else {
+	                            _this2.error(e);
+	                            reject(new Error(e.responseText));
+	                        }
 	                    }
 	                });
 	            });
@@ -7831,6 +7889,8 @@
 	    }, {
 	        key: 'patch',
 	        value: function patch(url, data) {
+	            var _this3 = this;
+
 	            var self = this;
 
 	            return new Promise(function (resolve, reject) {
@@ -7846,7 +7906,16 @@
 	                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                    },
 	                    error: function error(e) {
-	                        reject(new Error(e.responseText));
+	                        if (_this3.shouldRefresh(e)) {
+	                            _this3.refresh().then(function () {
+	                                return _this3.patch(url, param);
+	                            }).then(function (result) {
+	                                resolve(result);
+	                            });
+	                        } else {
+	                            _this3.error(e);
+	                            reject(new Error(e.responseText));
+	                        }
 	                    }
 	                });
 	            });
@@ -7864,6 +7933,8 @@
 	    }, {
 	        key: 'post',
 	        value: function post(url, data) {
+	            var _this4 = this;
+
 	            var self = this;
 
 	            return new Promise(function (resolve, reject) {
@@ -7879,7 +7950,16 @@
 	                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                    },
 	                    error: function error(e) {
-	                        reject(new Error(e.responseText));
+	                        if (_this4.shouldRefresh(e)) {
+	                            _this4.refresh().then(function () {
+	                                return _this4.patch(url, param);
+	                            }).then(function (result) {
+	                                resolve(result);
+	                            });
+	                        } else {
+	                            _this4.error(e);
+	                            reject(new Error(e.responseText));
+	                        }
 	                    }
 	                });
 	            });
@@ -7897,6 +7977,8 @@
 	    }, {
 	        key: 'put',
 	        value: function put(url, data) {
+	            var _this5 = this;
+
 	            var self = this;
 
 	            return new Promise(function (resolve, reject) {
@@ -7912,7 +7994,16 @@
 	                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                    },
 	                    error: function error(e) {
-	                        reject(new Error(e.responseText));
+	                        if (_this5.shouldRefresh(e)) {
+	                            _this5.refresh().then(function () {
+	                                return _this5.patch(url, param);
+	                            }).then(function (result) {
+	                                resolve(result);
+	                            });
+	                        } else {
+	                            _this5.error(e);
+	                            reject(new Error(e.responseText));
+	                        }
 	                    }
 	                });
 	            });
@@ -7991,11 +8082,11 @@
 	    }, {
 	        key: 'getProjects',
 	        value: function getProjects() {
-	            var _this3 = this;
+	            var _this6 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                _this3.get('1.0/user/repositories').then(function (repositories) {
-	                    _this3.processProjects(repositories);
+	                _this6.get('1.0/user/repositories').then(function (repositories) {
+	                    _this6.processProjects(repositories);
 
 	                    resolve();
 	                }).catch(reject);
@@ -8011,7 +8102,7 @@
 	    }, {
 	        key: 'getCollaborators',
 	        value: function getCollaborators() {
-	            var _this4 = this;
+	            var _this7 = this;
 
 	            if (this.isSpectating()) {
 	                return Promise.resolve([]);
@@ -8022,7 +8113,7 @@
 	                    res = res[0];
 	                }
 
-	                _this4.processMembers(res.values);
+	                _this7.processMembers(res.values);
 
 	                return Promise.resolve();
 	            }).catch(function (e) {
@@ -8047,10 +8138,10 @@
 	    }, {
 	        key: 'getIssues',
 	        value: function getIssues() {
-	            var _this5 = this;
+	            var _this8 = this;
 
 	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', 'issues', false).then(function (res) {
-	                _this5.processIssues(res);
+	                _this8.processIssues(res);
 
 	                return Promise.resolve();
 	            });
@@ -8121,10 +8212,10 @@
 	    }, {
 	        key: 'getVersions',
 	        value: function getVersions() {
-	            var _this6 = this;
+	            var _this9 = this;
 
 	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions').then(function (versions) {
-	                _this6.processVersions(versions);
+	                _this9.processVersions(versions);
 
 	                return Promise.resolve();
 	            });
@@ -8139,10 +8230,10 @@
 	    }, {
 	        key: 'getMilestones',
 	        value: function getMilestones() {
-	            var _this7 = this;
+	            var _this10 = this;
 
 	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones').then(function (milestones) {
-	                _this7.processMilestones(milestones);
+	                _this10.processMilestones(milestones);
 
 	                return Promise.resolve();
 	            });
@@ -8180,10 +8271,10 @@
 	    }, {
 	        key: 'addCollaborator',
 	        value: function addCollaborator(collaborator) {
-	            var _this8 = this;
+	            var _this11 = this;
 
 	            return new Promise(function (callback) {
-	                _this8.put('1.0/repositories/' + _this8.getProjectOwner() + '/' + _this8.getProjectName() + '/collaborators/' + collaborator).then(function () {
+	                _this11.put('1.0/repositories/' + _this11.getProjectOwner() + '/' + _this11.getProjectName() + '/collaborators/' + collaborator).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8200,10 +8291,10 @@
 	    }, {
 	        key: 'addIssueType',
 	        value: function addIssueType(type) {
-	            var _this9 = this;
+	            var _this12 = this;
 
 	            return new Promise(function (callback) {
-	                _this9.post('1.0/repositories/' + _this9.getProjectOwner() + '/' + _this9.getProjectName() + '/labels', {
+	                _this12.post('1.0/repositories/' + _this12.getProjectOwner() + '/' + _this12.getProjectName() + '/labels', {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8223,10 +8314,10 @@
 	    }, {
 	        key: 'addIssuePriority',
 	        value: function addIssuePriority(priority) {
-	            var _this10 = this;
+	            var _this13 = this;
 
 	            return new Promise(function (callback) {
-	                _this10.post('1.0/repositories/' + _this10.getProjectOwner() + '/' + _this10.getProjectName() + '/labels', {
+	                _this13.post('1.0/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/labels', {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8246,10 +8337,10 @@
 	    }, {
 	        key: 'addIssueEstimate',
 	        value: function addIssueEstimate(estimate) {
-	            var _this11 = this;
+	            var _this14 = this;
 
 	            return new Promise(function (callback) {
-	                _this11.post('1.0/repositories/' + _this11.getProjectOwner() + '/' + _this11.getProjectName() + '/labels', {
+	                _this14.post('1.0/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/labels', {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8269,10 +8360,10 @@
 	    }, {
 	        key: 'addIssueColumn',
 	        value: function addIssueColumn(column) {
-	            var _this12 = this;
+	            var _this15 = this;
 
 	            return new Promise(function (callback) {
-	                _this12.post('1.0/repositories/' + _this12.getProjectOwner() + '/' + _this12.getProjectName() + '/labels', {
+	                _this15.post('1.0/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels', {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8368,12 +8459,12 @@
 	    }, {
 	        key: 'removeMilestone',
 	        value: function removeMilestone(index) {
-	            var _this13 = this;
+	            var _this16 = this;
 
 	            var milestone = resources.milestones[index];
 
 	            return new Promise(function (callback) {
-	                _this13.delete('1.0/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
+	                _this16.delete('1.0/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8421,10 +8512,10 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            var _this14 = this;
+	            var _this17 = this;
 
 	            return new Promise(function (callback) {
-	                _this14.put('1.0/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/issues/milestones/' + milestone.id, _this14.convertMilestone(milestone)).then(function () {
+	                _this17.put('1.0/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/issues/milestones/' + milestone.id, _this17.convertMilestone(milestone)).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8442,10 +8533,10 @@
 	    }, {
 	        key: 'updateIssueType',
 	        value: function updateIssueType(type, previousName) {
-	            var _this15 = this;
+	            var _this18 = this;
 
 	            return new Promise(function (callback) {
-	                _this15.patch('1.0/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels/type:' + previousName, {
+	                _this18.patch('1.0/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/labels/type:' + previousName, {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8466,10 +8557,10 @@
 	    }, {
 	        key: 'updateIssuePriority',
 	        value: function updateIssuePriority(priority, previousName) {
-	            var _this16 = this;
+	            var _this19 = this;
 
 	            return new Promise(function (callback) {
-	                _this16.patch('1.0/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/labels/priority:' + previousName, {
+	                _this19.patch('1.0/repositories/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/labels/priority:' + previousName, {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8490,10 +8581,10 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(estimate, previousName) {
-	            var _this17 = this;
+	            var _this20 = this;
 
 	            return new Promise(function (callback) {
-	                _this17.patch('1.0/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/labels/estimate:' + previousName, {
+	                _this20.patch('1.0/repositories/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/labels/estimate:' + previousName, {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8514,10 +8605,10 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            var _this18 = this;
+	            var _this21 = this;
 
 	            return new Promise(function (callback) {
-	                _this18.patch('1.0/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/labels/column:' + previousName, {
+	                _this21.patch('1.0/repositories/' + _this21.getProjectOwner() + '/' + _this21.getProjectName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {

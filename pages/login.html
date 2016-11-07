@@ -28,9 +28,13 @@ layout: ~
                             <option value="bitbucket">BitBucket</option>
                         </select>
                     </li>
-                    <li> 
+                    <li data-hidden=""> 
                         <label for="input-token">API token</label>
-                        <input id=input-token" type="text" name="token" />
+                        <input id="input-token" type="text" name="token" />
+                    </li>
+                    <li data-hidden="github"> 
+                        <label for="input-refresh">API refresh token</label>
+                        <input id="input-refresh" type="text" name="refresh" />
                     </li>
                     <li>
                         <a id="link-new-token" href="#">Create new token</a>
@@ -79,15 +83,34 @@ layout: ~
                 location = 'http://api.samoosa.rocks/oauth/' + source;
             }
 
+            // Event: Change source
+            function onChangeSource() {
+                var source = $('#input-source').val();
+            
+                $('form li').each(function() {
+                    $(this).toggle($(this).data('hidden') != source);
+                });
+            }
+
+            onChangeSource();
+
             // Event hookups
             $('.login-form').on('submit', onSubmit);
             $('#link-new-token').on('click', onClickNewToken);
+            $('#input-source').on('change', onChangeSource);
 
             // Receive token parameter
             var token = getParameterByName('token');
 
             if(token) {
                 $('input[name="token"]').val(token);
+            }
+            
+            // Receive refresh parameter
+            var refresh = getParameterByName('refresh');
+
+            if(refresh) {
+                $('input[name="refresh"]').val(refresh);
             }
 
             // Receive source parameter

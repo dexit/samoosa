@@ -21,6 +21,49 @@ class BitBucketApi extends ApiHelper {
     // Generic API methods
     // ----------
     /**
+     * Refresh API token
+     *
+     * @returns {Promise} Promise
+     */
+    refresh() {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: apiUrl,
+                type: 'GET',
+                success: (result) => {
+                    if(result.token) {
+                        localStorage.setItem('token', result.token);
+
+                        resolve();
+                    } else {
+                        reject(new Error(result));
+
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * Check for refresh
+     *
+     * @param {Object} error
+     *
+     * @returns {Boolean} Whether or not we should refresh
+     */
+    shouldRefresh(error) {
+        if(
+            error.responseJSON &&
+            error.responseJSON.message &&
+            error.responseJSON.message.indexOf('Access token expired') == 0
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+    
+    /**
      * GET method
      *
      * @param {String} url
@@ -70,8 +113,16 @@ class BitBucketApi extends ApiHelper {
                         xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
                     },
                     error: (e) => {
-                        self.error(e);
-                        reject(new Error(e.responseText));
+                        if(self.shouldRefresh(e)) {
+                            self.refresh()
+                            .then(() => {
+                                getPage(page);
+                            });    
+                        
+                        } else {
+                            self.error(e);
+                            reject(new Error(e.responseText));
+                        }
                     }
                 });
             }
@@ -103,8 +154,20 @@ class BitBucketApi extends ApiHelper {
                     xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
                 },
                 error: (e) => {
-                    this.error(e);
-                    reject(new Error(e.responseText));
+                    if(this.shouldRefresh(e)) {
+                        this.refresh()
+                        .then(() => {
+                            return this.delete(url, param);
+                        })
+                        .then((result) => {
+                            resolve(result);
+                        });    
+
+                    } else {
+                        this.error(e);
+                        reject(new Error(e.responseText));
+                    
+                    }
                 }
             });
         });
@@ -134,7 +197,20 @@ class BitBucketApi extends ApiHelper {
                     xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
                 },
                 error: (e) => {
-                    reject(new Error(e.responseText));
+                    if(this.shouldRefresh(e)) {
+                        this.refresh()
+                        .then(() => {
+                            return this.patch(url, param);
+                        })
+                        .then((result) => {
+                            resolve(result);
+                        });
+                    
+                    } else {    
+                        this.error(e);
+                        reject(new Error(e.responseText));
+                    
+                    }
                 }
             });
         });
@@ -164,7 +240,20 @@ class BitBucketApi extends ApiHelper {
                     xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
                 },
                 error: (e) => {
-                    reject(new Error(e.responseText));
+                    if(this.shouldRefresh(e)) {
+                        this.refresh()
+                        .then(() => {
+                            return this.patch(url, param);
+                        })
+                        .then((result) => {
+                            resolve(result);
+                        });
+                    
+                    } else {    
+                        this.error(e);
+                        reject(new Error(e.responseText));
+                    
+                    }
                 }
             });
         });
@@ -194,7 +283,20 @@ class BitBucketApi extends ApiHelper {
                     xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
                 },
                 error: (e) => {
-                    reject(new Error(e.responseText));
+                    if(this.shouldRefresh(e)) {
+                        this.refresh()
+                        .then(() => {
+                            return this.patch(url, param);
+                        })
+                        .then((result) => {
+                            resolve(result);
+                        });
+                    
+                    } else {    
+                        this.error(e);
+                        reject(new Error(e.responseText));
+                    
+                    }
                 }
             });
         });

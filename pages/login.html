@@ -92,8 +92,6 @@ layout: ~
                 });
             }
 
-            onChangeSource();
-
             // Event hookups
             $('.login-form').on('submit', onSubmit);
             $('#link-new-token').on('click', onClickNewToken);
@@ -119,6 +117,9 @@ layout: ~
             if(source) {
                 $('#input-source').val(source);
             }
+            
+            // Fire init change source
+            onChangeSource();
         </script>
     </body>
 </html>

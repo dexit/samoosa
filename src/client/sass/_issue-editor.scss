@@ -191,14 +191,22 @@
 
                 .issue-title {
                     margin: 0px;
-                    display: inline;
+                    position: relative;
+
+                    .btn-edit {
+                        cursor: text;
+                        position: absolute;
+                        width: 100%;
+                        height: 100%;
+                        top: 0px;
+                        left: 0px;
+                        display: block;
+                        z-index: 5;
+                    }
                     
-                    span, input {
+                    .rendered, .edit {
                         font-size: 1em;
                         line-height: 1em;
-                    }
-
-                    input {
                         background-color: transparent;
                         color: #fff;
                         border: 0px;

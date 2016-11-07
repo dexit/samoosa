@@ -387,11 +387,19 @@ body, html {
         padding: 20px 35px 15px 10px; }
         .issue-editor > .header .header-content .header-center .issue-title {
           margin: 0px;
-          display: inline; }
-          .issue-editor > .header .header-content .header-center .issue-title span, .issue-editor > .header .header-content .header-center .issue-title input {
+          position: relative; }
+          .issue-editor > .header .header-content .header-center .issue-title .btn-edit {
+            cursor: text;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0px;
+            left: 0px;
+            display: block;
+            z-index: 5; }
+          .issue-editor > .header .header-content .header-center .issue-title .rendered, .issue-editor > .header .header-content .header-center .issue-title .edit {
             font-size: 1em;
-            line-height: 1em; }
-          .issue-editor > .header .header-content .header-center .issue-title input {
+            line-height: 1em;
             background-color: transparent;
             color: #fff;
             border: 0px;
@@ -399,7 +407,7 @@ body, html {
             margin: 0px;
             display: block;
             width: 100%; }
-            .issue-editor > .header .header-content .header-center .issue-title input, .issue-editor > .header .header-content .header-center .issue-title input:focus, .issue-editor > .header .header-content .header-center .issue-title input:hover, .issue-editor > .header .header-content .header-center .issue-title input:active {
+            .issue-editor > .header .header-content .header-center .issue-title .rendered, .issue-editor > .header .header-content .header-center .issue-title .rendered:focus, .issue-editor > .header .header-content .header-center .issue-title .rendered:hover, .issue-editor > .header .header-content .header-center .issue-title .rendered:active, .issue-editor > .header .header-content .header-center .issue-title .edit, .issue-editor > .header .header-content .header-center .issue-title .edit:focus, .issue-editor > .header .header-content .header-center .issue-title .edit:hover, .issue-editor > .header .header-content .header-center .issue-title .edit:active {
               outline: 0px; }
     .issue-editor > .header .drag-handle {
       cursor: move;

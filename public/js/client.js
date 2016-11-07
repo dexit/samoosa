@@ -11159,7 +11159,7 @@
 	    // Center section
 	    _.div({ class: 'header-center' },
 	    // Title
-	    _.h4({ class: 'issue-title' }, _.span({ class: 'btn-edit' }, this.model.title).click(this.onClickEdit), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
+	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
 	        _this.onChange();
 
 	        _this.$element.find('.header .rendered').html(_this.model.title);
@@ -11167,7 +11167,7 @@
 	        if (e.which == 13) {
 	            _this.onBlur(e);
 	        }
-	    })))),
+	    }), _.button({ class: 'btn-edit' }).click(this.onClickEdit)))),
 
 	    // Expand/collapse button
 	    _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-up' }), _.span({ class: 'fa icon-open fa-chevron-down' })).click(function (e) {

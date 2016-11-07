@@ -38,9 +38,9 @@ module.exports = function render() {
                 _.div({class: 'header-center'},
                     // Title
                     _.h4({class: 'issue-title'},
-                        _.span({class: 'btn-edit'},
+                        _.span({class: 'rendered'},
                             this.model.title
-                        ).click(this.onClickEdit),
+                        ),
                         _.input({type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title})
                             .change(() => {
                                 this.onChange();
@@ -54,7 +54,8 @@ module.exports = function render() {
                                 if(e.which == 13) {
                                     this.onBlur(e);
                                 }
-                            })
+                            }),
+                        _.button({class: 'btn-edit'}).click(this.onClickEdit)
                     )
                 )
             ),

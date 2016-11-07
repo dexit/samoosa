@@ -14,9 +14,6 @@
 ## Introduction
 Samoosa can be set up to work with GitHub, Bitbucket, your own custom backend, you name it. The support is added through plugins that reshape the content of their API sources into the Samoosa format. In the case of the GitHub plugin, labels are being used to track version numbers, estimates, issue types and columns.
 
-### Entirely client-side
-No server software, such as Node.js or PHP, is needed to run Samoosa. It's built entirely in client-side JavaScript.
-
 ### Current features
 - Milestone planning
 - Kanban board with customisable columns
@@ -38,14 +35,10 @@ No server software, such as Node.js or PHP, is needed to run Samoosa. It's built
 ![Settings](/public/img/screenshots/settings.jpg)
 
 ## Quick start
-1. Make sure you have a [GitHub](https://github.com) account and at least one repository.
+1. Make sure you have a [GitHub](https://github.com) or [BitBucket](http://bitbucket.com) account and at least one repository.
 2. Go to the [Samoosa login page]({{ site.url }}/login).
 3. Click "Create new token". You might be prompted to log in.
-4. Name your token something like "samoosa-token".
-5. Tick the "repo" scope.
-6. Click "Generate token"
-7. Copy the newly created token and paste it into the "API token" field of the [Samoosa login page]({{ site.url }}/login)
-8. Once logged in, click a repo in the navigation menu.
+4. Once logged in, click a repo in the navigation menu.
 
 ## Creating an issue
 1. Click the "Kanban" or the "List" button on the navbar

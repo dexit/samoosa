@@ -204,7 +204,7 @@ class BitBucketApi extends ApiHelper {
                     if(this.shouldRefresh(e)) {
                         this.refresh()
                         .then(() => {
-                            return this.patch(url, param);
+                            return this.patch(url, data);
                         })
                         .then((result) => {
                             resolve(result);
@@ -247,7 +247,7 @@ class BitBucketApi extends ApiHelper {
                     if(this.shouldRefresh(e)) {
                         this.refresh()
                         .then(() => {
-                            return this.patch(url, param);
+                            return this.patch(url, data);
                         })
                         .then((result) => {
                             resolve(result);
@@ -290,7 +290,7 @@ class BitBucketApi extends ApiHelper {
                     if(this.shouldRefresh(e)) {
                         this.refresh()
                         .then(() => {
-                            return this.patch(url, param);
+                            return this.patch(url, data);
                         })
                         .then((result) => {
                             resolve(result);

@@ -7911,7 +7911,7 @@
 	                    error: function error(e) {
 	                        if (_this3.shouldRefresh(e)) {
 	                            _this3.refresh().then(function () {
-	                                return _this3.patch(url, param);
+	                                return _this3.patch(url, data);
 	                            }).then(function (result) {
 	                                resolve(result);
 	                            });
@@ -7955,7 +7955,7 @@
 	                    error: function error(e) {
 	                        if (_this4.shouldRefresh(e)) {
 	                            _this4.refresh().then(function () {
-	                                return _this4.patch(url, param);
+	                                return _this4.patch(url, data);
 	                            }).then(function (result) {
 	                                resolve(result);
 	                            });
@@ -7999,7 +7999,7 @@
 	                    error: function error(e) {
 	                        if (_this5.shouldRefresh(e)) {
 	                            _this5.refresh().then(function () {
-	                                return _this5.patch(url, param);
+	                                return _this5.patch(url, data);
 	                            }).then(function (result) {
 	                                resolve(result);
 	                            });

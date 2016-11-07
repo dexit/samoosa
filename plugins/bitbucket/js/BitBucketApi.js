@@ -27,6 +27,8 @@ class BitBucketApi extends ApiHelper {
      */
     refresh() {
         return new Promise((resolve, reject) => {
+            let apiUrl = 'http://api.samoosa.rocks/oauth/bitbucket/?refresh=' + localStorage.getItem('refresh');
+
             $.ajax({
                 url: apiUrl,
                 type: 'GET',
@@ -54,9 +56,11 @@ class BitBucketApi extends ApiHelper {
     shouldRefresh(error) {
         if(
             error.responseJSON &&
-            error.responseJSON.message &&
-            error.responseJSON.message.indexOf('Access token expired') == 0
+            error.responseJSON.error,
+            error.responseJSON.error.message &&
+            error.responseJSON.error.message.indexOf('Access token expired') == 0
         ) {
+
             return true;
         }
 

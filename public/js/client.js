@@ -7734,6 +7734,8 @@
 	        key: 'refresh',
 	        value: function refresh() {
 	            return new Promise(function (resolve, reject) {
+	                var apiUrl = 'http://api.samoosa.rocks/oauth/bitbucket/?refresh=' + localStorage.getItem('refresh');
+
 	                $.ajax({
 	                    url: apiUrl,
 	                    type: 'GET',
@@ -7761,7 +7763,8 @@
 	    }, {
 	        key: 'shouldRefresh',
 	        value: function shouldRefresh(error) {
-	            if (error.responseJSON && error.responseJSON.message && error.responseJSON.message.indexOf('Access token expired') == 0) {
+	            if (error.responseJSON && error.responseJSON.error, error.responseJSON.error.message && error.responseJSON.error.message.indexOf('Access token expired') == 0) {
+
 	                return true;
 	            }
 
@@ -10885,7 +10888,7 @@
 
 	            var replaced = $(this).val().replace(/@[a-zA-Z0-9-_]+ /g, function (string) {
 	                var fuzzyMatch = void 0;
-	                var typedName = string.replace('@', '').replace(' ', '');
+	                var typedName = string.replace('@', '').replace(' ', '').toLowerCase();
 
 	                var _iteratorNormalCompletion5 = true;
 	                var _didIteratorError5 = false;
@@ -10899,10 +10902,12 @@
 	                            continue;
 	                        }
 
-	                        if (typedName == collaborator.name) {
+	                        if (typedName == collaborator.name || typedName == collaborator.displayName) {
 	                            return string;
-	                        } else if (collaborator.name.indexOf(typedName) == 0) {
+	                        } else if (collaborator.name.toLowerCase().indexOf(typedName) == 0) {
 	                            fuzzyMatch = collaborator.name;
+	                        } else if (collaborator.displayName && collaborator.displayName.toLowerCase().indexOf(typedName) == 0) {
+	                            fuzzyMatch = collaborator.displayName;
 	                        }
 	                    }
 	                } catch (err) {

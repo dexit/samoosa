@@ -457,16 +457,19 @@ class IssueEditor extends View {
 
         let replaced = $(this).val().replace(/@[a-zA-Z0-9-_]+ /g, (string) => {
             let fuzzyMatch;
-            let typedName = string.replace('@', '').replace(' ', '');
+            let typedName = string.replace('@', '').replace(' ', '').toLowerCase();
 
             for(let collaborator of resources.collaborators || []) {
                 if(!collaborator) { continue; }
 
-                if(typedName == collaborator.name) {
+                if(typedName == collaborator.name || typedName == collaborator.displayName) {
                     return string;
 
-                } else if(collaborator.name.indexOf(typedName) == 0) {
+                } else if(collaborator.name.toLowerCase().indexOf(typedName) == 0) {
                     fuzzyMatch = collaborator.name;
+                
+                } else if(collaborator.displayName && collaborator.displayName.toLowerCase().indexOf(typedName) == 0) {
+                    fuzzyMatch = collaborator.displayName;
 
                 }
             }

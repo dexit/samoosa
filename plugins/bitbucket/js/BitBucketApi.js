@@ -487,8 +487,8 @@ class BitBucketApi extends ApiHelper {
      */
     getIssueEstimates() {
         resources.issueEstimates = [
-            '0.25h',
-            '0.5h',
+            '15m',
+            '30m',
             '1h',
             '2h',
             '3h',

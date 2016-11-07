@@ -171,7 +171,13 @@ module.exports = function render() {
             })
             .blur(this.onBlur)
             .keyup(this.onKeyUp)
+            .on('paste', (e) => {
+                this.onPaste(e);
+            })
         ),
+        
+        // Attachments
+        _.div({class: 'attachments'}),
 
         // Comments
         _.div({class: 'comments'}),

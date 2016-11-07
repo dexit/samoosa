@@ -4439,6 +4439,19 @@
 	            return 0;
 	        }
 	    }, {
+	        key: 'getIssueAttachment',
+	        value: function getIssueAttachment(name) {
+	            for (var i in resources.issueAttachments) {
+	                var type = resources.issueAttachments[i];
+
+	                if (type == name) {
+	                    return i;
+	                }
+	            }
+
+	            return 0;
+	        }
+	    }, {
 	        key: 'getIssueType',
 	        value: function getIssueType(name) {
 	            for (var i in resources.issueTypes) {
@@ -6900,6 +6913,22 @@
 	        }
 
 	        /**
+	         * Gets issue attachments
+	         *
+	         * @returns {Promise} promise
+	         */
+
+	    }, {
+	        key: 'getIssueAttachments',
+	        value: function getIssueAttachments() {
+	            return new Promise(function (callback) {
+	                window.resources.issueAttachments = [];
+
+	                callback();
+	            });
+	        }
+
+	        /**
 	         * Gets milestones 
 	         *
 	         * @returns {Promise} promise
@@ -7045,6 +7074,22 @@
 	        }
 
 	        /**
+	         * Adds issue attachment
+	         *
+	         * @param {File} attachment
+	         *
+	         * @returns {Promise} promise
+	         */
+
+	    }, {
+	        key: 'addIssueAttachment',
+	        value: function addIssueAttachment(attachment) {
+	            return new Promise(function (callback) {
+	                callback();
+	            });
+	        }
+
+	        /**
 	         * Adds milestone 
 	         *
 	         * @param {String} milestone
@@ -7170,6 +7215,22 @@
 	    }, {
 	        key: 'removeIssueColumn',
 	        value: function removeIssueColumn(index) {
+	            return new Promise(function (callback) {
+	                callback();
+	            });
+	        }
+
+	        /**
+	         * Updates issue attachment
+	         *
+	         * @param {Number} index
+	         *
+	         * @returns {Promise} promise
+	         */
+
+	    }, {
+	        key: 'updateIssueAttachment',
+	        value: function updateIssueAttachment(index) {
 	            return new Promise(function (callback) {
 	                callback();
 	            });
@@ -7307,6 +7368,23 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(index, column) {
+	            return new Promise(function (callback) {
+	                callback();
+	            });
+	        }
+
+	        /**
+	         * Updates issue attachment
+	         *
+	         * @param {Number} index
+	         * @param {File} attachment
+	         *
+	         * @returns {Promise} promise
+	         */
+
+	    }, {
+	        key: 'updateIssueAttachment',
+	        value: function updateIssueAttachment(index, file) {
 	            return new Promise(function (callback) {
 	                callback();
 	            });
@@ -7464,6 +7542,9 @@
 	                case 'issueColumns':
 	                    return this.removeIssueColumn(index);
 
+	                case 'issueAttachments':
+	                    return this.removeIssueAttachment(index);
+
 	                case 'milestones':
 	                    return this.removeMilestone(index);
 
@@ -7507,6 +7588,9 @@
 
 	                case 'issueColumns':
 	                    return this.addIssueColumn(item);
+
+	                case 'issueAttachments':
+	                    return this.addIssueAttachment(item);
 
 	                case 'milestones':
 	                    return this.addMilestone(item);
@@ -7554,6 +7638,9 @@
 
 	                case 'issueColumns':
 	                    return this.updateIssueColumn(item, identifier);
+
+	                case 'issueAttachments':
+	                    return this.updateIssueAttachment(item, identifier);
 
 	                case 'versions':
 	                    return this.updateVersion(item, identifier);
@@ -7612,6 +7699,9 @@
 	                case 'issueColumns':
 	                    return this.getIssueColumns();
 
+	                case 'issueAttachments':
+	                    return this.getIssueAttachments();
+
 	                case 'milestones':
 	                    return this.getMilestones();
 
@@ -7665,6 +7755,8 @@
 	                return get('issueEstimates');
 	            }).then(function () {
 	                return get('issueColumns');
+	            }).then(function () {
+	                return get('issueAttachments');
 	            }).then(function () {
 	                return get('collaborators');
 	            }).then(function () {
@@ -8204,7 +8296,7 @@
 	    }, {
 	        key: 'getIssueEstimates',
 	        value: function getIssueEstimates() {
-	            resources.issueEstimates = ['0.25h', '0.5h', '1h', '2h', '3h', '4h', '5h', '6h', '7h', '8h'];
+	            resources.issueEstimates = ['15m', '30m', '1h', '2h', '3h', '4h', '5h', '6h', '7h', '8h'];
 
 	            return Promise.resolve();
 	        }
@@ -9257,6 +9349,7 @@
 	        this.id = properties.id;
 
 	        // Optional properties
+	        this.attachments = properties.attachments || [];
 	        this.column = properties.column || 0;
 	        this.type = properties.type || 0;
 	        this.priority = properties.priority || 0;
@@ -9416,7 +9509,7 @@
 	        }
 
 	        /**
-	         * Get estimated hours
+	         * Gets estimated hours
 	         *
 	         * @returns {Number} Hours
 	         */
@@ -9424,11 +9517,25 @@
 	    }, {
 	        key: 'getEstimate',
 	        value: function getEstimate() {
-	            return estimateToFloat(window.resources.issueEstimates[this.estimate]);
+	            return estimateToFloat(resources.issueEstimates[this.estimate]);
+	        }
+
+	        /**
+	         * Gets attachments
+	         *
+	         * @returns {Array} Attachments
+	         */
+
+	    }, {
+	        key: 'getAttachments',
+	        value: function getAttachments() {
+	            return this.attachments;
 	        }
 
 	        /**
 	         * Gets an object with all the baked values
+	         *
+	         * @returns {Object} Baked values
 	         */
 
 	    }, {
@@ -10987,6 +11094,65 @@
 	        }
 
 	        /**
+	         * Event: Paste
+	         *
+	         * @param {Event} e
+	         */
+
+	    }, {
+	        key: 'onPaste',
+	        value: function onPaste(e) {
+	            e = e.originalEvent;
+
+	            var items = e.clipboardData.items;
+	            var IMAGE_MIME_REGEX = /^image\/(p?jpeg|gif|png)$/i;
+
+	            // Look through all clipboard items
+	            for (var i = 0; i < items.length; i++) {
+	                // Check for image MIME type
+	                if (IMAGE_MIME_REGEX.test(items[i].type)) {
+	                    var file = items[i].getAsFile();
+
+	                    this.attachImage(file);
+	                    return;
+	                }
+	            }
+	        }
+
+	        /**
+	         * Attaches an image from file
+	         *
+	         * @param {File} file
+	         */
+
+	    }, {
+	        key: 'attachImage',
+	        value: function attachImage(file) {
+	            var _this6 = this;
+
+	            var reader = new FileReader();
+
+	            // Event: On image loaded
+	            reader.onload = function (e) {
+	                var base64 = e.target.result;
+	                var filename = file.name || Date.now().toString() + '.png';
+
+	                debug.log('Attaching image "' + filename + '"...', _this6);
+
+	                // Remove headers
+	                //base64 = base64.replace('data:image/png;base64,', '');
+
+	                // TEST
+	                var $img = _.img({ src: base64 });
+
+	                _this6.$element.find('.attachments').append($img);
+	            };
+
+	            // Read the file
+	            reader.readAsDataURL(file);
+	        }
+
+	        /**
 	         * Gets priority icon
 	         *
 	         * @returns {String} icon
@@ -11075,30 +11241,30 @@
 	    }, {
 	        key: 'getComments',
 	        value: function getComments() {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            var $comments = this.$element.find('.comments');
 
 	            ApiHelper.getUser().then(function (user) {
-	                ApiHelper.getIssueComments(_this6.model).then(function (comments) {
-	                    _this6.$element.toggleClass('loading', false);
+	                ApiHelper.getIssueComments(_this7.model).then(function (comments) {
+	                    _this7.$element.toggleClass('loading', false);
 
 	                    $comments.html(_.each(comments, function (i, comment) {
 	                        var collaborator = window.resources.collaborators[comment.collaborator];
 	                        var text = markdownToHtml(comment.text);
 	                        var isUser = collaborator.name == user.name;
 
-	                        return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.displayName || collaborator.name)), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this6.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
-	                            _this6.$element.toggleClass('loading', true);
+	                        return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.displayName || collaborator.name)), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this7.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
+	                            _this7.$element.toggleClass('loading', true);
 
-	                            comment.text = _this6.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
+	                            comment.text = _this7.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
 
-	                            _this6.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(markdownToHtml(comment.text) || '');
+	                            _this7.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(markdownToHtml(comment.text) || '');
 
-	                            ApiHelper.updateIssueComment(_this6.model, comment).then(function () {
-	                                _this6.$element.toggleClass('loading', false);
+	                            ApiHelper.updateIssueComment(_this7.model, comment).then(function () {
+	                                _this7.$element.toggleClass('loading', false);
 	                            });
-	                        }).blur(_this6.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
+	                        }).blur(_this7.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
 	                    }));
 	                });
 	            });
@@ -11242,7 +11408,12 @@
 	        _this.onChange();
 
 	        _this.$element.find('.body .rendered').html(markdownToHtml(_this.model.description) || '');
-	    }).blur(this.onBlur).keyup(this.onKeyUp)),
+	    }).blur(this.onBlur).keyup(this.onKeyUp).on('paste', function (e) {
+	        _this.onPaste(e);
+	    })),
+
+	    // Attachments
+	    _.div({ class: 'attachments' }),
 
 	    // Comments
 	    _.div({ class: 'comments' }),

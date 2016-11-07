@@ -211,6 +211,19 @@ class ApiHelper {
     }
     
     /**
+     * Gets issue attachments
+     *
+     * @returns {Promise} promise
+     */
+    getIssueAttachments() {
+        return new Promise((callback) => {
+            window.resources.issueAttachments = [];
+            
+            callback();
+        });
+    }
+    
+    /**
      * Gets milestones 
      *
      * @returns {Promise} promise
@@ -329,6 +342,19 @@ class ApiHelper {
     }
     
     /**
+     * Adds issue attachment
+     *
+     * @param {File} attachment
+     *
+     * @returns {Promise} promise
+     */
+    addIssueAttachment(attachment) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+    
+    /**
      * Adds milestone 
      *
      * @param {String} milestone
@@ -435,6 +461,19 @@ class ApiHelper {
         });
     }
     
+    /**
+     * Updates issue attachment
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */
+    updateIssueAttachment(index) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+
     /**
      * Removes milestone 
      *
@@ -543,6 +582,20 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateIssueColumn(index, column) {
+        return new Promise((callback) => {
+            callback();
+        });
+    }
+    
+    /**
+     * Updates issue attachment
+     *
+     * @param {Number} index
+     * @param {File} attachment
+     *
+     * @returns {Promise} promise
+     */
+    updateIssueAttachment(index, file) {
         return new Promise((callback) => {
             callback();
         });
@@ -677,6 +730,9 @@ class ApiHelper {
 
             case 'issueColumns':
                 return this.removeIssueColumn(index);
+            
+            case 'issueAttachments':
+                return this.removeIssueAttachment(index);
 
             case 'milestones':
                 return this.removeMilestone(index);
@@ -719,6 +775,9 @@ class ApiHelper {
             case 'issueColumns':
                 return this.addIssueColumn(item);
 
+            case 'issueAttachments':
+                return this.addIssueAttachment(item);
+            
             case 'milestones':
                 return this.addMilestone(item);
 
@@ -762,6 +821,9 @@ class ApiHelper {
 
             case 'issueColumns':
                 return this.updateIssueColumn(item, identifier);
+            
+            case 'issueAttachments':
+                return this.updateIssueAttachment(item, identifier);
 
             case 'versions':
                 return this.updateVersion(item, identifier);
@@ -818,6 +880,9 @@ class ApiHelper {
             case 'issueColumns':
                 return this.getIssueColumns();
 
+            case 'issueAttachments':
+                return this.getIssueAttachments();
+            
             case 'milestones':
                 return this.getMilestones();
 
@@ -871,6 +936,9 @@ class ApiHelper {
         })
         .then(() => {
             return get('issueColumns');
+        })
+        .then(() => {
+            return get('issueAttachments');
         })
         .then(() => {
             return get('collaborators');

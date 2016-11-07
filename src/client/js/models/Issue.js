@@ -22,6 +22,7 @@ class Issue {
         this.id = properties.id;
         
         // Optional properties
+        this.attachments = properties.attachments || [];
         this.column = properties.column || 0;
         this.type = properties.type || 0;
         this.priority = properties.priority || 0;
@@ -152,16 +153,27 @@ class Issue {
     }
 
     /**
-     * Get estimated hours
+     * Gets estimated hours
      *
      * @returns {Number} Hours
      */
     getEstimate() {
-        return estimateToFloat(window.resources.issueEstimates[this.estimate]);
+        return estimateToFloat(resources.issueEstimates[this.estimate]);
+    }
+
+    /**
+     * Gets attachments
+     *
+     * @returns {Array} Attachments
+     */
+    getAttachments() {
+        return this.attachments;
     }
 
     /**
      * Gets an object with all the baked values
+     *
+     * @returns {Object} Baked values
      */
     getBakedValues() {
         return {

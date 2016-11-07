@@ -532,6 +532,57 @@ class IssueEditor extends View {
     }
 
     /**
+     * Event: Paste
+     *
+     * @param {Event} e
+     */
+    onPaste(e) {
+        e = e.originalEvent;
+
+        let items = e.clipboardData.items;
+        let IMAGE_MIME_REGEX = /^image\/(p?jpeg|gif|png)$/i;
+
+        // Look through all clipboard items
+        for (let i = 0; i < items.length; i++) {
+            // Check for image MIME type
+            if(IMAGE_MIME_REGEX.test(items[i].type)) {
+                let file = items[i].getAsFile();
+
+                this.attachImage(file);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Attaches an image from file
+     *
+     * @param {File} file
+     */
+    attachImage(file) {
+        let reader = new FileReader();
+
+        // Event: On image loaded
+        reader.onload = (e) => {
+            let base64 = e.target.result;
+            let filename = file.name || Date.now().toString() + '.png';
+
+            debug.log('Attaching image "' + filename + '"...', this);
+
+            // Remove headers
+            //base64 = base64.replace('data:image/png;base64,', '');
+
+            // TEST
+            let $img = _.img({src: base64});
+
+            this.$element.find('.attachments').append($img);
+        };
+
+        // Read the file
+        reader.readAsDataURL(file);
+    }
+
+    /**
      * Gets priority icon
      *
      * @returns {String} icon

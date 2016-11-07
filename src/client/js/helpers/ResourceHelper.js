@@ -45,6 +45,18 @@ class ResourceHelper {
         return 0;
     }
     
+    static getIssueAttachment(name) {
+        for(let i in resources.issueAttachments) {
+            let type = resources.issueAttachments[i];
+            
+            if(type == name) {
+                return i;
+            }
+        }
+
+        return 0;
+    }
+    
     static getIssueType(name) {
         for(let i in resources.issueTypes) {
             let type = resources.issueTypes[i];

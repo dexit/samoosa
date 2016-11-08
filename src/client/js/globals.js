@@ -319,3 +319,23 @@ window.estimateToFloat = function estimateToFloat(estimate) {
     // Invaild or no estimate
     return 0;
 }
+
+// Show modal
+window.modal = function modal($content) {
+    $('.app-container').toggleClass('disabled', $content != false);
+
+    if($content == false) {
+        $('.modal-backdrop').remove();
+        return;
+    }
+    
+    let $backdrop = _.div({class: 'modal-backdrop'},
+        _.div({class: 'modal-content'},
+           $content 
+        )
+    ).click(() => {
+        modal(false);
+    });
+
+    $('body').append($backdrop);
+}

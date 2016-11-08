@@ -375,6 +375,42 @@ class GitHubApi extends ApiHelper {
     }
     
     /**
+     * Gets issue attachments
+     *
+     * @param {Issue} issue
+     *
+     * @returns {Promise} Promise
+     */
+    getIssueAttachments(issue) {
+        let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id;
+
+        return this.get(apiUrl, 'ref=samoosa-resources') 
+        .then((response) => {
+            if(!Array.isArray(response)) {
+                return Promise.reject(new Error('Response of issue attachments was not an array'));
+            }
+            
+            let attachments = [];
+
+            for(let obj of response) {
+                let timestamp = obj.name.split('__')[0];
+                let name = obj.name.split('__')[1];
+
+                attachments[attachments.length] = new Attachment({
+                    name: name,
+                    timestamp: timestamp,
+                    url: obj.download_url
+                });
+            }
+
+            return Promise.resolve(attachments);  
+        })
+        .catch(() => {
+            return Promise.resolve([]);  
+        });
+    }
+    
+    /**
      * Gets issue priorities
      *
      * @returns {Promise} promise
@@ -555,12 +591,13 @@ class GitHubApi extends ApiHelper {
     /**
      * Adds issue attachment
      *
+     * @param {Issue} issue
      * @param {Attachment} attachment
      *
      * @returns {Promise} Promise
      */
-    addIssueAttachment(attachment) {
-        let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + attachment.getTimestamp().getTime() + '__' + attachment.getName();
+    addIssueAttachment(issue, attachment) {
+        let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getTimestamp().getTime() + '__' + attachment.getName();
         let postData = {
             message: 'Added attachment "' + attachment.name + '"',
             content: attachment.getBase64(),

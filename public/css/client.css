@@ -130,6 +130,23 @@ body, html {
     line-height: 1em; }
 
 /**
+ * A modal
+ */
+.modal-backdrop {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%; }
+  .modal-backdrop .modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90%;
+    max-height: 90%; }
+
+/**
  * A transparent, border-less button
  */
 .btn-transparent {
@@ -296,7 +313,7 @@ body, html {
     display: none; }
   .issue-editor.expanded .body, .issue-editor.expanded .operations, .issue-editor.expanded .comments, .issue-editor.expanded .add-comment {
     display: block; }
-  .issue-editor.expanded .meta {
+  .issue-editor.expanded .meta, .issue-editor.expanded .attachments {
     display: flex; }
   .issue-editor.expanded.selected .multi-edit-notification {
     display: block;
@@ -319,7 +336,7 @@ body, html {
     flex-basis: 100%; }
     .issue-editor.expanded.selected .multi-edit-actions button {
       margin-left: 10px; }
-  .issue-editor.expanded.selected .body, .issue-editor.expanded.selected .comments, .issue-editor.expanded.selected .add-comment {
+  .issue-editor.expanded.selected .body, .issue-editor.expanded.selected .attachments, .issue-editor.expanded.selected .comments, .issue-editor.expanded.selected .add-comment {
     display: none; }
   .issue-editor .multi-edit-toggle, .issue-editor .multi-edit-notification, .issue-editor .multi-edit-actions {
     display: none; }
@@ -444,15 +461,13 @@ body, html {
         display: none; }
       .issue-editor > .header span.icon-open, .issue-editor > .header input.icon-open, .issue-editor > .header h4.icon-open {
         display: inline; }
-  .issue-editor .body, .issue-editor .operations, .issue-editor .comments, .issue-editor .add-comment {
+  .issue-editor .body, .issue-editor .operations, .issue-editor .attachments, .issue-editor .comments, .issue-editor .add-comment {
     display: none;
     padding: 15px; }
-  .issue-editor .meta, .issue-editor .comments, .issue-editor .add-comment {
-    background-color: #e0e0e0; }
   .issue-editor .meta {
     display: none;
     flex-wrap: wrap;
-    padding-right: 15px; }
+    padding: 0px 15px 15px 0px; }
     .issue-editor .meta .meta-field {
       width: 50%;
       flex-basis: 50%;
@@ -495,31 +510,65 @@ body, html {
       display: block;
       width: 100%;
       min-height: 100px; }
-  .issue-editor .comments .comment {
-    display: flex;
-    margin-top: 15px;
+  .issue-editor .attachments {
+    padding: 0px 0px 15px 15px;
+    flex-wrap: wrap;
     position: relative; }
-    .issue-editor .comments .comment:first-child {
-      margin-top: 0px; }
-    .issue-editor .comments .comment .collaborator {
-      width: 80px;
-      padding-right: 15px;
-      flex-shrink: 0; }
-      .issue-editor .comments .comment .collaborator img {
-        max-width: 30px; }
-    .issue-editor .comments .comment .btn-edit {
+    .issue-editor .attachments label {
+      flex-basis: 100%;
+      display: block; }
+    .issue-editor .attachments input[type="file"], .issue-editor .attachments .btn-upload-attachment {
       position: absolute;
-      top: 5px;
-      right: 5px;
-      color: #fff; }
-    .issue-editor .comments .comment .text, .issue-editor .comments .comment .rendered, .issue-editor .comments .comment .edit {
-      resize: none;
+      top: 0px;
+      right: 20px;
+      width: 15px;
+      height: 15px;
+      cursor: pointer; }
+    .issue-editor .attachments input[type="file"] {
+      opacity: 0;
+      overflow: hidden;
+      z-index: -100; }
+    .issue-editor .attachments .attachment {
       flex-grow: 1;
-      padding: 10px;
-      border-radius: 5px;
-      background-color: #f5f5f5; }
+      max-width: 64px;
+      height: 64px;
+      margin: 0px 15px 15px 0px;
+      display: flex;
+      flex-direction: vertical;
+      align-items: center;
+      justify-content: center;
+      padding: 5px; }
+      .issue-editor .attachments .attachment img {
+        max-width: 100%;
+        max-height: 100%; }
+  .issue-editor .comments {
+    padding: 0px 15px 15px 15px; }
+    .issue-editor .comments .comment {
+      display: flex;
+      margin-top: 15px;
+      position: relative; }
+      .issue-editor .comments .comment:first-child {
+        margin-top: 0px; }
+      .issue-editor .comments .comment .collaborator {
+        width: 80px;
+        padding-right: 15px;
+        flex-shrink: 0; }
+        .issue-editor .comments .comment .collaborator img {
+          max-width: 30px; }
+      .issue-editor .comments .comment .btn-edit {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        color: #fff; }
+      .issue-editor .comments .comment .text, .issue-editor .comments .comment .rendered, .issue-editor .comments .comment .edit {
+        resize: none;
+        flex-grow: 1;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f5f5f5; }
   .issue-editor .add-comment {
-    text-align: right; }
+    text-align: right;
+    padding: 0px 15px 15px 15px; }
     .issue-editor .add-comment textarea {
       text-align: left;
       padding: 10px;
@@ -1385,8 +1434,10 @@ a {
     .issue-editor textarea:focus, .issue-editor .rendered:focus {
       outline: none;
       border: 2px solid #E70D3B; }
-  .issue-editor .btn-edit:hover .fa {
-    color: #E70D3B; }
+  .issue-editor .btn-edit, .issue-editor .btn-upload-attachment {
+    color: #fff; }
+    .issue-editor .btn-edit:hover .fa, .issue-editor .btn-upload-attachment:hover .fa {
+      color: #E70D3B; }
   .issue-editor > .header {
     background-color: transparent; }
     .issue-editor > .header h4, .issue-editor > .header h4 input {
@@ -1405,10 +1456,12 @@ a {
       color: #E70D3B; }
   .issue-editor .meta, .issue-editor .body {
     color: #5b84a2; }
+  .issue-editor label {
+    line-height: 2rem;
+    height: 2rem;
+    color: #5b84a2; }
   .issue-editor .body {
     background-color: #21303B; }
-    .issue-editor .body label {
-      line-height: 2rem; }
     .issue-editor .body textarea, .issue-editor .body .rendered {
       padding: 10px;
       border-radius: 5px; }
@@ -1426,13 +1479,16 @@ a {
       line-height: 1.5em; }
   .issue-editor .meta {
     background-color: transparent; }
-    .issue-editor .meta .meta-field label {
-      line-height: 2rem;
-      height: 2rem; }
     .issue-editor .meta .meta-field select {
       font-weight: bold; }
   .issue-editor .multi-edit-notification {
     color: #E70D3B !important; }
+  .issue-editor .attachments {
+    background-color: transparent; }
+    .issue-editor .attachments .attachment {
+      background-color: #171e23; }
+      .issue-editor .attachments .attachment:hover {
+        outline: 2px solid #E70D3B; }
   .issue-editor .comments, .issue-editor .add-comment {
     background-color: transparent; }
     .issue-editor .comments .comment .rendered, .issue-editor .add-comment .comment .rendered {

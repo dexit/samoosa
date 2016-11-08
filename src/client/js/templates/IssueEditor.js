@@ -177,10 +177,19 @@ module.exports = function render() {
         ),
         
         // Attachments
-        _.div({class: 'attachments'}),
+        _.div({class: 'attachments'},
+            _.label('Attachments'),
+            _.input({name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file'})
+                .change((e) => { this.onAttachmentFileInputChange(e); }),
+            _.label({for: 'input-upload-attachment-' + this.model.id, class: 'btn-upload-attachment'},
+                _.span({class: 'fa fa-upload'})
+            )
+        ),
 
         // Comments
-        _.div({class: 'comments'}),
+        _.div({class: 'comments'},
+            _.label('Comments')
+        ),
 
         // Add comment
         _.if(!ApiHelper.isSpectating(),

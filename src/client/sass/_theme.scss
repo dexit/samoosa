@@ -402,7 +402,9 @@ a {
         }
     }
 
-    .btn-edit {
+    .btn-edit, .btn-upload-attachment {
+        color: $white;
+
         &:hover {
             .fa {
                 color: $pink-medium;
@@ -444,12 +446,14 @@ a {
         color: $teal-light;
     }
 
+    label {
+        line-height: 2rem;
+        height: 2rem;
+        color: $teal-light;
+    }
+
     .body {
         background-color: $teal-dark;
-
-        label {
-            line-height: 2rem;
-        }
 
         textarea, .rendered {
             padding: 10px;
@@ -483,11 +487,6 @@ a {
         background-color: transparent;
 
         .meta-field {
-            label {
-                line-height: 2rem;
-                height: 2rem;
-            }
-
             select {
                 font-weight: bold;
             }
@@ -496,6 +495,18 @@ a {
     
     .multi-edit-notification {
         color: $pink-medium !important;
+    }
+
+    .attachments {
+        background-color: transparent;
+        
+        .attachment {
+            background-color: $teal-darker;
+
+            &:hover {
+                outline: 2px solid $pink-medium;
+            }
+        }
     }
 
     .comments, .add-comment {

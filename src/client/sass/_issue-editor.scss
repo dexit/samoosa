@@ -42,7 +42,7 @@
             display: block;
         }
 
-        .meta {
+        .meta, .attachments {
             display: flex;
         }
 
@@ -76,7 +76,7 @@
                 }
             }
 
-            .body, .comments, .add-comment {
+            .body, .attachments, .comments, .add-comment {
                 display: none;
             }
         }
@@ -275,19 +275,15 @@
         }
     }
 
-    .body, .operations, .comments, .add-comment {
+    .body, .operations, .attachments, .comments, .add-comment {
         display: none;
         padding: 15px;
-    }
-
-    .meta, .comments, .add-comment {
-        background-color: material-color('grey', '300');
     }
 
     .meta {
         display: none;
         flex-wrap: wrap;
-        padding-right: 15px;
+        padding: 0px 15px 15px 0px;
 
         .meta-field {
             width: 50%;
@@ -352,7 +348,52 @@
         }
     }
     
+    .attachments {
+        padding: 0px 0px 15px 15px;
+        flex-wrap: wrap;
+        position: relative;
+
+        label {
+            flex-basis: 100%;
+            display: block;
+        }
+
+        input[type="file"], .btn-upload-attachment {
+            position: absolute;
+            top: 0px;
+            right: 20px;
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+        }
+
+        input[type="file"] {
+            opacity: 0;
+            overflow: hidden;
+            z-index: -100;
+        }
+
+        .attachment {
+            flex-grow: 1;
+            max-width: 64px;
+            height: 64px;
+            margin: 0px 15px 15px 0px;
+            display: flex;
+            flex-direction: vertical;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+
+            img {
+                max-width: 100%;
+                max-height: 100%;
+            }
+        }
+    }
+
     .comments {
+        padding: 0px 15px 15px 15px;
+
         .comment {
             display: flex;
             margin-top: 15px;
@@ -391,6 +432,7 @@
 
     .add-comment {
         text-align: right;
+        padding: 0px 15px 15px 15px;
         
         textarea {    
             text-align: left;

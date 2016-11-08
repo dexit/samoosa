@@ -57,6 +57,7 @@ class IssueEditor extends View {
         } else {
             if(!wasExpanded) {
                 this.getComments();
+                this.getAttachments();
             }
         }
     }
@@ -532,6 +533,17 @@ class IssueEditor extends View {
     }
 
     /**
+     * Event: On click attachment
+     *
+     * @param {Event} e
+     */
+    onClickAttachment(e) {
+        let $preview = $(this).find('.attachment-preview');
+
+        modal($preview.clone());
+    }
+
+    /**
      * Event: Paste
      *
      * @param {Event} e
@@ -555,6 +567,17 @@ class IssueEditor extends View {
     }
 
     /**
+     * Event: Attachment file input
+     *
+     * @param {Event} e
+     */
+    onAttachmentFileInputChange(e) {
+        if(e.target.files && e.target.files.length > 0) {
+            this.attachImage(e.target.files[0]);
+        } 
+    }
+
+    /**
      * Attaches an image from file
      *
      * @param {File} file
@@ -565,31 +588,29 @@ class IssueEditor extends View {
         // Event: On image loaded
         reader.onload = (e) => {
             let base64 = e.target.result;
-            let filename = (file.name || 'Pasted') + '.png';
+            let filename = file.name || 'pasted.png';
 
             debug.log('Attaching image "' + filename + '"...', this);
 
             // Remove headers
-            base64 = base64.replace('data:image/png;base64,', '');
+            base64 = base64.replace(/data:(.+);base64,/, '');
 
             let attachment = new Attachment({
                 name: filename,
+                issueId: this.model.id,
                 base64: base64
             });
 
-            spinner(true);
+            this.$element.toggleClass('loading', true);
             
-            ResourceHelper.addResource('issueAttachments', attachment)
+            ApiHelper.addIssueAttachment(this.model, attachment)
             .then((uploadedAttachment) => {
-                let $img = _.img({src: uploadedAttachment.getUrl()});
-                this.$element.find('.attachments').append($img);
-
-                spinner(false);
+                this.getAttachments();
             })
             .catch((e) => {
                 displayError(e);
                 
-                spinner(false);
+                this.$element.toggleClass('loading', false);
             });
         };
 
@@ -669,64 +690,91 @@ class IssueEditor extends View {
         return _.span({class: 'type-indicator fa fa-' + icon + ' ' + type});
     }
 
+    /**
+     * Lazy load the attachments
+     */
+    getAttachments() {
+        this.$element.toggleClass('loading', true);
+        
+        let $attachments = this.$element.find('.attachments');
+        
+        ApiHelper.getIssueAttachments(this.model)
+        .then((attachments) => {
+            this.$element.toggleClass('loading', false);
 
+            $attachments.toggleClass('hidden', !attachments || attachments.length < 1);
+
+            $attachments.children('.attachment').remove();
+
+            _.append($attachments,
+                _.each(attachments, (i, attachment) => {
+                    return _.button({class: 'attachment'},
+                        _.img({class: 'attachment-preview', src: attachment.getURL()})
+                    ).click(this.onClickAttachment);   
+                })
+            );
+        });
+    }
+        
     /**
      * Lazy load the comments
      */
     getComments() {
+        this.$element.toggleClass('loading', true);
+        
         let $comments = this.$element.find('.comments');
+        let user = User.getCurrent();
 
-        ApiHelper.getUser()
-        .then((user) => {
-            ApiHelper.getIssueComments(this.model)
-            .then((comments) => {
-                this.$element.toggleClass('loading', false);
-                
-                $comments.html(
-                    _.each(comments, (i, comment) => {
-                        let collaborator = window.resources.collaborators[comment.collaborator];
-                        let text = markdownToHtml(comment.text);
-                        let isUser = collaborator.name == user.name;
-                        
-                        return _.div({class: 'comment', 'data-index': comment.index},
-                            _.div({class: 'collaborator'},
-                                _.img({src: collaborator.avatar}),
-                                _.p(collaborator.displayName || collaborator.name)    
+        ApiHelper.getIssueComments(this.model)
+        .then((comments) => {
+            this.$element.toggleClass('loading', false);
+            
+            $comments.children('.comment').remove();
+
+            _.append($comments,
+                _.each(comments, (i, comment) => {
+                    let collaborator = resources.collaborators[comment.collaborator];
+                    let text = markdownToHtml(comment.text);
+                    let isUser = collaborator.name == user.name;
+                    
+                    return _.div({class: 'comment', 'data-index': comment.index},
+                        _.div({class: 'collaborator'},
+                            _.img({src: collaborator.avatar}),
+                            _.p(collaborator.displayName || collaborator.name)    
+                        ),
+                        _.if(isUser, 
+                            _.button({class: 'btn-edit'},
+                                _.span({class: 'fa fa-edit'})
+                            ).click(this.onClickEdit),
+                            _.div({class: 'rendered'},
+                                text
                             ),
-                            _.if(isUser, 
-                                _.button({class: 'btn-edit'},
-                                    _.span({class: 'fa fa-edit'})
-                                ).click(this.onClickEdit),
-                                _.div({class: 'rendered'},
-                                    text
-                                ),
-                                _.textarea({class: 'edit selectable hidden text btn-transparent'},
-                                    comment.text
-                                ).change(() => {
-                                    this.$element.toggleClass('loading', true);
-                                    
-                                    comment.text = this.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
+                            _.textarea({class: 'edit selectable hidden text btn-transparent'},
+                                comment.text
+                            ).change(() => {
+                                this.$element.toggleClass('loading', true);
+                                
+                                comment.text = this.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
 
-                                    this.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(
-                                        markdownToHtml(comment.text) || ''
-                                    );
+                                this.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(
+                                    markdownToHtml(comment.text) || ''
+                                );
 
-                                    ApiHelper.updateIssueComment(this.model, comment)
-                                    .then(() => {
-                                        this.$element.toggleClass('loading', false);
-                                    });
-                                })
-                                .blur(this.onBlur)
-                            ),
-                            _.if(!isUser,
-                                _.div({class: 'text'},
-                                    text
-                                )
+                                ApiHelper.updateIssueComment(this.model, comment)
+                                .then(() => {
+                                    this.$element.toggleClass('loading', false);
+                                });
+                            })
+                            .blur(this.onBlur)
+                        ),
+                        _.if(!isUser,
+                            _.div({class: 'text'},
+                                text
                             )
-                        );
-                    })
-                );
-            });
+                        )
+                    );
+                })
+            );
         });
     }
 }

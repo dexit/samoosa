@@ -211,19 +211,6 @@ class ApiHelper {
     }
     
     /**
-     * Gets issue attachments
-     *
-     * @returns {Promise} promise
-     */
-    getIssueAttachments() {
-        return new Promise((callback) => {
-            window.resources.issueAttachments = [];
-            
-            callback();
-        });
-    }
-    
-    /**
      * Gets milestones 
      *
      * @returns {Promise} promise
@@ -336,19 +323,6 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     addIssueColumn(column) {
-        return new Promise((callback) => {
-            callback();
-        });
-    }
-    
-    /**
-     * Adds issue attachment
-     *
-     * @param {Attachment} attachment
-     *
-     * @returns {Promise} promise
-     */
-    addIssueAttachment(attachment) {
         return new Promise((callback) => {
             callback();
         });
@@ -588,20 +562,6 @@ class ApiHelper {
     }
     
     /**
-     * Updates issue attachment
-     *
-     * @param {Number} index
-     * @param {File} attachment
-     *
-     * @returns {Promise} promise
-     */
-    updateIssueAttachment(index, file) {
-        return new Promise((callback) => {
-            callback();
-        });
-    }
-    
-    /**
      * Updates milestone 
      *
      * @param {Number} index
@@ -660,14 +620,16 @@ class ApiHelper {
 
    
     // ----------
-    // Issue methods
+    // Issue comment methods
     // ---------- 
     /** 
      * Gets issue comments
      *
-     * @returns {Promise} promise
+     * @param {Issue} issue
+     *
+     * @returns {Promise} Array of comments
      */
-    getIssueComments() {
+    getIssueComments(issue) {
         return new Promise((callback) => {
             callback([]);
         });
@@ -700,6 +662,45 @@ class ApiHelper {
             callback([]);
         });
     }
+
+    // ----------
+    // Issue attachment methods
+    // ----------
+    /**
+     * Gets issue attachments
+     *
+     * @param {Issue} issue
+     *
+     * @return {Promise} List of attachments
+     */
+    getIssueAttachments() {
+        return Promise.resolve([]);
+    }
+    
+    /**
+     * Adds issue attachment
+     *
+     * @param {Issue} issue
+     * @param {Attachment} attachment
+     *
+     * @returns {Promise} Promise
+     */
+    addIssueAttachment(issue, attachment) {
+        return Promise.resolve();
+    }
+
+    /**
+     * Updates issue attachment
+     *
+     * @param {Issue} issue
+     * @param {Attachment} attachment
+     *
+     * @returns {Promise} Promise
+     */
+    updateIssueAttachment(issue, attachment) {
+        return Promise.resolve();
+    }
+    
 
     // ----------
     // Generic methods
@@ -745,6 +746,9 @@ class ApiHelper {
             
             case 'projects':
                 return this.removeProject(index);
+            
+            default:
+                return Promise.reject(new Error('Resource "' + resource + '" is invalid for DELETE'));
         }
     }
     
@@ -775,9 +779,6 @@ class ApiHelper {
             case 'issueColumns':
                 return this.addIssueColumn(item);
 
-            case 'issueAttachments':
-                return this.addIssueAttachment(item);
-            
             case 'milestones':
                 return this.addMilestone(item);
 
@@ -791,9 +792,7 @@ class ApiHelper {
                 return this.addProject(item);
         
             default:
-                return new Promise((resolve, reject) => {
-                    reject(new Error('Resource "' + resource + '" is unknown'));
-                });
+                return Promise.reject(new Error('Resource "' + resource + '" is invalid for PUT'));
         }
     }
     
@@ -838,9 +837,7 @@ class ApiHelper {
                 return this.updateProject(item);
             
             default:
-                return new Promise((resolve, reject) => {
-                    reject(new Error('Resource "' + resource + '" is unknown'));
-                });
+                return Promise.reject(new Error('Resource "' + resource + '" is invalid for POST'));
         }
     }
 
@@ -880,9 +877,6 @@ class ApiHelper {
             case 'issueColumns':
                 return this.getIssueColumns();
 
-            case 'issueAttachments':
-                return this.getIssueAttachments();
-            
             case 'milestones':
                 return this.getMilestones();
 
@@ -896,9 +890,7 @@ class ApiHelper {
                 return this.getProjects();
 
             default:
-                return new Promise((resolve, reject) => {
-                    reject(new Error('Resource "' + resource + '" is unknown'));
-                });
+                return Promise.reject(new Error('Resource "' + resource + '" is invalid for GET'));
         }
     }
 
@@ -936,9 +928,6 @@ class ApiHelper {
         })
         .then(() => {
             return get('issueColumns');
-        })
-        .then(() => {
-            return get('issueAttachments');
         })
         .then(() => {
             return get('collaborators');

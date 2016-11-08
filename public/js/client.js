@@ -104,16 +104,16 @@
 	// Views
 	window.Navbar = __webpack_require__(31);
 	window.IssueEditor = __webpack_require__(33);
-	window.MilestoneEditor = __webpack_require__(35);
-	window.ResourceEditor = __webpack_require__(37);
-	window.PlanItemEditor = __webpack_require__(39);
-	window.PlanEditor = __webpack_require__(41);
-	window.ProjectEditor = __webpack_require__(43);
-	window.FilterEditor = __webpack_require__(45);
-	window.BurnDownChart = __webpack_require__(47);
+	window.MilestoneEditor = __webpack_require__(34);
+	window.ResourceEditor = __webpack_require__(36);
+	window.PlanItemEditor = __webpack_require__(38);
+	window.PlanEditor = __webpack_require__(40);
+	window.ProjectEditor = __webpack_require__(42);
+	window.FilterEditor = __webpack_require__(44);
+	window.BurnDownChart = __webpack_require__(46);
 
 	// Routes
-	__webpack_require__(49);
+	__webpack_require__(48);
 
 	// Title
 	$('head title').html((Router.params.project ? Router.params.project + ' - ' : '') + 'Samoosa');
@@ -4374,6 +4374,22 @@
 	    return 0;
 	};
 
+	// Show modal
+	window.modal = function modal($content) {
+	    $('.app-container').toggleClass('disabled', $content != false);
+
+	    if ($content == false) {
+	        $('.modal-backdrop').remove();
+	        return;
+	    }
+
+	    var $backdrop = _.div({ class: 'modal-backdrop' }, _.div({ class: 'modal-content' }, $content)).click(function () {
+	        modal(false);
+	    });
+
+	    $('body').append($backdrop);
+	};
+
 /***/ },
 /* 17 */
 /***/ function(module, exports) {
@@ -5513,6 +5529,64 @@
 	        }
 
 	        /**
+	         * Gets issue attachments
+	         *
+	         * @param {Issue} issue
+	         *
+	         * @returns {Promise} Promise
+	         */
+
+	    }, {
+	        key: 'getIssueAttachments',
+	        value: function getIssueAttachments(issue) {
+	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id;
+
+	            return this.get(apiUrl, 'ref=samoosa-resources').then(function (response) {
+	                if (!Array.isArray(response)) {
+	                    return Promise.reject(new Error('Response of issue attachments was not an array'));
+	                }
+
+	                var attachments = [];
+
+	                var _iteratorNormalCompletion2 = true;
+	                var _didIteratorError2 = false;
+	                var _iteratorError2 = undefined;
+
+	                try {
+	                    for (var _iterator2 = response[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                        var obj = _step2.value;
+
+	                        var timestamp = obj.name.split('__')[0];
+	                        var name = obj.name.split('__')[1];
+
+	                        attachments[attachments.length] = new Attachment({
+	                            name: name,
+	                            timestamp: timestamp,
+	                            url: obj.download_url
+	                        });
+	                    }
+	                } catch (err) {
+	                    _didIteratorError2 = true;
+	                    _iteratorError2 = err;
+	                } finally {
+	                    try {
+	                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                            _iterator2.return();
+	                        }
+	                    } finally {
+	                        if (_didIteratorError2) {
+	                            throw _iteratorError2;
+	                        }
+	                    }
+	                }
+
+	                return Promise.resolve(attachments);
+	            }).catch(function () {
+	                return Promise.resolve([]);
+	            });
+	        }
+
+	        /**
 	         * Gets issue priorities
 	         *
 	         * @returns {Promise} promise
@@ -5724,6 +5798,7 @@
 	        /**
 	         * Adds issue attachment
 	         *
+	         * @param {Issue} issue
 	         * @param {Attachment} attachment
 	         *
 	         * @returns {Promise} Promise
@@ -5731,8 +5806,8 @@
 
 	    }, {
 	        key: 'addIssueAttachment',
-	        value: function addIssueAttachment(attachment) {
-	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + attachment.getTimestamp().getTime() + '__' + attachment.getName();
+	        value: function addIssueAttachment(issue, attachment) {
+	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getTimestamp().getTime() + '__' + attachment.getName();
 	            var postData = {
 	                message: 'Added attachment "' + attachment.name + '"',
 	                content: attachment.getBase64(),
@@ -6105,49 +6180,6 @@
 	        value: function processVersions(labels) {
 	            window.resources.versions = [];
 
-	            var _iteratorNormalCompletion2 = true;
-	            var _didIteratorError2 = false;
-	            var _iteratorError2 = undefined;
-
-	            try {
-	                for (var _iterator2 = labels[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                    var label = _step2.value;
-
-	                    var versionIndex = label.name.indexOf('version:');
-
-	                    if (versionIndex > -1) {
-	                        var versionName = label.name.replace('version:', '');
-
-	                        window.resources.versions.push(versionName);
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError2 = true;
-	                _iteratorError2 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                        _iterator2.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError2) {
-	                        throw _iteratorError2;
-	                    }
-	                }
-	            }
-	        }
-
-	        /**
-	         * Process issue priotities
-	         *
-	         * @param {Array} labels
-	         */
-
-	    }, {
-	        key: 'processIssuePriorities',
-	        value: function processIssuePriorities(labels) {
-	            window.resources.issuePriorities = [];
-
 	            var _iteratorNormalCompletion3 = true;
 	            var _didIteratorError3 = false;
 	            var _iteratorError3 = undefined;
@@ -6156,12 +6188,12 @@
 	                for (var _iterator3 = labels[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
 	                    var label = _step3.value;
 
-	                    var index = label.name.indexOf('priority:');
+	                    var versionIndex = label.name.indexOf('version:');
 
-	                    if (index > -1) {
-	                        var name = label.name.replace('priority:', '');
+	                    if (versionIndex > -1) {
+	                        var versionName = label.name.replace('version:', '');
 
-	                        window.resources.issuePriorities.push(name);
+	                        window.resources.versions.push(versionName);
 	                    }
 	                }
 	            } catch (err) {
@@ -6181,15 +6213,15 @@
 	        }
 
 	        /**
-	         * Process issue estimates
+	         * Process issue priotities
 	         *
 	         * @param {Array} labels
 	         */
 
 	    }, {
-	        key: 'processIssueEstimates',
-	        value: function processIssueEstimates(labels) {
-	            window.resources.issueEstimates = [];
+	        key: 'processIssuePriorities',
+	        value: function processIssuePriorities(labels) {
+	            window.resources.issuePriorities = [];
 
 	            var _iteratorNormalCompletion4 = true;
 	            var _didIteratorError4 = false;
@@ -6199,12 +6231,12 @@
 	                for (var _iterator4 = labels[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
 	                    var label = _step4.value;
 
-	                    var index = label.name.indexOf('estimate:');
+	                    var index = label.name.indexOf('priority:');
 
 	                    if (index > -1) {
-	                        var name = label.name.replace('estimate:', '');
+	                        var name = label.name.replace('priority:', '');
 
-	                        window.resources.issueEstimates.push(name);
+	                        window.resources.issuePriorities.push(name);
 	                    }
 	                }
 	            } catch (err) {
@@ -6224,17 +6256,15 @@
 	        }
 
 	        /**
-	         * Process issue columns
+	         * Process issue estimates
 	         *
 	         * @param {Array} labels
 	         */
 
 	    }, {
-	        key: 'processIssueColumns',
-	        value: function processIssueColumns(labels) {
-	            window.resources.issueColumns = [];
-
-	            window.resources.issueColumns.push('to do');
+	        key: 'processIssueEstimates',
+	        value: function processIssueEstimates(labels) {
+	            window.resources.issueEstimates = [];
 
 	            var _iteratorNormalCompletion5 = true;
 	            var _didIteratorError5 = false;
@@ -6244,12 +6274,12 @@
 	                for (var _iterator5 = labels[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
 	                    var label = _step5.value;
 
-	                    var index = label.name.indexOf('column:');
+	                    var index = label.name.indexOf('estimate:');
 
 	                    if (index > -1) {
-	                        var name = label.name.replace('column:', '');
+	                        var name = label.name.replace('estimate:', '');
 
-	                        window.resources.issueColumns.push(name);
+	                        window.resources.issueEstimates.push(name);
 	                    }
 	                }
 	            } catch (err) {
@@ -6263,6 +6293,51 @@
 	                } finally {
 	                    if (_didIteratorError5) {
 	                        throw _iteratorError5;
+	                    }
+	                }
+	            }
+	        }
+
+	        /**
+	         * Process issue columns
+	         *
+	         * @param {Array} labels
+	         */
+
+	    }, {
+	        key: 'processIssueColumns',
+	        value: function processIssueColumns(labels) {
+	            window.resources.issueColumns = [];
+
+	            window.resources.issueColumns.push('to do');
+
+	            var _iteratorNormalCompletion6 = true;
+	            var _didIteratorError6 = false;
+	            var _iteratorError6 = undefined;
+
+	            try {
+	                for (var _iterator6 = labels[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+	                    var label = _step6.value;
+
+	                    var index = label.name.indexOf('column:');
+
+	                    if (index > -1) {
+	                        var name = label.name.replace('column:', '');
+
+	                        window.resources.issueColumns.push(name);
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError6 = true;
+	                _iteratorError6 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
+	                        _iterator6.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError6) {
+	                        throw _iteratorError6;
 	                    }
 	                }
 	            }
@@ -6281,13 +6356,13 @@
 	        value: function processIssueTypes(labels) {
 	            window.resources.issueTypes = [];
 
-	            var _iteratorNormalCompletion6 = true;
-	            var _didIteratorError6 = false;
-	            var _iteratorError6 = undefined;
+	            var _iteratorNormalCompletion7 = true;
+	            var _didIteratorError7 = false;
+	            var _iteratorError7 = undefined;
 
 	            try {
-	                for (var _iterator6 = labels[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-	                    var label = _step6.value;
+	                for (var _iterator7 = labels[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+	                    var label = _step7.value;
 
 	                    var index = label.name.indexOf('type:');
 
@@ -6296,46 +6371,6 @@
 
 	                        window.resources.issueTypes.push(name);
 	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError6 = true;
-	                _iteratorError6 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
-	                        _iterator6.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError6) {
-	                        throw _iteratorError6;
-	                    }
-	                }
-	            }
-	        }
-
-	        /**
-	         * Process collaborators
-	         *
-	         * @param {Array} collaborators
-	         */
-
-	    }, {
-	        key: 'processCollaborators',
-	        value: function processCollaborators(collaborators) {
-	            window.resources.collaborators = [];
-
-	            var _iteratorNormalCompletion7 = true;
-	            var _didIteratorError7 = false;
-	            var _iteratorError7 = undefined;
-
-	            try {
-	                for (var _iterator7 = collaborators[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-	                    var collaborator = _step7.value;
-
-	                    window.resources.collaborators.push({
-	                        name: collaborator.login,
-	                        avatar: collaborator.avatar_url
-	                    });
 	                }
 	            } catch (err) {
 	                _didIteratorError7 = true;
@@ -6354,6 +6389,46 @@
 	        }
 
 	        /**
+	         * Process collaborators
+	         *
+	         * @param {Array} collaborators
+	         */
+
+	    }, {
+	        key: 'processCollaborators',
+	        value: function processCollaborators(collaborators) {
+	            window.resources.collaborators = [];
+
+	            var _iteratorNormalCompletion8 = true;
+	            var _didIteratorError8 = false;
+	            var _iteratorError8 = undefined;
+
+	            try {
+	                for (var _iterator8 = collaborators[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+	                    var collaborator = _step8.value;
+
+	                    window.resources.collaborators.push({
+	                        name: collaborator.login,
+	                        avatar: collaborator.avatar_url
+	                    });
+	                }
+	            } catch (err) {
+	                _didIteratorError8 = true;
+	                _iteratorError8 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
+	                        _iterator8.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError8) {
+	                        throw _iteratorError8;
+	                    }
+	                }
+	            }
+	        }
+
+	        /**
 	         * Process issues
 	         *
 	         * @param {Array} issues
@@ -6364,13 +6439,13 @@
 	        value: function processIssues(issues) {
 	            window.resources.issues = [];
 
-	            var _iteratorNormalCompletion8 = true;
-	            var _didIteratorError8 = false;
-	            var _iteratorError8 = undefined;
+	            var _iteratorNormalCompletion9 = true;
+	            var _didIteratorError9 = false;
+	            var _iteratorError9 = undefined;
 
 	            try {
-	                for (var _iterator8 = issues[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-	                    var gitHubIssue = _step8.value;
+	                for (var _iterator9 = issues[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+	                    var gitHubIssue = _step9.value;
 
 	                    var issue = new Issue();
 
@@ -6387,13 +6462,13 @@
 
 	                    issue.labels = issue.labels || [];
 
-	                    var _iteratorNormalCompletion9 = true;
-	                    var _didIteratorError9 = false;
-	                    var _iteratorError9 = undefined;
+	                    var _iteratorNormalCompletion10 = true;
+	                    var _didIteratorError10 = false;
+	                    var _iteratorError10 = undefined;
 
 	                    try {
-	                        for (var _iterator9 = gitHubIssue.labels[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-	                            var label = _step9.value;
+	                        for (var _iterator10 = gitHubIssue.labels[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+	                            var label = _step10.value;
 
 	                            var typeIndex = label.name.indexOf('type:');
 	                            var priorityIndex = label.name.indexOf('priority:');
@@ -6428,16 +6503,16 @@
 	                            }
 	                        }
 	                    } catch (err) {
-	                        _didIteratorError9 = true;
-	                        _iteratorError9 = err;
+	                        _didIteratorError10 = true;
+	                        _iteratorError10 = err;
 	                    } finally {
 	                        try {
-	                            if (!_iteratorNormalCompletion9 && _iterator9.return) {
-	                                _iterator9.return();
+	                            if (!_iteratorNormalCompletion10 && _iterator10.return) {
+	                                _iterator10.return();
 	                            }
 	                        } finally {
-	                            if (_didIteratorError9) {
-	                                throw _iteratorError9;
+	                            if (_didIteratorError10) {
+	                                throw _iteratorError10;
 	                            }
 	                        }
 	                    }
@@ -6459,16 +6534,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError8 = true;
-	                _iteratorError8 = err;
+	                _didIteratorError9 = true;
+	                _iteratorError9 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
-	                        _iterator8.return();
+	                    if (!_iteratorNormalCompletion9 && _iterator9.return) {
+	                        _iterator9.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError8) {
-	                        throw _iteratorError8;
+	                    if (_didIteratorError9) {
+	                        throw _iteratorError9;
 	                    }
 	                }
 	            }
@@ -6632,13 +6707,13 @@
 	                _this18.get('/repos/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
 	                    var comments = [];
 
-	                    var _iteratorNormalCompletion10 = true;
-	                    var _didIteratorError10 = false;
-	                    var _iteratorError10 = undefined;
+	                    var _iteratorNormalCompletion11 = true;
+	                    var _didIteratorError11 = false;
+	                    var _iteratorError11 = undefined;
 
 	                    try {
-	                        for (var _iterator10 = gitHubComments[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-	                            var gitHubComment = _step10.value;
+	                        for (var _iterator11 = gitHubComments[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+	                            var gitHubComment = _step11.value;
 
 	                            var comment = {
 	                                collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
@@ -6649,16 +6724,16 @@
 	                            comments.push(comment);
 	                        }
 	                    } catch (err) {
-	                        _didIteratorError10 = true;
-	                        _iteratorError10 = err;
+	                        _didIteratorError11 = true;
+	                        _iteratorError11 = err;
 	                    } finally {
 	                        try {
-	                            if (!_iteratorNormalCompletion10 && _iterator10.return) {
-	                                _iterator10.return();
+	                            if (!_iteratorNormalCompletion11 && _iterator11.return) {
+	                                _iterator11.return();
 	                            }
 	                        } finally {
-	                            if (_didIteratorError10) {
-	                                throw _iteratorError10;
+	                            if (_didIteratorError11) {
+	                                throw _iteratorError11;
 	                            }
 	                        }
 	                    }
@@ -6947,22 +7022,6 @@
 	        }
 
 	        /**
-	         * Gets issue attachments
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'getIssueAttachments',
-	        value: function getIssueAttachments() {
-	            return new Promise(function (callback) {
-	                window.resources.issueAttachments = [];
-
-	                callback();
-	            });
-	        }
-
-	        /**
 	         * Gets milestones 
 	         *
 	         * @returns {Promise} promise
@@ -7102,22 +7161,6 @@
 	    }, {
 	        key: 'addIssueColumn',
 	        value: function addIssueColumn(column) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
-	        }
-
-	        /**
-	         * Adds issue attachment
-	         *
-	         * @param {Attachment} attachment
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'addIssueAttachment',
-	        value: function addIssueAttachment(attachment) {
 	            return new Promise(function (callback) {
 	                callback();
 	            });
@@ -7408,23 +7451,6 @@
 	        }
 
 	        /**
-	         * Updates issue attachment
-	         *
-	         * @param {Number} index
-	         * @param {File} attachment
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'updateIssueAttachment',
-	        value: function updateIssueAttachment(index, file) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
-	        }
-
-	        /**
 	         * Updates milestone 
 	         *
 	         * @param {Number} index
@@ -7493,17 +7519,19 @@
 	        }
 
 	        // ----------
-	        // Issue methods
+	        // Issue comment methods
 	        // ---------- 
 	        /** 
 	         * Gets issue comments
 	         *
-	         * @returns {Promise} promise
+	         * @param {Issue} issue
+	         *
+	         * @returns {Promise} Array of comments
 	         */
 
 	    }, {
 	        key: 'getIssueComments',
-	        value: function getIssueComments() {
+	        value: function getIssueComments(issue) {
 	            return new Promise(function (callback) {
 	                callback([]);
 	            });
@@ -7541,6 +7569,53 @@
 	            return new Promise(function (callback) {
 	                callback([]);
 	            });
+	        }
+
+	        // ----------
+	        // Issue attachment methods
+	        // ----------
+	        /**
+	         * Gets issue attachments
+	         *
+	         * @param {Issue} issue
+	         *
+	         * @return {Promise} List of attachments
+	         */
+
+	    }, {
+	        key: 'getIssueAttachments',
+	        value: function getIssueAttachments() {
+	            return Promise.resolve([]);
+	        }
+
+	        /**
+	         * Adds issue attachment
+	         *
+	         * @param {Issue} issue
+	         * @param {Attachment} attachment
+	         *
+	         * @returns {Promise} Promise
+	         */
+
+	    }, {
+	        key: 'addIssueAttachment',
+	        value: function addIssueAttachment(issue, attachment) {
+	            return Promise.resolve();
+	        }
+
+	        /**
+	         * Updates issue attachment
+	         *
+	         * @param {Issue} issue
+	         * @param {Attachment} attachment
+	         *
+	         * @returns {Promise} Promise
+	         */
+
+	    }, {
+	        key: 'updateIssueAttachment',
+	        value: function updateIssueAttachment(issue, attachment) {
+	            return Promise.resolve();
 	        }
 
 	        // ----------
@@ -7590,6 +7665,9 @@
 
 	                case 'projects':
 	                    return this.removeProject(index);
+
+	                default:
+	                    return Promise.reject(new Error('Resource "' + resource + '" is invalid for DELETE'));
 	            }
 	        }
 
@@ -7623,9 +7701,6 @@
 	                case 'issueColumns':
 	                    return this.addIssueColumn(item);
 
-	                case 'issueAttachments':
-	                    return this.addIssueAttachment(item);
-
 	                case 'milestones':
 	                    return this.addMilestone(item);
 
@@ -7639,9 +7714,7 @@
 	                    return this.addProject(item);
 
 	                default:
-	                    return new Promise(function (resolve, reject) {
-	                        reject(new Error('Resource "' + resource + '" is unknown'));
-	                    });
+	                    return Promise.reject(new Error('Resource "' + resource + '" is invalid for PUT'));
 	            }
 	        }
 
@@ -7689,9 +7762,7 @@
 	                    return this.updateProject(item);
 
 	                default:
-	                    return new Promise(function (resolve, reject) {
-	                        reject(new Error('Resource "' + resource + '" is unknown'));
-	                    });
+	                    return Promise.reject(new Error('Resource "' + resource + '" is invalid for POST'));
 	            }
 	        }
 
@@ -7733,9 +7804,6 @@
 	                case 'issueColumns':
 	                    return this.getIssueColumns();
 
-	                case 'issueAttachments':
-	                    return this.getIssueAttachments();
-
 	                case 'milestones':
 	                    return this.getMilestones();
 
@@ -7749,9 +7817,7 @@
 	                    return this.getProjects();
 
 	                default:
-	                    return new Promise(function (resolve, reject) {
-	                        reject(new Error('Resource "' + resource + '" is unknown'));
-	                    });
+	                    return Promise.reject(new Error('Resource "' + resource + '" is invalid for GET'));
 	            }
 	        }
 
@@ -7789,8 +7855,6 @@
 	                return get('issueEstimates');
 	            }).then(function () {
 	                return get('issueColumns');
-	            }).then(function () {
-	                return get('issueAttachments');
 	            }).then(function () {
 	                return get('collaborators');
 	            }).then(function () {
@@ -10543,7 +10607,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (IssueEditor.__proto__ || Object.getPrototypeOf(IssueEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(34);
+	        _this.template = __webpack_require__(49);
 
 	        _this.fetch();
 	        return _this;
@@ -10598,6 +10662,7 @@
 	            } else {
 	                if (!wasExpanded) {
 	                    this.getComments();
+	                    this.getAttachments();
 	                }
 	            }
 	        }
@@ -11230,6 +11295,20 @@
 	        }
 
 	        /**
+	         * Event: On click attachment
+	         *
+	         * @param {Event} e
+	         */
+
+	    }, {
+	        key: 'onClickAttachment',
+	        value: function onClickAttachment(e) {
+	            var $preview = $(this).find('.attachment-preview');
+
+	            modal($preview.clone());
+	        }
+
+	        /**
 	         * Event: Paste
 	         *
 	         * @param {Event} e
@@ -11256,6 +11335,20 @@
 	        }
 
 	        /**
+	         * Event: Attachment file input
+	         *
+	         * @param {Event} e
+	         */
+
+	    }, {
+	        key: 'onAttachmentFileInputChange',
+	        value: function onAttachmentFileInputChange(e) {
+	            if (e.target.files && e.target.files.length > 0) {
+	                this.attachImage(e.target.files[0]);
+	            }
+	        }
+
+	        /**
 	         * Attaches an image from file
 	         *
 	         * @param {File} file
@@ -11271,29 +11364,27 @@
 	            // Event: On image loaded
 	            reader.onload = function (e) {
 	                var base64 = e.target.result;
-	                var filename = (file.name || 'Pasted') + '.png';
+	                var filename = file.name || 'pasted.png';
 
 	                debug.log('Attaching image "' + filename + '"...', _this6);
 
 	                // Remove headers
-	                base64 = base64.replace('data:image/png;base64,', '');
+	                base64 = base64.replace(/data:(.+);base64,/, '');
 
 	                var attachment = new Attachment({
 	                    name: filename,
+	                    issueId: _this6.model.id,
 	                    base64: base64
 	                });
 
-	                spinner(true);
+	                _this6.$element.toggleClass('loading', true);
 
-	                ResourceHelper.addResource('issueAttachments', attachment).then(function (uploadedAttachment) {
-	                    var $img = _.img({ src: uploadedAttachment.getUrl() });
-	                    _this6.$element.find('.attachments').append($img);
-
-	                    spinner(false);
+	                ApiHelper.addIssueAttachment(_this6.model, attachment).then(function (uploadedAttachment) {
+	                    _this6.getAttachments();
 	                }).catch(function (e) {
 	                    displayError(e);
 
-	                    spinner(false);
+	                    _this6.$element.toggleClass('loading', false);
 	                });
 	            };
 
@@ -11384,38 +11475,67 @@
 	        }
 
 	        /**
+	         * Lazy load the attachments
+	         */
+
+	    }, {
+	        key: 'getAttachments',
+	        value: function getAttachments() {
+	            var _this7 = this;
+
+	            this.$element.toggleClass('loading', true);
+
+	            var $attachments = this.$element.find('.attachments');
+
+	            ApiHelper.getIssueAttachments(this.model).then(function (attachments) {
+	                _this7.$element.toggleClass('loading', false);
+
+	                $attachments.toggleClass('hidden', !attachments || attachments.length < 1);
+
+	                $attachments.children('.attachment').remove();
+
+	                _.append($attachments, _.each(attachments, function (i, attachment) {
+	                    return _.button({ class: 'attachment' }, _.img({ class: 'attachment-preview', src: attachment.getURL() })).click(_this7.onClickAttachment);
+	                }));
+	            });
+	        }
+
+	        /**
 	         * Lazy load the comments
 	         */
 
 	    }, {
 	        key: 'getComments',
 	        value: function getComments() {
-	            var _this7 = this;
+	            var _this8 = this;
+
+	            this.$element.toggleClass('loading', true);
 
 	            var $comments = this.$element.find('.comments');
+	            var user = User.getCurrent();
 
-	            ApiHelper.getUser().then(function (user) {
-	                ApiHelper.getIssueComments(_this7.model).then(function (comments) {
-	                    _this7.$element.toggleClass('loading', false);
+	            ApiHelper.getIssueComments(this.model).then(function (comments) {
+	                _this8.$element.toggleClass('loading', false);
 
-	                    $comments.html(_.each(comments, function (i, comment) {
-	                        var collaborator = window.resources.collaborators[comment.collaborator];
-	                        var text = markdownToHtml(comment.text);
-	                        var isUser = collaborator.name == user.name;
+	                $comments.children('.comment').remove();
 
-	                        return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.displayName || collaborator.name)), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this7.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
-	                            _this7.$element.toggleClass('loading', true);
+	                _.append($comments, _.each(comments, function (i, comment) {
+	                    var collaborator = resources.collaborators[comment.collaborator];
+	                    var text = markdownToHtml(comment.text);
+	                    var isUser = collaborator.name == user.name;
 
-	                            comment.text = _this7.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
+	                    return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.displayName || collaborator.name)), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this8.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
+	                        _this8.$element.toggleClass('loading', true);
 
-	                            _this7.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(markdownToHtml(comment.text) || '');
+	                        comment.text = _this8.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
 
-	                            ApiHelper.updateIssueComment(_this7.model, comment).then(function () {
-	                                _this7.$element.toggleClass('loading', false);
-	                            });
-	                        }).blur(_this7.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
-	                    }));
-	                });
+	                        _this8.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(markdownToHtml(comment.text) || '');
+
+	                        ApiHelper.updateIssueComment(_this8.model, comment).then(function () {
+	                            _this8.$element.toggleClass('loading', false);
+	                        });
+	                    }).blur(_this8.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
+	                }));
 	            });
 	        }
 	    }], [{
@@ -11436,155 +11556,6 @@
 
 /***/ },
 /* 34 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	/**
-	 * Issue editor template
-	 */
-	module.exports = function render() {
-	    var _this = this;
-
-	    return _.div({ class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type] },
-
-	    // Header
-	    _.div({ class: 'header' },
-	    // Drag handle
-	    _.div({ class: 'drag-handle' }, _.span({ class: 'fa fa-bars' })).on('mousedown', function (e) {
-	        _this.onClickDragHandle(e);
-	    }),
-
-	    // Header content
-	    _.div({ class: 'header-content' },
-	    // Icons                
-	    _.div({ class: 'header-icons' },
-	    // Type indicator
-	    this.getTypeIndicator(),
-
-	    // Priority indicator
-	    this.getPriorityIndicator(),
-
-	    // Issue id
-	    _.span({ class: 'issue-id' }, this.model.id)),
-
-	    // Assignee avatar
-	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())),
-
-	    // Center section
-	    _.div({ class: 'header-center' },
-	    // Title
-	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
-	        _this.onChange();
-
-	        _this.$element.find('.header .rendered').html(_this.model.title);
-	    }).blur(this.onBlur).keyup(function (e) {
-	        if (e.which == 13) {
-	            _this.onBlur(e);
-	        }
-	    }), _.button({ class: 'btn-edit' }).click(this.onClickEdit)))),
-
-	    // Expand/collapse button
-	    _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-up' }), _.span({ class: 'fa icon-open fa-chevron-down' })).click(function (e) {
-	        _this.onClickToggle(e);
-	    })).click(function (e) {
-	        _this.onClickElement(e);
-	    }),
-
-	    // Meta information
-	    _.div({ class: 'meta' },
-
-	    // Multi edit notification
-	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
-
-	    // Type
-	    _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueTypes, function (i, type) {
-	        return _.option({ value: i }, type);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.type)),
-
-	    // Priority
-	    _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issuePriorities, function (i, priority) {
-	        return _.option({ value: i }, priority);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.priority)),
-
-	    // Assignee
-	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
-	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.assignee))),
-
-	    // Version
-	    _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
-	        return _.option({ value: i }, version);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.version)),
-
-	    // Estimate
-	    _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueEstimates, function (i, estimate) {
-	        return _.option({ value: i }, estimate);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.estimate)),
-
-	    // Multi edit actions
-	    _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
-	        _this.onClickMultiEditCancel();
-	    }), _.button({ class: 'btn' }, 'Apply').click(function () {
-	        _this.onClickMultiEditApply();
-	    }))),
-
-	    // Body
-	    _.div({ class: 'body' },
-
-	    // Description
-	    _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(this.onClickEdit), _.label('Description'), _.div({ class: 'rendered' }, markdownToHtml(this.model.description)), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
-	        _this.onChange();
-
-	        _this.$element.find('.body .rendered').html(markdownToHtml(_this.model.description) || '');
-	    }).blur(this.onBlur).keyup(this.onKeyUp).on('paste', function (e) {
-	        _this.onPaste(e);
-	    })),
-
-	    // Attachments
-	    _.div({ class: 'attachments' }),
-
-	    // Comments
-	    _.div({ class: 'comments' }),
-
-	    // Add comment
-	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' },
-	    // Add comment input
-	    _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp),
-
-	    // Remove button
-	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
-	        _this.onClickRemove();
-	    })),
-
-	    // Add comment button
-	    _.button({ class: 'btn' }, 'Comment').click(function () {
-	        _this.onClickComment();
-	    }))));
-	};
-
-/***/ },
-/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11609,7 +11580,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (MilestoneEditor.__proto__ || Object.getPrototypeOf(MilestoneEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(36);
+	        _this.template = __webpack_require__(35);
 
 	        _this.fetch();
 
@@ -11911,7 +11882,7 @@
 	module.exports = MilestoneEditor;
 
 /***/ },
-/* 36 */
+/* 35 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11941,7 +11912,7 @@
 	};
 
 /***/ },
-/* 37 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11962,7 +11933,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ResourceEditor.__proto__ || Object.getPrototypeOf(ResourceEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(38);
+	        _this.template = __webpack_require__(37);
 
 	        _this.fetch();
 	        return _this;
@@ -12036,7 +12007,7 @@
 	module.exports = ResourceEditor;
 
 /***/ },
-/* 38 */
+/* 37 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12072,7 +12043,7 @@
 	};
 
 /***/ },
-/* 39 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12093,7 +12064,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (PlanItemEditor.__proto__ || Object.getPrototypeOf(PlanItemEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(40);
+	        _this.template = __webpack_require__(39);
 
 	        _this.fetch();
 	        return _this;
@@ -12425,7 +12396,7 @@
 	module.exports = PlanItemEditor;
 
 /***/ },
-/* 40 */
+/* 39 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12445,7 +12416,7 @@
 	};
 
 /***/ },
-/* 41 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12473,7 +12444,7 @@
 	            _this.currentMonth = '0' + _this.currentMonth;
 	        }
 
-	        _this.template = __webpack_require__(42);
+	        _this.template = __webpack_require__(41);
 
 	        _this.init();
 	        return _this;
@@ -12717,7 +12688,7 @@
 	module.exports = PlanEditor;
 
 /***/ },
-/* 42 */
+/* 41 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12765,7 +12736,7 @@
 	};
 
 /***/ },
-/* 43 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12786,7 +12757,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ProjectEditor.__proto__ || Object.getPrototypeOf(ProjectEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(44);
+	        _this.template = __webpack_require__(43);
 
 	        _this.fetch();
 	        return _this;
@@ -12813,7 +12784,7 @@
 	module.exports = ProjectEditor;
 
 /***/ },
-/* 44 */
+/* 43 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12827,7 +12798,7 @@
 	};
 
 /***/ },
-/* 45 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12850,7 +12821,7 @@
 
 	        _this.MAX_FILTERS = 5;
 
-	        _this.template = __webpack_require__(46);
+	        _this.template = __webpack_require__(45);
 
 	        _this.defaultFilter = {
 	            key: 'column',
@@ -13032,7 +13003,7 @@
 	module.exports = FilterEditor;
 
 /***/ },
-/* 46 */
+/* 45 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13119,7 +13090,7 @@
 	};
 
 /***/ },
-/* 47 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13144,7 +13115,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (BurnDownChart.__proto__ || Object.getPrototypeOf(BurnDownChart)).call(this, params));
 
-	        _this.template = __webpack_require__(48);
+	        _this.template = __webpack_require__(47);
 
 	        // Find most relevant milestone
 	        var nearest = void 0;
@@ -13321,7 +13292,7 @@
 	module.exports = BurnDownChart;
 
 /***/ },
-/* 48 */
+/* 47 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13425,7 +13396,7 @@
 	};
 
 /***/ },
-/* 49 */
+/* 48 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13578,6 +13549,157 @@
 	var navbar = new Navbar();
 
 	$('.app-container').html(navbar.$element);
+
+/***/ },
+/* 49 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	/**
+	 * Issue editor template
+	 */
+	module.exports = function render() {
+	    var _this = this;
+
+	    return _.div({ class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type] },
+
+	    // Header
+	    _.div({ class: 'header' },
+	    // Drag handle
+	    _.div({ class: 'drag-handle' }, _.span({ class: 'fa fa-bars' })).on('mousedown', function (e) {
+	        _this.onClickDragHandle(e);
+	    }),
+
+	    // Header content
+	    _.div({ class: 'header-content' },
+	    // Icons                
+	    _.div({ class: 'header-icons' },
+	    // Type indicator
+	    this.getTypeIndicator(),
+
+	    // Priority indicator
+	    this.getPriorityIndicator(),
+
+	    // Issue id
+	    _.span({ class: 'issue-id' }, this.model.id)),
+
+	    // Assignee avatar
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())),
+
+	    // Center section
+	    _.div({ class: 'header-center' },
+	    // Title
+	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
+	        _this.onChange();
+
+	        _this.$element.find('.header .rendered').html(_this.model.title);
+	    }).blur(this.onBlur).keyup(function (e) {
+	        if (e.which == 13) {
+	            _this.onBlur(e);
+	        }
+	    }), _.button({ class: 'btn-edit' }).click(this.onClickEdit)))),
+
+	    // Expand/collapse button
+	    _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-up' }), _.span({ class: 'fa icon-open fa-chevron-down' })).click(function (e) {
+	        _this.onClickToggle(e);
+	    })).click(function (e) {
+	        _this.onClickElement(e);
+	    }),
+
+	    // Meta information
+	    _.div({ class: 'meta' },
+
+	    // Multi edit notification
+	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
+
+	    // Type
+	    _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueTypes, function (i, type) {
+	        return _.option({ value: i }, type);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.type)),
+
+	    // Priority
+	    _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issuePriorities, function (i, priority) {
+	        return _.option({ value: i }, priority);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.priority)),
+
+	    // Assignee
+	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
+	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.assignee))),
+
+	    // Version
+	    _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
+	        return _.option({ value: i }, version);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.version)),
+
+	    // Estimate
+	    _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueEstimates, function (i, estimate) {
+	        return _.option({ value: i }, estimate);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.estimate)),
+
+	    // Multi edit actions
+	    _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
+	        _this.onClickMultiEditCancel();
+	    }), _.button({ class: 'btn' }, 'Apply').click(function () {
+	        _this.onClickMultiEditApply();
+	    }))),
+
+	    // Body
+	    _.div({ class: 'body' },
+
+	    // Description
+	    _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(this.onClickEdit), _.label('Description'), _.div({ class: 'rendered' }, markdownToHtml(this.model.description)), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
+	        _this.onChange();
+
+	        _this.$element.find('.body .rendered').html(markdownToHtml(_this.model.description) || '');
+	    }).blur(this.onBlur).keyup(this.onKeyUp).on('paste', function (e) {
+	        _this.onPaste(e);
+	    })),
+
+	    // Attachments
+	    _.div({ class: 'attachments' }, _.label('Attachments'), _.input({ name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file' }).change(function (e) {
+	        _this.onAttachmentFileInputChange(e);
+	    }), _.label({ for: 'input-upload-attachment-' + this.model.id, class: 'btn-upload-attachment' }, _.span({ class: 'fa fa-upload' }))),
+
+	    // Comments
+	    _.div({ class: 'comments' }, _.label('Comments')),
+
+	    // Add comment
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' },
+	    // Add comment input
+	    _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp),
+
+	    // Remove button
+	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
+	        _this.onClickRemove();
+	    })),
+
+	    // Add comment button
+	    _.button({ class: 'btn' }, 'Comment').click(function () {
+	        _this.onClickComment();
+	    }))));
+	};
 
 /***/ }
 /******/ ]);

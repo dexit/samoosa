@@ -579,6 +579,9 @@ class IssueEditor extends View {
             // Check for image MIME type
             if(IMAGE_MIME_REGEX.test(items[i].type)) {
                 let file = items[i].getAsFile();
+                
+                file.name = 'pasted.png';
+                file.filename = file.name;
 
                 this.attachImage(file);
                 return;
@@ -608,17 +611,20 @@ class IssueEditor extends View {
         // Event: On image loaded
         reader.onload = (e) => {
             let base64 = e.target.result;
-            let filename = file.name || 'pasted.png';
 
-            debug.log('Attaching image "' + filename + '"...', this);
+            debug.log('Attaching image "' + file.name + '"...', this);
 
             // Remove headers
-            base64 = base64.replace(/data:(.+);base64,/, '');
+            let headersRegex = /data:(.+);base64,/;
+            let headersMatch = headersRegex.exec(base64);
+
+            base64 = base64.replace(headersRegex, '');
 
             let attachment = new Attachment({
-                name: filename,
-                issueId: this.model.id,
-                base64: base64
+                name: file.name,
+                file: file,
+                base64: base64,
+                headers: headersMatch ? headersMatch[0] : null
             });
 
             this.$element.toggleClass('loading', true);
@@ -628,9 +634,9 @@ class IssueEditor extends View {
                 this.getAttachments();
             })
             .catch((e) => {
-                displayError(e);
-                
                 this.$element.toggleClass('loading', false);
+                
+                displayError(e);
             });
         };
 

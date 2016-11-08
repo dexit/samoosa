@@ -283,7 +283,7 @@ window.displayError = function(error) {
 
     alert(alertString);
 
-    throw error;
+    console.log(error.stack);
 };
 
 // Convert estimate string to float

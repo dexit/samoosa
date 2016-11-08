@@ -7,8 +7,9 @@ class Attachment {
         this.timestamp = properties.timestamp || Date.now();
         this.name = properties.name;
         this.base64 = properties.base64;
-        this.data = properties.data;
         this.url = properties.url;
+        this.headers = properties.headers;
+        this.file = properties.file;
     }
 
     /**
@@ -58,11 +59,11 @@ class Attachment {
      * @returns {String} Name
      */
     getBase64() {
-        if(!this.data && !this.base64) { return null; }
+        if(!this.file && !this.base64) { return null; }
         
         if(this.base64) { return this.base64; }
         
-        return btoa(this.data);
+        return btoa(this.file);
     }
 }
 

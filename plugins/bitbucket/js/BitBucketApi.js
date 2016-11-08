@@ -58,7 +58,7 @@ class BitBucketApi extends ApiHelper {
     shouldRefresh(error) {
         if(
             error.responseJSON &&
-            error.responseJSON.error,
+            error.responseJSON.error &&
             error.responseJSON.error.message &&
             error.responseJSON.error.message.indexOf('Access token expired') == 0
         ) {
@@ -119,16 +119,15 @@ class BitBucketApi extends ApiHelper {
                     beforeSend: (xhr) => {
                         xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
                     },
-                    error: (e) => {
-                        if(self.shouldRefresh(e)) {
+                    error: (xhr) => {
+                        if(self.shouldRefresh(xhr)) {
                             self.refresh()
                             .then(() => {
                                 getPage(page);
                             });    
                         
                         } else {
-                            self.error(e);
-                            reject(new Error(e.responseText));
+                            reject(new Error(xhr.responseText));
                         }
                     }
                 });
@@ -171,7 +170,6 @@ class BitBucketApi extends ApiHelper {
                         });    
 
                     } else {
-                        this.error(e);
                         reject(new Error(e.responseText));
                     
                     }
@@ -214,7 +212,6 @@ class BitBucketApi extends ApiHelper {
                         });
                     
                     } else {    
-                        this.error(e);
                         reject(new Error(e.responseText));
                     
                     }
@@ -238,7 +235,9 @@ class BitBucketApi extends ApiHelper {
             $.ajax({
                 url: 'https://api.bitbucket.org/' + url,
                 type: 'POST',
+                contentType: false,//data instanceof FormData ? 'multipart/form-data' : 'application/json',
                 data: data,
+                processData: false,
                 cache: false,
                 success: (result) => {
                     resolve(result);
@@ -257,7 +256,6 @@ class BitBucketApi extends ApiHelper {
                         });
                     
                     } else {    
-                        this.error(e);
                         reject(new Error(e.responseText));
                     
                     }
@@ -283,6 +281,8 @@ class BitBucketApi extends ApiHelper {
                 type: 'PUT',
                 data: data,
                 cache: false,
+                contentType: false,//data instanceof FormData ? 'multipart/form-data' : 'application/json',
+                processData: false,
                 success: (result) => {
                     resolve(result);
                 },
@@ -300,7 +300,6 @@ class BitBucketApi extends ApiHelper {
                         });
                     
                     } else {    
-                        this.error(e);
                         reject(new Error(e.responseText));
                     
                     }
@@ -463,6 +462,71 @@ class BitBucketApi extends ApiHelper {
         return Promise.resolve();
     }
     
+    /**
+     * Gets issue attachments
+     *
+     * @param {Issue} issue
+     *
+     * @returns {Promise} Array of attachments
+     */
+    getIssueAttachments(issue) {
+        return this.get('2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments', 'values')
+        .then((response) => {
+            if(!Array.isArray(response)) {
+                return Promise.reject(new Error('Response of issue attachments was not an array'));
+            }
+            
+            let attachments = [];
+
+            let nextAttachment = () => {
+                let obj = response.pop();
+
+                if(!obj) {
+                    return Promise.resolve(attachments);                
+                }
+
+                let timestamp = obj.name.split('__')[0];
+                let name = obj.name.split('__')[1];
+
+                let attachment = new Attachment({
+                    name: name,
+                    timestamp: timestamp
+                });
+                
+                attachments[attachments.length] = attachment;
+
+                return new Promise((resolve, reject) => {
+                    let apiUrl = '2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments/' + obj.name;
+                    
+                    $.ajax({
+                        url: 'https://api.bitbucket.org/' + apiUrl,
+                        type: 'GET',
+                        crossDomain: true,
+                        succes: (result, statusText, xhr) => {
+                            resolve();
+                        },
+                        beforeSend: (xhr) => {
+                            xhr.setRequestHeader('Authorization', 'Bearer ' + this.getApiToken());
+                        },
+                        error: (xhr) => {
+                            resolve();
+                        }
+                    });  
+                })
+                .then((newUrl) => {
+                    attachment.url = newUrl;
+
+                    return nextAttachment();
+                });
+            };
+
+            return nextAttachment();
+        })
+        .catch(() => {
+            return Promise.resolve([]);  
+        });
+    }
+
     /**
      * Gets issue priorities
      *
@@ -638,6 +702,26 @@ class BitBucketApi extends ApiHelper {
             .then(() => {
                 callback();
             });
+        });
+    }
+    
+    /**
+     * Adds issue attachment
+     *
+     * @param {Issue} issue
+     * @param {Attachment} attachment
+     *
+     * @returns {Promise} Promise
+     */
+    addIssueAttachment(issue, attachment) {
+        let apiUrl = '2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments';
+        let postData = new FormData();
+        
+        postData.append('file', attachment.file);
+
+        return this.post(apiUrl, postData) 
+        .then((response) => {
+            return Promise.resolve(attachment);  
         });
     }
     

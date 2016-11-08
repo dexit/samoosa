@@ -513,7 +513,7 @@ a {
         background-color: transparent;
  
         .comment {   
-            .rendered {
+            .rendered, .text {
                 background-color: $teal-darker;
                 color: $white;
             }

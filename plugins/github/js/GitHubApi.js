@@ -41,7 +41,6 @@ class GitHubApi extends ApiHelper {
                         }
                     },
                     error: (e) => {
-                        self.error(e);
                         reject(new Error(e.responseJSON.message));
                     }
                 });
@@ -75,8 +74,7 @@ class GitHubApi extends ApiHelper {
                     resolve(result);
                 },
                 error: (e) => {
-                    this.error(e);
-                    reject(e);
+                    reject(new Error(e.responseJSON.message));
                 }
             });
         });
@@ -105,8 +103,7 @@ class GitHubApi extends ApiHelper {
                     resolve(result);
                 },
                 error: (e) => {
-                    this.error(e);
-                    reject(e);
+                    reject(new Error(e.responseJSON.message));
                 }
             });
         });
@@ -135,8 +132,7 @@ class GitHubApi extends ApiHelper {
                     resolve(result);
                 },
                 error: (e) => {
-                    this.error(e);
-                    reject(e);
+                    reject(new Error(e.responseJSON.message));
                 }
             });
         });
@@ -165,34 +161,10 @@ class GitHubApi extends ApiHelper {
                     resolve(result);
                 },
                 error: (e) => {
-                    this.error(e);
-                    reject(e);
+                    reject(new Error(e.responseJSON.message));
                 }
             });
         });
-    }
-
-    /**
-     * Error message
-     *
-     * @param {Object} error
-     */
-    error(error) {
-        if(error) {
-            switch(error.status) {
-                //case 401: case 403:
-                //    this.resetApiToken();
-                //    break;
-
-                default:
-                    if(error.responseJSON) {
-                        displayError(error.responseJSON.message);
-                    } else {
-                        displayError(error.statusText);
-                    } 
-                    break;
-            }
-        }
     }
 
     // ----------

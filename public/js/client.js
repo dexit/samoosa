@@ -104,16 +104,16 @@
 	// Views
 	window.Navbar = __webpack_require__(31);
 	window.IssueEditor = __webpack_require__(33);
-	window.MilestoneEditor = __webpack_require__(34);
-	window.ResourceEditor = __webpack_require__(36);
-	window.PlanItemEditor = __webpack_require__(38);
-	window.PlanEditor = __webpack_require__(40);
-	window.ProjectEditor = __webpack_require__(42);
-	window.FilterEditor = __webpack_require__(44);
-	window.BurnDownChart = __webpack_require__(46);
+	window.MilestoneEditor = __webpack_require__(35);
+	window.ResourceEditor = __webpack_require__(37);
+	window.PlanItemEditor = __webpack_require__(39);
+	window.PlanEditor = __webpack_require__(41);
+	window.ProjectEditor = __webpack_require__(43);
+	window.FilterEditor = __webpack_require__(45);
+	window.BurnDownChart = __webpack_require__(47);
 
 	// Routes
-	__webpack_require__(48);
+	__webpack_require__(49);
 
 	// Title
 	$('head title').html((Router.params.project ? Router.params.project + ' - ' : '') + 'Samoosa');
@@ -4335,7 +4335,7 @@
 
 	    alert(alertString);
 
-	    throw error;
+	    console.log(error.stack);
 	};
 
 	// Convert estimate string to float
@@ -5121,7 +5121,6 @@
 	                            }
 	                        },
 	                        error: function error(e) {
-	                            self.error(e);
 	                            reject(new Error(e.responseJSON.message));
 	                        }
 	                    });
@@ -5160,8 +5159,7 @@
 	                        resolve(result);
 	                    },
 	                    error: function error(e) {
-	                        _this2.error(e);
-	                        reject(e);
+	                        reject(new Error(e.responseJSON.message));
 	                    }
 	                });
 	            });
@@ -5195,8 +5193,7 @@
 	                        resolve(result);
 	                    },
 	                    error: function error(e) {
-	                        _this3.error(e);
-	                        reject(e);
+	                        reject(new Error(e.responseJSON.message));
 	                    }
 	                });
 	            });
@@ -5230,8 +5227,7 @@
 	                        resolve(result);
 	                    },
 	                    error: function error(e) {
-	                        _this4.error(e);
-	                        reject(e);
+	                        reject(new Error(e.responseJSON.message));
 	                    }
 	                });
 	            });
@@ -5265,37 +5261,10 @@
 	                        resolve(result);
 	                    },
 	                    error: function error(e) {
-	                        _this5.error(e);
-	                        reject(e);
+	                        reject(new Error(e.responseJSON.message));
 	                    }
 	                });
 	            });
-	        }
-
-	        /**
-	         * Error message
-	         *
-	         * @param {Object} error
-	         */
-
-	    }, {
-	        key: 'error',
-	        value: function error(_error) {
-	            if (_error) {
-	                switch (_error.status) {
-	                    //case 401: case 403:
-	                    //    this.resetApiToken();
-	                    //    break;
-
-	                    default:
-	                        if (_error.responseJSON) {
-	                            displayError(_error.responseJSON.message);
-	                        } else {
-	                            displayError(_error.statusText);
-	                        }
-	                        break;
-	                }
-	            }
 	        }
 
 	        // ----------
@@ -8042,7 +8011,7 @@
 	    }, {
 	        key: 'shouldRefresh',
 	        value: function shouldRefresh(error) {
-	            if (error.responseJSON && error.responseJSON.error, error.responseJSON.error.message && error.responseJSON.error.message.indexOf('Access token expired') == 0) {
+	            if (error.responseJSON && error.responseJSON.error && error.responseJSON.error.message && error.responseJSON.error.message.indexOf('Access token expired') == 0) {
 	                debug.log('API token needs a refresh', this);
 
 	                return true;
@@ -8100,14 +8069,13 @@
 	                        beforeSend: function beforeSend(xhr) {
 	                            xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                        },
-	                        error: function error(e) {
-	                            if (self.shouldRefresh(e)) {
+	                        error: function error(xhr) {
+	                            if (self.shouldRefresh(xhr)) {
 	                                self.refresh().then(function () {
 	                                    getPage(page);
 	                                });
 	                            } else {
-	                                self.error(e);
-	                                reject(new Error(e.responseText));
+	                                reject(new Error(xhr.responseText));
 	                            }
 	                        }
 	                    });
@@ -8152,7 +8120,6 @@
 	                                resolve(result);
 	                            });
 	                        } else {
-	                            _this2.error(e);
 	                            reject(new Error(e.responseText));
 	                        }
 	                    }
@@ -8196,7 +8163,6 @@
 	                                resolve(result);
 	                            });
 	                        } else {
-	                            _this3.error(e);
 	                            reject(new Error(e.responseText));
 	                        }
 	                    }
@@ -8224,7 +8190,9 @@
 	                $.ajax({
 	                    url: 'https://api.bitbucket.org/' + url,
 	                    type: 'POST',
+	                    contentType: false, //data instanceof FormData ? 'multipart/form-data' : 'application/json',
 	                    data: data,
+	                    processData: false,
 	                    cache: false,
 	                    success: function success(result) {
 	                        resolve(result);
@@ -8240,7 +8208,6 @@
 	                                resolve(result);
 	                            });
 	                        } else {
-	                            _this4.error(e);
 	                            reject(new Error(e.responseText));
 	                        }
 	                    }
@@ -8270,6 +8237,8 @@
 	                    type: 'PUT',
 	                    data: data,
 	                    cache: false,
+	                    contentType: false, //data instanceof FormData ? 'multipart/form-data' : 'application/json',
+	                    processData: false,
 	                    success: function success(result) {
 	                        resolve(result);
 	                    },
@@ -8284,7 +8253,6 @@
 	                                resolve(result);
 	                            });
 	                        } else {
-	                            _this5.error(e);
 	                            reject(new Error(e.responseText));
 	                        }
 	                    }
@@ -8459,6 +8427,73 @@
 	        }
 
 	        /**
+	         * Gets issue attachments
+	         *
+	         * @param {Issue} issue
+	         *
+	         * @returns {Promise} Array of attachments
+	         */
+
+	    }, {
+	        key: 'getIssueAttachments',
+	        value: function getIssueAttachments(issue) {
+	            var _this9 = this;
+
+	            return this.get('2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments', 'values').then(function (response) {
+	                if (!Array.isArray(response)) {
+	                    return Promise.reject(new Error('Response of issue attachments was not an array'));
+	                }
+
+	                var attachments = [];
+
+	                var nextAttachment = function nextAttachment() {
+	                    var obj = response.pop();
+
+	                    if (!obj) {
+	                        return Promise.resolve(attachments);
+	                    }
+
+	                    var timestamp = obj.name.split('__')[0];
+	                    var name = obj.name.split('__')[1];
+
+	                    var attachment = new Attachment({
+	                        name: name,
+	                        timestamp: timestamp
+	                    });
+
+	                    attachments[attachments.length] = attachment;
+
+	                    return new Promise(function (resolve, reject) {
+	                        var apiUrl = '2.0/repositories/' + _this9.getProjectOwner() + '/' + _this9.getProjectName() + '/issues/' + issue.id + '/attachments/' + obj.name;
+
+	                        $.ajax({
+	                            url: 'https://api.bitbucket.org/' + apiUrl,
+	                            type: 'GET',
+	                            crossDomain: true,
+	                            succes: function succes(result, statusText, xhr) {
+	                                resolve();
+	                            },
+	                            beforeSend: function beforeSend(xhr) {
+	                                xhr.setRequestHeader('Authorization', 'Bearer ' + _this9.getApiToken());
+	                            },
+	                            error: function error(xhr) {
+	                                resolve();
+	                            }
+	                        });
+	                    }).then(function (newUrl) {
+	                        attachment.url = newUrl;
+
+	                        return nextAttachment();
+	                    });
+	                };
+
+	                return nextAttachment();
+	            }).catch(function () {
+	                return Promise.resolve([]);
+	            });
+	        }
+
+	        /**
 	         * Gets issue priorities
 	         *
 	         * @returns {Promise} promise
@@ -8495,10 +8530,10 @@
 	    }, {
 	        key: 'getVersions',
 	        value: function getVersions() {
-	            var _this9 = this;
+	            var _this10 = this;
 
 	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions').then(function (versions) {
-	                _this9.processVersions(versions);
+	                _this10.processVersions(versions);
 
 	                return Promise.resolve();
 	            });
@@ -8513,10 +8548,10 @@
 	    }, {
 	        key: 'getMilestones',
 	        value: function getMilestones() {
-	            var _this10 = this;
+	            var _this11 = this;
 
 	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones').then(function (milestones) {
-	                _this10.processMilestones(milestones);
+	                _this11.processMilestones(milestones);
 
 	                return Promise.resolve();
 	            });
@@ -8554,10 +8589,10 @@
 	    }, {
 	        key: 'addCollaborator',
 	        value: function addCollaborator(collaborator) {
-	            var _this11 = this;
+	            var _this12 = this;
 
 	            return new Promise(function (callback) {
-	                _this11.put('1.0/repositories/' + _this11.getProjectOwner() + '/' + _this11.getProjectName() + '/collaborators/' + collaborator).then(function () {
+	                _this12.put('1.0/repositories/' + _this12.getProjectOwner() + '/' + _this12.getProjectName() + '/collaborators/' + collaborator).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8574,10 +8609,10 @@
 	    }, {
 	        key: 'addIssueType',
 	        value: function addIssueType(type) {
-	            var _this12 = this;
+	            var _this13 = this;
 
 	            return new Promise(function (callback) {
-	                _this12.post('1.0/repositories/' + _this12.getProjectOwner() + '/' + _this12.getProjectName() + '/labels', {
+	                _this13.post('1.0/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/labels', {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8597,10 +8632,10 @@
 	    }, {
 	        key: 'addIssuePriority',
 	        value: function addIssuePriority(priority) {
-	            var _this13 = this;
+	            var _this14 = this;
 
 	            return new Promise(function (callback) {
-	                _this13.post('1.0/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/labels', {
+	                _this14.post('1.0/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/labels', {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8620,10 +8655,10 @@
 	    }, {
 	        key: 'addIssueEstimate',
 	        value: function addIssueEstimate(estimate) {
-	            var _this14 = this;
+	            var _this15 = this;
 
 	            return new Promise(function (callback) {
-	                _this14.post('1.0/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/labels', {
+	                _this15.post('1.0/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels', {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8643,15 +8678,37 @@
 	    }, {
 	        key: 'addIssueColumn',
 	        value: function addIssueColumn(column) {
-	            var _this15 = this;
+	            var _this16 = this;
 
 	            return new Promise(function (callback) {
-	                _this15.post('1.0/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels', {
+	                _this16.post('1.0/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/labels', {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
 	                    callback();
 	                });
+	            });
+	        }
+
+	        /**
+	         * Adds issue attachment
+	         *
+	         * @param {Issue} issue
+	         * @param {Attachment} attachment
+	         *
+	         * @returns {Promise} Promise
+	         */
+
+	    }, {
+	        key: 'addIssueAttachment',
+	        value: function addIssueAttachment(issue, attachment) {
+	            var apiUrl = '2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments';
+	            var postData = new FormData();
+
+	            postData.append('file', attachment.file);
+
+	            return this.post(apiUrl, postData).then(function (response) {
+	                return Promise.resolve(attachment);
 	            });
 	        }
 
@@ -8742,12 +8799,12 @@
 	    }, {
 	        key: 'removeMilestone',
 	        value: function removeMilestone(index) {
-	            var _this16 = this;
+	            var _this17 = this;
 
 	            var milestone = resources.milestones[index];
 
 	            return new Promise(function (callback) {
-	                _this16.delete('1.0/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
+	                _this17.delete('1.0/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8795,10 +8852,10 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            var _this17 = this;
+	            var _this18 = this;
 
 	            return new Promise(function (callback) {
-	                _this17.put('1.0/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/issues/milestones/' + milestone.id, _this17.convertMilestone(milestone)).then(function () {
+	                _this18.put('1.0/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/issues/milestones/' + milestone.id, _this18.convertMilestone(milestone)).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8816,10 +8873,10 @@
 	    }, {
 	        key: 'updateIssueType',
 	        value: function updateIssueType(type, previousName) {
-	            var _this18 = this;
+	            var _this19 = this;
 
 	            return new Promise(function (callback) {
-	                _this18.patch('1.0/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/labels/type:' + previousName, {
+	                _this19.patch('1.0/repositories/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/labels/type:' + previousName, {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8840,10 +8897,10 @@
 	    }, {
 	        key: 'updateIssuePriority',
 	        value: function updateIssuePriority(priority, previousName) {
-	            var _this19 = this;
+	            var _this20 = this;
 
 	            return new Promise(function (callback) {
-	                _this19.patch('1.0/repositories/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/labels/priority:' + previousName, {
+	                _this20.patch('1.0/repositories/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/labels/priority:' + previousName, {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8864,10 +8921,10 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(estimate, previousName) {
-	            var _this20 = this;
+	            var _this21 = this;
 
 	            return new Promise(function (callback) {
-	                _this20.patch('1.0/repositories/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/labels/estimate:' + previousName, {
+	                _this21.patch('1.0/repositories/' + _this21.getProjectOwner() + '/' + _this21.getProjectName() + '/labels/estimate:' + previousName, {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8888,10 +8945,10 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            var _this21 = this;
+	            var _this22 = this;
 
 	            return new Promise(function (callback) {
-	                _this21.patch('1.0/repositories/' + _this21.getProjectOwner() + '/' + _this21.getProjectName() + '/labels/column:' + previousName, {
+	                _this22.patch('1.0/repositories/' + _this22.getProjectOwner() + '/' + _this22.getProjectName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -10251,8 +10308,9 @@
 	        this.timestamp = properties.timestamp || Date.now();
 	        this.name = properties.name;
 	        this.base64 = properties.base64;
-	        this.data = properties.data;
 	        this.url = properties.url;
+	        this.headers = properties.headers;
+	        this.file = properties.file;
 	    }
 
 	    /**
@@ -10317,7 +10375,7 @@
 	    }, {
 	        key: 'getBase64',
 	        value: function getBase64() {
-	            if (!this.data && !this.base64) {
+	            if (!this.file && !this.base64) {
 	                return null;
 	            }
 
@@ -10325,7 +10383,7 @@
 	                return this.base64;
 	            }
 
-	            return btoa(this.data);
+	            return btoa(this.file);
 	        }
 	    }]);
 
@@ -10680,7 +10738,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (IssueEditor.__proto__ || Object.getPrototypeOf(IssueEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(49);
+	        _this.template = __webpack_require__(34);
 
 	        _this.fetch();
 	        return _this;
@@ -11414,6 +11472,9 @@
 	                if (IMAGE_MIME_REGEX.test(items[i].type)) {
 	                    var file = items[i].getAsFile();
 
+	                    file.name = 'pasted.png';
+	                    file.filename = file.name;
+
 	                    this.attachImage(file);
 	                    return;
 	                }
@@ -11450,17 +11511,20 @@
 	            // Event: On image loaded
 	            reader.onload = function (e) {
 	                var base64 = e.target.result;
-	                var filename = file.name || 'pasted.png';
 
-	                debug.log('Attaching image "' + filename + '"...', _this7);
+	                debug.log('Attaching image "' + file.name + '"...', _this7);
 
 	                // Remove headers
-	                base64 = base64.replace(/data:(.+);base64,/, '');
+	                var headersRegex = /data:(.+);base64,/;
+	                var headersMatch = headersRegex.exec(base64);
+
+	                base64 = base64.replace(headersRegex, '');
 
 	                var attachment = new Attachment({
-	                    name: filename,
-	                    issueId: _this7.model.id,
-	                    base64: base64
+	                    name: file.name,
+	                    file: file,
+	                    base64: base64,
+	                    headers: headersMatch ? headersMatch[0] : null
 	                });
 
 	                _this7.$element.toggleClass('loading', true);
@@ -11468,9 +11532,9 @@
 	                ApiHelper.addIssueAttachment(_this7.model, attachment).then(function (uploadedAttachment) {
 	                    _this7.getAttachments();
 	                }).catch(function (e) {
-	                    displayError(e);
-
 	                    _this7.$element.toggleClass('loading', false);
+
+	                    displayError(e);
 	                });
 	            };
 
@@ -11634,6 +11698,159 @@
 
 /***/ },
 /* 34 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	/**
+	 * Issue editor template
+	 */
+	module.exports = function render() {
+	    var _this = this;
+
+	    return _.div({ class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type] },
+
+	    // Header
+	    _.div({ class: 'header' },
+	    // Drag handle
+	    _.div({ class: 'drag-handle' }, _.span({ class: 'fa fa-bars' })).on('mousedown', function (e) {
+	        _this.onClickDragHandle(e);
+	    }),
+
+	    // Header content
+	    _.div({ class: 'header-content' },
+	    // Icons                
+	    _.div({ class: 'header-icons' },
+	    // Type indicator
+	    this.getTypeIndicator(),
+
+	    // Priority indicator
+	    this.getPriorityIndicator(),
+
+	    // Issue id
+	    _.span({ class: 'issue-id' }, this.model.id)),
+
+	    // Assignee avatar
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())),
+
+	    // Center section
+	    _.div({ class: 'header-center' },
+	    // Title
+	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
+	        _this.onChange();
+
+	        _this.$element.find('.header .rendered').html(_this.model.title);
+	    }).blur(this.onBlur).keyup(function (e) {
+	        if (e.which == 13) {
+	            _this.onBlur(e);
+	        }
+	    }), _.button({ class: 'btn-edit' }).click(this.onClickEdit)))),
+
+	    // Expand/collapse button
+	    _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-up' }), _.span({ class: 'fa icon-open fa-chevron-down' })).click(function (e) {
+	        _this.onClickToggle(e);
+	    })).click(function (e) {
+	        _this.onClickElement(e);
+	    }),
+
+	    // Meta information
+	    _.div({ class: 'meta' },
+
+	    // Multi edit notification
+	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
+
+	    // Type
+	    _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueTypes, function (i, type) {
+	        return _.option({ value: i }, type);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.type)),
+
+	    // Priority
+	    _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issuePriorities, function (i, priority) {
+	        return _.option({ value: i }, priority);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.priority)),
+
+	    // Assignee
+	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
+	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.assignee))),
+
+	    // Version
+	    _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
+	        return _.option({ value: i }, version);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.version)),
+
+	    // Estimate
+	    _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueEstimates, function (i, estimate) {
+	        return _.option({ value: i }, estimate);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.estimate)),
+
+	    // Multi edit actions
+	    _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
+	        _this.onClickMultiEditCancel();
+	    }), _.button({ class: 'btn' }, 'Apply').click(function () {
+	        _this.onClickMultiEditApply();
+	    }))),
+
+	    // Body
+	    _.div({ class: 'body' },
+
+	    // Description
+	    _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(this.onClickEdit), _.label('Description'), _.div({ class: 'rendered' }, markdownToHtml(this.model.description)), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
+	        _this.onChange();
+
+	        _this.$element.find('.body .rendered').html(markdownToHtml(_this.model.description) || '');
+	    }).blur(this.onBlur).keyup(this.onKeyUp).on('paste', function (e) {
+	        _this.onPaste(e);
+	    })),
+
+	    // Attachments
+	    _.div({ class: 'attachments' }, _.label('Attachments'), _.input({ name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file' }).change(function (e) {
+	        _this.onAttachmentFileInputChange(e);
+	    }), _.label({ for: 'input-upload-attachment-' + this.model.id, class: 'btn-upload-attachment' }, _.span({ class: 'fa fa-upload' }))),
+
+	    // Comments
+	    _.div({ class: 'comments' }, _.label('Comments')),
+
+	    // Add comment
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' },
+	    // Add comment input
+	    _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp).on('paste', function (e) {
+	        _this.onPaste(e);
+	    }),
+
+	    // Remove button
+	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
+	        _this.onClickRemove();
+	    })),
+
+	    // Add comment button
+	    _.button({ class: 'btn' }, 'Comment').click(function () {
+	        _this.onClickComment();
+	    }))));
+	};
+
+/***/ },
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11658,7 +11875,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (MilestoneEditor.__proto__ || Object.getPrototypeOf(MilestoneEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(35);
+	        _this.template = __webpack_require__(36);
 
 	        _this.fetch();
 
@@ -11963,7 +12180,7 @@
 	module.exports = MilestoneEditor;
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11993,7 +12210,7 @@
 	};
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12014,7 +12231,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ResourceEditor.__proto__ || Object.getPrototypeOf(ResourceEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(37);
+	        _this.template = __webpack_require__(38);
 
 	        _this.fetch();
 	        return _this;
@@ -12088,7 +12305,7 @@
 	module.exports = ResourceEditor;
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12124,7 +12341,7 @@
 	};
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12145,7 +12362,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (PlanItemEditor.__proto__ || Object.getPrototypeOf(PlanItemEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(39);
+	        _this.template = __webpack_require__(40);
 
 	        _this.fetch();
 	        return _this;
@@ -12477,7 +12694,7 @@
 	module.exports = PlanItemEditor;
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12497,7 +12714,7 @@
 	};
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12525,7 +12742,7 @@
 	            _this.currentMonth = '0' + _this.currentMonth;
 	        }
 
-	        _this.template = __webpack_require__(41);
+	        _this.template = __webpack_require__(42);
 
 	        _this.init();
 	        return _this;
@@ -12769,7 +12986,7 @@
 	module.exports = PlanEditor;
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12817,7 +13034,7 @@
 	};
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12838,7 +13055,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ProjectEditor.__proto__ || Object.getPrototypeOf(ProjectEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(43);
+	        _this.template = __webpack_require__(44);
 
 	        _this.fetch();
 	        return _this;
@@ -12865,7 +13082,7 @@
 	module.exports = ProjectEditor;
 
 /***/ },
-/* 43 */
+/* 44 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12879,7 +13096,7 @@
 	};
 
 /***/ },
-/* 44 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12902,7 +13119,7 @@
 
 	        _this.MAX_FILTERS = 5;
 
-	        _this.template = __webpack_require__(45);
+	        _this.template = __webpack_require__(46);
 
 	        _this.defaultFilter = {
 	            key: 'column',
@@ -13084,7 +13301,7 @@
 	module.exports = FilterEditor;
 
 /***/ },
-/* 45 */
+/* 46 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13171,7 +13388,7 @@
 	};
 
 /***/ },
-/* 46 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13196,7 +13413,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (BurnDownChart.__proto__ || Object.getPrototypeOf(BurnDownChart)).call(this, params));
 
-	        _this.template = __webpack_require__(47);
+	        _this.template = __webpack_require__(48);
 
 	        // Find most relevant milestone
 	        var nearest = void 0;
@@ -13373,7 +13590,7 @@
 	module.exports = BurnDownChart;
 
 /***/ },
-/* 47 */
+/* 48 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13477,7 +13694,7 @@
 	};
 
 /***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13630,159 +13847,6 @@
 	var navbar = new Navbar();
 
 	$('.app-container').html(navbar.$element);
-
-/***/ },
-/* 49 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	/**
-	 * Issue editor template
-	 */
-	module.exports = function render() {
-	    var _this = this;
-
-	    return _.div({ class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type] },
-
-	    // Header
-	    _.div({ class: 'header' },
-	    // Drag handle
-	    _.div({ class: 'drag-handle' }, _.span({ class: 'fa fa-bars' })).on('mousedown', function (e) {
-	        _this.onClickDragHandle(e);
-	    }),
-
-	    // Header content
-	    _.div({ class: 'header-content' },
-	    // Icons                
-	    _.div({ class: 'header-icons' },
-	    // Type indicator
-	    this.getTypeIndicator(),
-
-	    // Priority indicator
-	    this.getPriorityIndicator(),
-
-	    // Issue id
-	    _.span({ class: 'issue-id' }, this.model.id)),
-
-	    // Assignee avatar
-	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())),
-
-	    // Center section
-	    _.div({ class: 'header-center' },
-	    // Title
-	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
-	        _this.onChange();
-
-	        _this.$element.find('.header .rendered').html(_this.model.title);
-	    }).blur(this.onBlur).keyup(function (e) {
-	        if (e.which == 13) {
-	            _this.onBlur(e);
-	        }
-	    }), _.button({ class: 'btn-edit' }).click(this.onClickEdit)))),
-
-	    // Expand/collapse button
-	    _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-up' }), _.span({ class: 'fa icon-open fa-chevron-down' })).click(function (e) {
-	        _this.onClickToggle(e);
-	    })).click(function (e) {
-	        _this.onClickElement(e);
-	    }),
-
-	    // Meta information
-	    _.div({ class: 'meta' },
-
-	    // Multi edit notification
-	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
-
-	    // Type
-	    _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueTypes, function (i, type) {
-	        return _.option({ value: i }, type);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.type)),
-
-	    // Priority
-	    _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issuePriorities, function (i, priority) {
-	        return _.option({ value: i }, priority);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.priority)),
-
-	    // Assignee
-	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
-	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.assignee))),
-
-	    // Version
-	    _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
-	        return _.option({ value: i }, version);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.version)),
-
-	    // Estimate
-	    _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueEstimates, function (i, estimate) {
-	        return _.option({ value: i }, estimate);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.estimate)),
-
-	    // Multi edit actions
-	    _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
-	        _this.onClickMultiEditCancel();
-	    }), _.button({ class: 'btn' }, 'Apply').click(function () {
-	        _this.onClickMultiEditApply();
-	    }))),
-
-	    // Body
-	    _.div({ class: 'body' },
-
-	    // Description
-	    _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(this.onClickEdit), _.label('Description'), _.div({ class: 'rendered' }, markdownToHtml(this.model.description)), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
-	        _this.onChange();
-
-	        _this.$element.find('.body .rendered').html(markdownToHtml(_this.model.description) || '');
-	    }).blur(this.onBlur).keyup(this.onKeyUp).on('paste', function (e) {
-	        _this.onPaste(e);
-	    })),
-
-	    // Attachments
-	    _.div({ class: 'attachments' }, _.label('Attachments'), _.input({ name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file' }).change(function (e) {
-	        _this.onAttachmentFileInputChange(e);
-	    }), _.label({ for: 'input-upload-attachment-' + this.model.id, class: 'btn-upload-attachment' }, _.span({ class: 'fa fa-upload' }))),
-
-	    // Comments
-	    _.div({ class: 'comments' }, _.label('Comments')),
-
-	    // Add comment
-	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' },
-	    // Add comment input
-	    _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp).on('paste', function (e) {
-	        _this.onPaste(e);
-	    }),
-
-	    // Remove button
-	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
-	        _this.onClickRemove();
-	    })),
-
-	    // Add comment button
-	    _.button({ class: 'btn' }, 'Comment').click(function () {
-	        _this.onClickComment();
-	    }))));
-	};
 
 /***/ }
 /******/ ]);

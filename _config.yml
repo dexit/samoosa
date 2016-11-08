@@ -1,8 +1,0 @@
-exclude: [ node_modules ]
-url: http://samoosa.rocks
-defaults:
-  -
-    scope:
-      path: "" # empty string for all files
-    values:
-      layout: "page"

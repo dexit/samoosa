@@ -25,9 +25,16 @@ class IssueEditor extends View {
      */
     onClickRemove() {
         if(confirm('Are you sure you want to delete "' + this.model.title + '"?')) {
+            spinner(true);
+
             ApiHelper.removeIssue(this.model)
             .then(() => {
                 this.$element.remove();
+                spinner(false);
+            })
+            .catch((e) => {
+                displayError(e);
+                spinner(false);  
             });
         }
     }
@@ -36,8 +43,10 @@ class IssueEditor extends View {
      * Event: Click the toggle button
      */
     onClickToggle(e) {
-        e.preventDefault();
-        e.stopPropagation();
+        if(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
         if(!this.usingMultiEdit()) {
             IssueEditor.cancelMultiSelect();
@@ -535,12 +544,23 @@ class IssueEditor extends View {
     /**
      * Event: On click attachment
      *
-     * @param {Event} e
+     * @param {Attachment} attachment
      */
-    onClickAttachment(e) {
-        let $preview = $(this).find('.attachment-preview');
-
-        modal($preview.clone());
+    onClickAttachment(attachment) {
+        modal(_.div({class: 'modal-attachment'},
+            _.img({src: attachment.getURL()}),
+            _.div({class: 'modal-attachment-toolbar'},
+                _.button({class: 'btn-remove-attachment'},
+                    _.span({class: 'fa fa-trash'})
+                ).click(() => {
+                    ApiHelper.removeIssueAttachment(this.model, attachment)
+                    .then(() => {
+                        modal(false);
+                        this.getAttachments();
+                    });
+                })
+            )
+        ));
     }
 
     /**
@@ -703,8 +723,8 @@ class IssueEditor extends View {
             _.append($attachments,
                 _.each(attachments, (i, attachment) => {
                     return _.button({class: 'attachment'},
-                        _.img({class: 'attachment-preview', src: attachment.getURL()})
-                    ).click(this.onClickAttachment);   
+                        _.img({class: 'attachment-preview', src: attachment.getURL()}),
+                    ).click((e) => { this.onClickAttachment(attachment); });
                 })
             );
         });

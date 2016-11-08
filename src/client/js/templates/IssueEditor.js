@@ -196,7 +196,10 @@ module.exports = function render() {
             _.div({class: 'add-comment'},
                 // Add comment input
                 _.textarea({class: 'btn-transparent', placeholder: 'Add comment here...'})
-                    .keyup(this.onKeyUp),
+                    .keyup(this.onKeyUp)
+                    .on('paste', (e) => {
+                        this.onPaste(e);
+                    }),
 
                 // Remove button
                 _.if(!ApiHelper.isSpectating(),

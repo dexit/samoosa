@@ -4,15 +4,6 @@
  * The data model for issues
  */
 class Issue {
-    /**
-     * Create a new issue and push it to the remote source
-     */
-    static create(properties) {
-        let issue = new Issue(properties);
-
-        return ResourceHelper.addResource('issues', issue);
-    }
-
     constructor(properties) {
         properties = properties || {};
         
@@ -22,7 +13,6 @@ class Issue {
         this.id = properties.id;
         
         // Optional properties
-        this.attachments = properties.attachments || [];
         this.column = properties.column || 0;
         this.type = properties.type || 0;
         this.priority = properties.priority || 0;
@@ -35,6 +25,15 @@ class Issue {
         this.closedAt = properties.closedAt;
         this.deleted = false;
 
+    }
+
+    /**
+     * Gets the attachments
+     *
+     * @returns {Promise} Array of attachments
+     */
+    getAttachments() {
+        return ApiHelper.getIssueAttachments(this);
     }
 
     /**
@@ -70,7 +69,7 @@ class Issue {
      * @returns {String} Type name
      */
     getType() {
-        return resources.issueTypes[this.type || -1];
+        return resources.issueTypes[this.type || 0];
     }
 
     /**
@@ -79,7 +78,7 @@ class Issue {
      * @returns {String} Priority name
      */
     getPriority() {
-        return resources.issuePriorities[this.priority || -1];
+        return resources.issuePriorities[this.priority || 0];
     }
 
     /**
@@ -88,7 +87,7 @@ class Issue {
      * @returns {String} Version name
      */
     getVersion() {
-        return resources.versions[this.version || -1];
+        return resources.versions[this.version || 0];
     }
 
     /**
@@ -97,7 +96,7 @@ class Issue {
      * @returns {Milestone} Milestone object
      */
     getMilestone() {
-        return resources.milestones[this.milestone || -1];
+        return resources.milestones[this.milestone || 0];
     }
 
     /**
@@ -115,7 +114,7 @@ class Issue {
      * @returns {Collaborator} Collaborator object
      */
     getAssignee() {
-        return resources.collaborators[this.assignee || -1];
+        return resources.collaborators[this.assignee || 0];
     }
 
     /**
@@ -158,16 +157,7 @@ class Issue {
      * @returns {Number} Hours
      */
     getEstimate() {
-        return estimateToFloat(resources.issueEstimates[this.estimate]);
-    }
-
-    /**
-     * Gets attachments
-     *
-     * @returns {Array} Attachments
-     */
-    getAttachments() {
-        return this.attachments;
+        return estimateToFloat(resources.issueEstimates[this.estimate || 0]);
     }
 
     /**

@@ -690,18 +690,17 @@ class ApiHelper {
     }
 
     /**
-     * Updates issue attachment
+     * Removes issue attachment
      *
      * @param {Issue} issue
      * @param {Attachment} attachment
      *
      * @returns {Promise} Promise
      */
-    updateIssueAttachment(issue, attachment) {
+    removeIssueAttachment(issue, attachment) {
         return Promise.resolve();
     }
     
-
     // ----------
     // Generic methods
     // ----------
@@ -732,9 +731,6 @@ class ApiHelper {
             case 'issueColumns':
                 return this.removeIssueColumn(index);
             
-            case 'issueAttachments':
-                return this.removeIssueAttachment(index);
-
             case 'milestones':
                 return this.removeMilestone(index);
 
@@ -821,9 +817,6 @@ class ApiHelper {
             case 'issueColumns':
                 return this.updateIssueColumn(item, identifier);
             
-            case 'issueAttachments':
-                return this.updateIssueAttachment(item, identifier);
-
             case 'versions':
                 return this.updateVersion(item, identifier);
 

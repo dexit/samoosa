@@ -104,16 +104,16 @@
 	// Views
 	window.Navbar = __webpack_require__(31);
 	window.IssueEditor = __webpack_require__(33);
-	window.MilestoneEditor = __webpack_require__(35);
-	window.ResourceEditor = __webpack_require__(37);
-	window.PlanItemEditor = __webpack_require__(39);
-	window.PlanEditor = __webpack_require__(41);
-	window.ProjectEditor = __webpack_require__(43);
-	window.FilterEditor = __webpack_require__(45);
-	window.BurnDownChart = __webpack_require__(47);
+	window.MilestoneEditor = __webpack_require__(34);
+	window.ResourceEditor = __webpack_require__(36);
+	window.PlanItemEditor = __webpack_require__(38);
+	window.PlanEditor = __webpack_require__(40);
+	window.ProjectEditor = __webpack_require__(42);
+	window.FilterEditor = __webpack_require__(44);
+	window.BurnDownChart = __webpack_require__(46);
 
 	// Routes
-	__webpack_require__(49);
+	__webpack_require__(48);
 
 	// Title
 	$('head title').html((Router.params.project ? Router.params.project + ' - ' : '') + 'Samoosa');
@@ -5136,20 +5136,26 @@
 	         *
 	         * @param {String} url
 	         * @param {String} param
+	         * @param {Object} data
 	         *
 	         * @returns {Promise} promise
 	         */
 
 	    }, {
 	        key: 'delete',
-	        value: function _delete(url, param) {
+	        value: function _delete(url, param, data) {
 	            var _this2 = this;
+
+	            if (data && (typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
+	                data = JSON.stringify(data);
+	            }
 
 	            return new Promise(function (resolve, reject) {
 	                $.ajax({
 	                    url: 'https://api.github.com' + url + _this2.getApiTokenString() + (param ? '&' + param : ''),
 	                    type: 'DELETE',
 	                    cache: false,
+	                    data: data,
 	                    success: function success(result) {
 	                        resolve(result);
 	                    },
@@ -5559,11 +5565,15 @@
 	                        var timestamp = obj.name.split('__')[0];
 	                        var name = obj.name.split('__')[1];
 
-	                        attachments[attachments.length] = new Attachment({
+	                        var attachment = new Attachment({
 	                            name: name,
 	                            timestamp: timestamp,
 	                            url: obj.download_url
 	                        });
+
+	                        attachment.sha = obj.sha;
+
+	                        attachments[attachments.length] = attachment;
 	                    }
 	                } catch (err) {
 	                    _didIteratorError2 = true;
@@ -5677,12 +5687,14 @@
 	            if (deletedIssue) {
 	                issue.id = deletedIssue.id;
 
-	                return this.updateIssue(issue);
+	                return this.updateIssue(issue).then(function () {
+	                    return Promise.resolve(issue);
+	                });
 	            } else {
 	                return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue)).then(function (gitHubIssue) {
 	                    issue.id = gitHubIssue.number;
 
-	                    return Promise.resolve();
+	                    return Promise.resolve(issue);
 	                });
 	            }
 	        }
@@ -5884,12 +5896,59 @@
 	    }, {
 	        key: 'removeIssue',
 	        value: function removeIssue(issue) {
+	            var _this16 = this;
+
 	            issue.deleted = true;
 	            deletedIssuesCache.push(issue);
 
-	            resources.issues[issue.index] = null;
+	            resources.issues.splice(issue.index, 1);
 
-	            return this.updateIssue(issue);
+	            // Update the issue with the "deleted" label
+	            return this.updateIssue(issue)
+
+	            // Get all attachments
+	            .then(function () {
+	                return _this16.getIssueAttachments(issue);
+	            })
+
+	            // Delete attachments one by one
+	            .then(function (attachments) {
+	                var deleteNextAttachment = function deleteNextAttachment() {
+	                    var attachment = attachments.pop();
+
+	                    if (attachment) {
+	                        return _this16.removeIssueAttachment(issue, attachment).then(function () {
+	                            return deleteNextAttachment();
+	                        });
+	                    } else {
+	                        return Promise.resolve();
+	                    }
+	                };
+
+	                return deleteNextAttachment();
+	            })
+
+	            // Get all comments
+	            .then(function () {
+	                return _this16.getIssueComments(issue);
+	            })
+
+	            // Delete all comments one by one
+	            .then(function (comments) {
+	                var deleteNextComment = function deleteNextComment() {
+	                    var comment = comments.pop();
+
+	                    if (comment) {
+	                        return _this16.removeIssueComment(issue, comment).then(function () {
+	                            return deleteNextComment();
+	                        });
+	                    } else {
+	                        return Promise.resolve();
+	                    }
+	                };
+
+	                return deleteNextComment();
+	            });
 	        }
 
 	        /**
@@ -5960,6 +6019,28 @@
 	        key: 'removeIssueColumn',
 	        value: function removeIssueColumn(index) {
 	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index]);
+	        }
+
+	        /**
+	         * Removes an issue attachment
+	         *
+	         * @param {Issue} issue
+	         * @param {Attachment} attachment
+	         *
+	         * @returns {Promise} Promise
+	         */
+
+	    }, {
+	        key: 'removeIssueAttachment',
+	        value: function removeIssueAttachment(issue, attachment) {
+	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getTimestamp().getTime() + '__' + attachment.getName();
+	            var deleteData = {
+	                message: 'Removed attachment "' + attachment.getName() + '"',
+	                sha: attachment.sha,
+	                branch: 'samoosa-resources'
+	            };
+
+	            return this.delete(apiUrl, null, deleteData);
 	        }
 
 	        /**
@@ -6600,7 +6681,6 @@
 	            gitHubIssue.state = issueColumn == 'done' ? 'closed' : 'open';
 
 	            // Milestone
-	            // GitHub counts numbers from 1, ' + this.getProjectName() + ' counts from 0
 	            if (issue.getMilestone()) {
 	                gitHubIssue.milestone = issue.getMilestone().id;
 	            } else {
@@ -6658,10 +6738,10 @@
 	    }, {
 	        key: 'addIssueComment',
 	        value: function addIssueComment(issue, text) {
-	            var _this16 = this;
+	            var _this17 = this;
 
 	            return new Promise(function (callback) {
-	                _this16.post('/repos/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/issues/' + issue.id + '/comments', {
+	                _this17.post('/repos/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/issues/' + issue.id + '/comments', {
 	                    body: text
 	                }).then(function () {
 	                    callback();
@@ -6679,15 +6759,28 @@
 	    }, {
 	        key: 'updateIssueComment',
 	        value: function updateIssueComment(issue, comment) {
-	            var _this17 = this;
+	            var _this18 = this;
 
 	            return new Promise(function (callback) {
-	                _this17.patch('/repos/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/issues/comments/' + comment.index, {
+	                _this18.patch('/repos/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/issues/comments/' + comment.index, {
 	                    body: comment.text
 	                }).then(function () {
 	                    callback();
 	                });
 	            });
+	        }
+
+	        /**
+	         * Remove issue comment
+	         *
+	         * @param {Issue} issue
+	         * @param {Object} comment
+	         */
+
+	    }, {
+	        key: 'removeIssueComment',
+	        value: function removeIssueComment(issue, comment) {
+	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/comments/' + comment.index);
 	        }
 
 	        /**
@@ -6701,10 +6794,10 @@
 	    }, {
 	        key: 'getIssueComments',
 	        value: function getIssueComments(issue) {
-	            var _this18 = this;
+	            var _this19 = this;
 
 	            return new Promise(function (callback) {
-	                _this18.get('/repos/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
+	                _this19.get('/repos/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
 	                    var comments = [];
 
 	                    var _iteratorNormalCompletion11 = true;
@@ -7604,7 +7697,7 @@
 	        }
 
 	        /**
-	         * Updates issue attachment
+	         * Removes issue attachment
 	         *
 	         * @param {Issue} issue
 	         * @param {Attachment} attachment
@@ -7613,8 +7706,8 @@
 	         */
 
 	    }, {
-	        key: 'updateIssueAttachment',
-	        value: function updateIssueAttachment(issue, attachment) {
+	        key: 'removeIssueAttachment',
+	        value: function removeIssueAttachment(issue, attachment) {
 	            return Promise.resolve();
 	        }
 
@@ -7650,9 +7743,6 @@
 
 	                case 'issueColumns':
 	                    return this.removeIssueColumn(index);
-
-	                case 'issueAttachments':
-	                    return this.removeIssueAttachment(index);
 
 	                case 'milestones':
 	                    return this.removeMilestone(index);
@@ -7745,9 +7835,6 @@
 
 	                case 'issueColumns':
 	                    return this.updateIssueColumn(item, identifier);
-
-	                case 'issueAttachments':
-	                    return this.updateIssueAttachment(item, identifier);
 
 	                case 'versions':
 	                    return this.updateVersion(item, identifier);
@@ -9423,19 +9510,6 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Issue = function () {
-	    _createClass(Issue, null, [{
-	        key: 'create',
-
-	        /**
-	         * Create a new issue and push it to the remote source
-	         */
-	        value: function create(properties) {
-	            var issue = new Issue(properties);
-
-	            return ResourceHelper.addResource('issues', issue);
-	        }
-	    }]);
-
 	    function Issue(properties) {
 	        _classCallCheck(this, Issue);
 
@@ -9447,7 +9521,6 @@
 	        this.id = properties.id;
 
 	        // Optional properties
-	        this.attachments = properties.attachments || [];
 	        this.column = properties.column || 0;
 	        this.type = properties.type || 0;
 	        this.priority = properties.priority || 0;
@@ -9462,13 +9535,25 @@
 	    }
 
 	    /**
-	     * Gets the title
+	     * Gets the attachments
 	     *
-	     * @returns {String} Title
+	     * @returns {Promise} Array of attachments
 	     */
 
 
 	    _createClass(Issue, [{
+	        key: 'getAttachments',
+	        value: function getAttachments() {
+	            return ApiHelper.getIssueAttachments(this);
+	        }
+
+	        /**
+	         * Gets the title
+	         *
+	         * @returns {String} Title
+	         */
+
+	    }, {
 	        key: 'getTitle',
 	        value: function getTitle() {
 	            return this.title;
@@ -9507,7 +9592,7 @@
 	    }, {
 	        key: 'getType',
 	        value: function getType() {
-	            return resources.issueTypes[this.type || -1];
+	            return resources.issueTypes[this.type || 0];
 	        }
 
 	        /**
@@ -9519,7 +9604,7 @@
 	    }, {
 	        key: 'getPriority',
 	        value: function getPriority() {
-	            return resources.issuePriorities[this.priority || -1];
+	            return resources.issuePriorities[this.priority || 0];
 	        }
 
 	        /**
@@ -9531,7 +9616,7 @@
 	    }, {
 	        key: 'getVersion',
 	        value: function getVersion() {
-	            return resources.versions[this.version || -1];
+	            return resources.versions[this.version || 0];
 	        }
 
 	        /**
@@ -9543,7 +9628,7 @@
 	    }, {
 	        key: 'getMilestone',
 	        value: function getMilestone() {
-	            return resources.milestones[this.milestone || -1];
+	            return resources.milestones[this.milestone || 0];
 	        }
 
 	        /**
@@ -9567,7 +9652,7 @@
 	    }, {
 	        key: 'getAssignee',
 	        value: function getAssignee() {
-	            return resources.collaborators[this.assignee || -1];
+	            return resources.collaborators[this.assignee || 0];
 	        }
 
 	        /**
@@ -9615,19 +9700,7 @@
 	    }, {
 	        key: 'getEstimate',
 	        value: function getEstimate() {
-	            return estimateToFloat(resources.issueEstimates[this.estimate]);
-	        }
-
-	        /**
-	         * Gets attachments
-	         *
-	         * @returns {Array} Attachments
-	         */
-
-	    }, {
-	        key: 'getAttachments',
-	        value: function getAttachments() {
-	            return this.attachments;
+	            return estimateToFloat(resources.issueEstimates[this.estimate || 0]);
 	        }
 
 	        /**
@@ -10607,7 +10680,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (IssueEditor.__proto__ || Object.getPrototypeOf(IssueEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(34);
+	        _this.template = __webpack_require__(49);
 
 	        _this.fetch();
 	        return _this;
@@ -10629,8 +10702,14 @@
 	            var _this2 = this;
 
 	            if (confirm('Are you sure you want to delete "' + this.model.title + '"?')) {
+	                spinner(true);
+
 	                ApiHelper.removeIssue(this.model).then(function () {
 	                    _this2.$element.remove();
+	                    spinner(false);
+	                }).catch(function (e) {
+	                    displayError(e);
+	                    spinner(false);
 	                });
 	            }
 	        }
@@ -10642,8 +10721,10 @@
 	    }, {
 	        key: 'onClickToggle',
 	        value: function onClickToggle(e) {
-	            e.preventDefault();
-	            e.stopPropagation();
+	            if (e) {
+	                e.preventDefault();
+	                e.stopPropagation();
+	            }
 
 	            if (!this.usingMultiEdit()) {
 	                IssueEditor.cancelMultiSelect();
@@ -11297,15 +11378,20 @@
 	        /**
 	         * Event: On click attachment
 	         *
-	         * @param {Event} e
+	         * @param {Attachment} attachment
 	         */
 
 	    }, {
 	        key: 'onClickAttachment',
-	        value: function onClickAttachment(e) {
-	            var $preview = $(this).find('.attachment-preview');
+	        value: function onClickAttachment(attachment) {
+	            var _this6 = this;
 
-	            modal($preview.clone());
+	            modal(_.div({ class: 'modal-attachment' }, _.img({ src: attachment.getURL() }), _.div({ class: 'modal-attachment-toolbar' }, _.button({ class: 'btn-remove-attachment' }, _.span({ class: 'fa fa-trash' })).click(function () {
+	                ApiHelper.removeIssueAttachment(_this6.model, attachment).then(function () {
+	                    modal(false);
+	                    _this6.getAttachments();
+	                });
+	            }))));
 	        }
 
 	        /**
@@ -11357,7 +11443,7 @@
 	    }, {
 	        key: 'attachImage',
 	        value: function attachImage(file) {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            var reader = new FileReader();
 
@@ -11366,25 +11452,25 @@
 	                var base64 = e.target.result;
 	                var filename = file.name || 'pasted.png';
 
-	                debug.log('Attaching image "' + filename + '"...', _this6);
+	                debug.log('Attaching image "' + filename + '"...', _this7);
 
 	                // Remove headers
 	                base64 = base64.replace(/data:(.+);base64,/, '');
 
 	                var attachment = new Attachment({
 	                    name: filename,
-	                    issueId: _this6.model.id,
+	                    issueId: _this7.model.id,
 	                    base64: base64
 	                });
 
-	                _this6.$element.toggleClass('loading', true);
+	                _this7.$element.toggleClass('loading', true);
 
-	                ApiHelper.addIssueAttachment(_this6.model, attachment).then(function (uploadedAttachment) {
-	                    _this6.getAttachments();
+	                ApiHelper.addIssueAttachment(_this7.model, attachment).then(function (uploadedAttachment) {
+	                    _this7.getAttachments();
 	                }).catch(function (e) {
 	                    displayError(e);
 
-	                    _this6.$element.toggleClass('loading', false);
+	                    _this7.$element.toggleClass('loading', false);
 	                });
 	            };
 
@@ -11473,19 +11559,21 @@
 	    }, {
 	        key: 'getAttachments',
 	        value: function getAttachments() {
-	            var _this7 = this;
+	            var _this8 = this;
 
 	            this.$element.toggleClass('loading', true);
 
 	            var $attachments = this.$element.find('.attachments');
 
 	            ApiHelper.getIssueAttachments(this.model).then(function (attachments) {
-	                _this7.$element.toggleClass('loading', false);
+	                _this8.$element.toggleClass('loading', false);
 
 	                $attachments.children('.attachment').remove();
 
 	                _.append($attachments, _.each(attachments, function (i, attachment) {
-	                    return _.button({ class: 'attachment' }, _.img({ class: 'attachment-preview', src: attachment.getURL() })).click(_this7.onClickAttachment);
+	                    return _.button({ class: 'attachment' }, _.img({ class: 'attachment-preview', src: attachment.getURL() })).click(function (e) {
+	                        _this8.onClickAttachment(attachment);
+	                    });
 	                }));
 	            });
 	        }
@@ -11497,7 +11585,7 @@
 	    }, {
 	        key: 'getComments',
 	        value: function getComments() {
-	            var _this8 = this;
+	            var _this9 = this;
 
 	            this.$element.toggleClass('loading', true);
 
@@ -11505,7 +11593,7 @@
 	            var user = User.getCurrent();
 
 	            ApiHelper.getIssueComments(this.model).then(function (comments) {
-	                _this8.$element.toggleClass('loading', false);
+	                _this9.$element.toggleClass('loading', false);
 
 	                $comments.children('.comment').remove();
 
@@ -11514,17 +11602,17 @@
 	                    var text = markdownToHtml(comment.text);
 	                    var isUser = collaborator.name == user.name;
 
-	                    return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.displayName || collaborator.name)), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this8.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
-	                        _this8.$element.toggleClass('loading', true);
+	                    return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.displayName || collaborator.name)), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this9.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
+	                        _this9.$element.toggleClass('loading', true);
 
-	                        comment.text = _this8.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
+	                        comment.text = _this9.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
 
-	                        _this8.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(markdownToHtml(comment.text) || '');
+	                        _this9.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(markdownToHtml(comment.text) || '');
 
-	                        ApiHelper.updateIssueComment(_this8.model, comment).then(function () {
-	                            _this8.$element.toggleClass('loading', false);
+	                        ApiHelper.updateIssueComment(_this9.model, comment).then(function () {
+	                            _this9.$element.toggleClass('loading', false);
 	                        });
-	                    }).blur(_this8.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
+	                    }).blur(_this9.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
 	                }));
 	            });
 	        }
@@ -11546,157 +11634,6 @@
 
 /***/ },
 /* 34 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	/**
-	 * Issue editor template
-	 */
-	module.exports = function render() {
-	    var _this = this;
-
-	    return _.div({ class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type] },
-
-	    // Header
-	    _.div({ class: 'header' },
-	    // Drag handle
-	    _.div({ class: 'drag-handle' }, _.span({ class: 'fa fa-bars' })).on('mousedown', function (e) {
-	        _this.onClickDragHandle(e);
-	    }),
-
-	    // Header content
-	    _.div({ class: 'header-content' },
-	    // Icons                
-	    _.div({ class: 'header-icons' },
-	    // Type indicator
-	    this.getTypeIndicator(),
-
-	    // Priority indicator
-	    this.getPriorityIndicator(),
-
-	    // Issue id
-	    _.span({ class: 'issue-id' }, this.model.id)),
-
-	    // Assignee avatar
-	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())),
-
-	    // Center section
-	    _.div({ class: 'header-center' },
-	    // Title
-	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
-	        _this.onChange();
-
-	        _this.$element.find('.header .rendered').html(_this.model.title);
-	    }).blur(this.onBlur).keyup(function (e) {
-	        if (e.which == 13) {
-	            _this.onBlur(e);
-	        }
-	    }), _.button({ class: 'btn-edit' }).click(this.onClickEdit)))),
-
-	    // Expand/collapse button
-	    _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-up' }), _.span({ class: 'fa icon-open fa-chevron-down' })).click(function (e) {
-	        _this.onClickToggle(e);
-	    })).click(function (e) {
-	        _this.onClickElement(e);
-	    }),
-
-	    // Meta information
-	    _.div({ class: 'meta' },
-
-	    // Multi edit notification
-	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
-
-	    // Type
-	    _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueTypes, function (i, type) {
-	        return _.option({ value: i }, type);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.type)),
-
-	    // Priority
-	    _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issuePriorities, function (i, priority) {
-	        return _.option({ value: i }, priority);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.priority)),
-
-	    // Assignee
-	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
-	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.assignee))),
-
-	    // Version
-	    _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
-	        return _.option({ value: i }, version);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.version)),
-
-	    // Estimate
-	    _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueEstimates, function (i, estimate) {
-	        return _.option({ value: i }, estimate);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.estimate)),
-
-	    // Multi edit actions
-	    _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
-	        _this.onClickMultiEditCancel();
-	    }), _.button({ class: 'btn' }, 'Apply').click(function () {
-	        _this.onClickMultiEditApply();
-	    }))),
-
-	    // Body
-	    _.div({ class: 'body' },
-
-	    // Description
-	    _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(this.onClickEdit), _.label('Description'), _.div({ class: 'rendered' }, markdownToHtml(this.model.description)), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
-	        _this.onChange();
-
-	        _this.$element.find('.body .rendered').html(markdownToHtml(_this.model.description) || '');
-	    }).blur(this.onBlur).keyup(this.onKeyUp).on('paste', function (e) {
-	        _this.onPaste(e);
-	    })),
-
-	    // Attachments
-	    _.div({ class: 'attachments' }, _.label('Attachments'), _.input({ name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file' }).change(function (e) {
-	        _this.onAttachmentFileInputChange(e);
-	    }), _.label({ for: 'input-upload-attachment-' + this.model.id, class: 'btn-upload-attachment' }, _.span({ class: 'fa fa-upload' }))),
-
-	    // Comments
-	    _.div({ class: 'comments' }, _.label('Comments')),
-
-	    // Add comment
-	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' },
-	    // Add comment input
-	    _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp),
-
-	    // Remove button
-	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
-	        _this.onClickRemove();
-	    })),
-
-	    // Add comment button
-	    _.button({ class: 'btn' }, 'Comment').click(function () {
-	        _this.onClickComment();
-	    }))));
-	};
-
-/***/ },
-/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11721,7 +11658,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (MilestoneEditor.__proto__ || Object.getPrototypeOf(MilestoneEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(36);
+	        _this.template = __webpack_require__(35);
 
 	        _this.fetch();
 
@@ -11741,17 +11678,20 @@
 
 	            spinner(true);
 
-	            Issue.create({ milestone: this.model.index }).then(function (issue) {
+	            var issue = new Issue({
+	                milestone: this.model.index
+	            });
+
+	            ResourceHelper.addResource('issues', issue).then(function (newIssue) {
 	                var editor = new IssueEditor({
-	                    model: issue
+	                    model: newIssue
 	                });
 
 	                var $issue = editor.$element;
 
-	                _this2.$element.find('.column[data-index="' + issue.column + '"] .btn-new-issue').before($issue);
+	                _this2.$element.find('.column[data-index="' + newIssue.column + '"] .btn-new-issue').before($issue);
 
-	                $issue.toggleClass('expanded', true);
-	                $issue.toggleClass('selected', false);
+	                editor.onClickToggle();
 
 	                _this2.updateProgress();
 
@@ -12023,7 +11963,7 @@
 	module.exports = MilestoneEditor;
 
 /***/ },
-/* 36 */
+/* 35 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12053,7 +11993,7 @@
 	};
 
 /***/ },
-/* 37 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12074,7 +12014,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ResourceEditor.__proto__ || Object.getPrototypeOf(ResourceEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(38);
+	        _this.template = __webpack_require__(37);
 
 	        _this.fetch();
 	        return _this;
@@ -12148,7 +12088,7 @@
 	module.exports = ResourceEditor;
 
 /***/ },
-/* 38 */
+/* 37 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12184,7 +12124,7 @@
 	};
 
 /***/ },
-/* 39 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12205,7 +12145,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (PlanItemEditor.__proto__ || Object.getPrototypeOf(PlanItemEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(40);
+	        _this.template = __webpack_require__(39);
 
 	        _this.fetch();
 	        return _this;
@@ -12537,7 +12477,7 @@
 	module.exports = PlanItemEditor;
 
 /***/ },
-/* 40 */
+/* 39 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12557,7 +12497,7 @@
 	};
 
 /***/ },
-/* 41 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12585,7 +12525,7 @@
 	            _this.currentMonth = '0' + _this.currentMonth;
 	        }
 
-	        _this.template = __webpack_require__(42);
+	        _this.template = __webpack_require__(41);
 
 	        _this.init();
 	        return _this;
@@ -12829,7 +12769,7 @@
 	module.exports = PlanEditor;
 
 /***/ },
-/* 42 */
+/* 41 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12877,7 +12817,7 @@
 	};
 
 /***/ },
-/* 43 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12898,7 +12838,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ProjectEditor.__proto__ || Object.getPrototypeOf(ProjectEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(44);
+	        _this.template = __webpack_require__(43);
 
 	        _this.fetch();
 	        return _this;
@@ -12925,7 +12865,7 @@
 	module.exports = ProjectEditor;
 
 /***/ },
-/* 44 */
+/* 43 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12939,7 +12879,7 @@
 	};
 
 /***/ },
-/* 45 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12962,7 +12902,7 @@
 
 	        _this.MAX_FILTERS = 5;
 
-	        _this.template = __webpack_require__(46);
+	        _this.template = __webpack_require__(45);
 
 	        _this.defaultFilter = {
 	            key: 'column',
@@ -13144,7 +13084,7 @@
 	module.exports = FilterEditor;
 
 /***/ },
-/* 46 */
+/* 45 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13231,7 +13171,7 @@
 	};
 
 /***/ },
-/* 47 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13256,7 +13196,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (BurnDownChart.__proto__ || Object.getPrototypeOf(BurnDownChart)).call(this, params));
 
-	        _this.template = __webpack_require__(48);
+	        _this.template = __webpack_require__(47);
 
 	        // Find most relevant milestone
 	        var nearest = void 0;
@@ -13433,7 +13373,7 @@
 	module.exports = BurnDownChart;
 
 /***/ },
-/* 48 */
+/* 47 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13537,7 +13477,7 @@
 	};
 
 /***/ },
-/* 49 */
+/* 48 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13690,6 +13630,159 @@
 	var navbar = new Navbar();
 
 	$('.app-container').html(navbar.$element);
+
+/***/ },
+/* 49 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	/**
+	 * Issue editor template
+	 */
+	module.exports = function render() {
+	    var _this = this;
+
+	    return _.div({ class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type] },
+
+	    // Header
+	    _.div({ class: 'header' },
+	    // Drag handle
+	    _.div({ class: 'drag-handle' }, _.span({ class: 'fa fa-bars' })).on('mousedown', function (e) {
+	        _this.onClickDragHandle(e);
+	    }),
+
+	    // Header content
+	    _.div({ class: 'header-content' },
+	    // Icons                
+	    _.div({ class: 'header-icons' },
+	    // Type indicator
+	    this.getTypeIndicator(),
+
+	    // Priority indicator
+	    this.getPriorityIndicator(),
+
+	    // Issue id
+	    _.span({ class: 'issue-id' }, this.model.id)),
+
+	    // Assignee avatar
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())),
+
+	    // Center section
+	    _.div({ class: 'header-center' },
+	    // Title
+	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
+	        _this.onChange();
+
+	        _this.$element.find('.header .rendered').html(_this.model.title);
+	    }).blur(this.onBlur).keyup(function (e) {
+	        if (e.which == 13) {
+	            _this.onBlur(e);
+	        }
+	    }), _.button({ class: 'btn-edit' }).click(this.onClickEdit)))),
+
+	    // Expand/collapse button
+	    _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-up' }), _.span({ class: 'fa icon-open fa-chevron-down' })).click(function (e) {
+	        _this.onClickToggle(e);
+	    })).click(function (e) {
+	        _this.onClickElement(e);
+	    }),
+
+	    // Meta information
+	    _.div({ class: 'meta' },
+
+	    // Multi edit notification
+	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
+
+	    // Type
+	    _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueTypes, function (i, type) {
+	        return _.option({ value: i }, type);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.type)),
+
+	    // Priority
+	    _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issuePriorities, function (i, priority) {
+	        return _.option({ value: i }, priority);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.priority)),
+
+	    // Assignee
+	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
+	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.assignee))),
+
+	    // Version
+	    _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
+	        return _.option({ value: i }, version);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.version)),
+
+	    // Estimate
+	    _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueEstimates, function (i, estimate) {
+	        return _.option({ value: i }, estimate);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.estimate)),
+
+	    // Multi edit actions
+	    _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
+	        _this.onClickMultiEditCancel();
+	    }), _.button({ class: 'btn' }, 'Apply').click(function () {
+	        _this.onClickMultiEditApply();
+	    }))),
+
+	    // Body
+	    _.div({ class: 'body' },
+
+	    // Description
+	    _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(this.onClickEdit), _.label('Description'), _.div({ class: 'rendered' }, markdownToHtml(this.model.description)), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
+	        _this.onChange();
+
+	        _this.$element.find('.body .rendered').html(markdownToHtml(_this.model.description) || '');
+	    }).blur(this.onBlur).keyup(this.onKeyUp).on('paste', function (e) {
+	        _this.onPaste(e);
+	    })),
+
+	    // Attachments
+	    _.div({ class: 'attachments' }, _.label('Attachments'), _.input({ name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file' }).change(function (e) {
+	        _this.onAttachmentFileInputChange(e);
+	    }), _.label({ for: 'input-upload-attachment-' + this.model.id, class: 'btn-upload-attachment' }, _.span({ class: 'fa fa-upload' }))),
+
+	    // Comments
+	    _.div({ class: 'comments' }, _.label('Comments')),
+
+	    // Add comment
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' },
+	    // Add comment input
+	    _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp).on('paste', function (e) {
+	        _this.onPaste(e);
+	    }),
+
+	    // Remove button
+	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
+	        _this.onClickRemove();
+	    })),
+
+	    // Add comment button
+	    _.button({ class: 'btn' }, 'Comment').click(function () {
+	        _this.onClickComment();
+	    }))));
+	};
 
 /***/ }
 /******/ ]);

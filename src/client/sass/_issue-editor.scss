@@ -349,7 +349,7 @@
     }
     
     .attachments {
-        padding: 0px 0px 15px 15px;
+        padding: 0px 0px 0px 15px;
         flex-wrap: wrap;
         position: relative;
 
@@ -361,7 +361,7 @@
         input[type="file"], .btn-upload-attachment {
             position: absolute;
             top: 0px;
-            right: 20px;
+            right: 18px;
             width: 15px;
             height: 15px;
             cursor: pointer;
@@ -392,11 +392,11 @@
     }
 
     .comments {
-        padding: 0px 15px 15px 15px;
+        padding: 0px 15px 0px 15px;
 
         .comment {
             display: flex;
-            margin-top: 15px;
+            margin-bottom: 15px;
             position: relative;
 
             &:first-child {

@@ -56,15 +56,21 @@ class GitHubApi extends ApiHelper {
      *
      * @param {String} url
      * @param {String} param
+     * @param {Object} data
      *
      * @returns {Promise} promise
      */
-    delete(url, param) {
+    delete(url, param, data) {
+        if(data && typeof data === 'object') {
+            data = JSON.stringify(data);
+        }
+        
         return new Promise((resolve, reject) => {
             $.ajax({
                 url: 'https://api.github.com' + url + this.getApiTokenString() + (param ? '&' + param : ''),
                 type: 'DELETE',
                 cache: false,
+                data: data,
                 success: (result) => {
                     resolve(result);
                 },
@@ -396,11 +402,15 @@ class GitHubApi extends ApiHelper {
                 let timestamp = obj.name.split('__')[0];
                 let name = obj.name.split('__')[1];
 
-                attachments[attachments.length] = new Attachment({
+                let attachment = new Attachment({
                     name: name,
                     timestamp: timestamp,
                     url: obj.download_url
                 });
+                
+                attachment.sha = obj.sha;
+                
+                attachments[attachments.length] = attachment;
             }
 
             return Promise.resolve(attachments);  
@@ -478,18 +488,21 @@ class GitHubApi extends ApiHelper {
      */
     addIssue(issue) {
         let deletedIssue = deletedIssuesCache.pop();
-       
+      
         if(deletedIssue) {
             issue.id = deletedIssue.id;
 
-            return this.updateIssue(issue);
+            return this.updateIssue(issue)
+            .then(() => {
+                return Promise.resolve(issue);  
+            });
         
         } else {
             return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue))
             .then((gitHubIssue) => {
                 issue.id = gitHubIssue.number;
 
-                return Promise.resolve();
+                return Promise.resolve(issue);
             });
         }
     }
@@ -671,9 +684,60 @@ class GitHubApi extends ApiHelper {
         issue.deleted = true;
         deletedIssuesCache.push(issue);
 
-        resources.issues[issue.index] = null;
+        resources.issues.splice(issue.index, 1);
 
-        return this.updateIssue(issue);
+        // Update the issue with the "deleted" label
+        return this.updateIssue(issue)
+
+        // Get all attachments
+        .then(() => {
+            return this.getIssueAttachments(issue)
+        })
+
+        // Delete attachments one by one
+        .then((attachments) => {
+            let deleteNextAttachment = () => {
+                let attachment = attachments.pop();
+
+                if(attachment) {
+                    return this.removeIssueAttachment(issue, attachment)
+                    .then(() => {
+                        return deleteNextAttachment();
+                    });
+                
+                } else {
+                    return Promise.resolve();
+
+                }
+            };
+        
+            return deleteNextAttachment();
+        })
+
+        // Get all comments
+        .then(() => {
+            return this.getIssueComments(issue);
+        })
+
+        // Delete all comments one by one
+        .then((comments) => {
+            let deleteNextComment = () => {
+                let comment = comments.pop();
+
+                if(comment) {
+                    return this.removeIssueComment(issue, comment)
+                    .then(() => {
+                        return deleteNextComment();
+                    });
+                
+                } else {
+                    return Promise.resolve();
+
+                }
+            };
+        
+            return deleteNextComment();
+        });
     }
     
     /**
@@ -729,6 +793,25 @@ class GitHubApi extends ApiHelper {
      */
     removeIssueColumn(index) {
         return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index]);
+    }
+    
+    /**
+     * Removes an issue attachment
+     *
+     * @param {Issue} issue
+     * @param {Attachment} attachment
+     *
+     * @returns {Promise} Promise
+     */
+    removeIssueAttachment(issue, attachment) {
+        let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getTimestamp().getTime() + '__' + attachment.getName();
+        let deleteData = {
+            message: 'Removed attachment "' + attachment.getName() + '"',
+            sha: attachment.sha,
+            branch: 'samoosa-resources'
+        };
+
+        return this.delete(apiUrl, null, deleteData);
     }
     
     /**
@@ -1150,7 +1233,6 @@ class GitHubApi extends ApiHelper {
         gitHubIssue.state = issueColumn == 'done' ? 'closed' : 'open';
 
         // Milestone
-        // GitHub counts numbers from 1, ' + this.getProjectName() + ' counts from 0
         if(issue.getMilestone()) {
             gitHubIssue.milestone = issue.getMilestone().id;
         } else {
@@ -1230,6 +1312,16 @@ class GitHubApi extends ApiHelper {
                 callback(); 
             });
         });
+    }
+    
+    /**
+     * Remove issue comment
+     *
+     * @param {Issue} issue
+     * @param {Object} comment
+     */
+    removeIssueComment(issue, comment) {
+        return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/comments/' + comment.index);
     }
 
     /**

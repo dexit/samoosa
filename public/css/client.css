@@ -511,7 +511,7 @@ body, html {
       width: 100%;
       min-height: 100px; }
   .issue-editor .attachments {
-    padding: 0px 0px 15px 15px;
+    padding: 0px 0px 0px 15px;
     flex-wrap: wrap;
     position: relative; }
     .issue-editor .attachments label {
@@ -520,7 +520,7 @@ body, html {
     .issue-editor .attachments input[type="file"], .issue-editor .attachments .btn-upload-attachment {
       position: absolute;
       top: 0px;
-      right: 20px;
+      right: 18px;
       width: 15px;
       height: 15px;
       cursor: pointer; }
@@ -542,10 +542,10 @@ body, html {
         max-width: 100%;
         max-height: 100%; }
   .issue-editor .comments {
-    padding: 0px 15px 15px 15px; }
+    padding: 0px 15px 0px 15px; }
     .issue-editor .comments .comment {
       display: flex;
-      margin-top: 15px;
+      margin-bottom: 15px;
       position: relative; }
       .issue-editor .comments .comment:first-child {
         margin-top: 0px; }

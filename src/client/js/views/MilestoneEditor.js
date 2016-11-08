@@ -19,19 +19,22 @@ class MilestoneEditor extends View {
      */
     onClickNewIssue() {
         spinner(true);
-        
-        Issue.create({ milestone: this.model.index })
-        .then((issue) => {
+
+        let issue = new Issue({
+            milestone: this.model.index
+        });
+
+        ResourceHelper.addResource('issues', issue)
+        .then((newIssue) => {
             let editor = new IssueEditor({
-                model: issue
+                model: newIssue
             }); 
 
             let $issue = editor.$element;
 
-            this.$element.find('.column[data-index="' + issue.column + '"] .btn-new-issue').before($issue);
+            this.$element.find('.column[data-index="' + newIssue.column + '"] .btn-new-issue').before($issue);
            
-            $issue.toggleClass('expanded', true);
-            $issue.toggleClass('selected', false);
+            editor.onClickToggle();
 
             this.updateProgress();
 

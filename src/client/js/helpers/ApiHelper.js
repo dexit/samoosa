@@ -344,7 +344,7 @@ class ApiHelper {
     /**
      * Adds issue attachment
      *
-     * @param {File} attachment
+     * @param {Attachment} attachment
      *
      * @returns {Promise} promise
      */

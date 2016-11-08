@@ -52,6 +52,7 @@ window.Issue = require('./models/Issue');
 window.Milestone = require('./models/Milestone');
 window.User = require('./models/User');
 window.Project = require('./models/Project');
+window.Attachment = require('./models/Attachment');
 
 // Views
 window.Navbar = require('./views/Navbar');

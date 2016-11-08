@@ -547,6 +547,30 @@ class GitHubApi extends ApiHelper {
     }
     
     /**
+     * Adds issue attachment
+     *
+     * @param {Attachment} attachment
+     *
+     * @returns {Promise} Promise
+     */
+    addIssueAttachment(attachment) {
+        let postData = {
+            message: 'Added attachment "' + attachment.name + '"',
+            content: attachment.getBase64(),
+            branch: 'samoosa-resources'
+        };
+
+        return this.put('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + attachment.getTimestamp().getTime() + '__' + attachment.getName(), postData) 
+        .then((response) => {
+            if(response && response.content) {
+                attachment.url = response.content.download_url;
+            }
+
+            return Promise.resolve(attachment);  
+        });
+    }
+    
+    /**
      * Adds milestone 
      *
      * @param {Object} milestone

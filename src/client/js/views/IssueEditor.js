@@ -565,17 +565,31 @@ class IssueEditor extends View {
         // Event: On image loaded
         reader.onload = (e) => {
             let base64 = e.target.result;
-            let filename = file.name || Date.now().toString() + '.png';
+            let filename = (file.name || 'Pasted') + '.png';
 
             debug.log('Attaching image "' + filename + '"...', this);
 
             // Remove headers
             //base64 = base64.replace('data:image/png;base64,', '');
 
-            // TEST
-            let $img = _.img({src: base64});
+            let attachment = new Attachment({
+                name: filename,
+                base64: base64
+            });
 
-            this.$element.find('.attachments').append($img);
+            spinner(true);
+            
+            ResourceHelper.addResource('issueAttachments', attachment)
+            .then(() => {
+                let $img = _.img({src: attachment.getBase64()});
+                this.$element.find('.attachments').append($img);
+
+                spinner(false);
+            })
+            .catch(() => {
+                
+                spinner(false);
+            });
         };
 
         // Read the file

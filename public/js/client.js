@@ -99,20 +99,21 @@
 	window.Milestone = __webpack_require__(27);
 	window.User = __webpack_require__(28);
 	window.Project = __webpack_require__(29);
+	window.Attachment = __webpack_require__(30);
 
 	// Views
-	window.Navbar = __webpack_require__(30);
-	window.IssueEditor = __webpack_require__(32);
-	window.MilestoneEditor = __webpack_require__(34);
-	window.ResourceEditor = __webpack_require__(36);
-	window.PlanItemEditor = __webpack_require__(38);
-	window.PlanEditor = __webpack_require__(40);
-	window.ProjectEditor = __webpack_require__(42);
-	window.FilterEditor = __webpack_require__(44);
-	window.BurnDownChart = __webpack_require__(46);
+	window.Navbar = __webpack_require__(31);
+	window.IssueEditor = __webpack_require__(33);
+	window.MilestoneEditor = __webpack_require__(35);
+	window.ResourceEditor = __webpack_require__(37);
+	window.PlanItemEditor = __webpack_require__(39);
+	window.PlanEditor = __webpack_require__(41);
+	window.ProjectEditor = __webpack_require__(43);
+	window.FilterEditor = __webpack_require__(45);
+	window.BurnDownChart = __webpack_require__(47);
 
 	// Routes
-	__webpack_require__(48);
+	__webpack_require__(49);
 
 	// Title
 	$('head title').html((Router.params.project ? Router.params.project + ' - ' : '') + 'Samoosa');
@@ -5715,6 +5716,32 @@
 	        }
 
 	        /**
+	         * Adds issue attachment
+	         *
+	         * @param {Attachment} attachment
+	         *
+	         * @returns {Promise} Promise
+	         */
+
+	    }, {
+	        key: 'addIssueAttachment',
+	        value: function addIssueAttachment(attachment) {
+	            var postData = {
+	                message: 'Added attachment "' + attachment.name + '"',
+	                content: attachment.getBase64(),
+	                branch: 'samoosa-resources'
+	            };
+
+	            return this.put('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + attachment.getTimestamp().getTime() + '__' + attachment.getName(), postData).then(function (response) {
+	                if (response && response.content) {
+	                    attachment.url = response.content.download_url;
+	                }
+
+	                return Promise.resolve(attachment);
+	            });
+	        }
+
+	        /**
 	         * Adds milestone 
 	         *
 	         * @param {Object} milestone
@@ -7076,7 +7103,7 @@
 	        /**
 	         * Adds issue attachment
 	         *
-	         * @param {File} attachment
+	         * @param {Attachment} attachment
 	         *
 	         * @returns {Promise} promise
 	         */
@@ -10063,6 +10090,108 @@
 
 /***/ },
 /* 30 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Attachment = function () {
+	    function Attachment(properties) {
+	        _classCallCheck(this, Attachment);
+
+	        properties = properties || {};
+
+	        this.timestamp = properties.timestamp || Date.now();
+	        this.name = properties.name;
+	        this.base64 = properties.base64;
+	        this.data = properties.data;
+	        this.url = properties.url;
+	    }
+
+	    /**
+	     * Gets the timestamp
+	     *
+	     * @returns {Date} Timestamp
+	     */
+
+
+	    _createClass(Attachment, [{
+	        key: 'getTimestamp',
+	        value: function getTimestamp() {
+	            if (!this.timestamp) {
+	                return null;
+	            }
+
+	            var date = void 0;
+
+	            if (!isNaN(this.timestamp)) {
+	                date = new Date(parseInt(this.timestamp));
+	            } else {
+	                date = new Date(this.timestamp);
+	            }
+
+	            if (!date || isNaN(date.getTime())) {
+	                return null;
+	            }
+
+	            return date;
+	        }
+
+	        /**
+	         * Gets the name
+	         *
+	         * @returns {String} Name
+	         */
+
+	    }, {
+	        key: 'getName',
+	        value: function getName() {
+	            return this.name;
+	        }
+
+	        /**
+	         * Gets the URL
+	         *
+	         * @returns {String} URL
+	         */
+
+	    }, {
+	        key: 'getURL',
+	        value: function getURL() {
+	            return this.url;
+	        }
+
+	        /**
+	         * Gets the base64 string
+	         *
+	         * @returns {String} Name
+	         */
+
+	    }, {
+	        key: 'getBase64',
+	        value: function getBase64() {
+	            if (!this.data && !this.base64) {
+	                return null;
+	            }
+
+	            if (this.base64) {
+	                return this.base64;
+	            }
+
+	            return btoa(this.data);
+	        }
+	    }]);
+
+	    return Attachment;
+	}();
+
+	module.exports = Attachment;
+
+/***/ },
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10089,7 +10218,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (Navbar.__proto__ || Object.getPrototypeOf(Navbar)).call(this, params));
 
-	        _this.template = __webpack_require__(31);
+	        _this.template = __webpack_require__(32);
 
 	        _this.fetch();
 	        return _this;
@@ -10354,7 +10483,7 @@
 	module.exports = Navbar;
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10386,7 +10515,7 @@
 	};
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10407,7 +10536,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (IssueEditor.__proto__ || Object.getPrototypeOf(IssueEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(33);
+	        _this.template = __webpack_require__(34);
 
 	        _this.fetch();
 	        return _this;
@@ -11135,17 +11264,29 @@
 	            // Event: On image loaded
 	            reader.onload = function (e) {
 	                var base64 = e.target.result;
-	                var filename = file.name || Date.now().toString() + '.png';
+	                var filename = (file.name || 'Pasted') + '.png';
 
 	                debug.log('Attaching image "' + filename + '"...', _this6);
 
 	                // Remove headers
 	                //base64 = base64.replace('data:image/png;base64,', '');
 
-	                // TEST
-	                var $img = _.img({ src: base64 });
+	                var attachment = new Attachment({
+	                    name: filename,
+	                    base64: base64
+	                });
 
-	                _this6.$element.find('.attachments').append($img);
+	                spinner(true);
+
+	                ResourceHelper.addResource('issueAttachments', attachment).then(function () {
+	                    var $img = _.img({ src: attachment.getBase64() });
+	                    _this6.$element.find('.attachments').append($img);
+
+	                    spinner(false);
+	                }).catch(function () {
+
+	                    spinner(false);
+	                });
 	            };
 
 	            // Read the file
@@ -11286,7 +11427,7 @@
 	module.exports = IssueEditor;
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11435,7 +11576,7 @@
 	};
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11460,7 +11601,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (MilestoneEditor.__proto__ || Object.getPrototypeOf(MilestoneEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(35);
+	        _this.template = __webpack_require__(36);
 
 	        _this.fetch();
 
@@ -11762,7 +11903,7 @@
 	module.exports = MilestoneEditor;
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11792,7 +11933,7 @@
 	};
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11813,7 +11954,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ResourceEditor.__proto__ || Object.getPrototypeOf(ResourceEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(37);
+	        _this.template = __webpack_require__(38);
 
 	        _this.fetch();
 	        return _this;
@@ -11887,7 +12028,7 @@
 	module.exports = ResourceEditor;
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11923,7 +12064,7 @@
 	};
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11944,7 +12085,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (PlanItemEditor.__proto__ || Object.getPrototypeOf(PlanItemEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(39);
+	        _this.template = __webpack_require__(40);
 
 	        _this.fetch();
 	        return _this;
@@ -12276,7 +12417,7 @@
 	module.exports = PlanItemEditor;
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12296,7 +12437,7 @@
 	};
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12324,7 +12465,7 @@
 	            _this.currentMonth = '0' + _this.currentMonth;
 	        }
 
-	        _this.template = __webpack_require__(41);
+	        _this.template = __webpack_require__(42);
 
 	        _this.init();
 	        return _this;
@@ -12568,7 +12709,7 @@
 	module.exports = PlanEditor;
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12616,7 +12757,7 @@
 	};
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12637,7 +12778,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ProjectEditor.__proto__ || Object.getPrototypeOf(ProjectEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(43);
+	        _this.template = __webpack_require__(44);
 
 	        _this.fetch();
 	        return _this;
@@ -12664,7 +12805,7 @@
 	module.exports = ProjectEditor;
 
 /***/ },
-/* 43 */
+/* 44 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12678,7 +12819,7 @@
 	};
 
 /***/ },
-/* 44 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12701,7 +12842,7 @@
 
 	        _this.MAX_FILTERS = 5;
 
-	        _this.template = __webpack_require__(45);
+	        _this.template = __webpack_require__(46);
 
 	        _this.defaultFilter = {
 	            key: 'column',
@@ -12883,7 +13024,7 @@
 	module.exports = FilterEditor;
 
 /***/ },
-/* 45 */
+/* 46 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12970,7 +13111,7 @@
 	};
 
 /***/ },
-/* 46 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12995,7 +13136,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (BurnDownChart.__proto__ || Object.getPrototypeOf(BurnDownChart)).call(this, params));
 
-	        _this.template = __webpack_require__(47);
+	        _this.template = __webpack_require__(48);
 
 	        // Find most relevant milestone
 	        var nearest = void 0;
@@ -13172,7 +13313,7 @@
 	module.exports = BurnDownChart;
 
 /***/ },
-/* 47 */
+/* 48 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13276,7 +13417,7 @@
 	};
 
 /***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports) {
 
 	'use strict';

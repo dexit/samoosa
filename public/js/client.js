@@ -11404,10 +11404,6 @@
 	            var priority = this.model.getPriority();
 	            var icon = '';
 
-	            if (!priority) {
-	                return null;
-	            }
-
 	            switch (priority) {
 	                case 'low':case 'trivial':
 	                    icon = 'arrow-down';
@@ -11440,10 +11436,6 @@
 	        value: function getTypeIndicator() {
 	            var type = this.model.getType();
 	            var icon = '';
-
-	            if (!type) {
-	                return null;
-	            }
 
 	            switch (type) {
 	                case 'proposal':

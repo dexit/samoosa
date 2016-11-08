@@ -627,8 +627,6 @@ class IssueEditor extends View {
         let priority = this.model.getPriority();
         let icon = '';
 
-        if(!priority) { return null; }
-
         switch(priority) {
             case 'low': case 'trivial':
                 icon = 'arrow-down';
@@ -658,8 +656,6 @@ class IssueEditor extends View {
     getTypeIndicator() {
         let type = this.model.getType();
         let icon = '';
-
-        if(!type) { return null; }
 
         switch(type) {
             case 'proposal':

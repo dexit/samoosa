@@ -570,7 +570,7 @@ class IssueEditor extends View {
             debug.log('Attaching image "' + filename + '"...', this);
 
             // Remove headers
-            //base64 = base64.replace('data:image/png;base64,', '');
+            base64 = base64.replace('data:image/png;base64,', '');
 
             let attachment = new Attachment({
                 name: filename,
@@ -580,13 +580,14 @@ class IssueEditor extends View {
             spinner(true);
             
             ResourceHelper.addResource('issueAttachments', attachment)
-            .then(() => {
-                let $img = _.img({src: attachment.getBase64()});
+            .then((uploadedAttachment) => {
+                let $img = _.img({src: uploadedAttachment.getUrl()});
                 this.$element.find('.attachments').append($img);
 
                 spinner(false);
             })
-            .catch(() => {
+            .catch((e) => {
+                displayError(e);
                 
                 spinner(false);
             });

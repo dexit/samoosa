@@ -140,15 +140,21 @@ class GitHubApi extends ApiHelper {
      * PUT method
      *
      * @param {String} url
+     * @param {Object} data
      *
      * @returns {Promise} promise
      */
-    put(url) {
+    put(url, data) {
+        if(typeof data === 'object') {
+            data = JSON.stringify(data);
+        }
+        
         return new Promise((resolve, reject) => {
             $.ajax({
                 url: 'https://api.github.com' + url + this.getApiTokenString(),
                 type: 'PUT',
                 cache: false,
+                data: data,
                 success: (result) => {
                     resolve(result);
                 },
@@ -554,13 +560,14 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} Promise
      */
     addIssueAttachment(attachment) {
+        let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + attachment.getTimestamp().getTime() + '__' + attachment.getName();
         let postData = {
             message: 'Added attachment "' + attachment.name + '"',
             content: attachment.getBase64(),
             branch: 'samoosa-resources'
         };
 
-        return this.put('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + attachment.getTimestamp().getTime() + '__' + attachment.getName(), postData) 
+        return this.put(apiUrl, postData) 
         .then((response) => {
             if(response && response.content) {
                 attachment.url = response.content.download_url;

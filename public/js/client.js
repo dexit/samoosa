@@ -5219,20 +5219,26 @@
 	         * PUT method
 	         *
 	         * @param {String} url
+	         * @param {Object} data
 	         *
 	         * @returns {Promise} promise
 	         */
 
 	    }, {
 	        key: 'put',
-	        value: function put(url) {
+	        value: function put(url, data) {
 	            var _this5 = this;
+
+	            if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
+	                data = JSON.stringify(data);
+	            }
 
 	            return new Promise(function (resolve, reject) {
 	                $.ajax({
 	                    url: 'https://api.github.com' + url + _this5.getApiTokenString(),
 	                    type: 'PUT',
 	                    cache: false,
+	                    data: data,
 	                    success: function success(result) {
 	                        resolve(result);
 	                    },
@@ -5726,13 +5732,14 @@
 	    }, {
 	        key: 'addIssueAttachment',
 	        value: function addIssueAttachment(attachment) {
+	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + attachment.getTimestamp().getTime() + '__' + attachment.getName();
 	            var postData = {
 	                message: 'Added attachment "' + attachment.name + '"',
 	                content: attachment.getBase64(),
 	                branch: 'samoosa-resources'
 	            };
 
-	            return this.put('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + attachment.getTimestamp().getTime() + '__' + attachment.getName(), postData).then(function (response) {
+	            return this.put(apiUrl, postData).then(function (response) {
 	                if (response && response.content) {
 	                    attachment.url = response.content.download_url;
 	                }
@@ -11269,7 +11276,7 @@
 	                debug.log('Attaching image "' + filename + '"...', _this6);
 
 	                // Remove headers
-	                //base64 = base64.replace('data:image/png;base64,', '');
+	                base64 = base64.replace('data:image/png;base64,', '');
 
 	                var attachment = new Attachment({
 	                    name: filename,
@@ -11278,12 +11285,13 @@
 
 	                spinner(true);
 
-	                ResourceHelper.addResource('issueAttachments', attachment).then(function () {
-	                    var $img = _.img({ src: attachment.getBase64() });
+	                ResourceHelper.addResource('issueAttachments', attachment).then(function (uploadedAttachment) {
+	                    var $img = _.img({ src: uploadedAttachment.getUrl() });
 	                    _this6.$element.find('.attachments').append($img);
 
 	                    spinner(false);
-	                }).catch(function () {
+	                }).catch(function (e) {
+	                    displayError(e);
 
 	                    spinner(false);
 	                });

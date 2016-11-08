@@ -104,16 +104,16 @@
 	// Views
 	window.Navbar = __webpack_require__(31);
 	window.IssueEditor = __webpack_require__(33);
-	window.MilestoneEditor = __webpack_require__(34);
-	window.ResourceEditor = __webpack_require__(36);
-	window.PlanItemEditor = __webpack_require__(38);
-	window.PlanEditor = __webpack_require__(40);
-	window.ProjectEditor = __webpack_require__(42);
-	window.FilterEditor = __webpack_require__(44);
-	window.BurnDownChart = __webpack_require__(46);
+	window.MilestoneEditor = __webpack_require__(35);
+	window.ResourceEditor = __webpack_require__(37);
+	window.PlanItemEditor = __webpack_require__(39);
+	window.PlanEditor = __webpack_require__(41);
+	window.ProjectEditor = __webpack_require__(43);
+	window.FilterEditor = __webpack_require__(45);
+	window.BurnDownChart = __webpack_require__(47);
 
 	// Routes
-	__webpack_require__(48);
+	__webpack_require__(49);
 
 	// Title
 	$('head title').html((Router.params.project ? Router.params.project + ' - ' : '') + 'Samoosa');
@@ -10607,7 +10607,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (IssueEditor.__proto__ || Object.getPrototypeOf(IssueEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(49);
+	        _this.template = __webpack_require__(34);
 
 	        _this.fetch();
 	        return _this;
@@ -11482,8 +11482,6 @@
 	            ApiHelper.getIssueAttachments(this.model).then(function (attachments) {
 	                _this7.$element.toggleClass('loading', false);
 
-	                $attachments.toggleClass('hidden', !attachments || attachments.length < 1);
-
 	                $attachments.children('.attachment').remove();
 
 	                _.append($attachments, _.each(attachments, function (i, attachment) {
@@ -11548,6 +11546,157 @@
 
 /***/ },
 /* 34 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	/**
+	 * Issue editor template
+	 */
+	module.exports = function render() {
+	    var _this = this;
+
+	    return _.div({ class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type] },
+
+	    // Header
+	    _.div({ class: 'header' },
+	    // Drag handle
+	    _.div({ class: 'drag-handle' }, _.span({ class: 'fa fa-bars' })).on('mousedown', function (e) {
+	        _this.onClickDragHandle(e);
+	    }),
+
+	    // Header content
+	    _.div({ class: 'header-content' },
+	    // Icons                
+	    _.div({ class: 'header-icons' },
+	    // Type indicator
+	    this.getTypeIndicator(),
+
+	    // Priority indicator
+	    this.getPriorityIndicator(),
+
+	    // Issue id
+	    _.span({ class: 'issue-id' }, this.model.id)),
+
+	    // Assignee avatar
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())),
+
+	    // Center section
+	    _.div({ class: 'header-center' },
+	    // Title
+	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
+	        _this.onChange();
+
+	        _this.$element.find('.header .rendered').html(_this.model.title);
+	    }).blur(this.onBlur).keyup(function (e) {
+	        if (e.which == 13) {
+	            _this.onBlur(e);
+	        }
+	    }), _.button({ class: 'btn-edit' }).click(this.onClickEdit)))),
+
+	    // Expand/collapse button
+	    _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-up' }), _.span({ class: 'fa icon-open fa-chevron-down' })).click(function (e) {
+	        _this.onClickToggle(e);
+	    })).click(function (e) {
+	        _this.onClickElement(e);
+	    }),
+
+	    // Meta information
+	    _.div({ class: 'meta' },
+
+	    // Multi edit notification
+	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
+
+	    // Type
+	    _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueTypes, function (i, type) {
+	        return _.option({ value: i }, type);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.type)),
+
+	    // Priority
+	    _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issuePriorities, function (i, priority) {
+	        return _.option({ value: i }, priority);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.priority)),
+
+	    // Assignee
+	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
+	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.assignee))),
+
+	    // Version
+	    _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
+	        return _.option({ value: i }, version);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.version)),
+
+	    // Estimate
+	    _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueEstimates, function (i, estimate) {
+	        return _.option({ value: i }, estimate);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.estimate)),
+
+	    // Multi edit actions
+	    _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
+	        _this.onClickMultiEditCancel();
+	    }), _.button({ class: 'btn' }, 'Apply').click(function () {
+	        _this.onClickMultiEditApply();
+	    }))),
+
+	    // Body
+	    _.div({ class: 'body' },
+
+	    // Description
+	    _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(this.onClickEdit), _.label('Description'), _.div({ class: 'rendered' }, markdownToHtml(this.model.description)), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
+	        _this.onChange();
+
+	        _this.$element.find('.body .rendered').html(markdownToHtml(_this.model.description) || '');
+	    }).blur(this.onBlur).keyup(this.onKeyUp).on('paste', function (e) {
+	        _this.onPaste(e);
+	    })),
+
+	    // Attachments
+	    _.div({ class: 'attachments' }, _.label('Attachments'), _.input({ name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file' }).change(function (e) {
+	        _this.onAttachmentFileInputChange(e);
+	    }), _.label({ for: 'input-upload-attachment-' + this.model.id, class: 'btn-upload-attachment' }, _.span({ class: 'fa fa-upload' }))),
+
+	    // Comments
+	    _.div({ class: 'comments' }, _.label('Comments')),
+
+	    // Add comment
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' },
+	    // Add comment input
+	    _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp),
+
+	    // Remove button
+	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
+	        _this.onClickRemove();
+	    })),
+
+	    // Add comment button
+	    _.button({ class: 'btn' }, 'Comment').click(function () {
+	        _this.onClickComment();
+	    }))));
+	};
+
+/***/ },
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11572,7 +11721,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (MilestoneEditor.__proto__ || Object.getPrototypeOf(MilestoneEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(35);
+	        _this.template = __webpack_require__(36);
 
 	        _this.fetch();
 
@@ -11874,7 +12023,7 @@
 	module.exports = MilestoneEditor;
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -11904,7 +12053,7 @@
 	};
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11925,7 +12074,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ResourceEditor.__proto__ || Object.getPrototypeOf(ResourceEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(37);
+	        _this.template = __webpack_require__(38);
 
 	        _this.fetch();
 	        return _this;
@@ -11999,7 +12148,7 @@
 	module.exports = ResourceEditor;
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12035,7 +12184,7 @@
 	};
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12056,7 +12205,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (PlanItemEditor.__proto__ || Object.getPrototypeOf(PlanItemEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(39);
+	        _this.template = __webpack_require__(40);
 
 	        _this.fetch();
 	        return _this;
@@ -12388,7 +12537,7 @@
 	module.exports = PlanItemEditor;
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12408,7 +12557,7 @@
 	};
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12436,7 +12585,7 @@
 	            _this.currentMonth = '0' + _this.currentMonth;
 	        }
 
-	        _this.template = __webpack_require__(41);
+	        _this.template = __webpack_require__(42);
 
 	        _this.init();
 	        return _this;
@@ -12680,7 +12829,7 @@
 	module.exports = PlanEditor;
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12728,7 +12877,7 @@
 	};
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12749,7 +12898,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ProjectEditor.__proto__ || Object.getPrototypeOf(ProjectEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(43);
+	        _this.template = __webpack_require__(44);
 
 	        _this.fetch();
 	        return _this;
@@ -12776,7 +12925,7 @@
 	module.exports = ProjectEditor;
 
 /***/ },
-/* 43 */
+/* 44 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12790,7 +12939,7 @@
 	};
 
 /***/ },
-/* 44 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12813,7 +12962,7 @@
 
 	        _this.MAX_FILTERS = 5;
 
-	        _this.template = __webpack_require__(45);
+	        _this.template = __webpack_require__(46);
 
 	        _this.defaultFilter = {
 	            key: 'column',
@@ -12995,7 +13144,7 @@
 	module.exports = FilterEditor;
 
 /***/ },
-/* 45 */
+/* 46 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13082,7 +13231,7 @@
 	};
 
 /***/ },
-/* 46 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13107,7 +13256,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (BurnDownChart.__proto__ || Object.getPrototypeOf(BurnDownChart)).call(this, params));
 
-	        _this.template = __webpack_require__(47);
+	        _this.template = __webpack_require__(48);
 
 	        // Find most relevant milestone
 	        var nearest = void 0;
@@ -13284,7 +13433,7 @@
 	module.exports = BurnDownChart;
 
 /***/ },
-/* 47 */
+/* 48 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13388,7 +13537,7 @@
 	};
 
 /***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13541,157 +13690,6 @@
 	var navbar = new Navbar();
 
 	$('.app-container').html(navbar.$element);
-
-/***/ },
-/* 49 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	/**
-	 * Issue editor template
-	 */
-	module.exports = function render() {
-	    var _this = this;
-
-	    return _.div({ class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type] },
-
-	    // Header
-	    _.div({ class: 'header' },
-	    // Drag handle
-	    _.div({ class: 'drag-handle' }, _.span({ class: 'fa fa-bars' })).on('mousedown', function (e) {
-	        _this.onClickDragHandle(e);
-	    }),
-
-	    // Header content
-	    _.div({ class: 'header-content' },
-	    // Icons                
-	    _.div({ class: 'header-icons' },
-	    // Type indicator
-	    this.getTypeIndicator(),
-
-	    // Priority indicator
-	    this.getPriorityIndicator(),
-
-	    // Issue id
-	    _.span({ class: 'issue-id' }, this.model.id)),
-
-	    // Assignee avatar
-	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'assignee-avatar' }, this.getAssigneeAvatar())),
-
-	    // Center section
-	    _.div({ class: 'header-center' },
-	    // Title
-	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
-	        _this.onChange();
-
-	        _this.$element.find('.header .rendered').html(_this.model.title);
-	    }).blur(this.onBlur).keyup(function (e) {
-	        if (e.which == 13) {
-	            _this.onBlur(e);
-	        }
-	    }), _.button({ class: 'btn-edit' }).click(this.onClickEdit)))),
-
-	    // Expand/collapse button
-	    _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-up' }), _.span({ class: 'fa icon-open fa-chevron-down' })).click(function (e) {
-	        _this.onClickToggle(e);
-	    })).click(function (e) {
-	        _this.onClickElement(e);
-	    }),
-
-	    // Meta information
-	    _.div({ class: 'meta' },
-
-	    // Multi edit notification
-	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
-
-	    // Type
-	    _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueTypes, function (i, type) {
-	        return _.option({ value: i }, type);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.type)),
-
-	    // Priority
-	    _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issuePriorities, function (i, priority) {
-	        return _.option({ value: i }, priority);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.priority)),
-
-	    // Assignee
-	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
-	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.assignee))),
-
-	    // Version
-	    _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
-	        return _.option({ value: i }, version);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.version)),
-
-	    // Estimate
-	    _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueEstimates, function (i, estimate) {
-	        return _.option({ value: i }, estimate);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.estimate)),
-
-	    // Multi edit actions
-	    _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
-	        _this.onClickMultiEditCancel();
-	    }), _.button({ class: 'btn' }, 'Apply').click(function () {
-	        _this.onClickMultiEditApply();
-	    }))),
-
-	    // Body
-	    _.div({ class: 'body' },
-
-	    // Description
-	    _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(this.onClickEdit), _.label('Description'), _.div({ class: 'rendered' }, markdownToHtml(this.model.description)), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
-	        _this.onChange();
-
-	        _this.$element.find('.body .rendered').html(markdownToHtml(_this.model.description) || '');
-	    }).blur(this.onBlur).keyup(this.onKeyUp).on('paste', function (e) {
-	        _this.onPaste(e);
-	    })),
-
-	    // Attachments
-	    _.div({ class: 'attachments' }, _.label('Attachments'), _.input({ name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file' }).change(function (e) {
-	        _this.onAttachmentFileInputChange(e);
-	    }), _.label({ for: 'input-upload-attachment-' + this.model.id, class: 'btn-upload-attachment' }, _.span({ class: 'fa fa-upload' }))),
-
-	    // Comments
-	    _.div({ class: 'comments' }, _.label('Comments')),
-
-	    // Add comment
-	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' },
-	    // Add comment input
-	    _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp),
-
-	    // Remove button
-	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
-	        _this.onClickRemove();
-	    })),
-
-	    // Add comment button
-	    _.button({ class: 'btn' }, 'Comment').click(function () {
-	        _this.onClickComment();
-	    }))));
-	};
 
 /***/ }
 /******/ ]);

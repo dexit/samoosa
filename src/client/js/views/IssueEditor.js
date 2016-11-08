@@ -698,8 +698,6 @@ class IssueEditor extends View {
         .then((attachments) => {
             this.$element.toggleClass('loading', false);
 
-            $attachments.toggleClass('hidden', !attachments || attachments.length < 1);
-
             $attachments.children('.attachment').remove();
 
             _.append($attachments,

@@ -185,15 +185,24 @@ body, html {
     background-color: transparent;
 
     .spinner-container {
-        width: 32px;
-        height: 32px;
         position: absolute;
         top: 50%;
         left: 50%;
-        text-align: center;
         transform: translate(-50%, -50%);
+        display: flex;
+        padding: 0.5rem 1rem 0.5rem 0.5rem;
+
+        .spinner-text {
+            display: block;
+            line-height: 32px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-left: 0.5rem;
+        }
 
         .spinner-icon {
+            display: block;
+            text-align: center;
             color: material-color('blue', '500');
             line-height: 32px;
             height: 32px;

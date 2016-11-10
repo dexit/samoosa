@@ -4284,12 +4284,20 @@
 
 	// Spinner
 	window.spinner = function (active) {
-	    $('.spinner-backdrop').remove();
-
-	    $('.app-container').toggleClass('disabled', active);
-
 	    if (active) {
-	        $('body').append(_.div({ class: 'spinner-backdrop' }, _.div({ class: 'spinner-container' }, _.span({ class: 'spinner-icon fa fa-refresh' }))));
+	        if ($('.spinner-backdrop .spinner-container .spinner-text').length > 0) {
+	            $('.spinner-backdrop .spinner-container .spinner-text').html(typeof active === 'string' ? active : '');
+	        } else {
+	            $('.spinner-backdrop').remove();
+
+	            $('body').append(_.div({ class: 'spinner-backdrop' }, _.div({ class: 'spinner-container' }, _.span({ class: 'spinner-icon fa fa-refresh' }), _.span({ class: 'spinner-text' }, typeof active === 'string' ? active : ''))));
+
+	            $('.app-container').toggleClass('disabled', true);
+	        }
+	    } else {
+	        $('.app-container').toggleClass('disabled', false);
+
+	        $('.spinner-backdrop').remove();
 	    }
 	};
 
@@ -4533,7 +4541,7 @@
 	    }, {
 	        key: 'updateResource',
 	        value: function updateResource(resource, item, index, identifier) {
-	            spinner(true);
+	            spinner('Updating ' + resource);
 
 	            return ApiHelper.updateResource(resource, item, identifier).then(function () {
 	                index = index || item.index;
@@ -4550,7 +4558,7 @@
 	    }, {
 	        key: 'removeResource',
 	        value: function removeResource(resource, index) {
-	            spinner(true);
+	            spinner('Updating ' + resource);
 
 	            return ApiHelper.removeResource(resource, index).then(function () {
 	                resources[resource].splice(index, 1);
@@ -4565,7 +4573,7 @@
 	    }, {
 	        key: 'addResource',
 	        value: function addResource(resource, item) {
-	            spinner(true);
+	            spinner('Updating ' + resource);
 
 	            return ApiHelper.addResource(resource, item).then(function (newItem) {
 	                item = newItem || item;
@@ -6860,7 +6868,7 @@
 	        value: function checkConnection() {
 	            var _this = this;
 
-	            spinner(true);
+	            spinner('Connecting to ' + localStorage.getItem('source'));
 
 	            debug.log('Getting user...', this);
 
@@ -6872,8 +6880,6 @@
 	                debug.log('Found user "' + user.name + '"', _this);
 
 	                localStorage.setItem('user', user.name);
-
-	                spinner(false);
 
 	                return Promise.resolve(user);
 	            });
@@ -7842,7 +7848,7 @@
 	                return Promise.resolve();
 	            }
 
-	            debug.log('Getting ' + resource + '...', this);
+	            spinner('Getting ' + resource);
 
 	            switch (resource) {
 	                case 'collaborators':
@@ -7894,7 +7900,7 @@
 	        value: function getResources(dontOverwrite) {
 	            var _this2 = this;
 
-	            spinner(true);
+	            spinner('Getting resources');
 
 	            var get = function get(resource) {
 	                // If "don't overwrite" is in effect, check if resource is already loaded
@@ -7923,8 +7929,6 @@
 	                return get('versions');
 	            }).then(function () {
 	                return get('issues');
-	            }).then(function () {
-	                spinner(false);
 	            });
 	        }
 	    }]);
@@ -10824,7 +10828,7 @@
 	            var _this2 = this;
 
 	            if (confirm('Are you sure you want to delete "' + this.model.title + '"?')) {
-	                spinner(true);
+	                spinner('Deleting issue');
 
 	                ApiHelper.removeIssue(this.model).then(function () {
 	                    _this2.$element.remove();
@@ -11961,7 +11965,7 @@
 	        value: function onClickNewIssue() {
 	            var _this2 = this;
 
-	            spinner(true);
+	            spinner('Creating issue');
 
 	            var issue = new Issue({
 	                milestone: this.model.index
@@ -12532,7 +12536,7 @@
 	                return;
 	            }
 
-	            spinner(true);
+	            spinner('Deleting milestone');
 
 	            ResourceHelper.removeResource('milestones', this.model.index).then(function () {
 	                ViewHelper.removeAll('PlanItemEditor');
@@ -12924,7 +12928,7 @@
 	                return;
 	            }
 
-	            spinner(true);
+	            spinner('Creating milestone');
 
 	            ResourceHelper.addResource('milestones', new Milestone({
 	                title: 'New milestone',
@@ -13776,7 +13780,9 @@
 	        $('.workspace').remove();
 
 	        $('.app-container').append(_.div({ class: 'workspace logo' }, _.img({ src: '/public/svg/logo-medium.svg' })));
-	    });
+
+	        spinner(false);
+	    }).catch(displayError);
 	});
 
 	// Project
@@ -13794,7 +13800,8 @@
 	        $('.app-container').append(_.div({ class: 'workspace plan-container' }, new PlanEditor().$element));
 
 	        navbar.slideIn();
-	    });
+	        spinner(false);
+	    }).catch(displayError);
 	});
 
 	// Board
@@ -13836,7 +13843,8 @@
 	        }).$element);
 
 	        navbar.slideIn();
-	    });
+	        spinner(false);
+	    }).catch(displayError);
 	});
 
 	// Analytics
@@ -13859,6 +13867,7 @@
 	        })), _.div({ class: 'panes' }, _.div({ class: 'pane active' }, new BurnDownChart().$element)))));
 
 	        navbar.slideIn();
+	        spinner(false);
 	    }).catch(displayError);
 	});
 
@@ -13905,7 +13914,8 @@
 	        })))));
 
 	        navbar.slideIn();
-	    });
+	        spinner(false);
+	    }).catch(displayError);
 	});
 
 	// Init router

@@ -197,6 +197,13 @@ a {
 
 .spinner-backdrop {
     .spinner-container {
+        border-radius: 5px;
+        background-color: $teal-dark;
+
+        .spinner-text {
+            color: $white;
+        }
+
         .spinner-icon {
             color: $pink-medium;
         }

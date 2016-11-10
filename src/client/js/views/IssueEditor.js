@@ -25,7 +25,7 @@ class IssueEditor extends View {
      */
     onClickRemove() {
         if(confirm('Are you sure you want to delete "' + this.model.title + '"?')) {
-            spinner(true);
+            spinner('Deleting issue');
 
             ApiHelper.removeIssue(this.model)
             .then(() => {

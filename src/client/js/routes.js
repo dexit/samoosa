@@ -13,7 +13,10 @@ Router.route('/', () => {
                 _.img({src: '/public/svg/logo-medium.svg'})
             )
         );
-    });
+        
+        spinner(false);
+    })
+    .catch(displayError);
 });
 
 // Project
@@ -37,7 +40,9 @@ Router.route('/:user/:project/plan/', () => {
         );
         
         navbar.slideIn();
-    });
+        spinner(false);
+    })
+    .catch(displayError);
 });
 
 // Board
@@ -88,7 +93,9 @@ Router.route('/:user/:project/board/:mode', () => {
         );
 
         navbar.slideIn();
-    });
+        spinner(false);
+    })
+    .catch(displayError);
 });
 
 // Analytics
@@ -128,6 +135,7 @@ Router.route('/:user/:project/analytics/', () => {
         );
         
         navbar.slideIn();
+        spinner(false);
     })
     .catch(displayError);
 });
@@ -192,7 +200,9 @@ Router.route('/:user/:project/settings/:resource', () => {
         );
         
         navbar.slideIn();
-    });
+        spinner(false);
+    })
+    .catch(displayError);
 });
 
 // Init router

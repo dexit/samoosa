@@ -18,7 +18,7 @@ class MilestoneEditor extends View {
      * Event: Click new issue button
      */
     onClickNewIssue() {
-        spinner(true);
+        spinner('Creating issue');
 
         let issue = new Issue({
             milestone: this.model.index

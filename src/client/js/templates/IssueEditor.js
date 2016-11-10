@@ -145,7 +145,7 @@ module.exports = function render() {
                     })
                 ).change(() => { this.onChange(); }).val(this.model.estimate)
             ),
-
+            
             // Multi edit actions
             _.div({class: 'multi-edit-actions'}, 
                 _.button({class: 'btn'},

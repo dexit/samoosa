@@ -230,18 +230,28 @@ window.prettyDate = function(inputDate, separator) {
 
 // Spinner
 window.spinner = function(active) {
-    $('.spinner-backdrop').remove();
-   
-    $('.app-container').toggleClass('disabled', active);
-
     if(active) { 
-        $('body').append(
-            _.div({class: 'spinner-backdrop'},
-                _.div({class: 'spinner-container'},
-                    _.span({class: 'spinner-icon fa fa-refresh'})
+        if($('.spinner-backdrop .spinner-container .spinner-text').length > 0) {
+            $('.spinner-backdrop .spinner-container .spinner-text').html(typeof active === 'string' ? active : '');
+
+        } else {
+            $('.spinner-backdrop').remove();
+
+            $('body').append(
+                _.div({class: 'spinner-backdrop'},
+                    _.div({class: 'spinner-container'},
+                        _.span({class: 'spinner-icon fa fa-refresh'}),
+                        _.span({class: 'spinner-text'}, typeof active === 'string' ? active : '')
+                    )
                 )
-            )
-        );
+            );
+            
+            $('.app-container').toggleClass('disabled', true);
+        }
+    } else {
+        $('.app-container').toggleClass('disabled', false);
+
+        $('.spinner-backdrop').remove();
     }
 };
 

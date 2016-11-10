@@ -184,31 +184,6 @@
                         &:last-of-type {
                             margin-bottom: 15px;
                         }
-
-                        >.header {
-                            transform: translateX(-100%);
-                            display: inline;
-                            width: auto;
-                            position: absolute;
-                            padding-right: 30px;
-                        }
-
-                        .issue-editor {
-                            .header {
-                                position: relative;
-
-                                .drag-handle {
-                                    position: absolute;
-                                    width: 50%;
-                                    left: 25%;
-                                    top: 0%;
-                                }
-
-                                h4 {
-                                    font-size: 14px;
-                                }
-                            }
-                        }
                     }
                 }
             }

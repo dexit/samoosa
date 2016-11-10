@@ -115,7 +115,7 @@ class ResourceHelper {
     }
 
     static updateResource(resource, item, index, identifier) {
-        spinner(true);
+        spinner('Updating ' + resource);
 
         return ApiHelper.updateResource(resource, item, identifier)
         .then(() => {
@@ -132,7 +132,7 @@ class ResourceHelper {
     }
 
     static removeResource(resource, index) {
-        spinner(true);
+        spinner('Updating ' + resource);
 
         return ApiHelper.removeResource(resource, index)
         .then(() => {
@@ -147,7 +147,7 @@ class ResourceHelper {
     }
 
     static addResource(resource, item) {
-        spinner(true);
+        spinner('Updating ' + resource);
 
         return ApiHelper.addResource(resource, item)
         .then((newItem) => {

@@ -24,7 +24,7 @@ class ApiHelper {
      * Check whether the connection to the source has been made
      */
     checkConnection() {
-        spinner(true);
+        spinner('Connecting to ' + localStorage.getItem('source'));
 
         debug.log('Getting user...', this);
 
@@ -38,8 +38,6 @@ class ApiHelper {
 
             localStorage.setItem('user', user.name);
 
-            spinner(false);
-            
             return Promise.resolve(user);
         });
     }
@@ -851,7 +849,7 @@ class ApiHelper {
             return Promise.resolve();
         }
         
-        debug.log('Getting ' + resource + '...', this);
+        spinner('Getting ' + resource);
 
         switch(resource) {
             case 'collaborators':
@@ -899,7 +897,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     getResources(dontOverwrite) {
-        spinner(true);
+        spinner('Getting resources');
 
         let get = (resource) => {
             // If "don't overwrite" is in effect, check if resource is already loaded
@@ -937,9 +935,6 @@ class ApiHelper {
         })
         .then(() => {
             return get('issues');
-        })
-        .then(() => {
-            spinner(false);
         });
     }
 }

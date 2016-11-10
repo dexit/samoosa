@@ -98,7 +98,7 @@ class PlanEditor extends View {
             return;
         }
         
-        spinner(true);
+        spinner('Creating milestone');
 
         ResourceHelper.addResource('milestones', new Milestone({
             title: 'New milestone',

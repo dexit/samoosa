@@ -239,14 +239,21 @@ body, html {
   z-index: 9999;
   background-color: transparent; }
   .spinner-backdrop .spinner-container {
-    width: 32px;
-    height: 32px;
     position: absolute;
     top: 50%;
     left: 50%;
-    text-align: center;
-    transform: translate(-50%, -50%); }
+    transform: translate(-50%, -50%);
+    display: flex;
+    padding: 0.5rem 1rem 0.5rem 0.5rem; }
+    .spinner-backdrop .spinner-container .spinner-text {
+      display: block;
+      line-height: 32px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-left: 0.5rem; }
     .spinner-backdrop .spinner-container .spinner-icon {
+      display: block;
+      text-align: center;
       color: #2196f3;
       line-height: 32px;
       height: 32px;
@@ -792,21 +799,6 @@ body, html {
     margin-right: auto; }
     .board-container.list .milestone-editor:not(.collapsed) .columns .column:last-of-type {
       margin-bottom: 15px; }
-    .board-container.list .milestone-editor:not(.collapsed) .columns .column > .header {
-      transform: translateX(-100%);
-      display: inline;
-      width: auto;
-      position: absolute;
-      padding-right: 30px; }
-    .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header {
-      position: relative; }
-      .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header .drag-handle {
-        position: absolute;
-        width: 50%;
-        left: 25%;
-        top: 0%; }
-      .board-container.list .milestone-editor:not(.collapsed) .columns .column .issue-editor .header h4 {
-        font-size: 14px; }
 
 .board-container.dragging .milestone-editor .columns .column.hovering {
   outline: 4px solid #81c784;
@@ -1333,8 +1325,13 @@ a {
     left: 50%;
     transform: translate(-50%, -50%); }
 
-.spinner-backdrop .spinner-container .spinner-icon {
-  color: #E70D3B; }
+.spinner-backdrop .spinner-container {
+  border-radius: 5px;
+  background-color: #21303B; }
+  .spinner-backdrop .spinner-container .spinner-text {
+    color: #fff; }
+  .spinner-backdrop .spinner-container .spinner-icon {
+    color: #E70D3B; }
 
 .navbar, .navbar .obscure {
   background-color: #21303B;

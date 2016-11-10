@@ -9576,6 +9576,7 @@
 	        this.title = properties.title || 'New issue';
 	        this.description = properties.description || '';
 	        this.id = properties.id;
+	        this.reporter = properties.reporter;
 
 	        // Optional properties
 	        this.column = properties.column || 0;
@@ -9710,6 +9711,18 @@
 	        key: 'getAssignee',
 	        value: function getAssignee() {
 	            return resources.collaborators[this.assignee || 0];
+	        }
+
+	        /**
+	         * Gets reporter
+	         *
+	         * @returns {Collaborator} Collaborator object
+	         */
+
+	    }, {
+	        key: 'getReporter',
+	        value: function getReporter() {
+	            return resources.collaborators[this.reporter || 0];
 	        }
 
 	        /**
@@ -10875,6 +10888,7 @@
 	            this.model.type = this.getProperty('type');
 	            this.model.priority = this.getProperty('priority');
 	            this.model.assignee = this.getProperty('assignee');
+	            this.model.reporter = this.getProperty('reporter');
 	            this.model.version = this.getProperty('version');
 	            this.model.description = this.getProperty('description');
 	            this.model.estimate = this.getProperty('estimate');
@@ -11759,6 +11773,20 @@
 	    // Multi edit notification
 	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
 
+	    // Readonly    
+	    _.div({ class: 'readonly' },
+	    // Reporter
+	    _.if(window.resources.collaborators.length > 0, _.label({}, 'Reporter', _.span(this.model.getReporter().displayName || this.model.getReporter().name)))),
+
+	    // Assignee
+	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
+	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
+	    })).change(function () {
+	        _this.onChange();
+	    }).val(this.model.assignee))),
+
 	    // Type
 	    _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
@@ -11776,15 +11804,6 @@
 	    })).change(function () {
 	        _this.onChange();
 	    }).val(this.model.priority)),
-
-	    // Assignee
-	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
-	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.assignee))),
 
 	    // Version
 	    _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {

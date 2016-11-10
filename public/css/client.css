@@ -468,6 +468,12 @@ body, html {
     display: none;
     flex-wrap: wrap;
     padding: 0px 15px 15px 0px; }
+    .issue-editor .meta .readonly {
+      display: block;
+      flex-basis: 100%;
+      width: 100%; }
+      .issue-editor .meta .readonly label span {
+        color: #fff; }
     .issue-editor .meta .meta-field {
       width: 50%;
       flex-basis: 50%;

@@ -11,7 +11,8 @@ class Issue {
         this.title = properties.title || 'New issue';
         this.description = properties.description || '';
         this.id = properties.id;
-        
+        this.reporter = properties.reporter;
+
         // Optional properties
         this.column = properties.column || 0;
         this.type = properties.type || 0;
@@ -115,6 +116,15 @@ class Issue {
      */
     getAssignee() {
         return resources.collaborators[this.assignee || 0];
+    }
+    
+    /**
+     * Gets reporter
+     *
+     * @returns {Collaborator} Collaborator object
+     */
+    getReporter() {
+        return resources.collaborators[this.reporter || 0];
     }
 
     /**

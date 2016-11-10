@@ -1198,7 +1198,7 @@ class GitHubApi extends ApiHelper {
             gitHubIssue.assignee = '';
 
         }
-
+        
         // State
         let issueColumn = resources.issueColumns[issue.column];
 

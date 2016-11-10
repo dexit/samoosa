@@ -56,7 +56,7 @@ module.exports = function render() {
                                 }
                             }),
                         _.button({class: 'btn-edit'}).click(this.onClickEdit)
-                    )
+                    ),
                 )
             ),
             
@@ -73,6 +73,32 @@ module.exports = function render() {
             // Multi edit notification
             _.div({class: 'multi-edit-notification'},
                 'Now editing multiple issues'
+            ),
+                
+            // Readonly    
+            _.div({class: 'readonly'},      
+                // Reporter
+                _.if(window.resources.collaborators.length > 0,
+                    _.label({},
+                        'Reporter',
+                        _.span(this.model.getReporter().displayName || this.model.getReporter().name)
+                    )
+                )
+            ),
+            
+            // Assignee
+            _.if(window.resources.collaborators.length > 0,
+                _.div({class: 'meta-field assignee'},
+                    _.input({class: 'multi-edit-toggle', type: 'checkbox'})
+                        .change((e) => { this.onChangeCheckbox(e); }),
+                    _.label('Assignee'),
+                    _.select({'data-property': 'assignee', disabled: ApiHelper.isSpectating()},
+                        _.option({value: null}, '(unassigned)'),
+                        _.each(window.resources.collaborators, (i, collaborator) => {
+                            return _.option({value: i}, collaborator.displayName || collaborator.name);
+                        })
+                    ).change(() => { this.onChange(); }).val(this.model.assignee)
+                )
             ),
 
             // Type
@@ -98,22 +124,7 @@ module.exports = function render() {
                     })
                 ).change(() => { this.onChange(); }).val(this.model.priority)
             ),
-
-            // Assignee
-            _.if(window.resources.collaborators.length > 0,
-                _.div({class: 'meta-field assignee'},
-                    _.input({class: 'multi-edit-toggle', type: 'checkbox'})
-                        .change((e) => { this.onChangeCheckbox(e); }),
-                    _.label('Assignee'),
-                    _.select({'data-property': 'assignee', disabled: ApiHelper.isSpectating()},
-                        _.option({value: null}, '(unassigned)'),
-                        _.each(window.resources.collaborators, (i, collaborator) => {
-                            return _.option({value: i}, collaborator.displayName || collaborator.name);
-                        })
-                    ).change(() => { this.onChange(); }).val(this.model.assignee)
-                )
-            ),
-
+            
             // Version
             _.div({class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '')},
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})

@@ -285,6 +285,18 @@
         flex-wrap: wrap;
         padding: 0px 15px 15px 0px;
 
+        .readonly {
+            display: block;
+            flex-basis: 100%;
+            width: 100%;
+            
+            label {
+                span {
+                    color: #fff;
+                }
+            }
+        }
+
         .meta-field {
             width: 50%;
             flex-basis: 50%;

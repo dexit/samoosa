@@ -25,7 +25,56 @@ class Issue {
         this.createdAt = properties.createdAt;
         this.closedAt = properties.closedAt;
         this.deleted = false;
+    }
 
+    /**
+     * Parses the description for meta data and assigns the cleaned up description
+     * Meta data is using the {% key:value %} notation
+     *
+     * @param {String} description
+     */
+    setDescriptionWithMetaData(description) {
+        if(!description) { return; }
+
+        let tagRegex = /{% (\w+):(.+) %}/g;
+        let nextMatch = tagRegex.exec(description);
+
+        while(nextMatch != null) {
+            let key = nextMatch[1];
+            let value = nextMatch[2];
+
+            if(key && value) {
+                switch(key) {
+                    case 'column':
+                        this.column = ResourceHelper.getIssueColumn(value);
+                        break;
+                    
+                    case 'type':
+                        this.type = ResourceHelper.getIssueType(value);
+                        break;
+                    
+                    case 'priority':
+                        this.priority = ResourceHelper.getIssuePriority(value);
+                        break;
+                    
+                    case 'estimate':
+                        this.estimate = ResourceHelper.getIssueEstimate(value);
+                        break;
+                    
+                    case 'version':
+                        this.version = ResourceHelper.getVersion(value);
+                        break;
+                
+                    default:
+                        this[key] = value;
+                        break;    
+                }
+            }
+
+            nextMatch = tagRegex.exec(this.description);
+        }
+
+        this.description = description.replace(tagRegex, '');
     }
 
     /**

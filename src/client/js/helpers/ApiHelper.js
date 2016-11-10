@@ -24,6 +24,8 @@ class ApiHelper {
      * Check whether the connection to the source has been made
      */
     checkConnection() {
+        spinner(true);
+
         debug.log('Getting user...', this);
 
         return this.getUser()
@@ -36,6 +38,8 @@ class ApiHelper {
 
             localStorage.setItem('user', user.name);
 
+            spinner(false);
+            
             return Promise.resolve(user);
         });
     }

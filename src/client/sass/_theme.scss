@@ -487,6 +487,13 @@ a {
         background-color: transparent;
 
         .meta-field {
+            &.readonly {
+                p {
+                    color: $white;
+                    font-weight: bold;
+                }
+            }
+
             select {
                 font-weight: bold;
             }
@@ -574,16 +581,23 @@ select {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-color: $pink-medium;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
     color: $white;
-    line-height: 2rem;
+    line-height: 1.5rem;
     border: 0px;
-    height: 2rem;
+    height: 1.5rem;
+    background-color: $teal-darker;
+    border-radius: 5px;
+    padding: 0rem 0.5rem;
+    margin: 0.25rem -0.5rem;
+
+    &, &:focus {
+        outline: none;
+    }
 
     option {
         padding: 0.5em;
+        background-color: $teal-darker;
+        font-weight: bold;
     }
 }
 

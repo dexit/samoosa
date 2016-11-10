@@ -235,9 +235,8 @@ class BitBucketApi extends ApiHelper {
             $.ajax({
                 url: 'https://api.bitbucket.org/' + url,
                 type: 'POST',
-                contentType: false,//data instanceof FormData ? 'multipart/form-data' : 'application/json',
+                contentType: data instanceof FormData ? 'multipart/form-data' : undefined,
                 data: data,
-                processData: false,
                 cache: false,
                 success: (result) => {
                     resolve(result);
@@ -279,10 +278,9 @@ class BitBucketApi extends ApiHelper {
             $.ajax({
                 url: 'https://api.bitbucket.org/' + url,
                 type: 'PUT',
+                contentType: data instanceof FormData ? 'multipart/form-data' : undefined,
                 data: data,
                 cache: false,
-                contentType: false,//data instanceof FormData ? 'multipart/form-data' : 'application/json',
-                processData: false,
                 success: (result) => {
                     resolve(result);
                 },
@@ -1149,7 +1147,7 @@ class BitBucketApi extends ApiHelper {
             let issue = new Issue();
 
             issue.title = bitBucketIssue.title;
-            issue.description = bitBucketIssue.content;
+            issue.setDescriptionWithMetaData(bitBucketIssue.content)
             issue.id = bitBucketIssue.local_id;
             issue.createdAt = bitBucketIssue.utc_created_on;
 
@@ -1173,9 +1171,6 @@ class BitBucketApi extends ApiHelper {
             issue.type = ResourceHelper.getIssueType(bitBucketIssue.metadata.kind);
             issue.version = ResourceHelper.getVersion(bitBucketIssue.metadata.version);
             issue.column = ResourceHelper.getIssueColumn(bitBucketIssue.status);
-
-            // Remove meta
-            issue.description = issue.description.replace(/\n\n---\[Samoosa\]---\n\n/g, '');
             
             // Parse for estimate
             let estimateRegex = /{% estimate: ((\d+.\d+|\d+)(d|h|m)|(\d+.\d+|\d+)) %}/g;
@@ -1263,12 +1258,9 @@ class BitBucketApi extends ApiHelper {
 
         bitBucketIssue.version = version;
        
-        // Description meta
-        bitBucketIssue.content += '\n\n---[Samoosa]---\n\n';
-
         // Estimate
         let issueEstimate = resources.issueEstimates[issue.estimate];
-        let estimateString = '{% estimate: ' + issueEstimate + ' %}';
+        let estimateString = '{% estimate:' + issueEstimate + ' %}';
 
         bitBucketIssue.content += estimateString;
 

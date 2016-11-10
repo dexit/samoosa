@@ -38,11 +38,11 @@
             }
         }
 
-        .body, .operations, .comments, .add-comment {
+        .meta, .body, .operations, .comments, .add-comment {
             display: block;
         }
 
-        .meta, .attachments {
+        .attachments {
             display: flex;
         }
 
@@ -116,9 +116,8 @@
                 }
                 
                 .type-indicator, .priority-indicator {
-                    font-size: 10px;
+                    font-size: 12px;
                     text-align: center;
-                    margin-bottom: 5px;
                     margin-right: 5px;
                 }
 
@@ -282,34 +281,25 @@
 
     .meta {
         display: none;
-        flex-wrap: wrap;
         padding: 0px 15px 15px 0px;
 
-        .readonly {
-            display: block;
-            flex-basis: 100%;
-            width: 100%;
-            
-            label {
-                span {
-                    color: #fff;
-                }
-            }
-        }
-
         .meta-field {
-            width: 50%;
-            flex-basis: 50%;
             padding: 0px 0px 0px 15px;
 
+            &.readonly {
+                p {
+                    line-height: 2rem;    
+                    display: inline-block;
+                }
+            }
+
             label {
-                display: block;
-                width: 100%;
+                min-width: 100px;
+                display: inline-block;
             }
 
             select {
-                display: block;
-                width: 100%;
+                display: inline-block;
 
                 &[disabled] {
                     background-color: transparent;

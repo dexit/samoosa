@@ -6860,6 +6860,8 @@
 	        value: function checkConnection() {
 	            var _this = this;
 
+	            spinner(true);
+
 	            debug.log('Getting user...', this);
 
 	            return this.getUser().then(function (user) {
@@ -6870,6 +6872,8 @@
 	                debug.log('Found user "' + user.name + '"', _this);
 
 	                localStorage.setItem('user', user.name);
+
+	                spinner(false);
 
 	                return Promise.resolve(user);
 	            });
@@ -8190,9 +8194,8 @@
 	                $.ajax({
 	                    url: 'https://api.bitbucket.org/' + url,
 	                    type: 'POST',
-	                    contentType: false, //data instanceof FormData ? 'multipart/form-data' : 'application/json',
+	                    contentType: data instanceof FormData ? 'multipart/form-data' : undefined,
 	                    data: data,
-	                    processData: false,
 	                    cache: false,
 	                    success: function success(result) {
 	                        resolve(result);
@@ -8235,10 +8238,9 @@
 	                $.ajax({
 	                    url: 'https://api.bitbucket.org/' + url,
 	                    type: 'PUT',
+	                    contentType: data instanceof FormData ? 'multipart/form-data' : undefined,
 	                    data: data,
 	                    cache: false,
-	                    contentType: false, //data instanceof FormData ? 'multipart/form-data' : 'application/json',
-	                    processData: false,
 	                    success: function success(result) {
 	                        resolve(result);
 	                    },
@@ -9318,7 +9320,7 @@
 	                    var issue = new Issue();
 
 	                    issue.title = bitBucketIssue.title;
-	                    issue.description = bitBucketIssue.content;
+	                    issue.setDescriptionWithMetaData(bitBucketIssue.content);
 	                    issue.id = bitBucketIssue.local_id;
 	                    issue.createdAt = bitBucketIssue.utc_created_on;
 
@@ -9342,9 +9344,6 @@
 	                    issue.type = ResourceHelper.getIssueType(bitBucketIssue.metadata.kind);
 	                    issue.version = ResourceHelper.getVersion(bitBucketIssue.metadata.version);
 	                    issue.column = ResourceHelper.getIssueColumn(bitBucketIssue.status);
-
-	                    // Remove meta
-	                    issue.description = issue.description.replace(/\n\n---\[Samoosa\]---\n\n/g, '');
 
 	                    // Parse for estimate
 	                    var estimateRegex = /{% estimate: ((\d+.\d+|\d+)(d|h|m)|(\d+.\d+|\d+)) %}/g;
@@ -9450,12 +9449,9 @@
 
 	            bitBucketIssue.version = version;
 
-	            // Description meta
-	            bitBucketIssue.content += '\n\n---[Samoosa]---\n\n';
-
 	            // Estimate
 	            var issueEstimate = resources.issueEstimates[issue.estimate];
-	            var estimateString = '{% estimate: ' + issueEstimate + ' %}';
+	            var estimateString = '{% estimate:' + issueEstimate + ' %}';
 
 	            bitBucketIssue.content += estimateString;
 
@@ -9593,13 +9589,68 @@
 	    }
 
 	    /**
-	     * Gets the attachments
+	     * Parses the description for meta data and assigns the cleaned up description
+	     * Meta data is using the {% key:value %} notation
 	     *
-	     * @returns {Promise} Array of attachments
+	     * @param {String} description
 	     */
 
 
 	    _createClass(Issue, [{
+	        key: 'setDescriptionWithMetaData',
+	        value: function setDescriptionWithMetaData(description) {
+	            if (!description) {
+	                return;
+	            }
+
+	            var tagRegex = /{% (\w+):(.+) %}/g;
+	            var nextMatch = tagRegex.exec(description);
+
+	            while (nextMatch != null) {
+	                var key = nextMatch[1];
+	                var value = nextMatch[2];
+
+	                if (key && value) {
+	                    switch (key) {
+	                        case 'column':
+	                            this.column = ResourceHelper.getIssueColumn(value);
+	                            break;
+
+	                        case 'type':
+	                            this.type = ResourceHelper.getIssueType(value);
+	                            break;
+
+	                        case 'priority':
+	                            this.priority = ResourceHelper.getIssuePriority(value);
+	                            break;
+
+	                        case 'estimate':
+	                            this.estimate = ResourceHelper.getIssueEstimate(value);
+	                            break;
+
+	                        case 'version':
+	                            this.version = ResourceHelper.getVersion(value);
+	                            break;
+
+	                        default:
+	                            this[key] = value;
+	                            break;
+	                    }
+	                }
+
+	                nextMatch = tagRegex.exec(this.description);
+	            }
+
+	            this.description = description.replace(tagRegex, '');
+	        }
+
+	        /**
+	         * Gets the attachments
+	         *
+	         * @returns {Promise} Array of attachments
+	         */
+
+	    }, {
 	        key: 'getAttachments',
 	        value: function getAttachments() {
 	            return ApiHelper.getIssueAttachments(this);
@@ -11773,10 +11824,8 @@
 	    // Multi edit notification
 	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
 
-	    // Readonly    
-	    _.div({ class: 'readonly' },
 	    // Reporter
-	    _.if(window.resources.collaborators.length > 0, _.label({}, 'Reporter', _.span(this.model.getReporter().displayName || this.model.getReporter().name)))),
+	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field reporter readonly' }, _.label('Reporter'), _.p(this.model.getReporter().displayName || this.model.getReporter().name))),
 
 	    // Assignee
 	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {

@@ -75,14 +75,11 @@ module.exports = function render() {
                 'Now editing multiple issues'
             ),
                 
-            // Readonly    
-            _.div({class: 'readonly'},      
-                // Reporter
-                _.if(window.resources.collaborators.length > 0,
-                    _.label({},
-                        'Reporter',
-                        _.span(this.model.getReporter().displayName || this.model.getReporter().name)
-                    )
+            // Reporter
+            _.if(window.resources.collaborators.length > 0,
+                _.div({class: 'meta-field reporter readonly'},
+                    _.label('Reporter'),
+                    _.p(this.model.getReporter().displayName || this.model.getReporter().name)
                 )
             ),
             

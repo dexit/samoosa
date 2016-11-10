@@ -548,20 +548,24 @@ class IssueEditor extends View {
      * @param {Attachment} attachment
      */
     onClickAttachment(attachment) {
-        modal(_.div({class: 'modal-attachment'},
-            _.img({src: attachment.getURL()}),
-            _.div({class: 'modal-attachment-toolbar'},
-                _.button({class: 'btn-remove-attachment'},
-                    _.span({class: 'fa fa-trash'})
-                ).click(() => {
-                    ApiHelper.removeIssueAttachment(this.model, attachment)
-                    .then(() => {
-                        modal(false);
-                        this.getAttachments();
-                    });
-                })
-            )
-        ));
+        if(attachment.isRedirect) {
+            window.open(attachment.getURL());
+        } else {
+            modal(_.div({class: 'modal-attachment'},
+                _.img({src: attachment.getURL()}),
+                _.div({class: 'modal-attachment-toolbar'},
+                    _.button({class: 'btn-remove-attachment'},
+                        _.span({class: 'fa fa-trash'})
+                    ).click(() => {
+                        ApiHelper.removeIssueAttachment(this.model, attachment)
+                        .then(() => {
+                            modal(false);
+                            this.getAttachments();
+                        });
+                    })
+                )
+            ));
+        }
     }
 
     /**
@@ -729,8 +733,13 @@ class IssueEditor extends View {
 
             _.append($attachments,
                 _.each(attachments, (i, attachment) => {
-                    return _.button({class: 'attachment'},
-                        _.img({class: 'attachment-preview', src: attachment.getURL()}),
+                    return _.button({class: 'attachment', 'data-is-redirect': attachment.isRedirect, title: attachment.getName()},
+                        _.if(attachment.isRedirect,
+                            _.p(attachment.getName())
+                        ),
+                        _.if(!attachment.isRedirect,
+                            _.img({class: 'attachment-preview', src: attachment.getURL()})
+                        )
                     ).click((e) => { this.onClickAttachment(attachment); });
                 })
             );

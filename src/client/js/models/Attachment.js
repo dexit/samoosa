@@ -10,6 +10,7 @@ class Attachment {
         this.url = properties.url;
         this.headers = properties.headers;
         this.file = properties.file;
+        this.isRedirect = properties.isRedirect || false;
     }
 
     /**

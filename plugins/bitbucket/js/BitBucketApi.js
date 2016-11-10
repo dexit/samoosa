@@ -476,49 +476,23 @@ class BitBucketApi extends ApiHelper {
             
             let attachments = [];
 
-            let nextAttachment = () => {
-                let obj = response.pop();
-
-                if(!obj) {
-                    return Promise.resolve(attachments);                
-                }
+            for(let obj of response) {
+                if(!obj) { continue; }
 
                 let timestamp = obj.name.split('__')[0];
                 let name = obj.name.split('__')[1];
 
                 let attachment = new Attachment({
                     name: name,
-                    timestamp: timestamp
+                    timestamp: timestamp,
+                    url: obj.links.self.href[0],
+                    isRedirect: true
                 });
                 
                 attachments[attachments.length] = attachment;
-
-                return new Promise((resolve, reject) => {
-                    let apiUrl = '2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments/' + obj.name;
-                    
-                    $.ajax({
-                        url: 'https://api.bitbucket.org/' + apiUrl,
-                        type: 'GET',
-                        crossDomain: true,
-                        succes: (result, statusText, xhr) => {
-                            resolve();
-                        },
-                        beforeSend: (xhr) => {
-                            xhr.setRequestHeader('Authorization', 'Bearer ' + this.getApiToken());
-                        },
-                        error: (xhr) => {
-                            resolve();
-                        }
-                    });  
-                })
-                .then((newUrl) => {
-                    attachment.url = newUrl;
-
-                    return nextAttachment();
-                });
             };
 
-            return nextAttachment();
+            return Promise.resolve(attachments);
         })
         .catch(() => {
             return Promise.resolve([]);  

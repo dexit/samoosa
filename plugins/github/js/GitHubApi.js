@@ -6,6 +6,14 @@ let labelCache;
 let deletedIssuesCache = [];
 
 class GitHubApi extends ApiHelper {
+    /**
+     * Clears all temporary data
+     */
+    clear() {
+        labelCache = null;
+        deletedIssuesCache = [];
+    }
+    
     // ----------
     // Generic API methods
     // ----------

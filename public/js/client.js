@@ -4535,6 +4535,8 @@
 	        key: 'clear',
 	        value: function clear() {
 	            resources = {};
+
+	            ApiHelper.clear();
 	        }
 	    }, {
 	        key: 'reloadResource',
@@ -5099,7 +5101,15 @@
 	    }
 
 	    _createClass(GitHubApi, [{
-	        key: 'get',
+	        key: 'clear',
+
+	        /**
+	         * Clears all temporary data
+	         */
+	        value: function clear() {
+	            labelCache = null;
+	            deletedIssuesCache = [];
+	        }
 
 	        // ----------
 	        // Generic API methods
@@ -5113,6 +5123,9 @@
 	         *
 	         * @returns {Promise} promise
 	         */
+
+	    }, {
+	        key: 'get',
 	        value: function get(url, param, recursePages) {
 	            var self = this;
 
@@ -6836,11 +6849,19 @@
 	    }
 
 	    _createClass(ApiHelper, [{
-	        key: 'getConfig',
+	        key: 'clear',
+
+	        /**
+	         * Clears all temporary data
+	         */
+	        value: function clear() {}
 
 	        /**
 	         * Get config
 	         */
+
+	    }, {
+	        key: 'getConfig',
 	        value: function getConfig() {
 	            return {
 	                readonlyResources: []

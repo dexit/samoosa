@@ -2,6 +2,13 @@
 
 class ApiHelper {
     /**
+     * Clears all temporary data
+     */
+    clear() {
+
+    }
+
+    /**
      * Get config
      */
     getConfig() {

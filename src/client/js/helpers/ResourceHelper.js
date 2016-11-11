@@ -110,6 +110,8 @@ class ResourceHelper {
 
     static clear() {
         resources = {};
+
+        ApiHelper.clear();
     }
 
     static reloadResource(resource) {

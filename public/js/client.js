@@ -100,21 +100,22 @@
 	window.User = __webpack_require__(28);
 	window.Project = __webpack_require__(29);
 	window.Attachment = __webpack_require__(30);
-	window.Organization = __webpack_require__(50);
+	window.Organization = __webpack_require__(31);
 
 	// Views
-	window.Navbar = __webpack_require__(31);
-	window.IssueEditor = __webpack_require__(33);
-	window.MilestoneEditor = __webpack_require__(35);
-	window.ResourceEditor = __webpack_require__(37);
-	window.PlanItemEditor = __webpack_require__(39);
-	window.PlanEditor = __webpack_require__(41);
-	window.ProjectEditor = __webpack_require__(43);
-	window.FilterEditor = __webpack_require__(45);
-	window.BurnDownChart = __webpack_require__(47);
+	window.Navbar = __webpack_require__(32);
+	window.ProjectBar = __webpack_require__(34);
+	window.IssueEditor = __webpack_require__(36);
+	window.MilestoneEditor = __webpack_require__(38);
+	window.ResourceEditor = __webpack_require__(40);
+	window.PlanItemEditor = __webpack_require__(42);
+	window.PlanEditor = __webpack_require__(44);
+	window.ProjectEditor = __webpack_require__(46);
+	window.FilterEditor = __webpack_require__(48);
+	window.BurnDownChart = __webpack_require__(50);
 
 	// Routes
-	__webpack_require__(49);
+	__webpack_require__(52);
 
 	// Title
 	$('head title').html((Router.params.project ? Router.params.project + ' - ' : '') + 'Samoosa');
@@ -8043,13 +8044,14 @@
 	         * @param {String} url
 	         * @param {String} key
 	         * @param {Boolean} recursePages
+	         * @param {String} param
 	         *
 	         * @returns {Promise} promise
 	         */
 
 	    }, {
 	        key: 'get',
-	        value: function get(url, key, recursePages) {
+	        value: function get(url, key, recursePages, param) {
 	            var self = this;
 
 	            return new Promise(function (resolve, reject) {
@@ -8060,6 +8062,12 @@
 
 	                    if (recursePages) {
 	                        apiUrl += '?limit=50&start=' + page;
+
+	                        if (param) {
+	                            apiUrl += '&' + param;
+	                        }
+	                    } else if (param) {
+	                        apiUrl += '?' + param;
 	                    }
 
 	                    $.ajax({
@@ -8351,7 +8359,7 @@
 	        value: function getOrganizations() {
 	            var _this6 = this;
 
-	            return this.get('2.0/teams').then(function (teams) {
+	            return this.get('2.0/teams', 'values', false, 'role=member').then(function (teams) {
 	                _this6.processOrganizations(teams);
 
 	                return Promise.resolve();
@@ -10543,6 +10551,27 @@
 
 /***/ },
 /* 31 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Organization = function Organization(properties) {
+	    _classCallCheck(this, Organization);
+
+	    properties = properties || {};
+
+	    this.id = properties.id;
+	    this.index = properties.index;
+	    this.name = properties.name;
+	    this.description = properties.description;
+	};
+
+	module.exports = Organization;
+
+/***/ },
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10569,7 +10598,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (Navbar.__proto__ || Object.getPrototypeOf(Navbar)).call(this, params));
 
-	        _this.template = __webpack_require__(32);
+	        _this.template = __webpack_require__(33);
 
 	        _this.fetch();
 	        return _this;
@@ -10840,7 +10869,7 @@
 	module.exports = Navbar;
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -10872,7 +10901,54 @@
 	};
 
 /***/ },
-/* 33 */
+/* 34 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * The project bar view
+	 *
+	 * @class View Navbar
+	 */
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var ProjectBar = function (_View) {
+	    _inherits(ProjectBar, _View);
+
+	    function ProjectBar(params) {
+	        _classCallCheck(this, ProjectBar);
+
+	        var _this = _possibleConstructorReturn(this, (ProjectBar.__proto__ || Object.getPrototypeOf(ProjectBar)).call(this, params));
+
+	        _this.template = __webpack_require__(35);
+
+	        _this.fetch();
+	        return _this;
+	    }
+
+	    return ProjectBar;
+	}(View);
+
+	module.exports = ProjectBar;
+
+/***/ },
+/* 35 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function ProjectBar() {
+	    return _.div({ class: 'project-bar' }, _.h4(Project.getCurrent().title), _.p(Project.getCurrent().description));
+	};
+
+/***/ },
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -10893,7 +10969,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (IssueEditor.__proto__ || Object.getPrototypeOf(IssueEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(34);
+	        _this.template = __webpack_require__(37);
 
 	        _this.fetch();
 	        return _this;
@@ -11875,7 +11951,7 @@
 	module.exports = IssueEditor;
 
 /***/ },
-/* 34 */
+/* 37 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12031,7 +12107,7 @@
 	};
 
 /***/ },
-/* 35 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12056,7 +12132,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (MilestoneEditor.__proto__ || Object.getPrototypeOf(MilestoneEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(36);
+	        _this.template = __webpack_require__(39);
 
 	        _this.fetch();
 
@@ -12361,7 +12437,7 @@
 	module.exports = MilestoneEditor;
 
 /***/ },
-/* 36 */
+/* 39 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12391,7 +12467,7 @@
 	};
 
 /***/ },
-/* 37 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12412,7 +12488,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ResourceEditor.__proto__ || Object.getPrototypeOf(ResourceEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(38);
+	        _this.template = __webpack_require__(41);
 
 	        _this.fetch();
 	        return _this;
@@ -12486,7 +12562,7 @@
 	module.exports = ResourceEditor;
 
 /***/ },
-/* 38 */
+/* 41 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12522,7 +12598,7 @@
 	};
 
 /***/ },
-/* 39 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12543,7 +12619,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (PlanItemEditor.__proto__ || Object.getPrototypeOf(PlanItemEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(40);
+	        _this.template = __webpack_require__(43);
 
 	        _this.fetch();
 	        return _this;
@@ -12903,7 +12979,7 @@
 	module.exports = PlanItemEditor;
 
 /***/ },
-/* 40 */
+/* 43 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -12923,7 +12999,7 @@
 	};
 
 /***/ },
-/* 41 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -12951,7 +13027,7 @@
 	            _this.currentMonth = '0' + _this.currentMonth;
 	        }
 
-	        _this.template = __webpack_require__(42);
+	        _this.template = __webpack_require__(45);
 
 	        _this.init();
 	        return _this;
@@ -13274,7 +13350,7 @@
 	module.exports = PlanEditor;
 
 /***/ },
-/* 42 */
+/* 45 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13328,7 +13404,7 @@
 	};
 
 /***/ },
-/* 43 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13349,7 +13425,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ProjectEditor.__proto__ || Object.getPrototypeOf(ProjectEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(44);
+	        _this.template = __webpack_require__(47);
 
 	        _this.fetch();
 	        return _this;
@@ -13376,7 +13452,7 @@
 	module.exports = ProjectEditor;
 
 /***/ },
-/* 44 */
+/* 47 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13390,7 +13466,7 @@
 	};
 
 /***/ },
-/* 45 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13413,7 +13489,7 @@
 
 	        _this.MAX_FILTERS = 5;
 
-	        _this.template = __webpack_require__(46);
+	        _this.template = __webpack_require__(49);
 
 	        _this.defaultFilter = {
 	            key: 'column',
@@ -13432,13 +13508,23 @@
 	    }
 
 	    /**
-	     * Event: Change
-	     *
-	     * @param {Number} index
+	     * Event: Click toggle
 	     */
 
 
 	    _createClass(FilterEditor, [{
+	        key: 'onClickToggle',
+	        value: function onClickToggle() {
+	            this.$element.toggleClass('active');
+	        }
+
+	        /**
+	         * Event: Change
+	         *
+	         * @param {Number} index
+	         */
+
+	    }, {
 	        key: 'onChange',
 	        value: function onChange(index) {
 	            this.render();
@@ -13595,7 +13681,7 @@
 	module.exports = FilterEditor;
 
 /***/ },
-/* 46 */
+/* 49 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13605,7 +13691,9 @@
 
 	    var issueKeys = Object.keys(new Issue().getBakedValues());
 
-	    return _.div({ class: 'filter-editor' }, _.h4({ class: 'title' }, 'Filters'), _.div({ class: 'filters' }, _.each(this.model, function (i, filter) {
+	    return _.div({ class: 'filter-editor' }, _.button({ class: 'btn-toggle' }, 'Filters', _.span({ class: 'fa fa-filter' })).click(function () {
+	        _this.onClickToggle();
+	    }), _.div({ class: 'filters' }, _.each(this.model, function (i, filter) {
 	        var resourceKey = filter.key;
 
 	        // Change assignee to collaborator
@@ -13682,7 +13770,7 @@
 	};
 
 /***/ },
-/* 47 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13707,7 +13795,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (BurnDownChart.__proto__ || Object.getPrototypeOf(BurnDownChart)).call(this, params));
 
-	        _this.template = __webpack_require__(48);
+	        _this.template = __webpack_require__(51);
 
 	        // Find most relevant milestone
 	        var nearest = void 0;
@@ -13884,7 +13972,7 @@
 	module.exports = BurnDownChart;
 
 /***/ },
-/* 48 */
+/* 51 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -13988,7 +14076,7 @@
 	};
 
 /***/ },
-/* 49 */
+/* 52 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -14019,7 +14107,7 @@
 	    }).then(function () {
 	        $('.workspace').remove();
 
-	        $('.app-container').append(_.div({ class: 'workspace plan-container' }, new PlanEditor().$element));
+	        $('.app-container').append(_.div({ class: 'workspace plan-container' }, _.div({ class: 'workspace-fixed' }, new ProjectBar().$element), new PlanEditor().$element));
 
 	        navbar.slideIn();
 	        spinner(false);
@@ -14034,7 +14122,7 @@
 	        $('.workspace').remove();
 
 	        // Append all milestones
-	        $('.app-container').append(_.div({ class: 'workspace board-container ' + Router.params.mode }, new FilterEditor().$element, _.each(window.resources.milestones, function (i, milestone) {
+	        $('.app-container').append(_.div({ class: 'workspace board-container ' + Router.params.mode }, _.div({ class: 'workspace-fixed' }, new ProjectBar().$element, new FilterEditor().$element), _.each(window.resources.milestones, function (i, milestone) {
 	            return new MilestoneEditor({
 	                model: milestone
 	            }).$element;
@@ -14076,7 +14164,7 @@
 	    }).then(function () {
 	        $('.workspace').remove();
 
-	        $('.app-container').append(_.div({ class: 'workspace analytics' }, _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.button({ class: 'tab active' }, 'BURN DOWN CHART').click(function () {
+	        $('.app-container').append(_.div({ class: 'workspace analytics' }, _.div({ class: 'workspace-fixed' }, new ProjectBar().$element), _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.button({ class: 'tab active' }, 'BURN DOWN CHART').click(function () {
 	            var index = $(this).index();
 
 	            $(this).parent().children().each(function (i) {
@@ -14104,7 +14192,7 @@
 	    }).then(function () {
 	        $('.workspace').remove();
 
-	        $('.app-container').append(_.div({ class: 'workspace settings-container' }, _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.each(window.resources, function (name, resource) {
+	        $('.app-container').append(_.div({ class: 'workspace settings-container' }, _.div({ class: 'workspace-fixed' }, new ProjectBar().$element), _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.each(window.resources, function (name, resource) {
 	            // Read only
 	            if (ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
 	                return;
@@ -14145,29 +14233,7 @@
 
 	// Navbar
 	var navbar = new Navbar();
-
 	$('.app-container').html(navbar.$element);
-
-/***/ },
-/* 50 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var Organization = function Organization(properties) {
-	    _classCallCheck(this, Organization);
-
-	    properties = properties || {};
-
-	    this.id = properties.id;
-	    this.index = properties.index;
-	    this.name = properties.name;
-	    this.description = properties.description;
-	};
-
-	module.exports = Organization;
 
 /***/ }
 /******/ ]);

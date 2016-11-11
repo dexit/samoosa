@@ -4,9 +4,12 @@ module.exports = function render() {
     let issueKeys = Object.keys(new Issue().getBakedValues());
 
     return _.div({class: 'filter-editor'},
-        _.h4({class: 'title'},
-            'Filters'
-        ),
+        _.button({class: 'btn-toggle'},
+            'Filters', 
+            _.span({class: 'fa fa-filter'})
+        ).click(() => {
+            this.onClickToggle();  
+        }),
         _.div({class: 'filters'},
             _.each(this.model, (i, filter) => {
                 let resourceKey = filter.key;

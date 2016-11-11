@@ -86,8 +86,15 @@ body, html {
     }
 
     .workspace {
+        padding-top: 56px;
         flex-grow: 1;
-        display: relative;
+
+        .workspace-fixed {
+            z-index: 500;
+            position: fixed;
+            top: 0px;
+            width: calc(100% - 60px);
+        }
     }
 }
 

@@ -210,6 +210,11 @@ a {
     }
 }
 
+.project-bar {
+    background-color: $teal-dark;
+    color: $white;
+}
+
 .navbar {
     &, .obscure {
         background-color: $teal-dark;
@@ -313,8 +318,6 @@ a {
 }
 
 .board-container {
-    padding-top: 56px;
-
     &.dragging {
         .milestone-editor {
             .columns {
@@ -330,13 +333,11 @@ a {
 
 .filter-editor {
     background-color: $teal-dark;
-    position: fixed;
-    top: 0px;
-    z-index: 500;
 
-    .title {
-        line-height: 36px;
-        margin: 0px 15px 0px 5px;
+    .btn-toggle {
+        &:hover {
+            color: $pink-medium;
+        }
     }
     
     .filters {

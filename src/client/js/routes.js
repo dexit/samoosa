@@ -35,6 +35,9 @@ Router.route('/:user/:project/plan/', () => {
 
         $('.app-container').append(
             _.div({class: 'workspace plan-container'},
+                _.div({class: 'workspace-fixed'},
+                    new ProjectBar().$element
+                ),
                 new PlanEditor().$element
             )
         );
@@ -57,7 +60,10 @@ Router.route('/:user/:project/board/:mode', () => {
         // Append all milestones
         $('.app-container').append(
             _.div({class: 'workspace board-container ' + Router.params.mode},
-                new FilterEditor().$element,
+                _.div({class: 'workspace-fixed'},
+                    new ProjectBar().$element,
+                    new FilterEditor().$element
+                ),
                 _.each(window.resources.milestones, (i, milestone) => {
                     return new MilestoneEditor({
                         model: milestone,
@@ -109,6 +115,9 @@ Router.route('/:user/:project/analytics/', () => {
 
         $('.app-container').append(
             _.div({class: 'workspace analytics'},
+                _.div({class: 'workspace-fixed'},
+                    new ProjectBar().$element
+                ),
                 _.div({class: 'tabbed-container vertical'},
                     _.div({class: 'tabs'},
                         _.button({class: 'tab active'},
@@ -155,6 +164,9 @@ Router.route('/:user/:project/settings/:resource', () => {
 
         $('.app-container').append(
             _.div({class: 'workspace settings-container'},
+                _.div({class: 'workspace-fixed'},
+                    new ProjectBar().$element
+                ),
                 _.div({class: 'tabbed-container vertical'},
                     _.div({class: 'tabs'},
                         _.each(window.resources, (name, resource) => {
@@ -210,7 +222,4 @@ Router.init();
 
 // Navbar
 let navbar = new Navbar();
-
-$('.app-container').html(
-    navbar.$element
-);
+$('.app-container').html(navbar.$element);

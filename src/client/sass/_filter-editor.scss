@@ -1,16 +1,39 @@
 .filter-editor {
     display: flex;
-    padding: 10px;
     width: 100%;
     background-color: material-color('grey', '800');
     color: material-color('grey', '200');
+    position: relative;
+
+    .btn-toggle {
+        position: absolute;
+        right: 15px;
+        top: -38px;
+
+        .fa {
+            margin-left: 5px;
+        }
+    }
 
     .button-container {
+        display: none;
         line-height: 25px;
     }
 
+    &.active {
+        .filters {
+            display: flex;
+            padding: 10px 0px 10px 10px;
+        }
+
+        .button-container {
+            display: block;
+            padding: 10px 0px;
+        }
+    }
+
     .filters {
-        display: flex;
+        display: none;
 
         .filter {
             flex-shrink: 0;

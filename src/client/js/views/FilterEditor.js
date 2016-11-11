@@ -24,6 +24,13 @@ class FilterEditor extends View {
     }
 
     /**
+     * Event: Click toggle
+     */
+    onClickToggle() {
+        this.$element.toggleClass('active');
+    }
+
+    /**
      * Event: Change
      *
      * @param {Number} index

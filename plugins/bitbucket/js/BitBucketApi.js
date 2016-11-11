@@ -76,10 +76,11 @@ class BitBucketApi extends ApiHelper {
      * @param {String} url
      * @param {String} key
      * @param {Boolean} recursePages
+     * @param {String} param
      *
      * @returns {Promise} promise
      */
-    get(url, key, recursePages) {
+    get(url, key, recursePages, param) {
         let self = this;
 
         return new Promise((resolve, reject) => {
@@ -90,6 +91,13 @@ class BitBucketApi extends ApiHelper {
 
                 if(recursePages) {
                     apiUrl += '?limit=50&start=' + page;
+
+                    if(param) {
+                        apiUrl += '&' + param;
+                    }
+
+                } else if(param) {
+                    apiUrl += '?' + param;
                 }
 
                 $.ajax({
@@ -370,7 +378,7 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} Array of organisations
      */
     getOrganizations() {
-        return this.get('2.0/teams')
+        return this.get('2.0/teams', 'values', false, 'role=member')
         .then((teams) => {
             this.processOrganizations(teams);
 

@@ -127,7 +127,7 @@ class ApiHelper {
     logOut() {
         localStorage.setItem('token', '');
 
-        location.reload();
+        location = '/login';
     }
 
 

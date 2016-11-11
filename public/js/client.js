@@ -6987,7 +6987,7 @@
 	        value: function logOut() {
 	            localStorage.setItem('token', '');
 
-	            location.reload();
+	            location = '/login';
 	        }
 
 	        // ----------

@@ -6,7 +6,7 @@
 <img class="logo" src="https://rawgit.com/Putaitu/samoosa/gh-pages/public/img/logo.png" width="128" />
 
 <h1>Samoosa</h1>
-<p>A free and open-source issue tracker frontend</p>
+<p>A free and open-source issue tracker frontend by <a href="http://putaitu.com" target="_blank">Putaitu Productions</a></p>
 <p><a href="https://github.com/Putaitu/samoosa">GitHub repo</a></p>
 
 </div>

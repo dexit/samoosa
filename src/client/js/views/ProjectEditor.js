@@ -20,8 +20,6 @@ class ProjectEditor extends View {
             location = '/#/' + this.model.owner + '/' + this.model.title + '/board/kanban/';
         
         }
-
-        location.reload(true);
     }   
 }
 

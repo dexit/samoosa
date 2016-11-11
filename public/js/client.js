@@ -4532,6 +4532,11 @@
 	            }
 	        }
 	    }, {
+	        key: 'clear',
+	        value: function clear() {
+	            resources = {};
+	        }
+	    }, {
 	        key: 'reloadResource',
 	        value: function reloadResource(resource) {
 	            resources[resource] = [];
@@ -13183,6 +13188,8 @@
 	    _createClass(ProjectEditor, [{
 	        key: 'onClick',
 	        value: function onClick() {
+	            ResourceHelper.clear();
+
 	            if (this.overrideUrl) {
 	                location = '/#/' + this.model.owner + '/' + this.model.title + this.overrideUrl;
 	            } else if (Router.params.project) {

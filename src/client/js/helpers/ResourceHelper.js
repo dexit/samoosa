@@ -108,6 +108,10 @@ class ResourceHelper {
         }   
     }
 
+    static clear() {
+        resources = {};
+    }
+
     static reloadResource(resource) {
         resources[resource] = [];
 

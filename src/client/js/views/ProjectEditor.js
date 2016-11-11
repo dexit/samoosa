@@ -10,6 +10,8 @@ class ProjectEditor extends View {
     }
 
     onClick() {
+        ResourceHelper.clear();
+
         if(this.overrideUrl) {
             location = '/#/' + this.model.owner + '/' + this.model.title + this.overrideUrl;
 

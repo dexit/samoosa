@@ -277,8 +277,12 @@ body, html {
   transform: translate(-50%, -50%); }
   .login-form .logo {
     display: block;
-    width: 6rem;
-    margin: 0rem auto 2rem auto; }
+    text-align: center;
+    margin-bottom: 60px; }
+    .login-form .logo img {
+      max-width: 128px; }
+    .login-form .logo h1 {
+      margin: 0px; }
   .login-form ul {
     list-style-type: none;
     padding: 0px; }
@@ -830,17 +834,37 @@ body, html {
     .navbar.out.project-list .obscure > .content {
       overflow-y: hidden;
       padding: 15px 0px; }
-      .navbar.out.project-list .obscure > .content .project-list-search {
-        width: 100%;
-        height: 30px;
+      .navbar.out.project-list .obscure > .content .project-list-actions {
         margin-bottom: 15px;
-        padding: 0px 15px; }
-        .navbar.out.project-list .obscure > .content .project-list-search input {
-          padding: 0px 5px;
-          line-height: 30px;
-          display: block;
-          width: 100%;
-          border: 0px; }
+        padding: 0px 15px;
+        display: flex; }
+        .navbar.out.project-list .obscure > .content .project-list-actions .project-list-action {
+          flex-shrink: 0; }
+          .navbar.out.project-list .obscure > .content .project-list-actions .project-list-action.search {
+            flex-shrink: 1;
+            flex-grow: 1;
+            width: 100%;
+            height: 30px;
+            margin-bottom: 15px;
+            padding: 0px 0px 0px 15px;
+            position: relative; }
+            .navbar.out.project-list .obscure > .content .project-list-actions .project-list-action.search input {
+              border-radius: 18px;
+              padding: 0px 15px;
+              line-height: 36px;
+              display: block;
+              width: 100%;
+              border: 0px; }
+              .navbar.out.project-list .obscure > .content .project-list-actions .project-list-action.search input, .navbar.out.project-list .obscure > .content .project-list-actions .project-list-action.search input:focus {
+                outline: none; }
+            .navbar.out.project-list .obscure > .content .project-list-actions .project-list-action.search .fa {
+              position: absolute;
+              right: 15px;
+              top: 60%;
+              transform: translateY(-50%);
+              color: #000;
+              opacity: 0.5;
+              font-size: 18px; }
       .navbar.out.project-list .obscure > .content .project-list-items {
         padding: 15px 15px 0px 15px;
         height: calc(100% - 30px);
@@ -1366,8 +1390,11 @@ a {
   left: 50%;
   transform: translate(-50%, -50%); }
 
+.login-container {
+  background-color: #21303B; }
+
 .login-form {
-  background-color: #21303B;
+  background-color: transparent;
   color: #fff;
   padding: 2rem; }
   .login-form ul li a {
@@ -1548,17 +1575,21 @@ select {
     background-color: #171e23;
     font-weight: bold; }
 
-button.btn, input[type="submit"].btn {
-  padding: 10px 15px;
+button.btn, input[type="submit"].btn, select.btn {
+  padding: 0px 10px;
   font-size: 1em;
   height: 36px;
   text-transform: uppercase;
   color: #fff;
   font-family: 'Bree Serif';
-  background-color: #E70D3B; }
-  button.btn + .btn, input[type="submit"].btn + .btn {
+  background-color: #E70D3B;
+  margin: 0px;
+  border-radius: 0px; }
+  button.btn option, input[type="submit"].btn option, select.btn option {
+    background-color: #E70D3B; }
+  button.btn + .btn, input[type="submit"].btn + .btn, select.btn + .btn {
     margin-left: 0.5rem; }
-  button.btn .fa, input[type="submit"].btn .fa {
+  button.btn .fa, input[type="submit"].btn .fa, select.btn .fa {
     margin-left: 0.5em; }
 
 button.btn-remove {

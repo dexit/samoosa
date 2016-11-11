@@ -231,6 +231,20 @@ class GitHubApi extends ApiHelper {
     // Resource getters
     // ----------
     /**
+     * Gets organisations
+     *
+     * @returns {Promise} Array of organisations
+     */
+    getOrganizations() {
+        return this.get('/user/orgs')
+        .then((orgs) => {
+            this.processOrganizations(orgs);
+
+            return Promise.resolve();
+        });
+    }
+    
+    /**
      * Gets a list of deleted issues
      *
      * @returns {Array} List of deleted issues
@@ -940,6 +954,28 @@ class GitHubApi extends ApiHelper {
         }
     }
     
+    /**
+     * Process organisations
+     *
+     * @param {Array} orgs
+     */
+    processOrganizations(orgs) {
+        resources.organizations = [];
+
+        for(let i in orgs) {
+            let index = resources.organizations.length;
+
+            let organization = new Organization({
+                index: index,
+                id: orgs[i].id,
+                name: orgs[i].login,
+                description: orgs[i].description 
+            });
+
+            resources.organizations[index] = organization;
+        }
+    }
+
     /**
      * Process milestones
      *

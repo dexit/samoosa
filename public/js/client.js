@@ -100,6 +100,7 @@
 	window.User = __webpack_require__(28);
 	window.Project = __webpack_require__(29);
 	window.Attachment = __webpack_require__(30);
+	window.Organization = __webpack_require__(50);
 
 	// Views
 	window.Navbar = __webpack_require__(31);
@@ -5354,6 +5355,24 @@
 	        // Resource getters
 	        // ----------
 	        /**
+	         * Gets organisations
+	         *
+	         * @returns {Promise} Array of organisations
+	         */
+
+	    }, {
+	        key: 'getOrganizations',
+	        value: function getOrganizations() {
+	            var _this6 = this;
+
+	            return this.get('/user/orgs').then(function (orgs) {
+	                _this6.processOrganizations(orgs);
+
+	                return Promise.resolve();
+	            });
+	        }
+
+	        /**
 	         * Gets a list of deleted issues
 	         *
 	         * @returns {Array} List of deleted issues
@@ -5374,10 +5393,10 @@
 	    }, {
 	        key: 'getProjects',
 	        value: function getProjects() {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            return this.get('/user/repos').then(function (repos) {
-	                _this6.processProjects(repos);
+	                _this7.processProjects(repos);
 
 	                return Promise.resolve();
 	            });
@@ -5392,14 +5411,14 @@
 	    }, {
 	        key: 'getCollaborators',
 	        value: function getCollaborators() {
-	            var _this7 = this;
+	            var _this8 = this;
 
 	            if (this.isSpectating()) {
 	                return Promise.resolve([]);
 	            }
 
 	            return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators').then(function (collaborators) {
-	                _this7.processCollaborators(collaborators);
+	                _this8.processCollaborators(collaborators);
 	            });
 	        }
 
@@ -5412,10 +5431,10 @@
 	    }, {
 	        key: 'getIssues',
 	        value: function getIssues() {
-	            var _this8 = this;
+	            var _this9 = this;
 
 	            return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', 'state=all', true).then(function (issues) {
-	                _this8.processIssues(issues);
+	                _this9.processIssues(issues);
 
 	                return Promise.resolve();
 	            });
@@ -5478,13 +5497,13 @@
 	    }, {
 	        key: 'getLabels',
 	        value: function getLabels() {
-	            var _this9 = this;
+	            var _this10 = this;
 
 	            if (!labelCache) {
 	                return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels').then(function (labels) {
 	                    labelCache = labels || [];
 
-	                    return _this9.ensureMandatoryLabels();
+	                    return _this10.ensureMandatoryLabels();
 	                }).then(function () {
 	                    return Promise.resolve(labelCache);
 	                });
@@ -5502,10 +5521,10 @@
 	    }, {
 	        key: 'getIssueTypes',
 	        value: function getIssueTypes() {
-	            var _this10 = this;
+	            var _this11 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this10.processIssueTypes(labels);
+	                _this11.processIssueTypes(labels);
 
 	                return Promise.resolve();
 	            });
@@ -5520,10 +5539,10 @@
 	    }, {
 	        key: 'getIssueColumns',
 	        value: function getIssueColumns() {
-	            var _this11 = this;
+	            var _this12 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this11.processIssueColumns(labels);
+	                _this12.processIssueColumns(labels);
 
 	                return Promise.resolve();
 	            });
@@ -5596,10 +5615,10 @@
 	    }, {
 	        key: 'getIssuePriorities',
 	        value: function getIssuePriorities() {
-	            var _this12 = this;
+	            var _this13 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this12.processIssuePriorities(labels);
+	                _this13.processIssuePriorities(labels);
 
 	                return Promise.resolve();
 	            });
@@ -5614,10 +5633,10 @@
 	    }, {
 	        key: 'getIssueEstimates',
 	        value: function getIssueEstimates() {
-	            var _this13 = this;
+	            var _this14 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this13.processIssueEstimates(labels);
+	                _this14.processIssueEstimates(labels);
 
 	                return Promise.resolve();
 	            });
@@ -5632,10 +5651,10 @@
 	    }, {
 	        key: 'getVersions',
 	        value: function getVersions() {
-	            var _this14 = this;
+	            var _this15 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this14.processVersions(labels);
+	                _this15.processVersions(labels);
 
 	                return Promise.resolve();
 	            });
@@ -5650,10 +5669,10 @@
 	    }, {
 	        key: 'getMilestones',
 	        value: function getMilestones() {
-	            var _this15 = this;
+	            var _this16 = this;
 
 	            return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones').then(function (milestones) {
-	                _this15.processMilestones(milestones);
+	                _this16.processMilestones(milestones);
 
 	                return Promise.resolve();
 	            });
@@ -5887,7 +5906,7 @@
 	    }, {
 	        key: 'removeIssue',
 	        value: function removeIssue(issue) {
-	            var _this16 = this;
+	            var _this17 = this;
 
 	            issue.deleted = true;
 	            deletedIssuesCache.push(issue);
@@ -5899,7 +5918,7 @@
 
 	            // Get all attachments
 	            .then(function () {
-	                return _this16.getIssueAttachments(issue);
+	                return _this17.getIssueAttachments(issue);
 	            })
 
 	            // Delete attachments one by one
@@ -5908,7 +5927,7 @@
 	                    var attachment = attachments.pop();
 
 	                    if (attachment) {
-	                        return _this16.removeIssueAttachment(issue, attachment).then(function () {
+	                        return _this17.removeIssueAttachment(issue, attachment).then(function () {
 	                            return deleteNextAttachment();
 	                        });
 	                    } else {
@@ -5921,7 +5940,7 @@
 
 	            // Get all comments
 	            .then(function () {
-	                return _this16.getIssueComments(issue);
+	                return _this17.getIssueComments(issue);
 	            })
 
 	            // Delete all comments one by one
@@ -5930,7 +5949,7 @@
 	                    var comment = comments.pop();
 
 	                    if (comment) {
-	                        return _this16.removeIssueComment(issue, comment).then(function () {
+	                        return _this17.removeIssueComment(issue, comment).then(function () {
 	                            return deleteNextComment();
 	                        });
 	                    } else {
@@ -6211,6 +6230,31 @@
 	                };
 
 	                window.resources.projects[i] = project;
+	            }
+	        }
+
+	        /**
+	         * Process organisations
+	         *
+	         * @param {Array} orgs
+	         */
+
+	    }, {
+	        key: 'processOrganizations',
+	        value: function processOrganizations(orgs) {
+	            resources.organizations = [];
+
+	            for (var i in orgs) {
+	                var index = resources.organizations.length;
+
+	                var organization = new Organization({
+	                    index: index,
+	                    id: orgs[i].id,
+	                    name: orgs[i].login,
+	                    description: orgs[i].description
+	                });
+
+	                resources.organizations[index] = organization;
 	            }
 	        }
 
@@ -6729,10 +6773,10 @@
 	    }, {
 	        key: 'addIssueComment',
 	        value: function addIssueComment(issue, text) {
-	            var _this17 = this;
+	            var _this18 = this;
 
 	            return new Promise(function (callback) {
-	                _this17.post('/repos/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/issues/' + issue.id + '/comments', {
+	                _this18.post('/repos/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/issues/' + issue.id + '/comments', {
 	                    body: text
 	                }).then(function () {
 	                    callback();
@@ -6750,10 +6794,10 @@
 	    }, {
 	        key: 'updateIssueComment',
 	        value: function updateIssueComment(issue, comment) {
-	            var _this18 = this;
+	            var _this19 = this;
 
 	            return new Promise(function (callback) {
-	                _this18.patch('/repos/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/issues/comments/' + comment.index, {
+	                _this19.patch('/repos/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/issues/comments/' + comment.index, {
 	                    body: comment.text
 	                }).then(function () {
 	                    callback();
@@ -6785,10 +6829,10 @@
 	    }, {
 	        key: 'getIssueComments',
 	        value: function getIssueComments(issue) {
-	            var _this19 = this;
+	            var _this20 = this;
 
 	            return new Promise(function (callback) {
-	                _this19.get('/repos/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
+	                _this20.get('/repos/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
 	                    var comments = [];
 
 	                    var _iteratorNormalCompletion11 = true;
@@ -7020,6 +7064,20 @@
 	        // Resource getters
 	        // ----------
 	        /**
+	         * Gets organisations
+	         *
+	         * @returns {Promise} Array of team names
+	         */
+
+	    }, {
+	        key: 'getOrganizations',
+	        value: function getOrganizations() {
+	            window.resources.organization = [];
+
+	            return Promise.resolve();
+	        }
+
+	        /**
 	         * Gets issues
 	         *
 	         * @returns {Promise} promise
@@ -7028,11 +7086,9 @@
 	    }, {
 	        key: 'getIssues',
 	        value: function getIssues() {
-	            return new Promise(function (callback) {
-	                window.resources.issues = [];
+	            window.resources.issues = [];
 
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7044,11 +7100,9 @@
 	    }, {
 	        key: 'getCollaborators',
 	        value: function getCollaborators() {
-	            return new Promise(function (callback) {
-	                window.resources.collaborators = [];
+	            window.resources.collaborators = [];
 
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7060,11 +7114,9 @@
 	    }, {
 	        key: 'getIssueTypes',
 	        value: function getIssueTypes() {
-	            return new Promise(function (callback) {
-	                window.resources.issueTypes = [];
+	            window.resources.issueTypes = [];
 
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7076,11 +7128,9 @@
 	    }, {
 	        key: 'getIssuePriorities',
 	        value: function getIssuePriorities() {
-	            return new Promise(function (callback) {
-	                window.resources.issuePriorities = [];
+	            window.resources.issuePriorities = [];
 
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7092,11 +7142,9 @@
 	    }, {
 	        key: 'getIssueEstimates',
 	        value: function getIssueEstimates() {
-	            return new Promise(function (callback) {
-	                window.resources.issueEstimates = [];
+	            window.resources.issueEstimates = [];
 
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7108,11 +7156,9 @@
 	    }, {
 	        key: 'getIssueColumns',
 	        value: function getIssueColumns() {
-	            return new Promise(function (callback) {
-	                window.resources.issueColumns = [];
+	            window.resources.issueColumns = [];
 
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7124,11 +7170,9 @@
 	    }, {
 	        key: 'getMilestones',
 	        value: function getMilestones() {
-	            return new Promise(function (callback) {
-	                window.resources.milestones = [];
+	            window.resources.milestones = [];
 
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7140,11 +7184,9 @@
 	    }, {
 	        key: 'getVersions',
 	        value: function getVersions() {
-	            return new Promise(function (callback) {
-	                window.resources.versions = [];
+	            window.resources.versions = [];
 
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7156,9 +7198,9 @@
 	    }, {
 	        key: 'getProjects',
 	        value: function getProjects() {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            window.resources.projects = [];
+
+	            return Promise.resolve();
 	        }
 
 	        // ----------
@@ -7175,9 +7217,7 @@
 	    }, {
 	        key: 'addIssue',
 	        value: function addIssue(issue) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7191,9 +7231,7 @@
 	    }, {
 	        key: 'addCollaborator',
 	        value: function addCollaborator(collaborator) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7207,9 +7245,7 @@
 	    }, {
 	        key: 'addIssueType',
 	        value: function addIssueType(type) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7223,9 +7259,7 @@
 	    }, {
 	        key: 'addIssuePriority',
 	        value: function addIssuePriority(priority) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7239,9 +7273,7 @@
 	    }, {
 	        key: 'addIssueEstimate',
 	        value: function addIssueEstimate(estimate) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7255,9 +7287,7 @@
 	    }, {
 	        key: 'addIssueColumn',
 	        value: function addIssueColumn(column) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7271,9 +7301,7 @@
 	    }, {
 	        key: 'addMilestone',
 	        value: function addMilestone(milestone) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7287,9 +7315,7 @@
 	    }, {
 	        key: 'addVersion',
 	        value: function addVersion(version) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        // ----------
@@ -7306,9 +7332,7 @@
 	    }, {
 	        key: 'removeIssue',
 	        value: function removeIssue(issue) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7322,9 +7346,7 @@
 	    }, {
 	        key: 'removeCollaborator',
 	        value: function removeCollaborator(index) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7338,9 +7360,7 @@
 	    }, {
 	        key: 'removeIssueType',
 	        value: function removeIssueType(index) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7354,9 +7374,7 @@
 	    }, {
 	        key: 'removeIssuePriority',
 	        value: function removeIssuePriority(index) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7370,9 +7388,7 @@
 	    }, {
 	        key: 'removeIssueEstimate',
 	        value: function removeIssueEstimate(index) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7386,9 +7402,7 @@
 	    }, {
 	        key: 'removeIssueColumn',
 	        value: function removeIssueColumn(index) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7402,9 +7416,7 @@
 	    }, {
 	        key: 'updateIssueAttachment',
 	        value: function updateIssueAttachment(index) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7418,9 +7430,7 @@
 	    }, {
 	        key: 'removeMilestone',
 	        value: function removeMilestone(index) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7434,9 +7444,7 @@
 	    }, {
 	        key: 'removeVersion',
 	        value: function removeVersion(index) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        // ----------
@@ -7454,9 +7462,7 @@
 	    }, {
 	        key: 'updateIssue',
 	        value: function updateIssue(index, issue) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7471,9 +7477,7 @@
 	    }, {
 	        key: 'updateCollaborator',
 	        value: function updateCollaborator(index, collaborator) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7488,9 +7492,7 @@
 	    }, {
 	        key: 'updateIssueType',
 	        value: function updateIssueType(index, type) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7505,9 +7507,7 @@
 	    }, {
 	        key: 'updateIssuePriority',
 	        value: function updateIssuePriority(index, priority) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7522,9 +7522,7 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(index, estimate) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7539,9 +7537,7 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(index, column) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7556,9 +7552,7 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(index, milestone) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7573,9 +7567,7 @@
 	    }, {
 	        key: 'updateVersion',
 	        value: function updateVersion(index, version) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /**
@@ -7590,9 +7582,7 @@
 	    }, {
 	        key: 'updateProject',
 	        value: function updateProject(index, project) {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        // ----------
@@ -7607,9 +7597,7 @@
 	    }, {
 	        key: 'getUser',
 	        value: function getUser() {
-	            return new Promise(function (callback) {
-	                callback();
-	            });
+	            return Promise.resolve();
 	        }
 
 	        // ----------
@@ -7626,9 +7614,7 @@
 	    }, {
 	        key: 'getIssueComments',
 	        value: function getIssueComments(issue) {
-	            return new Promise(function (callback) {
-	                callback([]);
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /** 
@@ -7643,9 +7629,7 @@
 	    }, {
 	        key: 'addIssueComment',
 	        value: function addIssueComment(issue, comment) {
-	            return new Promise(function (callback) {
-	                callback([]);
-	            });
+	            return Promise.resolve();
 	        }
 
 	        /** 
@@ -7660,9 +7644,7 @@
 	    }, {
 	        key: 'updateIssueComment',
 	        value: function updateIssueComment(issue, comment) {
-	            return new Promise(function (callback) {
-	                callback([]);
-	            });
+	            return Promise.resolve();
 	        }
 
 	        // ----------
@@ -7873,6 +7855,9 @@
 	            spinner('Getting ' + resource);
 
 	            switch (resource) {
+	                case 'organizations':
+	                    return this.getOrganizations();
+
 	                case 'collaborators':
 	                    return this.getCollaborators();
 
@@ -7949,6 +7934,8 @@
 	                return get('milestones');
 	            }).then(function () {
 	                return get('versions');
+	            }).then(function () {
+	                return get('organizations');
 	            }).then(function () {
 	                return get('issues');
 	            });
@@ -8354,6 +8341,24 @@
 	        // Resource getters
 	        // ----------
 	        /**
+	         * Gets organisations
+	         *
+	         * @returns {Promise} Array of organisations
+	         */
+
+	    }, {
+	        key: 'getOrganizations',
+	        value: function getOrganizations() {
+	            var _this6 = this;
+
+	            return this.get('2.0/teams').then(function (teams) {
+	                _this6.processOrganizations(teams);
+
+	                return Promise.resolve();
+	            });
+	        }
+
+	        /**
 	         * Gets projects
 	         *
 	         * @returns {Promise} promise
@@ -8362,11 +8367,11 @@
 	    }, {
 	        key: 'getProjects',
 	        value: function getProjects() {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                _this6.get('1.0/user/repositories').then(function (repositories) {
-	                    _this6.processProjects(repositories);
+	                _this7.get('1.0/user/repositories').then(function (repositories) {
+	                    _this7.processProjects(repositories);
 
 	                    resolve();
 	                }).catch(reject);
@@ -8382,7 +8387,7 @@
 	    }, {
 	        key: 'getCollaborators',
 	        value: function getCollaborators() {
-	            var _this7 = this;
+	            var _this8 = this;
 
 	            if (this.isSpectating()) {
 	                return Promise.resolve([]);
@@ -8393,7 +8398,7 @@
 	                    res = res[0];
 	                }
 
-	                _this7.processMembers(res.values);
+	                _this8.processMembers(res.values);
 
 	                return Promise.resolve();
 	            }).catch(function (e) {
@@ -8418,10 +8423,10 @@
 	    }, {
 	        key: 'getIssues',
 	        value: function getIssues() {
-	            var _this8 = this;
+	            var _this9 = this;
 
 	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', 'issues', false).then(function (res) {
-	                _this8.processIssues(res);
+	                _this9.processIssues(res);
 
 	                return Promise.resolve();
 	            });
@@ -8466,7 +8471,7 @@
 	    }, {
 	        key: 'getIssueAttachments',
 	        value: function getIssueAttachments(issue) {
-	            var _this9 = this;
+	            var _this10 = this;
 
 	            return this.get('2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments', 'values').then(function (response) {
 	                if (!Array.isArray(response)) {
@@ -8487,12 +8492,12 @@
 	                            continue;
 	                        }
 
-	                        var apiUrl = 'https://api.bitbucket.org/2.0/repositories/' + _this9.getProjectOwner() + '/' + _this9.getProjectName() + '/issues/' + issue.id + '/attachments/' + obj.name;
+	                        var apiUrl = 'https://api.bitbucket.org/2.0/repositories/' + _this10.getProjectOwner() + '/' + _this10.getProjectName() + '/issues/' + issue.id + '/attachments/' + obj.name;
 
 	                        var attachment = new Attachment({
 	                            name: obj.name,
 	                            isRedirect: true,
-	                            url: apiUrl + '?access_token=' + _this9.getApiToken()
+	                            url: apiUrl + '?access_token=' + _this10.getApiToken()
 	                        });
 
 	                        attachments[attachments.length] = attachment;
@@ -8557,10 +8562,10 @@
 	    }, {
 	        key: 'getVersions',
 	        value: function getVersions() {
-	            var _this10 = this;
+	            var _this11 = this;
 
 	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions').then(function (versions) {
-	                _this10.processVersions(versions);
+	                _this11.processVersions(versions);
 
 	                return Promise.resolve();
 	            });
@@ -8575,10 +8580,10 @@
 	    }, {
 	        key: 'getMilestones',
 	        value: function getMilestones() {
-	            var _this11 = this;
+	            var _this12 = this;
 
 	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones').then(function (milestones) {
-	                _this11.processMilestones(milestones);
+	                _this12.processMilestones(milestones);
 
 	                return Promise.resolve();
 	            });
@@ -8616,10 +8621,10 @@
 	    }, {
 	        key: 'addCollaborator',
 	        value: function addCollaborator(collaborator) {
-	            var _this12 = this;
+	            var _this13 = this;
 
 	            return new Promise(function (callback) {
-	                _this12.put('1.0/repositories/' + _this12.getProjectOwner() + '/' + _this12.getProjectName() + '/collaborators/' + collaborator).then(function () {
+	                _this13.put('1.0/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/collaborators/' + collaborator).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8636,10 +8641,10 @@
 	    }, {
 	        key: 'addIssueType',
 	        value: function addIssueType(type) {
-	            var _this13 = this;
+	            var _this14 = this;
 
 	            return new Promise(function (callback) {
-	                _this13.post('1.0/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/labels', {
+	                _this14.post('1.0/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/labels', {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8659,10 +8664,10 @@
 	    }, {
 	        key: 'addIssuePriority',
 	        value: function addIssuePriority(priority) {
-	            var _this14 = this;
+	            var _this15 = this;
 
 	            return new Promise(function (callback) {
-	                _this14.post('1.0/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/labels', {
+	                _this15.post('1.0/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels', {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8682,10 +8687,10 @@
 	    }, {
 	        key: 'addIssueEstimate',
 	        value: function addIssueEstimate(estimate) {
-	            var _this15 = this;
+	            var _this16 = this;
 
 	            return new Promise(function (callback) {
-	                _this15.post('1.0/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels', {
+	                _this16.post('1.0/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/labels', {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8705,10 +8710,10 @@
 	    }, {
 	        key: 'addIssueColumn',
 	        value: function addIssueColumn(column) {
-	            var _this16 = this;
+	            var _this17 = this;
 
 	            return new Promise(function (callback) {
-	                _this16.post('1.0/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/labels', {
+	                _this17.post('1.0/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/labels', {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8843,12 +8848,12 @@
 	    }, {
 	        key: 'removeMilestone',
 	        value: function removeMilestone(index) {
-	            var _this17 = this;
+	            var _this18 = this;
 
 	            var milestone = resources.milestones[index];
 
 	            return new Promise(function (callback) {
-	                _this17.delete('1.0/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
+	                _this18.delete('1.0/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8896,10 +8901,10 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            var _this18 = this;
+	            var _this19 = this;
 
 	            return new Promise(function (callback) {
-	                _this18.put('1.0/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/issues/milestones/' + milestone.id, _this18.convertMilestone(milestone)).then(function () {
+	                _this19.put('1.0/repositories/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/issues/milestones/' + milestone.id, _this19.convertMilestone(milestone)).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8917,10 +8922,10 @@
 	    }, {
 	        key: 'updateIssueType',
 	        value: function updateIssueType(type, previousName) {
-	            var _this19 = this;
+	            var _this20 = this;
 
 	            return new Promise(function (callback) {
-	                _this19.patch('1.0/repositories/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/labels/type:' + previousName, {
+	                _this20.patch('1.0/repositories/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/labels/type:' + previousName, {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8941,10 +8946,10 @@
 	    }, {
 	        key: 'updateIssuePriority',
 	        value: function updateIssuePriority(priority, previousName) {
-	            var _this20 = this;
+	            var _this21 = this;
 
 	            return new Promise(function (callback) {
-	                _this20.patch('1.0/repositories/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/labels/priority:' + previousName, {
+	                _this21.patch('1.0/repositories/' + _this21.getProjectOwner() + '/' + _this21.getProjectName() + '/labels/priority:' + previousName, {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8965,10 +8970,10 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(estimate, previousName) {
-	            var _this21 = this;
+	            var _this22 = this;
 
 	            return new Promise(function (callback) {
-	                _this21.patch('1.0/repositories/' + _this21.getProjectOwner() + '/' + _this21.getProjectName() + '/labels/estimate:' + previousName, {
+	                _this22.patch('1.0/repositories/' + _this22.getProjectOwner() + '/' + _this22.getProjectName() + '/labels/estimate:' + previousName, {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8989,10 +8994,10 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            var _this22 = this;
+	            var _this23 = this;
 
 	            return new Promise(function (callback) {
-	                _this22.patch('1.0/repositories/' + _this22.getProjectOwner() + '/' + _this22.getProjectName() + '/labels/column:' + previousName, {
+	                _this23.patch('1.0/repositories/' + _this23.getProjectOwner() + '/' + _this23.getProjectName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -9046,6 +9051,31 @@
 	                });
 
 	                window.resources.projects[i] = project;
+	            }
+	        }
+
+	        /**
+	         * Process organisations
+	         *
+	         * @param {Array} teams
+	         */
+
+	    }, {
+	        key: 'processOrganizations',
+	        value: function processOrganizations(teams) {
+	            resources.organizations = [];
+
+	            for (var i in teams) {
+	                var index = resources.organizations.length;
+
+	                var organization = new Organization({
+	                    index: index,
+	                    id: teams[i].uuid,
+	                    name: teams[i].username,
+	                    description: teams[i].display_name
+	                });
+
+	                resources.organizations[index] = organization;
 	            }
 	        }
 
@@ -10713,11 +10743,17 @@
 	                };
 
 	                ApiHelper.getResource('projects', true).then(function () {
-	                    _.append($content.empty(), _.div({ class: 'project-list-search' }, _.input({ type: 'text', placeholder: 'Search in projects...' }).on('change keyup paste', function (e) {
+	                    _.append($content.empty(), _.div({ class: 'project-list-actions' }, _.button({ class: 'btn project-list-action' }, 'New project', _.span({ class: 'fa fa-plus' })).on('click', function (e) {
+	                        var name = prompt('Please input the new project name');
+
+	                        ResourceHelper.createResource('projects', name).then(function (project) {
+	                            location = '/#/' + project.owner + '/' + project.title;
+	                        });
+	                    }), _.div({ class: 'project-list-action search' }, _.input({ type: 'text', placeholder: 'Search in projects...' }).on('change keyup paste', function (e) {
 	                        var query = e.target.value;
 
 	                        filterProjects(query);
-	                    })), _.div({ class: 'project-list-items' }, _.each(window.resources.projects, function (i, project) {
+	                    }), _.span({ class: 'fa fa-search' }))), _.div({ class: 'project-list-items' }, _.each(window.resources.projects, function (i, project) {
 	                        return new ProjectEditor({
 	                            model: project,
 	                            overrideUrl: overrideUrl
@@ -12680,11 +12716,13 @@
 	            this.$element.removeAttr('style');
 	            this.$element.find('button, input').removeAttr('style');
 
+	            this.beingDragged = false;
+
 	            // Find new target element
 	            var $target = $('.hovering').first();
 
 	            // Unregister hover mouse events and unset hovering state
-	            $('.plan-editor .dates .date, .tab.year, .tab.month').off('mouseenter').off('mouseleave').toggleClass('hovering', false);
+	            this.unsetHoverEvents();
 
 	            // If the dragging event lasted less than 100 ms, open dialog
 	            if (Date.now() - this.prevClick < 100) {
@@ -12784,6 +12822,8 @@
 	                'pointer-events': 'none'
 	            });
 
+	            this.beingDragged = true;
+
 	            // Buffer the offset between mouse cursor and element position
 	            var offset = {
 	                x: bounds.left - e.pageX - offsetDOM.left,
@@ -12800,13 +12840,6 @@
 	                x: e.pageX,
 	                y: e.pageY
 	            };
-
-	            // Date mouse hover events
-	            $('.plan-editor .dates .date, .tab.year, .tab.month').on('mouseenter', function () {
-	                $(this).toggleClass('hovering', true);
-	            }).on('mouseleave', function () {
-	                $(this).toggleClass('hovering', false);
-	            });
 
 	            // Document pointer movement logic
 	            $(document).off('mousemove').on('mousemove', function (e) {
@@ -12830,6 +12863,37 @@
 	            $(document).off('mouseup').on('mouseup', function (e) {
 	                _this5.onReleaseDragHandle(e);
 	            });
+
+	            // Date mouse hover events
+	            this.setHoverEvents();
+	        }
+
+	        /**
+	         * Sets all hover events
+	         */
+
+	    }, {
+	        key: 'setHoverEvents',
+	        value: function setHoverEvents() {
+	            $('.plan-editor .dates .date, .tab.year, .tab.month').on('mouseenter', function () {
+	                $(this).toggleClass('hovering', true);
+
+	                if ($(this).hasClass('tab') && ($(this).hasClass('month') || $(this).hasClass('year'))) {
+	                    $(this).click();
+	                }
+	            }).on('mouseleave', function () {
+	                $(this).toggleClass('hovering', false);
+	            });
+	        }
+
+	        /**
+	         * Unsets all hover events
+	         */
+
+	    }, {
+	        key: 'unsetHoverEvents',
+	        value: function unsetHoverEvents() {
+	            $('.plan-editor .dates .date, .tab.year, .tab.month').off('mouseenter').off('mouseleave').toggleClass('hovering', false);
 	        }
 	    }]);
 
@@ -12893,46 +12957,26 @@
 	        return _this;
 	    }
 
+	    /**
+	     * Finds the PlanItemEditor instance being dragged
+	     *
+	     * @return {PlanItemEditor} Dragged item
+	     */
+
+
 	    _createClass(PlanEditor, [{
-	        key: 'onClickYear',
-	        value: function onClickYear(year) {
-	            this.currentYear = parseInt(year);
-
-	            this.render();
-	        }
-	    }, {
-	        key: 'onClickMonth',
-	        value: function onClickMonth(month) {
-	            this.currentMonth = parseInt(month);
-
-	            this.render();
-	        }
-	    }, {
-	        key: 'updateUndatedBox',
-	        value: function updateUndatedBox() {
-	            if (this.getUndatedMilestones().length < 1) {
-	                $('.plan-editor .undated').remove();
-	            }
-	        }
-	    }, {
-	        key: 'getUndatedMilestones',
-	        value: function getUndatedMilestones() {
-	            var milestones = [];
-
+	        key: 'findDraggedItem',
+	        value: function findDraggedItem() {
 	            var _iteratorNormalCompletion = true;
 	            var _didIteratorError = false;
 	            var _iteratorError = undefined;
 
 	            try {
-	                for (var _iterator = resources.milestones[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                    var milestone = _step.value;
+	                for (var _iterator = ViewHelper.getAll('PlanItemEditor')[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var item = _step.value;
 
-	                    if (!milestone) {
-	                        continue;
-	                    }
-
-	                    if (!milestone.getEndDate()) {
-	                        milestones.push(milestone);
+	                    if (item.beingDragged) {
+	                        return item;
 	                    }
 	                }
 	            } catch (err) {
@@ -12946,6 +12990,105 @@
 	                } finally {
 	                    if (_didIteratorError) {
 	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+
+	            return null;
+	        }
+
+	        /**
+	         * Event: Click year tab
+	         *
+	         * @param {String} year
+	         */
+
+	    }, {
+	        key: 'onClickYear',
+	        value: function onClickYear(year) {
+	            this.currentYear = parseInt(year);
+
+	            var draggedItem = this.findDraggedItem();
+
+	            if (draggedItem) {
+	                $('body').append(draggedItem.$element);
+	            }
+
+	            this.render();
+
+	            if (draggedItem) {
+	                this.$element.find('.dates').append(draggedItem.$element);
+
+	                draggedItem.unsetHoverEvents();
+	                draggedItem.setHoverEvents();
+	            }
+	        }
+
+	        /**
+	         * Event: Click month tab
+	         *
+	         * @param {String} month
+	         */
+
+	    }, {
+	        key: 'onClickMonth',
+	        value: function onClickMonth(month) {
+	            this.currentMonth = parseInt(month);
+
+	            var draggedItem = this.findDraggedItem();
+
+	            if (draggedItem) {
+	                $('body').append(draggedItem.$element);
+	            }
+
+	            this.render();
+
+	            if (draggedItem) {
+	                this.$element.find('.dates').append(draggedItem.$element);
+
+	                draggedItem.unsetHoverEvents();
+	                draggedItem.setHoverEvents();
+	            }
+	        }
+	    }, {
+	        key: 'updateUndatedBox',
+	        value: function updateUndatedBox() {
+	            if (this.getUndatedMilestones().length < 1) {
+	                $('.plan-editor .undated').remove();
+	            }
+	        }
+	    }, {
+	        key: 'getUndatedMilestones',
+	        value: function getUndatedMilestones() {
+	            var milestones = [];
+
+	            var _iteratorNormalCompletion2 = true;
+	            var _didIteratorError2 = false;
+	            var _iteratorError2 = undefined;
+
+	            try {
+	                for (var _iterator2 = resources.milestones[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                    var milestone = _step2.value;
+
+	                    if (!milestone) {
+	                        continue;
+	                    }
+
+	                    if (!milestone.getEndDate()) {
+	                        milestones.push(milestone);
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError2 = true;
+	                _iteratorError2 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                        _iterator2.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError2) {
+	                        throw _iteratorError2;
 	                    }
 	                }
 	            }
@@ -13019,29 +13162,29 @@
 	            var firstDay = new Date(this.currentYear, this.currentMonth, 1);
 	            var firstWeek = firstDay.getWeek();
 
-	            var _iteratorNormalCompletion2 = true;
-	            var _didIteratorError2 = false;
-	            var _iteratorError2 = undefined;
+	            var _iteratorNormalCompletion3 = true;
+	            var _didIteratorError3 = false;
+	            var _iteratorError3 = undefined;
 
 	            try {
-	                for (var _iterator2 = this.getDates()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                    var date = _step2.value;
+	                for (var _iterator3 = this.getDates()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                    var date = _step3.value;
 
 	                    if (weeks.indexOf(date.getWeek()) < 0) {
 	                        weeks.push(date.getWeek());
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError2 = true;
-	                _iteratorError2 = err;
+	                _didIteratorError3 = true;
+	                _iteratorError3 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                        _iterator2.return();
+	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                        _iterator3.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError2) {
-	                        throw _iteratorError2;
+	                    if (_didIteratorError3) {
+	                        throw _iteratorError3;
 	                    }
 	                }
 	            }
@@ -13071,29 +13214,29 @@
 	    }, {
 	        key: 'getDate',
 	        value: function getDate(week, weekday) {
-	            var _iteratorNormalCompletion3 = true;
-	            var _didIteratorError3 = false;
-	            var _iteratorError3 = undefined;
+	            var _iteratorNormalCompletion4 = true;
+	            var _didIteratorError4 = false;
+	            var _iteratorError4 = undefined;
 
 	            try {
-	                for (var _iterator3 = this.getDates()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                    var date = _step3.value;
+	                for (var _iterator4 = this.getDates()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                    var date = _step4.value;
 
 	                    if (date.getWeek() == week && date.getISODay() == weekday) {
 	                        return date;
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError3 = true;
-	                _iteratorError3 = err;
+	                _didIteratorError4 = true;
+	                _iteratorError4 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	                        _iterator3.return();
+	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                        _iterator4.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError3) {
-	                        throw _iteratorError3;
+	                    if (_didIteratorError4) {
+	                        throw _iteratorError4;
 	                    }
 	                }
 	            }
@@ -13139,6 +13282,8 @@
 	module.exports = function render() {
 	    var _this = this;
 
+	    var draggedItem = this.findDraggedItem();
+
 	    return _.div({ class: 'plan-editor' }, _.div({ class: 'tabbed-container' }, _.div({ class: 'tabs years' }, _.each(this.getYears(), function (i, year) {
 	        return _.button({ class: 'tab year' + (_this.currentYear == year.number ? ' active' : '') }, year.number).click(function () {
 	            _this.onClickYear(year.number);
@@ -13153,7 +13298,11 @@
 	        if (!date) {
 	            return _.div({ class: 'date-placeholder' });
 	        } else {
-	            return _.div({ class: 'date', 'data-date': date.getTime() }, _.div({ class: 'header' }, _.span({ class: 'datenumber' }, date.getDate()), _.span({ class: 'weeknumber' }, 'w ' + date.getWeek())), _.div({ class: 'body' }, _.each(window.resources.milestones, function (i, milestone) {
+	            return _.div({ class: 'date', 'data-date': date.getTime() }, _.div({ class: 'header' }, _.span({ class: 'datenumber' }, date.getDate()), _.span({ class: 'weeknumber' }, 'w ' + date.getWeek())), _.div({ class: 'body' }, _.each(resources.milestones, function (i, milestone) {
+	                if (draggedItem && draggedItem.model == milestone) {
+	                    return;
+	                }
+
 	                if (milestone.getEndDate()) {
 	                    var dueDate = milestone.getEndDate();
 
@@ -13998,6 +14147,27 @@
 	var navbar = new Navbar();
 
 	$('.app-container').html(navbar.$element);
+
+/***/ },
+/* 50 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Organization = function Organization(properties) {
+	    _classCallCheck(this, Organization);
+
+	    properties = properties || {};
+
+	    this.id = properties.id;
+	    this.index = properties.index;
+	    this.name = properties.name;
+	    this.description = properties.description;
+	};
+
+	module.exports = Organization;
 
 /***/ }
 /******/ ]);

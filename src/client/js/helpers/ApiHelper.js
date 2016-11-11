@@ -142,16 +142,25 @@ class ApiHelper {
     // Resource getters
     // ----------
     /**
+     * Gets organisations
+     *
+     * @returns {Promise} Array of team names
+     */
+    getOrganizations() {
+        window.resources.organization = [];
+
+        return Promise.resolve();
+    }
+
+    /**
      * Gets issues
      *
      * @returns {Promise} promise
      */
     getIssues() {
-        return new Promise((callback) => {
-            window.resources.issues = [];
-            
-            callback();
-        });
+        window.resources.issues = [];
+        
+        return Promise.resolve();
     }
     
     /**
@@ -160,11 +169,9 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     getCollaborators() {
-        return new Promise((callback) => {
-            window.resources.collaborators = [];
+        window.resources.collaborators = [];
             
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -173,11 +180,9 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     getIssueTypes() {
-        return new Promise((callback) => {
-            window.resources.issueTypes = [];
+        window.resources.issueTypes = [];
             
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -186,11 +191,9 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     getIssuePriorities() {
-        return new Promise((callback) => {
-            window.resources.issuePriorities = [];
-            
-            callback();
-        });
+        window.resources.issuePriorities = [];
+        
+        return Promise.resolve();
     }
     
     /**
@@ -199,11 +202,9 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     getIssueEstimates() {
-        return new Promise((callback) => {
-            window.resources.issueEstimates = [];
+        window.resources.issueEstimates = [];
             
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -212,11 +213,9 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     getIssueColumns() {
-        return new Promise((callback) => {
-            window.resources.issueColumns = [];
-            
-            callback();
-        });
+        window.resources.issueColumns = [];
+        
+        return Promise.resolve();
     }
     
     /**
@@ -225,11 +224,9 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     getMilestones() {
-        return new Promise((callback) => {
-            window.resources.milestones = [];
+        window.resources.milestones = [];
 
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -238,11 +235,9 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     getVersions() {
-        return new Promise((callback) => {
-            window.resources.versions = [];
-
-            callback();
-        });
+        window.resources.versions = [];
+        
+        return Promise.resolve();
     }
    
     /**
@@ -251,9 +246,9 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     getProjects() {
-        return new Promise((callback) => {
-            callback(); 
-        });
+        window.resources.projects = [];
+        
+        return Promise.resolve();
     }
 
     // ----------
@@ -267,9 +262,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */ 
     addIssue(issue) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -280,9 +273,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     addCollaborator(collaborator) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -293,9 +284,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     addIssueType(type) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -306,9 +295,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     addIssuePriority(priority) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -319,9 +306,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     addIssueEstimate(estimate) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -332,9 +317,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     addIssueColumn(column) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -345,9 +328,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     addMilestone(milestone) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -358,9 +339,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     addVersion(version) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
 
     // ----------
@@ -374,9 +353,7 @@ class ApiHelper {
      * @returns {Promise} Promise
      */ 
     removeIssue(issue) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -387,9 +364,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     removeCollaborator(index) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -400,9 +375,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     removeIssueType(index) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -413,9 +386,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     removeIssuePriority(index) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -426,9 +397,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     removeIssueEstimate(index) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -439,9 +408,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     removeIssueColumn(index) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -452,9 +419,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateIssueAttachment(index) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
 
     /**
@@ -465,9 +430,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     removeMilestone(index) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -478,9 +441,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     removeVersion(index) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
 
     // ----------
@@ -495,9 +456,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */ 
     updateIssue(index, issue) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -509,9 +468,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateCollaborator(index, collaborator) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -523,9 +480,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateIssueType(index, type) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -537,9 +492,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateIssuePriority(index, priority) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -551,9 +504,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateIssueEstimate(index, estimate) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -565,9 +516,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateIssueColumn(index, column) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -579,9 +528,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateMilestone(index, milestone) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -593,9 +540,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateVersion(index, version) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
     
     /**
@@ -607,9 +552,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateProject(index, project) {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
 
     
@@ -622,9 +565,7 @@ class ApiHelper {
      * @returns {Promise}
      */
     getUser() {
-        return new Promise((callback) => {
-            callback();
-        });
+        return Promise.resolve();
     }
 
    
@@ -639,9 +580,7 @@ class ApiHelper {
      * @returns {Promise} Array of comments
      */
     getIssueComments(issue) {
-        return new Promise((callback) => {
-            callback([]);
-        });
+        return Promise.resolve();
     }
     
     /** 
@@ -653,9 +592,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     addIssueComment(issue, comment) {
-        return new Promise((callback) => {
-            callback([]);
-        });
+        return Promise.resolve();
     }
     
     /** 
@@ -667,9 +604,7 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateIssueComment(issue, comment) {
-        return new Promise((callback) => {
-            callback([]);
-        });
+        return Promise.resolve();
     }
 
     // ----------
@@ -859,6 +794,9 @@ class ApiHelper {
         spinner('Getting ' + resource);
 
         switch(resource) {
+            case 'organizations':
+                return this.getOrganizations();
+
             case 'collaborators':
                 return this.getCollaborators();
 
@@ -939,6 +877,9 @@ class ApiHelper {
         })
         .then(() => {
             return get('versions');
+        })
+        .then(() => {
+            return get('organizations');
         })
         .then(() => {
             return get('issues');

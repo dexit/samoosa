@@ -285,8 +285,12 @@ a {
     }
 }
 
-.login-form {
+.login-container {
     background-color: $teal-dark;
+}
+
+.login-form {
+    background-color: transparent;
     color: $white;
     padding: 2rem;
 
@@ -621,14 +625,20 @@ select {
     }
 }
 
-button.btn, input[type="submit"].btn {
-    padding: 10px 15px;
+button.btn, input[type="submit"].btn, select.btn {
+    padding: 0px 10px;
     font-size: 1em;
     height: 36px;
     text-transform: uppercase;
     color: $white;
     font-family: 'Bree Serif';
     background-color: $pink-medium;
+    margin: 0px;
+    border-radius: 0px;
+
+    option {
+        background-color: $pink-medium;
+    }
 
     &+.btn {
         margin-left: 0.5rem;

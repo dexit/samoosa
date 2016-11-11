@@ -154,15 +154,14 @@ class PlanItemEditor extends View {
         $('.plan-container').toggleClass('dragging', false);
         this.$element.removeAttr('style');
         this.$element.find('button, input').removeAttr('style');
-        
+       
+        this.beingDragged = false;
+
         // Find new target element
         let $target = $('.hovering').first();
        
         // Unregister hover mouse events and unset hovering state
-        $('.plan-editor .dates .date, .tab.year, .tab.month')
-            .off('mouseenter')
-            .off('mouseleave').
-            toggleClass('hovering', false);
+        this.unsetHoverEvents();
 
         // If the dragging event lasted less than 100 ms, open dialog
         if(Date.now() - this.prevClick < 100) {
@@ -262,6 +261,8 @@ class PlanItemEditor extends View {
             'pointer-events': 'none',
         });
 
+        this.beingDragged = true;
+
         // Buffer the offset between mouse cursor and element position
         let offset = {
             x: bounds.left - e.pageX - offsetDOM.left,
@@ -278,15 +279,6 @@ class PlanItemEditor extends View {
             x: e.pageX,
             y: e.pageY
         };
-
-        // Date mouse hover events
-        $('.plan-editor .dates .date, .tab.year, .tab.month')
-            .on('mouseenter', function() {
-                $(this).toggleClass('hovering', true);
-            })
-            .on('mouseleave', function() {
-                $(this).toggleClass('hovering', false); 
-            });
 
         // Document pointer movement logic
         $(document)
@@ -314,6 +306,43 @@ class PlanItemEditor extends View {
             .on('mouseup', (e) => {
                 this.onReleaseDragHandle(e);
             });
+
+        // Date mouse hover events
+        this.setHoverEvents();
+    }
+
+    /**
+     * Sets all hover events
+     */
+    setHoverEvents() {
+        $('.plan-editor .dates .date, .tab.year, .tab.month')
+            .on('mouseenter', function() {
+                $(this).toggleClass('hovering', true);
+
+                if(
+                    $(this).hasClass('tab') &&
+                    (
+                        $(this).hasClass('month') || 
+                        $(this).hasClass('year')
+                    )
+                ) {
+                    $(this).click();
+                }
+            })
+            .on('mouseleave', function() {
+                $(this).toggleClass('hovering', false); 
+            });
+
+    }
+
+    /**
+     * Unsets all hover events
+     */
+    unsetHoverEvents() {
+        $('.plan-editor .dates .date, .tab.year, .tab.month')
+            .off('mouseenter')
+            .off('mouseleave').
+            toggleClass('hovering', false);
     }
 }
 

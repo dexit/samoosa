@@ -173,13 +173,27 @@ class Navbar extends View {
             ApiHelper.getResource('projects', true)
             .then(() => {
                 _.append($content.empty(),
-                    _.div({class: 'project-list-search'},
-                        _.input({type: 'text', placeholder: 'Search in projects...'})
-                            .on('change keyup paste', (e) => {
-                                let query = e.target.value;
+                    _.div({class: 'project-list-actions'},
+                        _.button({class: 'btn project-list-action'},
+                            'New project',
+                            _.span({class: 'fa fa-plus'})
+                        ).on('click', (e) => {
+                            let name = prompt('Please input the new project name');
 
-                                filterProjects(query);
-                            })
+                            ResourceHelper.createResource('projects', name)
+                            .then((project) => {
+                                location = '/#/' + project.owner + '/' + project.title;
+                            });
+                        }),
+                        _.div({class: 'project-list-action search'},
+                            _.input({type: 'text', placeholder: 'Search in projects...'})
+                                .on('change keyup paste', (e) => {
+                                    let query = e.target.value;
+
+                                    filterProjects(query);
+                                }),
+                            _.span({class: 'fa fa-search'})
+                        )
                     ),
                     _.div({class: 'project-list-items'},
                         _.each(window.resources.projects, (i, project) => {

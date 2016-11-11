@@ -1,6 +1,8 @@
 'use strict';
 
 module.exports = function render() {
+    let draggedItem = this.findDraggedItem();
+
     return _.div({class: 'plan-editor'},
         _.div({class: 'tabbed-container'},
             _.div({class: 'tabs years'},
@@ -34,7 +36,9 @@ module.exports = function render() {
                             _.span({class: 'weeknumber'}, 'w ' + date.getWeek())
                         ),
                         _.div({class: 'body'},
-                            _.each(window.resources.milestones, (i, milestone) => {
+                            _.each(resources.milestones, (i, milestone) => {
+                                if(draggedItem && draggedItem.model == milestone) { return; }
+
                                 if(milestone.getEndDate()) {
                                     let dueDate = milestone.getEndDate();
 

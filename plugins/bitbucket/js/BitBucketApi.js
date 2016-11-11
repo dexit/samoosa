@@ -365,6 +365,20 @@ class BitBucketApi extends ApiHelper {
     // Resource getters
     // ----------
     /**
+     * Gets organisations
+     *
+     * @returns {Promise} Array of organisations
+     */
+    getOrganizations() {
+        return this.get('2.0/teams')
+        .then((teams) => {
+            this.processOrganizations(teams);
+
+            return Promise.resolve();
+        });
+    }
+    
+    /**
      * Gets projects
      *
      * @returns {Promise} promise
@@ -954,6 +968,28 @@ class BitBucketApi extends ApiHelper {
             });
 
             window.resources.projects[i] = project;
+        }
+    }
+    
+    /**
+     * Process organisations
+     *
+     * @param {Array} teams
+     */
+    processOrganizations(teams) {
+        resources.organizations = [];
+
+        for(let i in teams) {
+            let index = resources.organizations.length;
+
+            let organization = new Organization({
+                index: index,
+                id: teams[i].uuid,
+                name: teams[i].username,
+                description: teams[i].display_name 
+            });
+
+            resources.organizations[index] = organization;
         }
     }
     

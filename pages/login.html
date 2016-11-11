@@ -17,13 +17,16 @@ layout: ~
         <title>Samoosa</title>
     </head>
     <body>
-        <div class="app-container">
+        <div class="app-container login-container">
             <form class="login-form">
-                <img class="logo" src="../public/svg/logo-light.svg" />
+                <div class="logo">
+                    <img src="../public/svg/logo-medium.svg" />
+                    <h1>Samoosa</h1>
+                </div>
                 <ul>
                     <li>
                         <label for="input-source">Source</label>
-                        <select id="input-source" name="source">
+                        <select class="btn" id="input-source" name="source">
                             <option value="github">GitHub</option>
                             <option value="bitbucket">BitBucket</option>
                         </select>

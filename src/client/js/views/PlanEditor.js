@@ -15,17 +15,68 @@ class PlanEditor extends View {
 
         this.init();
     }
-   
-    onClickYear(year) {
-        this.currentYear = parseInt(year);
 
-        this.render();
+    /**
+     * Finds the PlanItemEditor instance being dragged
+     *
+     * @return {PlanItemEditor} Dragged item
+     */
+    findDraggedItem() {
+        for(let item of ViewHelper.getAll('PlanItemEditor')) {
+            if(item.beingDragged) {
+                return item;
+            }
+        }
+
+        return null;
     }
 
+    /**
+     * Event: Click year tab
+     *
+     * @param {String} year
+     */
+    onClickYear(year) {
+        this.currentYear = parseInt(year);
+        
+        let draggedItem = this.findDraggedItem();
+        
+        if(draggedItem) {
+            $('body').append(draggedItem.$element);
+        }
+
+        this.render();
+
+        if(draggedItem) {
+            this.$element.find('.dates').append(draggedItem.$element);
+
+            draggedItem.unsetHoverEvents(); 
+            draggedItem.setHoverEvents();
+        }
+    }
+
+    /**
+     * Event: Click month tab
+     *
+     * @param {String} month
+     */
     onClickMonth(month) {
         this.currentMonth = parseInt(month);
 
+        let draggedItem = this.findDraggedItem();
+        
+        if(draggedItem) {
+            $('body').append(draggedItem.$element);
+        }
+
         this.render();
+
+        if(draggedItem) {
+            this.$element.find('.dates').append(draggedItem.$element);
+           
+            draggedItem.unsetHoverEvents(); 
+            draggedItem.setHoverEvents();
+        }
     }
 
     updateUndatedBox() {

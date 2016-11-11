@@ -533,7 +533,19 @@ body, html {
       opacity: 0;
       overflow: hidden;
       z-index: -100; }
-    .issue-editor .attachments .attachment {
+    .issue-editor .attachments div.attachment {
+      width: 100%;
+      flex-basis: 100%;
+      margin: 0px 15px 15px 0px;
+      padding: 5px 10px;
+      text-decoration: none;
+      display: flex; }
+      .issue-editor .attachments div.attachment label {
+        flex-grow: 1; }
+      .issue-editor .attachments div.attachment .btn-download-attachment, .issue-editor .attachments div.attachment .btn-remove-attachment {
+        margin-left: 15px;
+        line-height: 2rem; }
+    .issue-editor .attachments button.attachment {
       flex-grow: 1;
       max-width: 64px;
       height: 64px;
@@ -543,7 +555,7 @@ body, html {
       align-items: center;
       justify-content: center;
       padding: 5px; }
-      .issue-editor .attachments .attachment img {
+      .issue-editor .attachments button.attachment img {
         max-width: 100%;
         max-height: 100%; }
   .issue-editor .comments {
@@ -1483,9 +1495,16 @@ a {
     color: #E70D3B !important; }
   .issue-editor .attachments {
     background-color: transparent; }
-    .issue-editor .attachments .attachment {
+    .issue-editor .attachments div.attachment {
+      background-color: #171e23;
+      color: #fff; }
+      .issue-editor .attachments div.attachment .btn-download-attachment, .issue-editor .attachments div.attachment .btn-remove-attachment {
+        color: #fff; }
+        .issue-editor .attachments div.attachment .btn-download-attachment:hover, .issue-editor .attachments div.attachment .btn-remove-attachment:hover {
+          color: #E70D3B; }
+    .issue-editor .attachments button.attachment {
       background-color: #171e23; }
-      .issue-editor .attachments .attachment:hover {
+      .issue-editor .attachments button.attachment:hover {
         outline: 2px solid #E70D3B; }
   .issue-editor .comments, .issue-editor .add-comment {
     background-color: transparent; }

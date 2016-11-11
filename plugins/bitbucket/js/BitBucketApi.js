@@ -26,7 +26,7 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} Promise
      */
     refresh() {
-        debug.log('Refreshing API token...', this)
+        spinner('Refreshing token');
 
         return new Promise((resolve, reject) => {
             let apiUrl = 'http://api.samoosa.rocks/oauth/bitbucket/?refresh=' + localStorage.getItem('refresh');
@@ -235,8 +235,9 @@ class BitBucketApi extends ApiHelper {
             $.ajax({
                 url: 'https://api.bitbucket.org/' + url,
                 type: 'POST',
-                contentType: data instanceof FormData ? 'multipart/form-data' : undefined,
+                contentType: data instanceof FormData ? false : undefined,
                 data: data,
+                processData: false,
                 cache: false,
                 success: (result) => {
                     resolve(result);
@@ -479,14 +480,12 @@ class BitBucketApi extends ApiHelper {
             for(let obj of response) {
                 if(!obj) { continue; }
 
-                let timestamp = obj.name.split('__')[0];
-                let name = obj.name.split('__')[1];
+                let apiUrl = 'https://api.bitbucket.org/2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments/' + obj.name;
 
                 let attachment = new Attachment({
-                    name: name,
-                    timestamp: timestamp,
-                    url: obj.links.self.href[0],
-                    isRedirect: true
+                    name: obj.name,
+                    isRedirect: true,
+                    url: apiUrl + '?access_token=' + this.getApiToken()
                 });
                 
                 attachments[attachments.length] = attachment;
@@ -761,6 +760,20 @@ class BitBucketApi extends ApiHelper {
      */
     removeCollaborator(index) {
         return this.delete('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index]);
+    }
+    
+    /**
+     * Removes an issue attachment
+     *
+     * @param {Issue} issue
+     * @param {Attachment} attachment
+     *
+     * @returns {Promise} Promise
+     */
+    removeIssueAttachment(issue, attachment) {
+        let apiUrl = '2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments/' + attachment.getName();
+
+        return this.delete(apiUrl);
     }
     
     /**

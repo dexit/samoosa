@@ -375,7 +375,25 @@
             z-index: -100;
         }
 
-        .attachment {
+        div.attachment {
+            width: 100%;
+            flex-basis: 100%;
+            margin: 0px 15px 15px 0px;
+            padding: 5px 10px;
+            text-decoration: none;
+            display: flex;
+
+            label {
+                flex-grow: 1;
+            }
+
+            .btn-download-attachment, .btn-remove-attachment {
+                margin-left: 15px;
+                line-height: 2rem;
+            }
+        }
+
+        button.attachment {
             flex-grow: 1;
             max-width: 64px;
             height: 64px;

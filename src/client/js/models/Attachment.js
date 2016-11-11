@@ -11,6 +11,7 @@ class Attachment {
         this.headers = properties.headers;
         this.file = properties.file;
         this.isRedirect = properties.isRedirect || false;
+        this.path = properties.path;
     }
 
     /**

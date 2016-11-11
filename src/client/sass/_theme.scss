@@ -514,7 +514,20 @@ a {
     .attachments {
         background-color: transparent;
         
-        .attachment {
+        div.attachment {
+            background-color: $teal-darker;
+            color: $white;
+
+            .btn-download-attachment, .btn-remove-attachment {
+                color: $white;
+
+                &:hover {
+                    color: $pink-medium;
+                }
+            }
+        }
+
+        button.attachment {
             background-color: $teal-darker;
 
             &:hover {

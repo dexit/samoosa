@@ -543,29 +543,34 @@ class IssueEditor extends View {
     }
 
     /**
+     * Event: On click remove attachment
+     *
+     * @param {Attachment} attachment
+     */
+    onClickRemoveAttachment(attachment) {
+        if(!confirm('Are you sure you want to remove the attachment "' + attachment.name + '"?')) { return; }
+
+        ApiHelper.removeIssueAttachment(this.model, attachment)
+        .then(() => {
+            modal(false);
+            this.getAttachments();
+        });
+    }
+
+    /**
      * Event: On click attachment
      *
      * @param {Attachment} attachment
      */
     onClickAttachment(attachment) {
-        if(attachment.isRedirect) {
-            window.open(attachment.getURL());
-        } else {
-            modal(_.div({class: 'modal-attachment'},
-                _.img({src: attachment.getURL()}),
-                _.div({class: 'modal-attachment-toolbar'},
-                    _.button({class: 'btn-remove-attachment'},
-                        _.span({class: 'fa fa-trash'})
-                    ).click(() => {
-                        ApiHelper.removeIssueAttachment(this.model, attachment)
-                        .then(() => {
-                            modal(false);
-                            this.getAttachments();
-                        });
-                    })
-                )
-            ));
-        }
+        modal(_.div({class: 'modal-attachment'},
+            _.img({src: attachment.getURL()}),
+            _.div({class: 'modal-attachment-toolbar'},
+                _.button({class: 'btn-remove-attachment'},
+                    _.span({class: 'fa fa-trash'})
+                ).click(() => { this.onClickRemoveAttachment(attachment); })
+            )
+        ));
     }
 
     /**
@@ -583,12 +588,18 @@ class IssueEditor extends View {
         for (let i = 0; i < items.length; i++) {
             // Check for image MIME type
             if(IMAGE_MIME_REGEX.test(items[i].type)) {
-                let file = items[i].getAsFile();
+                let blob = items[i].getAsFile();
+                let file = null;
+               
+                try {
+                    file = new File([blob], 'pasted_' + new Date().toISOString() + '.png');
                 
-                file.name = 'pasted.png';
-                file.filename = file.name;
+                } catch(e) {
+                    file = blob;
 
-                this.attachImage(file);
+                }
+
+                this.attachFile(file);
                 return;
             }
         }
@@ -601,7 +612,7 @@ class IssueEditor extends View {
      */
     onAttachmentFileInputChange(e) {
         if(e.target.files && e.target.files.length > 0) {
-            this.attachImage(e.target.files[0]);
+            this.attachFile(e.target.files[0]);
         } 
     }
 
@@ -610,14 +621,14 @@ class IssueEditor extends View {
      *
      * @param {File} file
      */
-    attachImage(file) {
+    attachFile(file) {
         let reader = new FileReader();
 
-        // Event: On image loaded
+        spinner('Attaching "' + file.name + '"');
+
+        // Event: On file loaded
         reader.onload = (e) => {
             let base64 = e.target.result;
-
-            debug.log('Attaching image "' + file.name + '"...', this);
 
             // Remove headers
             let headersRegex = /data:(.+);base64,/;
@@ -632,16 +643,16 @@ class IssueEditor extends View {
                 headers: headersMatch ? headersMatch[0] : null
             });
 
-            this.$element.toggleClass('loading', true);
-            
             ApiHelper.addIssueAttachment(this.model, attachment)
             .then((uploadedAttachment) => {
                 this.getAttachments();
+                
+                spinner(false);
             })
             .catch((e) => {
-                this.$element.toggleClass('loading', false);
-                
                 displayError(e);
+
+                spinner(false);
             });
         };
 
@@ -733,14 +744,21 @@ class IssueEditor extends View {
 
             _.append($attachments,
                 _.each(attachments, (i, attachment) => {
-                    return _.button({class: 'attachment', 'data-is-redirect': attachment.isRedirect, title: attachment.getName()},
-                        _.if(attachment.isRedirect,
-                            _.p(attachment.getName())
-                        ),
-                        _.if(!attachment.isRedirect,
+                    if(attachment.isRedirect) {
+                        return _.div({class: 'attachment'},
+                            _.label(attachment.name),
+                            _.a({class: 'btn-download-attachment fa fa-download', href: attachment.getURL(), target: '_blank'}),
+                            _.button({class: 'btn-remove-attachment'},
+                                _.span({class: 'fa fa-trash'})
+                            ).click(() => { this.onClickRemoveAttachment(attachment); })
+                        );
+                    
+                    } else {
+                        return _.button({class: 'attachment', 'data-is-redirect': attachment.isRedirect, title: attachment.getName()},
                             _.img({class: 'attachment-preview', src: attachment.getURL()})
-                        )
-                    ).click((e) => { this.onClickAttachment(attachment); });
+                        ).click((e) => { this.onClickAttachment(attachment); });
+
+                    }
                 })
             );
         });

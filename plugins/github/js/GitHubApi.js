@@ -371,12 +371,8 @@ class GitHubApi extends ApiHelper {
             let attachments = [];
 
             for(let obj of response) {
-                let timestamp = obj.name.split('__')[0];
-                let name = obj.name.split('__')[1];
-
                 let attachment = new Attachment({
-                    name: name,
-                    timestamp: timestamp,
+                    name: obj.name,
                     url: obj.download_url
                 });
                 
@@ -582,7 +578,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} Promise
      */
     addIssueAttachment(issue, attachment) {
-        let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getTimestamp().getTime() + '__' + attachment.getName();
+        let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
         let postData = {
             message: 'Added attachment "' + attachment.name + '"',
             content: attachment.getBase64(),
@@ -776,7 +772,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} Promise
      */
     removeIssueAttachment(issue, attachment) {
-        let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getTimestamp().getTime() + '__' + attachment.getName();
+        let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
         let deleteData = {
             message: 'Removed attachment "' + attachment.getName() + '"',
             sha: attachment.sha,

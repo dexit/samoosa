@@ -5539,12 +5539,8 @@
 	                    for (var _iterator2 = response[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 	                        var obj = _step2.value;
 
-	                        var timestamp = obj.name.split('__')[0];
-	                        var name = obj.name.split('__')[1];
-
 	                        var attachment = new Attachment({
-	                            name: name,
-	                            timestamp: timestamp,
+	                            name: obj.name,
 	                            url: obj.download_url
 	                        });
 
@@ -5796,7 +5792,7 @@
 	    }, {
 	        key: 'addIssueAttachment',
 	        value: function addIssueAttachment(issue, attachment) {
-	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getTimestamp().getTime() + '__' + attachment.getName();
+	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
 	            var postData = {
 	                message: 'Added attachment "' + attachment.name + '"',
 	                content: attachment.getBase64(),
@@ -6010,7 +6006,7 @@
 	    }, {
 	        key: 'removeIssueAttachment',
 	        value: function removeIssueAttachment(issue, attachment) {
-	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getTimestamp().getTime() + '__' + attachment.getName();
+	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
 	            var deleteData = {
 	                message: 'Removed attachment "' + attachment.getName() + '"',
 	                sha: attachment.sha,
@@ -7987,7 +7983,7 @@
 	    }, {
 	        key: 'refresh',
 	        value: function refresh() {
-	            debug.log('Refreshing API token...', this);
+	            spinner('Refreshing token');
 
 	            return new Promise(function (resolve, reject) {
 	                var apiUrl = 'http://api.samoosa.rocks/oauth/bitbucket/?refresh=' + localStorage.getItem('refresh');
@@ -8198,8 +8194,9 @@
 	                $.ajax({
 	                    url: 'https://api.bitbucket.org/' + url,
 	                    type: 'POST',
-	                    contentType: data instanceof FormData ? 'multipart/form-data' : undefined,
+	                    contentType: data instanceof FormData ? false : undefined,
 	                    data: data,
+	                    processData: false,
 	                    cache: false,
 	                    success: function success(result) {
 	                        resolve(result);
@@ -8443,6 +8440,8 @@
 	    }, {
 	        key: 'getIssueAttachments',
 	        value: function getIssueAttachments(issue) {
+	            var _this9 = this;
+
 	            return this.get('2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments', 'values').then(function (response) {
 	                if (!Array.isArray(response)) {
 	                    return Promise.reject(new Error('Response of issue attachments was not an array'));
@@ -8462,14 +8461,12 @@
 	                            continue;
 	                        }
 
-	                        var timestamp = obj.name.split('__')[0];
-	                        var name = obj.name.split('__')[1];
+	                        var apiUrl = 'https://api.bitbucket.org/2.0/repositories/' + _this9.getProjectOwner() + '/' + _this9.getProjectName() + '/issues/' + issue.id + '/attachments/' + obj.name;
 
 	                        var attachment = new Attachment({
-	                            name: name,
-	                            timestamp: timestamp,
-	                            url: obj.links.self.href[0],
-	                            isRedirect: true
+	                            name: obj.name,
+	                            isRedirect: true,
+	                            url: apiUrl + '?access_token=' + _this9.getApiToken()
 	                        });
 
 	                        attachments[attachments.length] = attachment;
@@ -8534,10 +8531,10 @@
 	    }, {
 	        key: 'getVersions',
 	        value: function getVersions() {
-	            var _this9 = this;
+	            var _this10 = this;
 
 	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions').then(function (versions) {
-	                _this9.processVersions(versions);
+	                _this10.processVersions(versions);
 
 	                return Promise.resolve();
 	            });
@@ -8552,10 +8549,10 @@
 	    }, {
 	        key: 'getMilestones',
 	        value: function getMilestones() {
-	            var _this10 = this;
+	            var _this11 = this;
 
 	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones').then(function (milestones) {
-	                _this10.processMilestones(milestones);
+	                _this11.processMilestones(milestones);
 
 	                return Promise.resolve();
 	            });
@@ -8593,10 +8590,10 @@
 	    }, {
 	        key: 'addCollaborator',
 	        value: function addCollaborator(collaborator) {
-	            var _this11 = this;
+	            var _this12 = this;
 
 	            return new Promise(function (callback) {
-	                _this11.put('1.0/repositories/' + _this11.getProjectOwner() + '/' + _this11.getProjectName() + '/collaborators/' + collaborator).then(function () {
+	                _this12.put('1.0/repositories/' + _this12.getProjectOwner() + '/' + _this12.getProjectName() + '/collaborators/' + collaborator).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8613,10 +8610,10 @@
 	    }, {
 	        key: 'addIssueType',
 	        value: function addIssueType(type) {
-	            var _this12 = this;
+	            var _this13 = this;
 
 	            return new Promise(function (callback) {
-	                _this12.post('1.0/repositories/' + _this12.getProjectOwner() + '/' + _this12.getProjectName() + '/labels', {
+	                _this13.post('1.0/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/labels', {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8636,10 +8633,10 @@
 	    }, {
 	        key: 'addIssuePriority',
 	        value: function addIssuePriority(priority) {
-	            var _this13 = this;
+	            var _this14 = this;
 
 	            return new Promise(function (callback) {
-	                _this13.post('1.0/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/labels', {
+	                _this14.post('1.0/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/labels', {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8659,10 +8656,10 @@
 	    }, {
 	        key: 'addIssueEstimate',
 	        value: function addIssueEstimate(estimate) {
-	            var _this14 = this;
+	            var _this15 = this;
 
 	            return new Promise(function (callback) {
-	                _this14.post('1.0/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/labels', {
+	                _this15.post('1.0/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels', {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8682,10 +8679,10 @@
 	    }, {
 	        key: 'addIssueColumn',
 	        value: function addIssueColumn(column) {
-	            var _this15 = this;
+	            var _this16 = this;
 
 	            return new Promise(function (callback) {
-	                _this15.post('1.0/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels', {
+	                _this16.post('1.0/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/labels', {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8793,6 +8790,23 @@
 	        }
 
 	        /**
+	         * Removes an issue attachment
+	         *
+	         * @param {Issue} issue
+	         * @param {Attachment} attachment
+	         *
+	         * @returns {Promise} Promise
+	         */
+
+	    }, {
+	        key: 'removeIssueAttachment',
+	        value: function removeIssueAttachment(issue, attachment) {
+	            var apiUrl = '2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments/' + attachment.getName();
+
+	            return this.delete(apiUrl);
+	        }
+
+	        /**
 	         * Removes milestone 
 	         *
 	         * @param {Number} index
@@ -8803,12 +8817,12 @@
 	    }, {
 	        key: 'removeMilestone',
 	        value: function removeMilestone(index) {
-	            var _this16 = this;
+	            var _this17 = this;
 
 	            var milestone = resources.milestones[index];
 
 	            return new Promise(function (callback) {
-	                _this16.delete('1.0/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
+	                _this17.delete('1.0/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8856,10 +8870,10 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            var _this17 = this;
+	            var _this18 = this;
 
 	            return new Promise(function (callback) {
-	                _this17.put('1.0/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/issues/milestones/' + milestone.id, _this17.convertMilestone(milestone)).then(function () {
+	                _this18.put('1.0/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/issues/milestones/' + milestone.id, _this18.convertMilestone(milestone)).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8877,10 +8891,10 @@
 	    }, {
 	        key: 'updateIssueType',
 	        value: function updateIssueType(type, previousName) {
-	            var _this18 = this;
+	            var _this19 = this;
 
 	            return new Promise(function (callback) {
-	                _this18.patch('1.0/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/labels/type:' + previousName, {
+	                _this19.patch('1.0/repositories/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/labels/type:' + previousName, {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8901,10 +8915,10 @@
 	    }, {
 	        key: 'updateIssuePriority',
 	        value: function updateIssuePriority(priority, previousName) {
-	            var _this19 = this;
+	            var _this20 = this;
 
 	            return new Promise(function (callback) {
-	                _this19.patch('1.0/repositories/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/labels/priority:' + previousName, {
+	                _this20.patch('1.0/repositories/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/labels/priority:' + previousName, {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8925,10 +8939,10 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(estimate, previousName) {
-	            var _this20 = this;
+	            var _this21 = this;
 
 	            return new Promise(function (callback) {
-	                _this20.patch('1.0/repositories/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/labels/estimate:' + previousName, {
+	                _this21.patch('1.0/repositories/' + _this21.getProjectOwner() + '/' + _this21.getProjectName() + '/labels/estimate:' + previousName, {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8949,10 +8963,10 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            var _this21 = this;
+	            var _this22 = this;
 
 	            return new Promise(function (callback) {
-	                _this21.patch('1.0/repositories/' + _this21.getProjectOwner() + '/' + _this21.getProjectName() + '/labels/column:' + previousName, {
+	                _this22.patch('1.0/repositories/' + _this22.getProjectOwner() + '/' + _this22.getProjectName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -10378,6 +10392,7 @@
 	        this.headers = properties.headers;
 	        this.file = properties.file;
 	        this.isRedirect = properties.isRedirect || false;
+	        this.path = properties.path;
 	    }
 
 	    /**
@@ -11502,6 +11517,27 @@
 	        }
 
 	        /**
+	         * Event: On click remove attachment
+	         *
+	         * @param {Attachment} attachment
+	         */
+
+	    }, {
+	        key: 'onClickRemoveAttachment',
+	        value: function onClickRemoveAttachment(attachment) {
+	            var _this6 = this;
+
+	            if (!confirm('Are you sure you want to remove the attachment "' + attachment.name + '"?')) {
+	                return;
+	            }
+
+	            ApiHelper.removeIssueAttachment(this.model, attachment).then(function () {
+	                modal(false);
+	                _this6.getAttachments();
+	            });
+	        }
+
+	        /**
 	         * Event: On click attachment
 	         *
 	         * @param {Attachment} attachment
@@ -11510,18 +11546,11 @@
 	    }, {
 	        key: 'onClickAttachment',
 	        value: function onClickAttachment(attachment) {
-	            var _this6 = this;
+	            var _this7 = this;
 
-	            if (attachment.isRedirect) {
-	                window.open(attachment.getURL());
-	            } else {
-	                modal(_.div({ class: 'modal-attachment' }, _.img({ src: attachment.getURL() }), _.div({ class: 'modal-attachment-toolbar' }, _.button({ class: 'btn-remove-attachment' }, _.span({ class: 'fa fa-trash' })).click(function () {
-	                    ApiHelper.removeIssueAttachment(_this6.model, attachment).then(function () {
-	                        modal(false);
-	                        _this6.getAttachments();
-	                    });
-	                }))));
-	            }
+	            modal(_.div({ class: 'modal-attachment' }, _.img({ src: attachment.getURL() }), _.div({ class: 'modal-attachment-toolbar' }, _.button({ class: 'btn-remove-attachment' }, _.span({ class: 'fa fa-trash' })).click(function () {
+	                _this7.onClickRemoveAttachment(attachment);
+	            }))));
 	        }
 
 	        /**
@@ -11542,12 +11571,16 @@
 	            for (var i = 0; i < items.length; i++) {
 	                // Check for image MIME type
 	                if (IMAGE_MIME_REGEX.test(items[i].type)) {
-	                    var file = items[i].getAsFile();
+	                    var blob = items[i].getAsFile();
+	                    var file = null;
 
-	                    file.name = 'pasted.png';
-	                    file.filename = file.name;
+	                    try {
+	                        file = new File([blob], 'pasted_' + new Date().toISOString() + '.png');
+	                    } catch (e) {
+	                        file = blob;
+	                    }
 
-	                    this.attachImage(file);
+	                    this.attachFile(file);
 	                    return;
 	                }
 	            }
@@ -11563,7 +11596,7 @@
 	        key: 'onAttachmentFileInputChange',
 	        value: function onAttachmentFileInputChange(e) {
 	            if (e.target.files && e.target.files.length > 0) {
-	                this.attachImage(e.target.files[0]);
+	                this.attachFile(e.target.files[0]);
 	            }
 	        }
 
@@ -11574,17 +11607,17 @@
 	         */
 
 	    }, {
-	        key: 'attachImage',
-	        value: function attachImage(file) {
-	            var _this7 = this;
+	        key: 'attachFile',
+	        value: function attachFile(file) {
+	            var _this8 = this;
 
 	            var reader = new FileReader();
 
-	            // Event: On image loaded
+	            spinner('Attaching "' + file.name + '"');
+
+	            // Event: On file loaded
 	            reader.onload = function (e) {
 	                var base64 = e.target.result;
-
-	                debug.log('Attaching image "' + file.name + '"...', _this7);
 
 	                // Remove headers
 	                var headersRegex = /data:(.+);base64,/;
@@ -11599,14 +11632,14 @@
 	                    headers: headersMatch ? headersMatch[0] : null
 	                });
 
-	                _this7.$element.toggleClass('loading', true);
+	                ApiHelper.addIssueAttachment(_this8.model, attachment).then(function (uploadedAttachment) {
+	                    _this8.getAttachments();
 
-	                ApiHelper.addIssueAttachment(_this7.model, attachment).then(function (uploadedAttachment) {
-	                    _this7.getAttachments();
+	                    spinner(false);
 	                }).catch(function (e) {
-	                    _this7.$element.toggleClass('loading', false);
-
 	                    displayError(e);
+
+	                    spinner(false);
 	                });
 	            };
 
@@ -11695,21 +11728,27 @@
 	    }, {
 	        key: 'getAttachments',
 	        value: function getAttachments() {
-	            var _this8 = this;
+	            var _this9 = this;
 
 	            this.$element.toggleClass('loading', true);
 
 	            var $attachments = this.$element.find('.attachments');
 
 	            ApiHelper.getIssueAttachments(this.model).then(function (attachments) {
-	                _this8.$element.toggleClass('loading', false);
+	                _this9.$element.toggleClass('loading', false);
 
 	                $attachments.children('.attachment').remove();
 
 	                _.append($attachments, _.each(attachments, function (i, attachment) {
-	                    return _.button({ class: 'attachment', 'data-is-redirect': attachment.isRedirect, title: attachment.getName() }, _.if(attachment.isRedirect, _.p(attachment.getName())), _.if(!attachment.isRedirect, _.img({ class: 'attachment-preview', src: attachment.getURL() }))).click(function (e) {
-	                        _this8.onClickAttachment(attachment);
-	                    });
+	                    if (attachment.isRedirect) {
+	                        return _.div({ class: 'attachment' }, _.label(attachment.name), _.a({ class: 'btn-download-attachment fa fa-download', href: attachment.getURL(), target: '_blank' }), _.button({ class: 'btn-remove-attachment' }, _.span({ class: 'fa fa-trash' })).click(function () {
+	                            _this9.onClickRemoveAttachment(attachment);
+	                        }));
+	                    } else {
+	                        return _.button({ class: 'attachment', 'data-is-redirect': attachment.isRedirect, title: attachment.getName() }, _.img({ class: 'attachment-preview', src: attachment.getURL() })).click(function (e) {
+	                            _this9.onClickAttachment(attachment);
+	                        });
+	                    }
 	                }));
 	            });
 	        }
@@ -11721,7 +11760,7 @@
 	    }, {
 	        key: 'getComments',
 	        value: function getComments() {
-	            var _this9 = this;
+	            var _this10 = this;
 
 	            this.$element.toggleClass('loading', true);
 
@@ -11729,7 +11768,7 @@
 	            var user = User.getCurrent();
 
 	            ApiHelper.getIssueComments(this.model).then(function (comments) {
-	                _this9.$element.toggleClass('loading', false);
+	                _this10.$element.toggleClass('loading', false);
 
 	                $comments.children('.comment').remove();
 
@@ -11738,17 +11777,17 @@
 	                    var text = markdownToHtml(comment.text);
 	                    var isUser = collaborator.name == user.name;
 
-	                    return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.displayName || collaborator.name)), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this9.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
-	                        _this9.$element.toggleClass('loading', true);
+	                    return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.displayName || collaborator.name)), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this10.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
+	                        _this10.$element.toggleClass('loading', true);
 
-	                        comment.text = _this9.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
+	                        comment.text = _this10.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
 
-	                        _this9.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(markdownToHtml(comment.text) || '');
+	                        _this10.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(markdownToHtml(comment.text) || '');
 
-	                        ApiHelper.updateIssueComment(_this9.model, comment).then(function () {
-	                            _this9.$element.toggleClass('loading', false);
+	                        ApiHelper.updateIssueComment(_this10.model, comment).then(function () {
+	                            _this10.$element.toggleClass('loading', false);
 	                        });
-	                    }).blur(_this9.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
+	                    }).blur(_this10.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
 	                }));
 	            });
 	        }

@@ -1,5 +1,6 @@
 exclude: [ node_modules ]
 url: http://samoosa.rocks
+permalinks: pretty
 defaults:
   -
     scope:

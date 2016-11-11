@@ -581,7 +581,7 @@ class GitHubApi extends ApiHelper {
         let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
         let postData = {
             message: 'Added attachment "' + attachment.name + '"',
-            content: attachment.getBase64(),
+            content: attachment.base64,
             branch: 'samoosa-resources'
         };
 

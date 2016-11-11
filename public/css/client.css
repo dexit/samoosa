@@ -318,10 +318,8 @@ body, html {
     display: inline; }
   .issue-editor.expanded .header > button span.icon-open {
     display: none; }
-  .issue-editor.expanded .meta, .issue-editor.expanded .body, .issue-editor.expanded .operations, .issue-editor.expanded .comments, .issue-editor.expanded .add-comment {
+  .issue-editor.expanded .attachments, .issue-editor.expanded .meta, .issue-editor.expanded .body, .issue-editor.expanded .operations, .issue-editor.expanded .comments, .issue-editor.expanded .add-comment {
     display: block; }
-  .issue-editor.expanded .attachments {
-    display: flex; }
   .issue-editor.expanded.selected .multi-edit-notification {
     display: block;
     width: 100%;
@@ -517,7 +515,6 @@ body, html {
       min-height: 100px; }
   .issue-editor .attachments {
     padding: 0px 0px 0px 15px;
-    flex-wrap: wrap;
     position: relative; }
     .issue-editor .attachments label {
       flex-basis: 100%;
@@ -534,30 +531,20 @@ body, html {
       overflow: hidden;
       z-index: -100; }
     .issue-editor .attachments div.attachment {
-      width: 100%;
-      flex-basis: 100%;
       margin: 0px 15px 15px 0px;
       padding: 5px 10px;
       text-decoration: none;
       display: flex; }
       .issue-editor .attachments div.attachment label {
         flex-grow: 1; }
+        .issue-editor .attachments div.attachment label img {
+          max-width: 2rem;
+          max-height: 1rem;
+          transform: translateY(25%);
+          margin-right: 15px; }
       .issue-editor .attachments div.attachment .btn-download-attachment, .issue-editor .attachments div.attachment .btn-remove-attachment {
         margin-left: 15px;
         line-height: 2rem; }
-    .issue-editor .attachments button.attachment {
-      flex-grow: 1;
-      max-width: 64px;
-      height: 64px;
-      margin: 0px 15px 15px 0px;
-      display: flex;
-      flex-direction: vertical;
-      align-items: center;
-      justify-content: center;
-      padding: 5px; }
-      .issue-editor .attachments button.attachment img {
-        max-width: 100%;
-        max-height: 100%; }
   .issue-editor .comments {
     padding: 0px 15px 0px 15px; }
     .issue-editor .comments .comment {

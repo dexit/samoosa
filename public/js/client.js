@@ -5795,7 +5795,7 @@
 	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
 	            var postData = {
 	                message: 'Added attachment "' + attachment.name + '"',
-	                content: attachment.getBase64(),
+	                content: attachment.base64,
 	                branch: 'samoosa-resources'
 	            };
 
@@ -10392,17 +10392,36 @@
 	        this.headers = properties.headers;
 	        this.file = properties.file;
 	        this.isRedirect = properties.isRedirect || false;
-	        this.path = properties.path;
 	    }
 
 	    /**
-	     * Gets the timestamp
+	     * Check is attachment is an image
 	     *
-	     * @returns {Date} Timestamp
+	     * @returns {Boolean} Is image
 	     */
 
 
 	    _createClass(Attachment, [{
+	        key: 'isImage',
+	        value: function isImage() {
+	            if (this.headers) {
+	                return this.headers.indexOf('image/') > -1;
+	            }
+
+	            if (this.url) {
+	                return this.url.match(/\.(png|jpg|bmp|gif)/) != null;
+	            }
+
+	            return false;
+	        }
+
+	        /**
+	         * Gets the timestamp
+	         *
+	         * @returns {Date} Timestamp
+	         */
+
+	    }, {
 	        key: 'getTimestamp',
 	        value: function getTimestamp() {
 	            if (!this.timestamp) {
@@ -10451,21 +10470,13 @@
 	        /**
 	         * Gets the base64 string
 	         *
-	         * @returns {String} Name
+	         * @returns {String} Base64
 	         */
 
 	    }, {
 	        key: 'getBase64',
 	        value: function getBase64() {
-	            if (!this.file && !this.base64) {
-	                return null;
-	            }
-
-	            if (this.base64) {
-	                return this.base64;
-	            }
-
-	            return btoa(this.file);
+	            return this.base64;
 	        }
 	    }]);
 
@@ -11574,13 +11585,7 @@
 	                    var blob = items[i].getAsFile();
 	                    var file = null;
 
-	                    try {
-	                        file = new File([blob], 'pasted_' + new Date().toISOString() + '.png');
-	                    } catch (e) {
-	                        file = blob;
-	                    }
-
-	                    this.attachFile(file);
+	                    this.attachFile(blob);
 	                    return;
 	                }
 	            }
@@ -11613,8 +11618,6 @@
 
 	            var reader = new FileReader();
 
-	            spinner('Attaching "' + file.name + '"');
-
 	            // Event: On file loaded
 	            reader.onload = function (e) {
 	                var base64 = e.target.result;
@@ -11624,6 +11627,14 @@
 	                var headersMatch = headersRegex.exec(base64);
 
 	                base64 = base64.replace(headersRegex, '');
+
+	                if (file instanceof File == false) {
+	                    try {
+	                        file = new File([file], 'pasted_' + new Date().getTime() + '.png');
+	                    } catch (e) {}
+	                }
+
+	                spinner('Attaching "' + file.name + '"');
 
 	                var attachment = new Attachment({
 	                    name: file.name,
@@ -11740,15 +11751,9 @@
 	                $attachments.children('.attachment').remove();
 
 	                _.append($attachments, _.each(attachments, function (i, attachment) {
-	                    if (attachment.isRedirect) {
-	                        return _.div({ class: 'attachment' }, _.label(attachment.name), _.a({ class: 'btn-download-attachment fa fa-download', href: attachment.getURL(), target: '_blank' }), _.button({ class: 'btn-remove-attachment' }, _.span({ class: 'fa fa-trash' })).click(function () {
-	                            _this9.onClickRemoveAttachment(attachment);
-	                        }));
-	                    } else {
-	                        return _.button({ class: 'attachment', 'data-is-redirect': attachment.isRedirect, title: attachment.getName() }, _.img({ class: 'attachment-preview', src: attachment.getURL() })).click(function (e) {
-	                            _this9.onClickAttachment(attachment);
-	                        });
-	                    }
+	                    return _.div({ class: 'attachment' }, _.label({}, _.if(!attachment.isRedirect && attachment.isImage(), _.img({ src: attachment.getURL() })), attachment.name), _.a({ class: 'btn-download-attachment fa fa-download', href: attachment.getURL(), target: '_blank' }), _.button({ class: 'btn-remove-attachment' }, _.span({ class: 'fa fa-trash' })).click(function () {
+	                        _this9.onClickRemoveAttachment(attachment);
+	                    }));
 	                }));
 	            });
 	        }

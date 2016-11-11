@@ -11,7 +11,23 @@ class Attachment {
         this.headers = properties.headers;
         this.file = properties.file;
         this.isRedirect = properties.isRedirect || false;
-        this.path = properties.path;
+    }
+
+    /**
+     * Check is attachment is an image
+     *
+     * @returns {Boolean} Is image
+     */
+    isImage() {
+        if(this.headers) {
+            return this.headers.indexOf('image/') > -1; 
+        }
+
+        if(this.url) {
+            return this.url.match(/\.(png|jpg|bmp|gif)/) != null;
+        }
+
+        return false;
     }
 
     /**
@@ -58,14 +74,10 @@ class Attachment {
     /**
      * Gets the base64 string
      *
-     * @returns {String} Name
+     * @returns {String} Base64
      */
     getBase64() {
-        if(!this.file && !this.base64) { return null; }
-        
-        if(this.base64) { return this.base64; }
-        
-        return btoa(this.file);
+        return this.base64;
     }
 }
 

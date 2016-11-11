@@ -590,16 +590,8 @@ class IssueEditor extends View {
             if(IMAGE_MIME_REGEX.test(items[i].type)) {
                 let blob = items[i].getAsFile();
                 let file = null;
-               
-                try {
-                    file = new File([blob], 'pasted_' + new Date().toISOString() + '.png');
-                
-                } catch(e) {
-                    file = blob;
 
-                }
-
-                this.attachFile(file);
+                this.attachFile(blob);
                 return;
             }
         }
@@ -624,8 +616,6 @@ class IssueEditor extends View {
     attachFile(file) {
         let reader = new FileReader();
 
-        spinner('Attaching "' + file.name + '"');
-
         // Event: On file loaded
         reader.onload = (e) => {
             let base64 = e.target.result;
@@ -633,8 +623,19 @@ class IssueEditor extends View {
             // Remove headers
             let headersRegex = /data:(.+);base64,/;
             let headersMatch = headersRegex.exec(base64);
-
+    
             base64 = base64.replace(headersRegex, '');
+
+            if(file instanceof File == false) {
+                try {
+                    file = new File([file], 'pasted_' + new Date().getTime() + '.png');
+                
+                } catch(e) {
+
+                }
+            }
+
+            spinner('Attaching "' + file.name + '"');
 
             let attachment = new Attachment({
                 name: file.name,
@@ -744,21 +745,18 @@ class IssueEditor extends View {
 
             _.append($attachments,
                 _.each(attachments, (i, attachment) => {
-                    if(attachment.isRedirect) {
-                        return _.div({class: 'attachment'},
-                            _.label(attachment.name),
-                            _.a({class: 'btn-download-attachment fa fa-download', href: attachment.getURL(), target: '_blank'}),
-                            _.button({class: 'btn-remove-attachment'},
-                                _.span({class: 'fa fa-trash'})
-                            ).click(() => { this.onClickRemoveAttachment(attachment); })
-                        );
-                    
-                    } else {
-                        return _.button({class: 'attachment', 'data-is-redirect': attachment.isRedirect, title: attachment.getName()},
-                            _.img({class: 'attachment-preview', src: attachment.getURL()})
-                        ).click((e) => { this.onClickAttachment(attachment); });
-
-                    }
+                    return _.div({class: 'attachment'},
+                        _.label({},
+                            _.if(!attachment.isRedirect && attachment.isImage(),
+                                _.img({src: attachment.getURL()})
+                            ),
+                            attachment.name
+                        ),
+                        _.a({class: 'btn-download-attachment fa fa-download', href: attachment.getURL(), target: '_blank'}),
+                        _.button({class: 'btn-remove-attachment'},
+                            _.span({class: 'fa fa-trash'})
+                        ).click(() => { this.onClickRemoveAttachment(attachment); })
+                    );
                 })
             );
         });

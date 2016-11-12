@@ -36,7 +36,7 @@
             }
         }
 
-        &.project-list {
+        &.repository-list {
             .obscure {
                 max-width: 40rem;
 
@@ -44,12 +44,12 @@
                     overflow-y: hidden;
                     padding: 15px 0px;
 
-                    .project-list-actions {
+                    .repository-list-actions {
                         margin-bottom: 15px;
                         padding: 0px 15px;
                         display: flex;
 
-                        .project-list-action {
+                        .repository-list-action {
                             flex-shrink: 0;
 
                             &.search {
@@ -87,7 +87,7 @@
                         }
                     }
 
-                    .project-list-items {
+                    .repository-list-items {
                         padding: 15px 15px 0px 15px;
                         height: calc(100% - 30px);
                         overflow-y: auto;

@@ -864,18 +864,18 @@ body, html {
         margin: 0px; }
   .navbar.out.source-panel .obscure {
     max-width: 20rem; }
-  .navbar.out.project-list .obscure {
+  .navbar.out.repository-list .obscure {
     max-width: 40rem; }
-    .navbar.out.project-list .obscure > .content {
+    .navbar.out.repository-list .obscure > .content {
       overflow-y: hidden;
       padding: 15px 0px; }
-      .navbar.out.project-list .obscure > .content .project-list-actions {
+      .navbar.out.repository-list .obscure > .content .repository-list-actions {
         margin-bottom: 15px;
         padding: 0px 15px;
         display: flex; }
-        .navbar.out.project-list .obscure > .content .project-list-actions .project-list-action {
+        .navbar.out.repository-list .obscure > .content .repository-list-actions .repository-list-action {
           flex-shrink: 0; }
-          .navbar.out.project-list .obscure > .content .project-list-actions .project-list-action.search {
+          .navbar.out.repository-list .obscure > .content .repository-list-actions .repository-list-action.search {
             flex-shrink: 1;
             flex-grow: 1;
             width: 100%;
@@ -883,16 +883,16 @@ body, html {
             margin-bottom: 15px;
             padding: 0px 0px 0px 15px;
             position: relative; }
-            .navbar.out.project-list .obscure > .content .project-list-actions .project-list-action.search input {
+            .navbar.out.repository-list .obscure > .content .repository-list-actions .repository-list-action.search input {
               border-radius: 18px;
               padding: 0px 15px;
               line-height: 36px;
               display: block;
               width: 100%;
               border: 0px; }
-              .navbar.out.project-list .obscure > .content .project-list-actions .project-list-action.search input, .navbar.out.project-list .obscure > .content .project-list-actions .project-list-action.search input:focus {
+              .navbar.out.repository-list .obscure > .content .repository-list-actions .repository-list-action.search input, .navbar.out.repository-list .obscure > .content .repository-list-actions .repository-list-action.search input:focus {
                 outline: none; }
-            .navbar.out.project-list .obscure > .content .project-list-actions .project-list-action.search .fa {
+            .navbar.out.repository-list .obscure > .content .repository-list-actions .repository-list-action.search .fa {
               position: absolute;
               right: 15px;
               top: 60%;
@@ -900,7 +900,7 @@ body, html {
               color: #000;
               opacity: 0.5;
               font-size: 18px; }
-      .navbar.out.project-list .obscure > .content .project-list-items {
+      .navbar.out.repository-list .obscure > .content .repository-list-items {
         padding: 15px 15px 0px 15px;
         height: calc(100% - 30px);
         overflow-y: auto; }
@@ -995,21 +995,28 @@ body, html {
         transition: color 0.25s ease;
         transition-delay: 0.2s; }
 
-.project-bar {
-  padding: 18px 15px;
+.repository-bar {
+  padding: 0px 15px;
   height: 56px; }
-  .project-bar h1, .project-bar h2, .project-bar h3, .project-bar h4, .project-bar p {
-    margin: 0px 15px 0px 0px;
+  .repository-bar h1, .repository-bar h2, .repository-bar h3, .repository-bar h4, .repository-bar p {
+    padding: 0px 25px 0px 0px;
+    margin: 0px;
     display: inline-block;
-    position: relative; }
-    .project-bar h1 .btn-edit, .project-bar h2 .btn-edit, .project-bar h3 .btn-edit, .project-bar h4 .btn-edit, .project-bar p .btn-edit {
+    position: relative;
+    line-height: 56px; }
+    .repository-bar h1:hover .btn-edit, .repository-bar h2:hover .btn-edit, .repository-bar h3:hover .btn-edit, .repository-bar h4:hover .btn-edit, .repository-bar p:hover .btn-edit {
+      display: block; }
+    .repository-bar h1 .btn-edit, .repository-bar h2 .btn-edit, .repository-bar h3 .btn-edit, .repository-bar h4 .btn-edit, .repository-bar p .btn-edit {
+      display: none;
       position: absolute;
-      top: 0px;
-      left: 0px;
-      height: 100%;
-      width: 100%;
-      cursor: text; }
-    .project-bar h1 .edit, .project-bar h2 .edit, .project-bar h3 .edit, .project-bar h4 .edit, .project-bar p .edit {
+      top: 50%;
+      transform: translateY(-50%);
+      right: 0px;
+      height: 1em;
+      padding: 0px 5px;
+      cursor: pointer;
+      font-size: 12px; }
+    .repository-bar h1 .edit, .repository-bar h2 .edit, .repository-bar h3 .edit, .repository-bar h4 .edit, .repository-bar p .edit {
       font-size: inherit;
       color: inherit;
       line-height: 18px;
@@ -1017,7 +1024,7 @@ body, html {
       padding: 0px;
       margin: 0px;
       border: 0px; }
-      .project-bar h1 .edit, .project-bar h1 .edit:focus, .project-bar h2 .edit, .project-bar h2 .edit:focus, .project-bar h3 .edit, .project-bar h3 .edit:focus, .project-bar h4 .edit, .project-bar h4 .edit:focus, .project-bar p .edit, .project-bar p .edit:focus {
+      .repository-bar h1 .edit, .repository-bar h1 .edit:focus, .repository-bar h2 .edit, .repository-bar h2 .edit:focus, .repository-bar h3 .edit, .repository-bar h3 .edit:focus, .repository-bar h4 .edit, .repository-bar h4 .edit:focus, .repository-bar p .edit, .repository-bar p .edit:focus {
         outline: none; }
 
 .source-panel .obscure .content .btn {
@@ -1212,7 +1219,7 @@ body > .plan-item-editor {
   transition: opacity 0.25s ease;
   opacity: 1; }
 
-.project-editor {
+.repository-editor {
   padding: 15px;
   border: 1px solid #e0e0e0;
   border-radius: 2px;
@@ -1220,12 +1227,12 @@ body > .plan-item-editor {
   margin-bottom: 15px;
   background-color: #fff;
   cursor: pointer; }
-  .project-editor:hover {
+  .repository-editor:hover {
     outline: 2px solid #2196f3; }
-  .project-editor .content .header h4 {
+  .repository-editor .content .header h4 {
     font-weight: bold;
     margin-top: 0px; }
-  .project-editor .content .owner {
+  .repository-editor .content .owner {
     float: right;
     font-size: 12px;
     text-align: right; }
@@ -1416,22 +1423,24 @@ a {
   .spinner-backdrop .spinner-container .spinner-icon {
     color: #E70D3B; }
 
-.project-bar {
+.repository-bar {
   background-color: #21303B;
   color: #fff; }
+  .repository-bar .btn-edit:hover {
+    color: #E70D3B; }
 
 .navbar, .navbar .obscure {
   background-color: #21303B;
   color: #fff; }
-  .navbar .content .project-editor, .navbar .obscure .content .project-editor {
+  .navbar .content .repository-editor, .navbar .obscure .content .repository-editor {
     background-color: #171e23;
     border: 0px;
     box-shadow: none; }
-    .navbar .content .project-editor:hover, .navbar .obscure .content .project-editor:hover {
+    .navbar .content .repository-editor:hover, .navbar .obscure .content .repository-editor:hover {
       outline-color: #E70D3B; }
-    .navbar .content .project-editor .content .header h4, .navbar .obscure .content .project-editor .content .header h4 {
+    .navbar .content .repository-editor .content .header h4, .navbar .obscure .content .repository-editor .content .header h4 {
       font-weight: normal; }
-    .navbar .content .project-editor .content .owner, .navbar .obscure .content .project-editor .content .owner {
+    .navbar .content .repository-editor .content .owner, .navbar .obscure .content .repository-editor .content .owner {
       color: #5b84a2; }
 
 .navbar.out button.active.handler:before {

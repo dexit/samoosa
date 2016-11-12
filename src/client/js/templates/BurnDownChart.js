@@ -5,7 +5,7 @@ module.exports = function render() {
 
     if(!milestone) {
         return _.div({class: 'burndown-chart analytics-body'},
-            _.h4('There are no milestones defined in this project')
+            _.h4('There are no milestones defined in this repository')
         );
     }
 

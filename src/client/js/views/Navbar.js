@@ -28,9 +28,9 @@ class Navbar extends View {
         });
     
         links.push({
-            title: 'Projects',
-            url: '/projects/',
-            handler: this.toggleProjectsList,
+            title: 'Repositories',
+            url: '/repositories/',
+            handler: this.toggleRepositoriesList,
             icon: 'folder'
         });
         
@@ -75,7 +75,7 @@ class Navbar extends View {
      * Cleans up extra added classes
      */
     cleanUpClasses() {
-        this.$element.toggleClass('project-list', false);
+        this.$element.toggleClass('repository-list', false);
         this.$element.toggleClass('source-panel', false);
         this.$element.toggleClass('about-panel', false);
     }
@@ -157,12 +157,12 @@ class Navbar extends View {
     }
 
     /**
-     * Toggles the projects list
+     * Toggles the repositories list
      */
-    toggleProjectsList(isActive, overrideUrl) {
-        this.togglePanel('/projects/', 'project-list', ($content) => {
-            let filterProjects = (query) => {
-                $content.find('.project-editor').each((i, element) => {
+    toggleRepositoriesList(isActive, overrideUrl) {
+        this.togglePanel('/repositories/', 'repository-list', ($content) => {
+            let filterRepositories = (query) => {
+                $content.find('.repository-editor').each((i, element) => {
                     let title = $(element).find('.header > h4').text() || '';
                     let isMatch = title.toLowerCase().indexOf(query.toLowerCase()) > -1;
 
@@ -170,35 +170,37 @@ class Navbar extends View {
                 });       
             };
 
-            ApiHelper.getResource('projects', true)
+            ApiHelper.getResource('repositories', true)
             .then(() => {
                 _.append($content.empty(),
-                    _.div({class: 'project-list-actions'},
-                        _.button({class: 'btn project-list-action'},
-                            'New project',
+                    _.div({class: 'repository-list-actions'},
+                        _.button({class: 'btn repository-list-action'},
+                            'New repository',
                             _.span({class: 'fa fa-plus'})
                         ).on('click', (e) => {
-                            let name = prompt('Please input the new project name');
+                            let name = prompt('Please input the new repository name');
 
-                            ResourceHelper.createResource('projects', name)
-                            .then((project) => {
-                                location = '/#/' + project.owner + '/' + project.title;
+                            if(!name) { return; }
+
+                            ResourceHelper.addResource('repositories', name)
+                            .then((repository) => {
+                                location = '/#/' + repository.owner + '/' + repository.title;
                             });
                         }),
-                        _.div({class: 'project-list-action search'},
-                            _.input({type: 'text', placeholder: 'Search in projects...'})
+                        _.div({class: 'repository-list-action search'},
+                            _.input({type: 'text', placeholder: 'Search in repositories...'})
                                 .on('change keyup paste', (e) => {
                                     let query = e.target.value;
 
-                                    filterProjects(query);
+                                    filterRepositories(query);
                                 }),
                             _.span({class: 'fa fa-search'})
                         )
                     ),
-                    _.div({class: 'project-list-items'},
-                        _.each(window.resources.projects, (i, project) => {
-                            return new ProjectEditor({
-                                model: project,
+                    _.div({class: 'repository-list-items'},
+                        _.each(window.resources.repositories, (i, repository) => {
+                            return new RepositoryEditor({
+                                model: repository,
                                 overrideUrl: overrideUrl
                             }).$element;
                         })
@@ -216,11 +218,11 @@ class Navbar extends View {
      * @returns {String} url
      */
     getFullUrl(url) {
-        // Prepend project
-        url = '/' + ApiHelper.getProjectName() + url;
+        // Prepend repository
+        url = '/' + ApiHelper.getRepositoryName() + url;
         
         // Prepend user
-        url = '/' + ApiHelper.getProjectOwner() + url;
+        url = '/' + ApiHelper.getRepositoryOwner() + url;
         
         return url;
     }
@@ -234,8 +236,8 @@ class Navbar extends View {
         this.cleanUpClasses();
         this.$element.find('.obscure .content').empty();
         
-        if(!ApiHelper.getProjectName()) {
-            this.toggleProjectsList(true, url);
+        if(!ApiHelper.getRepositoryName()) {
+            this.toggleRepositoriesList(true, url);
 
         } else {
             url = this.getFullUrl(url);
@@ -257,7 +259,7 @@ class Navbar extends View {
         if(Router.url) {
             let url = Router.url
                 .replace('/' + ApiHelper.getUserName(), '')
-                .replace('/' + ApiHelper.getProjectName(), '');
+                .replace('/' + ApiHelper.getRepositoryName(), '');
 
             if(Router.params.resource) {
                 url = url.replace(Router.params.resource, '');

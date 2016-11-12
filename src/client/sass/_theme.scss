@@ -210,9 +210,15 @@ a {
     }
 }
 
-.project-bar {
+.repository-bar {
     background-color: $teal-dark;
     color: $white;
+
+    .btn-edit {
+        &:hover {
+            color: $pink-medium;
+        }
+    }
 }
 
 .navbar {
@@ -221,7 +227,7 @@ a {
         color: $white;
 
         .content {
-            .project-editor {
+            .repository-editor {
                 background-color: $teal-darker;
                 border: 0px;
                 box-shadow: none;

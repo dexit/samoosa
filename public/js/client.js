@@ -98,19 +98,19 @@
 	window.Issue = __webpack_require__(26);
 	window.Milestone = __webpack_require__(27);
 	window.User = __webpack_require__(28);
-	window.Project = __webpack_require__(29);
+	window.Repository = __webpack_require__(29);
 	window.Attachment = __webpack_require__(30);
 	window.Organization = __webpack_require__(31);
 
 	// Views
 	window.Navbar = __webpack_require__(32);
-	window.ProjectBar = __webpack_require__(34);
+	window.RepositoryBar = __webpack_require__(34);
 	window.IssueEditor = __webpack_require__(36);
 	window.MilestoneEditor = __webpack_require__(38);
 	window.ResourceEditor = __webpack_require__(40);
 	window.PlanItemEditor = __webpack_require__(42);
 	window.PlanEditor = __webpack_require__(44);
-	window.ProjectEditor = __webpack_require__(46);
+	window.RepositoryEditor = __webpack_require__(46);
 	window.FilterEditor = __webpack_require__(48);
 	window.BurnDownChart = __webpack_require__(50);
 
@@ -118,7 +118,7 @@
 	__webpack_require__(52);
 
 	// Title
-	$('head title').html((Router.params.project ? Router.params.project + ' - ' : '') + 'Samoosa');
+	$('head title').html((Router.params.repository ? Router.params.repository + ' - ' : '') + 'Samoosa');
 
 /***/ },
 /* 1 */
@@ -4654,9 +4654,9 @@
 	        value: function set(type, key, value, stringify) {
 	            var prefix = 'settings';
 
-	            // Exceptions for types not managed on a project basis
-	            if (type != 'projects') {
-	                prefix = localStorage.getItem('settings:projects:current') + prefix + ':';
+	            // Exceptions for types not managed on a repository basis
+	            if (type != 'repositories') {
+	                prefix = localStorage.getItem('settings:repositories:current') + prefix + ':';
 	            }
 
 	            if (stringify) {
@@ -4682,9 +4682,9 @@
 	        value: function get(type, key, defaultValue, parse) {
 	            var prefix = 'settings';
 
-	            // Exceptions for types not managed on a project basis
-	            if (type != 'projects') {
-	                prefix = localStorage.getItem('settings:projects:current') + prefix + ':';
+	            // Exceptions for types not managed on a repository basis
+	            if (type != 'repositories') {
+	                prefix = localStorage.getItem('settings:repositories:current') + prefix + ':';
 	            }
 
 	            var result = localStorage.getItem(prefix + ':' + type + ':' + key);
@@ -5398,18 +5398,18 @@
 	        }
 
 	        /**
-	         * Gets projects
+	         * Gets repositories
 	         *
 	         * @returns {Promise} promise
 	         */
 
 	    }, {
-	        key: 'getProjects',
-	        value: function getProjects() {
+	        key: 'getRepositories',
+	        value: function getRepositories() {
 	            var _this7 = this;
 
 	            return this.get('/user/repos').then(function (repos) {
-	                _this7.processProjects(repos);
+	                _this7.processRepositories(repos);
 
 	                return Promise.resolve();
 	            });
@@ -5430,7 +5430,7 @@
 	                return Promise.resolve([]);
 	            }
 
-	            return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators').then(function (collaborators) {
+	            return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/collaborators').then(function (collaborators) {
 	                _this8.processCollaborators(collaborators);
 	            });
 	        }
@@ -5446,7 +5446,7 @@
 	        value: function getIssues() {
 	            var _this9 = this;
 
-	            return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', 'state=all', true).then(function (issues) {
+	            return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues', 'state=all', true).then(function (issues) {
 	                _this9.processIssues(issues);
 
 	                return Promise.resolve();
@@ -5513,7 +5513,7 @@
 	            var _this10 = this;
 
 	            if (!labelCache) {
-	                return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels').then(function (labels) {
+	                return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels').then(function (labels) {
 	                    labelCache = labels || [];
 
 	                    return _this10.ensureMandatoryLabels();
@@ -5572,7 +5572,7 @@
 	    }, {
 	        key: 'getIssueAttachments',
 	        value: function getIssueAttachments(issue) {
-	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id;
+	            var apiUrl = '/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/contents/issueAttachments/' + issue.id;
 
 	            return this.get(apiUrl, 'ref=samoosa-resources').then(function (response) {
 	                if (!Array.isArray(response)) {
@@ -5684,7 +5684,7 @@
 	        value: function getMilestones() {
 	            var _this16 = this;
 
-	            return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones').then(function (milestones) {
+	            return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones').then(function (milestones) {
 	                _this16.processMilestones(milestones);
 
 	                return Promise.resolve();
@@ -5714,7 +5714,7 @@
 	                    return Promise.resolve(issue);
 	                });
 	            } else {
-	                return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue)).then(function (gitHubIssue) {
+	                return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues', this.convertIssue(issue)).then(function (gitHubIssue) {
 	                    issue.id = gitHubIssue.number;
 
 	                    return Promise.resolve(issue);
@@ -5733,7 +5733,7 @@
 	    }, {
 	        key: 'addCollaborator',
 	        value: function addCollaborator(collaborator) {
-	            return this.put('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + collaborator);
+	            return this.put('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/collaborators/' + collaborator);
 	        }
 
 	        /**
@@ -5748,7 +5748,7 @@
 	    }, {
 	        key: 'addLabel',
 	        value: function addLabel(name, color) {
-	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
+	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
 	                name: name,
 	                color: color || 'ffffff'
 	            });
@@ -5765,7 +5765,7 @@
 	    }, {
 	        key: 'addIssueType',
 	        value: function addIssueType(type) {
-	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
+	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
 	                name: 'type:' + type,
 	                color: 'ffffff'
 	            }).then(function () {
@@ -5784,7 +5784,7 @@
 	    }, {
 	        key: 'addIssuePriority',
 	        value: function addIssuePriority(priority) {
-	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
+	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
 	                name: 'priority:' + priority,
 	                color: 'ffffff'
 	            }).then(function () {
@@ -5803,7 +5803,7 @@
 	    }, {
 	        key: 'addIssueEstimate',
 	        value: function addIssueEstimate(estimate) {
-	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
+	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
 	                name: 'estimate:' + estimate,
 	                color: 'ffffff'
 	            }).then(function () {
@@ -5822,7 +5822,7 @@
 	    }, {
 	        key: 'addIssueColumn',
 	        value: function addIssueColumn(column) {
-	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
+	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
 	                name: 'column:' + column,
 	                color: 'ffffff'
 	            }).then(function () {
@@ -5842,7 +5842,7 @@
 	    }, {
 	        key: 'addIssueAttachment',
 	        value: function addIssueAttachment(issue, attachment) {
-	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
+	            var apiUrl = '/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
 	            var postData = {
 	                message: 'Added attachment "' + attachment.name + '"',
 	                content: attachment.base64,
@@ -5879,7 +5879,7 @@
 	                milestone = new Milestone(milestone);
 	            }
 
-	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones', this.convertMilestone(milestone)).then(function (gitHubMilestone) {
+	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones', this.convertMilestone(milestone)).then(function (gitHubMilestone) {
 	                milestone.id = gitHubMilestone.number;
 
 	                return Promise.resolve(milestone);
@@ -5897,7 +5897,7 @@
 	    }, {
 	        key: 'addVersion',
 	        value: function addVersion(version) {
-	            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
+	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
 	                name: 'version:' + version,
 	                color: 'ffffff'
 	            }).then(function () {
@@ -5985,7 +5985,7 @@
 	    }, {
 	        key: 'removeCollaborator',
 	        value: function removeCollaborator(index) {
-	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index]);
+	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/collaborators/' + window.resources.collaborators[index]);
 	        }
 
 	        /**
@@ -5999,7 +5999,7 @@
 	    }, {
 	        key: 'removeIssueType',
 	        value: function removeIssueType(index) {
-	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/type:' + window.resources.issueTypes[index]);
+	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/type:' + window.resources.issueTypes[index]);
 	        }
 
 	        /**
@@ -6013,7 +6013,7 @@
 	    }, {
 	        key: 'removeIssuePriority',
 	        value: function removeIssuePriority(index) {
-	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index]);
+	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/priority:' + window.resources.issuePriorities[index]);
 	        }
 
 	        /**
@@ -6027,7 +6027,7 @@
 	    }, {
 	        key: 'removeIssueEstimate',
 	        value: function removeIssueEstimate(index) {
-	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index]);
+	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/estimate:' + window.resources.issueEstimates[index]);
 	        }
 
 	        /**
@@ -6041,7 +6041,7 @@
 	    }, {
 	        key: 'removeIssueColumn',
 	        value: function removeIssueColumn(index) {
-	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index]);
+	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/column:' + window.resources.issueColumns[index]);
 	        }
 
 	        /**
@@ -6056,7 +6056,7 @@
 	    }, {
 	        key: 'removeIssueAttachment',
 	        value: function removeIssueAttachment(issue, attachment) {
-	            var apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
+	            var apiUrl = '/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
 	            var deleteData = {
 	                message: 'Removed attachment "' + attachment.getName() + '"',
 	                sha: attachment.sha,
@@ -6082,7 +6082,7 @@
 	            if (!milestone) {
 	                return Promise.reject(new Error('Milestone at index "' + index + '" not found'));
 	            } else {
-	                return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones/' + milestone.id);
+	                return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones/' + milestone.id);
 	            }
 	        }
 
@@ -6097,24 +6097,24 @@
 	    }, {
 	        key: 'removeVersion',
 	        value: function removeVersion(index) {
-	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/version:' + window.resources.versions[index]);
+	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/version:' + window.resources.versions[index]);
 	        }
 
 	        // ----------
 	        // Resource updaters
 	        // ----------
 	        /**
-	         * Update project
+	         * Update repository
 	         *
-	         * @param {Project} project
+	         * @param {Repository} repository
 	         *
 	         * @returns {Promise} Promise
 	         */
 
 	    }, {
-	        key: 'updateProject',
-	        value: function updateProject(project, previousName) {
-	            return this.patch('/repos/' + project.owner + '/' + previousName, this.convertProject(project));
+	        key: 'updateRepository',
+	        value: function updateRepository(repository, previousName) {
+	            return this.patch('/repos/' + repository.owner + '/' + previousName, this.convertRepository(repository));
 	        }
 
 	        /**
@@ -6126,7 +6126,7 @@
 	    }, {
 	        key: 'updateIssue',
 	        value: function updateIssue(issue) {
-	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id, this.convertIssue(issue));
+	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id, this.convertIssue(issue));
 	        }
 
 	        /**
@@ -6140,7 +6140,7 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones/' + milestone.id, this.convertMilestone(milestone));
+	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones/' + milestone.id, this.convertMilestone(milestone));
 	        }
 
 	        /**
@@ -6155,7 +6155,7 @@
 	    }, {
 	        key: 'updateIssueType',
 	        value: function updateIssueType(type, previousName) {
-	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/type:' + previousName, {
+	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/type:' + previousName, {
 	                name: 'type:' + type,
 	                color: 'ffffff'
 	            });
@@ -6173,7 +6173,7 @@
 	    }, {
 	        key: 'updateIssuePriority',
 	        value: function updateIssuePriority(priority, previousName) {
-	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/priority:' + previousName, {
+	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/priority:' + previousName, {
 	                name: 'priority:' + priority,
 	                color: 'ffffff'
 	            });
@@ -6191,7 +6191,7 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(estimate, previousName) {
-	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/estimate:' + previousName, {
+	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/estimate:' + previousName, {
 	                name: 'estimate:' + estimate,
 	                color: 'ffffff'
 	            });
@@ -6209,7 +6209,7 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/column:' + previousName, {
+	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/column:' + previousName, {
 	                name: 'column:' + column,
 	                color: 'ffffff'
 	            });
@@ -6227,7 +6227,7 @@
 	    }, {
 	        key: 'updateVersion',
 	        value: function updateVersion(version, previousName) {
-	            return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/version:' + previousName, {
+	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/version:' + previousName, {
 	                name: 'version:' + version,
 	                color: 'ffffff'
 	            });
@@ -6237,26 +6237,26 @@
 	        // Resource processing methods
 	        // ----------
 	        /**
-	         * Process projects
+	         * Process repositories
 	         *
-	         * @param {Array} projects
+	         * @param {Array} repositories
 	         */
 
 	    }, {
-	        key: 'processProjects',
-	        value: function processProjects(projects) {
-	            window.resources.projects = [];
+	        key: 'processRepositories',
+	        value: function processRepositories(repositories) {
+	            window.resources.repositories = [];
 
-	            for (var i in projects) {
-	                var project = {
+	            for (var i in repositories) {
+	                var repository = {
 	                    index: i,
-	                    title: projects[i].name,
-	                    description: projects[i].description,
-	                    cloneUrl: projects[i].clone_url,
-	                    owner: projects[i].owner.login
+	                    title: repositories[i].name,
+	                    description: repositories[i].description,
+	                    cloneUrl: repositories[i].clone_url,
+	                    owner: repositories[i].owner.login
 	                };
 
-	                window.resources.projects[i] = project;
+	                window.resources.repositories[i] = repository;
 	            }
 	        }
 
@@ -6693,21 +6693,21 @@
 	        }
 
 	        /**
-	         * Convert project model to GitHub schema
+	         * Convert repository model to GitHub schema
 	         *
-	         * @param {Project} project
+	         * @param {Repository} repository
 	         */
 
 	    }, {
-	        key: 'convertProject',
-	        value: function convertProject(project) {
-	            var gitHubProject = {
-	                name: project.title,
-	                description: project.description,
+	        key: 'convertRepository',
+	        value: function convertRepository(repository) {
+	            var gitHubRepository = {
+	                name: repository.title,
+	                description: repository.description,
 	                has_issues: true
 	            };
 
-	            return gitHubProject;
+	            return gitHubRepository;
 	        }
 
 	        /**
@@ -6821,7 +6821,7 @@
 	            var _this18 = this;
 
 	            return new Promise(function (callback) {
-	                _this18.post('/repos/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/issues/' + issue.id + '/comments', {
+	                _this18.post('/repos/' + _this18.getRepositoryOwner() + '/' + _this18.getRepositoryName() + '/issues/' + issue.id + '/comments', {
 	                    body: text
 	                }).then(function () {
 	                    callback();
@@ -6842,7 +6842,7 @@
 	            var _this19 = this;
 
 	            return new Promise(function (callback) {
-	                _this19.patch('/repos/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/issues/comments/' + comment.index, {
+	                _this19.patch('/repos/' + _this19.getRepositoryOwner() + '/' + _this19.getRepositoryName() + '/issues/comments/' + comment.index, {
 	                    body: comment.text
 	                }).then(function () {
 	                    callback();
@@ -6860,7 +6860,7 @@
 	    }, {
 	        key: 'removeIssueComment',
 	        value: function removeIssueComment(issue, comment) {
-	            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/comments/' + comment.index);
+	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/comments/' + comment.index);
 	        }
 
 	        /**
@@ -6877,7 +6877,7 @@
 	            var _this20 = this;
 
 	            return new Promise(function (callback) {
-	                _this20.get('/repos/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
+	                _this20.get('/repos/' + _this20.getRepositoryOwner() + '/' + _this20.getRepositoryName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
 	                    var comments = [];
 
 	                    var _iteratorNormalCompletion11 = true;
@@ -7046,39 +7046,39 @@
 	        }
 
 	        /**
-	         * Gets project owner
+	         * Gets repository owner
 	         *
 	         * @returns {String} Owner
 	         */
 
 	    }, {
-	        key: 'getProjectOwner',
-	        value: function getProjectOwner() {
-	            var project = Project.getCurrent();
+	        key: 'getRepositoryOwner',
+	        value: function getRepositoryOwner() {
+	            var repository = Repository.getCurrent();
 
-	            if (!project) {
+	            if (!repository) {
 	                return '';
 	            }
 
-	            return project.owner;
+	            return repository.owner;
 	        }
 
 	        /**
-	         * Gets project name
+	         * Gets repository name
 	         *
-	         * @returns {String} Project name
+	         * @returns {String} Repository name
 	         */
 
 	    }, {
-	        key: 'getProjectName',
-	        value: function getProjectName() {
-	            var project = Project.getCurrent();
+	        key: 'getRepositoryName',
+	        value: function getRepositoryName() {
+	            var repository = Repository.getCurrent();
 
-	            if (!project) {
+	            if (!repository) {
 	                return '';
 	            }
 
-	            return project.title;
+	            return repository.title;
 	        }
 
 	        /**
@@ -7235,15 +7235,15 @@
 	        }
 
 	        /**
-	         * Gets projects
+	         * Gets repositories
 	         *
 	         * @returns {Promise} promise
 	         */
 
 	    }, {
-	        key: 'getProjects',
-	        value: function getProjects() {
-	            window.resources.projects = [];
+	        key: 'getRepositories',
+	        value: function getRepositories() {
+	            window.resources.repositories = [];
 
 	            return Promise.resolve();
 	        }
@@ -7616,17 +7616,17 @@
 	        }
 
 	        /**
-	         * Updates project
+	         * Updates repository
 	         *
 	         * @param {Number} index
-	         * @param {Object} project
+	         * @param {Object} repository
 	         *
 	         * @returns {Promise} promise
 	         */
 
 	    }, {
-	        key: 'updateProject',
-	        value: function updateProject(index, project) {
+	        key: 'updateRepository',
+	        value: function updateRepository(index, repository) {
 	            return Promise.resolve();
 	        }
 
@@ -7781,8 +7781,8 @@
 	                case 'issues':
 	                    return this.removeIssue(index);
 
-	                case 'projects':
-	                    return this.removeProject(index);
+	                case 'repositories':
+	                    return this.removeRepository(index);
 
 	                default:
 	                    return Promise.reject(new Error('Resource "' + resource + '" is invalid for DELETE'));
@@ -7828,8 +7828,8 @@
 	                case 'issues':
 	                    return this.addIssue(item);
 
-	                case 'projects':
-	                    return this.addProject(item);
+	                case 'repositories':
+	                    return this.addRepository(item);
 
 	                default:
 	                    return Promise.reject(new Error('Resource "' + resource + '" is invalid for PUT'));
@@ -7873,8 +7873,8 @@
 	                case 'issues':
 	                    return this.updateIssue(item);
 
-	                case 'projects':
-	                    return this.updateProject(item);
+	                case 'repositories':
+	                    return this.updateRepository(item);
 
 	                default:
 	                    return Promise.reject(new Error('Resource "' + resource + '" is invalid for POST'));
@@ -7931,8 +7931,8 @@
 	                case 'issues':
 	                    return this.getIssues();
 
-	                case 'projects':
-	                    return this.getProjects();
+	                case 'repositories':
+	                    return this.getRepositories();
 
 	                default:
 	                    return Promise.reject(new Error('Resource "' + resource + '" is invalid for GET'));
@@ -7965,7 +7965,7 @@
 	                }
 	            };
 
-	            return get('projects').then(function () {
+	            return get('repositories').then(function () {
 	                return get('issueTypes');
 	            }).then(function () {
 	                return get('issuePriorities');
@@ -8261,7 +8261,7 @@
 	                    type: 'POST',
 	                    contentType: data instanceof FormData ? false : undefined,
 	                    data: data,
-	                    processData: false,
+	                    processData: data instanceof FormData == false,
 	                    cache: false,
 	                    success: function success(result) {
 	                        resolve(result);
@@ -8304,7 +8304,6 @@
 	                $.ajax({
 	                    url: 'https://api.bitbucket.org/' + url,
 	                    type: 'PUT',
-	                    contentType: data instanceof FormData ? 'multipart/form-data' : undefined,
 	                    data: data,
 	                    cache: false,
 	                    success: function success(result) {
@@ -8411,19 +8410,19 @@
 	        }
 
 	        /**
-	         * Gets projects
+	         * Gets repos
 	         *
 	         * @returns {Promise} promise
 	         */
 
 	    }, {
-	        key: 'getProjects',
-	        value: function getProjects() {
+	        key: 'getRepositories',
+	        value: function getRepositories() {
 	            var _this7 = this;
 
 	            return new Promise(function (resolve, reject) {
 	                _this7.get('1.0/user/repositories').then(function (repositories) {
-	                    _this7.processProjects(repositories);
+	                    _this7.processRepositories(repositories);
 
 	                    resolve();
 	                }).catch(reject);
@@ -8445,7 +8444,7 @@
 	                return Promise.resolve([]);
 	            }
 
-	            return this.get('2.0/teams/' + this.getProjectOwner() + '/members').then(function (res) {
+	            return this.get('2.0/teams/' + this.getRepositoryOwner() + '/members').then(function (res) {
 	                if (Array.isArray(res)) {
 	                    res = res[0];
 	                }
@@ -8477,7 +8476,7 @@
 	        value: function getIssues() {
 	            var _this9 = this;
 
-	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', 'issues', false).then(function (res) {
+	            return this.get('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues', 'issues', false).then(function (res) {
 	                _this9.processIssues(res);
 
 	                return Promise.resolve();
@@ -8525,7 +8524,7 @@
 	        value: function getIssueAttachments(issue) {
 	            var _this10 = this;
 
-	            return this.get('2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments', 'values').then(function (response) {
+	            return this.get('2.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/attachments', 'values').then(function (response) {
 	                if (!Array.isArray(response)) {
 	                    return Promise.reject(new Error('Response of issue attachments was not an array'));
 	                }
@@ -8544,7 +8543,7 @@
 	                            continue;
 	                        }
 
-	                        var apiUrl = 'https://api.bitbucket.org/2.0/repositories/' + _this10.getProjectOwner() + '/' + _this10.getProjectName() + '/issues/' + issue.id + '/attachments/' + obj.name;
+	                        var apiUrl = 'https://api.bitbucket.org/2.0/repositories/' + _this10.getRepositoryOwner() + '/' + _this10.getRepositoryName() + '/issues/' + issue.id + '/attachments/' + obj.name;
 
 	                        var attachment = new Attachment({
 	                            name: obj.name,
@@ -8616,7 +8615,7 @@
 	        value: function getVersions() {
 	            var _this11 = this;
 
-	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions').then(function (versions) {
+	            return this.get('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/versions').then(function (versions) {
 	                _this11.processVersions(versions);
 
 	                return Promise.resolve();
@@ -8634,7 +8633,7 @@
 	        value: function getMilestones() {
 	            var _this12 = this;
 
-	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones').then(function (milestones) {
+	            return this.get('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/milestones').then(function (milestones) {
 	                _this12.processMilestones(milestones);
 
 	                return Promise.resolve();
@@ -8655,7 +8654,7 @@
 	    }, {
 	        key: 'addIssue',
 	        value: function addIssue(issue) {
-	            return this.post('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue)).then(function (bitBucketIssue) {
+	            return this.post('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues', this.convertIssue(issue)).then(function (bitBucketIssue) {
 	                issue.id = bitBucketIssue.local_id;
 
 	                return Promise.resolve(new Issue(issue));
@@ -8676,7 +8675,7 @@
 	            var _this13 = this;
 
 	            return new Promise(function (callback) {
-	                _this13.put('1.0/repositories/' + _this13.getProjectOwner() + '/' + _this13.getProjectName() + '/collaborators/' + collaborator).then(function () {
+	                _this13.put('1.0/repositories/' + _this13.getRepositoryOwner() + '/' + _this13.getRepositoryName() + '/collaborators/' + collaborator).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8696,7 +8695,7 @@
 	            var _this14 = this;
 
 	            return new Promise(function (callback) {
-	                _this14.post('1.0/repositories/' + _this14.getProjectOwner() + '/' + _this14.getProjectName() + '/labels', {
+	                _this14.post('1.0/repositories/' + _this14.getRepositoryOwner() + '/' + _this14.getRepositoryName() + '/labels', {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8719,7 +8718,7 @@
 	            var _this15 = this;
 
 	            return new Promise(function (callback) {
-	                _this15.post('1.0/repositories/' + _this15.getProjectOwner() + '/' + _this15.getProjectName() + '/labels', {
+	                _this15.post('1.0/repositories/' + _this15.getRepositoryOwner() + '/' + _this15.getRepositoryName() + '/labels', {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8742,7 +8741,7 @@
 	            var _this16 = this;
 
 	            return new Promise(function (callback) {
-	                _this16.post('1.0/repositories/' + _this16.getProjectOwner() + '/' + _this16.getProjectName() + '/labels', {
+	                _this16.post('1.0/repositories/' + _this16.getRepositoryOwner() + '/' + _this16.getRepositoryName() + '/labels', {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8765,7 +8764,7 @@
 	            var _this17 = this;
 
 	            return new Promise(function (callback) {
-	                _this17.post('1.0/repositories/' + _this17.getProjectOwner() + '/' + _this17.getProjectName() + '/labels', {
+	                _this17.post('1.0/repositories/' + _this17.getRepositoryOwner() + '/' + _this17.getRepositoryName() + '/labels', {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -8786,7 +8785,7 @@
 	    }, {
 	        key: 'addIssueAttachment',
 	        value: function addIssueAttachment(issue, attachment) {
-	            var apiUrl = '2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments';
+	            var apiUrl = '2.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/attachments';
 	            var postData = new FormData();
 
 	            postData.append('file', attachment.file);
@@ -8813,7 +8812,7 @@
 	                });
 	            }
 
-	            return this.post('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/milestones', this.convertMilestone(milestone)).then(function (bitBucketMilestone) {
+	            return this.post('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/milestones', this.convertMilestone(milestone)).then(function (bitBucketMilestone) {
 	                milestone.id = bitBucketMilestone.id;
 
 	                return Promise.resolve(milestone);
@@ -8831,7 +8830,7 @@
 	    }, {
 	        key: 'addVersion',
 	        value: function addVersion(version) {
-	            return this.post('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions', {
+	            return this.post('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/versions', {
 	                name: version
 	            }).then(function (bitBucketVersion) {
 	                return Promise.resolve({
@@ -8855,7 +8854,7 @@
 	    }, {
 	        key: 'removeIssue',
 	        value: function removeIssue(issue) {
-	            return this.delete('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id);
+	            return this.delete('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id);
 	        }
 
 	        /**
@@ -8869,7 +8868,7 @@
 	    }, {
 	        key: 'removeCollaborator',
 	        value: function removeCollaborator(index) {
-	            return this.delete('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index]);
+	            return this.delete('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/collaborators/' + window.resources.collaborators[index]);
 	        }
 
 	        /**
@@ -8884,7 +8883,7 @@
 	    }, {
 	        key: 'removeIssueAttachment',
 	        value: function removeIssueAttachment(issue, attachment) {
-	            var apiUrl = '2.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/attachments/' + attachment.getName();
+	            var apiUrl = '2.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/attachments/' + attachment.getName();
 
 	            return this.delete(apiUrl);
 	        }
@@ -8905,7 +8904,7 @@
 	            var milestone = resources.milestones[index];
 
 	            return new Promise(function (callback) {
-	                _this18.delete('1.0/repositories/' + _this18.getProjectOwner() + '/' + _this18.getProjectName() + '/issues/milestones/' + milestone.id).then(function () {
+	                _this18.delete('1.0/repositories/' + _this18.getRepositoryOwner() + '/' + _this18.getRepositoryName() + '/issues/milestones/' + milestone.id).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8924,12 +8923,30 @@
 	        value: function removeVersion(index) {
 	            var version = resources.versions[index];
 
-	            return this.delete('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions/' + version.id);
+	            return this.delete('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/versions/' + version.id);
 	        }
 
 	        // ----------
 	        // Resource updaters
 	        // ----------
+	        /**
+	         * Update repo
+	         *
+	         * @param {Repository} repo
+	         *
+	         * @returns {Promise} Promise
+	         */
+
+	    }, {
+	        key: 'updateRepository',
+	        value: function updateRepository(repo, previousName) {
+	            return this.put('1.0/repositories/' + repo.owner + '/' + previousName, this.convertRepository(repo)).then(function (bitBucketRepository) {
+	                repository.id = bitBucketRepository.uuid;
+
+	                return resolve(repository);
+	            });
+	        }
+
 	        /**
 	         * Update issue
 	         *
@@ -8939,7 +8956,7 @@
 	    }, {
 	        key: 'updateIssue',
 	        value: function updateIssue(issue) {
-	            return this.put('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id, this.convertIssue(issue));
+	            return this.put('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id, this.convertIssue(issue));
 	        }
 
 	        /**
@@ -8956,7 +8973,7 @@
 	            var _this19 = this;
 
 	            return new Promise(function (callback) {
-	                _this19.put('1.0/repositories/' + _this19.getProjectOwner() + '/' + _this19.getProjectName() + '/issues/milestones/' + milestone.id, _this19.convertMilestone(milestone)).then(function () {
+	                _this19.put('1.0/repositories/' + _this19.getRepositoryOwner() + '/' + _this19.getRepositoryName() + '/issues/milestones/' + milestone.id, _this19.convertMilestone(milestone)).then(function () {
 	                    callback();
 	                });
 	            });
@@ -8977,7 +8994,7 @@
 	            var _this20 = this;
 
 	            return new Promise(function (callback) {
-	                _this20.patch('1.0/repositories/' + _this20.getProjectOwner() + '/' + _this20.getProjectName() + '/labels/type:' + previousName, {
+	                _this20.patch('1.0/repositories/' + _this20.getRepositoryOwner() + '/' + _this20.getRepositoryName() + '/labels/type:' + previousName, {
 	                    name: 'type:' + type,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -9001,7 +9018,7 @@
 	            var _this21 = this;
 
 	            return new Promise(function (callback) {
-	                _this21.patch('1.0/repositories/' + _this21.getProjectOwner() + '/' + _this21.getProjectName() + '/labels/priority:' + previousName, {
+	                _this21.patch('1.0/repositories/' + _this21.getRepositoryOwner() + '/' + _this21.getRepositoryName() + '/labels/priority:' + previousName, {
 	                    name: 'priority:' + priority,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -9025,7 +9042,7 @@
 	            var _this22 = this;
 
 	            return new Promise(function (callback) {
-	                _this22.patch('1.0/repositories/' + _this22.getProjectOwner() + '/' + _this22.getProjectName() + '/labels/estimate:' + previousName, {
+	                _this22.patch('1.0/repositories/' + _this22.getRepositoryOwner() + '/' + _this22.getRepositoryName() + '/labels/estimate:' + previousName, {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -9049,7 +9066,7 @@
 	            var _this23 = this;
 
 	            return new Promise(function (callback) {
-	                _this23.patch('1.0/repositories/' + _this23.getProjectOwner() + '/' + _this23.getProjectName() + '/labels/column:' + previousName, {
+	                _this23.patch('1.0/repositories/' + _this23.getRepositoryOwner() + '/' + _this23.getRepositoryName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -9074,7 +9091,7 @@
 	                return v.title == previousName;
 	            })[0];
 
-	            return this.put('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/versions/' + version.id, {
+	            return this.put('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/versions/' + version.id, {
 	                name: newName
 	            });
 	        }
@@ -9083,26 +9100,26 @@
 	        // Resource processing methods
 	        // ----------
 	        /**
-	         * Process projects
+	         * Process repositories
 	         *
-	         * @param {Array} projects
+	         * @param {Array} repositories
 	         */
 
 	    }, {
-	        key: 'processProjects',
-	        value: function processProjects(projects) {
-	            window.resources.projects = [];
+	        key: 'processRepositories',
+	        value: function processRepositories(repositories) {
+	            window.resources.repositories = [];
 
-	            for (var i in projects) {
-	                var project = new Project({
+	            for (var i in repositories) {
+	                var _repository = new Repository({
 	                    index: i,
-	                    id: projects[i].slug,
-	                    title: projects[i].slug,
-	                    description: projects[i].description,
-	                    owner: projects[i].owner
+	                    id: repositories[i].slug,
+	                    title: repositories[i].slug,
+	                    description: repositories[i].description,
+	                    owner: repositories[i].owner
 	                });
 
-	                window.resources.projects[i] = project;
+	                window.resources.repositories[i] = _repository;
 	            }
 	        }
 
@@ -9503,6 +9520,25 @@
 	        }
 
 	        /**
+	         * Convert repository model to BitBucket schema
+	         *
+	         * @param {Repository} repository
+	         */
+
+	    }, {
+	        key: 'convertRepository',
+	        value: function convertRepository(repository) {
+	            var bitBucketRepository = {
+	                name: repository.title,
+	                description: repository.description,
+	                has_issues: true,
+	                is_private: true
+	            };
+
+	            return bitBucketRepository;
+	        }
+
+	        /**
 	         * Convert milestone model to BitBucket schema
 	         *
 	         * @param {Object} milestone
@@ -9597,7 +9633,7 @@
 	    }, {
 	        key: 'addIssueComment',
 	        value: function addIssueComment(issue, text) {
-	            return this.post('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments', {
+	            return this.post('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments', {
 	                content: text
 	            });
 	        }
@@ -9612,7 +9648,7 @@
 	    }, {
 	        key: 'updateIssueComment',
 	        value: function updateIssueComment(issue, comment) {
-	            return this.put('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments/' + comment.index, {
+	            return this.put('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments/' + comment.index, {
 	                content: comment.text
 	            });
 	        }
@@ -9628,7 +9664,7 @@
 	    }, {
 	        key: 'getIssueComments',
 	        value: function getIssueComments(issue) {
-	            return this.get('1.0/repositories/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments').then(function (bitBucketComments) {
+	            return this.get('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments').then(function (bitBucketComments) {
 	                var comments = [];
 
 	                var _iteratorNormalCompletion8 = true;
@@ -9885,7 +9921,7 @@
 	    }, {
 	        key: 'getAssignee',
 	        value: function getAssignee() {
-	            return resources.collaborators[this.assignee || 0];
+	            return resources.collaborators[this.assignee];
 	        }
 
 	        /**
@@ -9897,7 +9933,7 @@
 	    }, {
 	        key: 'getReporter',
 	        value: function getReporter() {
-	            return resources.collaborators[this.reporter || 0];
+	            return resources.collaborators[this.reporter];
 	        }
 
 	        /**
@@ -10394,9 +10430,9 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var Project = function () {
-	    function Project(properties) {
-	        _classCallCheck(this, Project);
+	var Repository = function () {
+	    function Repository(properties) {
+	        _classCallCheck(this, Repository);
 
 	        properties = properties || {};
 
@@ -10408,15 +10444,15 @@
 	    }
 
 	    /**
-	     * Finds a project by title
+	     * Finds a repository by title
 	     *
 	     * @param {String} title
 	     *
-	     * @returns {Project} Project found
+	     * @returns {Repository} Repository found
 	     */
 
 
-	    _createClass(Project, null, [{
+	    _createClass(Repository, null, [{
 	        key: 'find',
 	        value: function find(title) {
 	            var _iteratorNormalCompletion = true;
@@ -10424,15 +10460,15 @@
 	            var _iteratorError = undefined;
 
 	            try {
-	                for (var _iterator = (resources.projects || [])[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                    var project = _step.value;
+	                for (var _iterator = (resources.repositories || [])[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var repository = _step.value;
 
-	                    if (!project) {
+	                    if (!repository) {
 	                        continue;
 	                    }
 
-	                    if (project.title == title) {
-	                        return project;
+	                    if (repository.title == title) {
+	                        return repository;
 	                    }
 	                }
 	            } catch (err) {
@@ -10450,15 +10486,15 @@
 	                }
 	            }
 
-	            debug.warning('Project "' + title + '" not found', this);
+	            debug.warning('Repository "' + title + '" not found', this);
 
 	            return null;
 	        }
 
 	        /**
-	         * Gets the current project
+	         * Gets the current repository
 	         *
-	         * @returns {Project} Current project
+	         * @returns {Repository} Current repository
 	         */
 
 	    }, {
@@ -10468,14 +10504,14 @@
 	                return null;
 	            }
 
-	            return Project.find(Router.params.project);
+	            return Repository.find(Router.params.repository);
 	        }
 	    }]);
 
-	    return Project;
+	    return Repository;
 	}();
 
-	module.exports = Project;
+	module.exports = Repository;
 
 /***/ },
 /* 30 */
@@ -10666,9 +10702,9 @@
 	            });
 
 	            links.push({
-	                title: 'Projects',
-	                url: '/projects/',
-	                handler: this.toggleProjectsList,
+	                title: 'Repositories',
+	                url: '/repositories/',
+	                handler: this.toggleRepositoriesList,
 	                icon: 'folder'
 	            });
 
@@ -10716,7 +10752,7 @@
 	    }, {
 	        key: 'cleanUpClasses',
 	        value: function cleanUpClasses() {
-	            this.$element.toggleClass('project-list', false);
+	            this.$element.toggleClass('repository-list', false);
 	            this.$element.toggleClass('source-panel', false);
 	            this.$element.toggleClass('about-panel', false);
 	        }
@@ -10799,15 +10835,15 @@
 	        }
 
 	        /**
-	         * Toggles the projects list
+	         * Toggles the repositories list
 	         */
 
 	    }, {
-	        key: 'toggleProjectsList',
-	        value: function toggleProjectsList(isActive, overrideUrl) {
-	            this.togglePanel('/projects/', 'project-list', function ($content) {
-	                var filterProjects = function filterProjects(query) {
-	                    $content.find('.project-editor').each(function (i, element) {
+	        key: 'toggleRepositoriesList',
+	        value: function toggleRepositoriesList(isActive, overrideUrl) {
+	            this.togglePanel('/repositories/', 'repository-list', function ($content) {
+	                var filterRepositories = function filterRepositories(query) {
+	                    $content.find('.repository-editor').each(function (i, element) {
 	                        var title = $(element).find('.header > h4').text() || '';
 	                        var isMatch = title.toLowerCase().indexOf(query.toLowerCase()) > -1;
 
@@ -10815,20 +10851,24 @@
 	                    });
 	                };
 
-	                ApiHelper.getResource('projects', true).then(function () {
-	                    _.append($content.empty(), _.div({ class: 'project-list-actions' }, _.button({ class: 'btn project-list-action' }, 'New project', _.span({ class: 'fa fa-plus' })).on('click', function (e) {
-	                        var name = prompt('Please input the new project name');
+	                ApiHelper.getResource('repositories', true).then(function () {
+	                    _.append($content.empty(), _.div({ class: 'repository-list-actions' }, _.button({ class: 'btn repository-list-action' }, 'New repository', _.span({ class: 'fa fa-plus' })).on('click', function (e) {
+	                        var name = prompt('Please input the new repository name');
 
-	                        ResourceHelper.createResource('projects', name).then(function (project) {
-	                            location = '/#/' + project.owner + '/' + project.title;
+	                        if (!name) {
+	                            return;
+	                        }
+
+	                        ResourceHelper.addResource('repositories', name).then(function (repository) {
+	                            location = '/#/' + repository.owner + '/' + repository.title;
 	                        });
-	                    }), _.div({ class: 'project-list-action search' }, _.input({ type: 'text', placeholder: 'Search in projects...' }).on('change keyup paste', function (e) {
+	                    }), _.div({ class: 'repository-list-action search' }, _.input({ type: 'text', placeholder: 'Search in repositories...' }).on('change keyup paste', function (e) {
 	                        var query = e.target.value;
 
-	                        filterProjects(query);
-	                    }), _.span({ class: 'fa fa-search' }))), _.div({ class: 'project-list-items' }, _.each(window.resources.projects, function (i, project) {
-	                        return new ProjectEditor({
-	                            model: project,
+	                        filterRepositories(query);
+	                    }), _.span({ class: 'fa fa-search' }))), _.div({ class: 'repository-list-items' }, _.each(window.resources.repositories, function (i, repository) {
+	                        return new RepositoryEditor({
+	                            model: repository,
 	                            overrideUrl: overrideUrl
 	                        }).$element;
 	                    })));
@@ -10847,11 +10887,11 @@
 	    }, {
 	        key: 'getFullUrl',
 	        value: function getFullUrl(url) {
-	            // Prepend project
-	            url = '/' + ApiHelper.getProjectName() + url;
+	            // Prepend repository
+	            url = '/' + ApiHelper.getRepositoryName() + url;
 
 	            // Prepend user
-	            url = '/' + ApiHelper.getProjectOwner() + url;
+	            url = '/' + ApiHelper.getRepositoryOwner() + url;
 
 	            return url;
 	        }
@@ -10868,8 +10908,8 @@
 	            this.cleanUpClasses();
 	            this.$element.find('.obscure .content').empty();
 
-	            if (!ApiHelper.getProjectName()) {
-	                this.toggleProjectsList(true, url);
+	            if (!ApiHelper.getRepositoryName()) {
+	                this.toggleRepositoriesList(true, url);
 	            } else {
 	                url = this.getFullUrl(url);
 
@@ -10891,7 +10931,7 @@
 	        key: 'slideIn',
 	        value: function slideIn() {
 	            if (Router.url) {
-	                var url = Router.url.replace('/' + ApiHelper.getUserName(), '').replace('/' + ApiHelper.getProjectName(), '');
+	                var url = Router.url.replace('/' + ApiHelper.getUserName(), '').replace('/' + ApiHelper.getRepositoryName(), '');
 
 	                if (Router.params.resource) {
 	                    url = url.replace(Router.params.resource, '');
@@ -10951,7 +10991,7 @@
 	'use strict';
 
 	/**
-	 * The project bar view
+	 * The repository bar view
 	 *
 	 * @class View Navbar
 	 */
@@ -10964,17 +11004,17 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var ProjectBar = function (_View) {
-	    _inherits(ProjectBar, _View);
+	var RepositoryBar = function (_View) {
+	    _inherits(RepositoryBar, _View);
 
-	    function ProjectBar(params) {
-	        _classCallCheck(this, ProjectBar);
+	    function RepositoryBar(params) {
+	        _classCallCheck(this, RepositoryBar);
 
-	        var _this = _possibleConstructorReturn(this, (ProjectBar.__proto__ || Object.getPrototypeOf(ProjectBar)).call(this, params));
+	        var _this = _possibleConstructorReturn(this, (RepositoryBar.__proto__ || Object.getPrototypeOf(RepositoryBar)).call(this, params));
 
 	        _this.template = __webpack_require__(35);
 
-	        _this.model = Project.getCurrent();
+	        _this.model = Repository.getCurrent();
 
 	        _this.fetch();
 	        return _this;
@@ -10985,7 +11025,7 @@
 	     */
 
 
-	    _createClass(ProjectBar, [{
+	    _createClass(RepositoryBar, [{
 	        key: 'onClickEditTitle',
 	        value: function onClickEditTitle() {
 	            var $title = this.$element.find('.title');
@@ -11036,7 +11076,7 @@
 	            this.model.title = newTitle;
 	            this.model.description = newDescription;
 
-	            ApiHelper.updateProject(this.model, prevTitle).then(function () {
+	            ApiHelper.updateRepository(this.model, prevTitle).then(function () {
 	                spinner(false);
 
 	                _this2.render();
@@ -11050,10 +11090,10 @@
 	        }
 	    }]);
 
-	    return ProjectBar;
+	    return RepositoryBar;
 	}(View);
 
-	module.exports = ProjectBar;
+	module.exports = RepositoryBar;
 
 /***/ },
 /* 35 */
@@ -11061,16 +11101,16 @@
 
 	'use strict';
 
-	module.exports = function ProjectBar() {
+	module.exports = function RepositoryBar() {
 	    var _this = this;
 
-	    return _.div({ class: 'project-bar' }, _.h4({ class: 'title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden', value: this.model.title }).on('change blur keyup', function (e) {
+	    return _.div({ class: 'repository-bar' }, _.h4({ class: 'title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden', value: this.model.title }).on('change blur keyup', function (e) {
 	        if (e.which && e.which != 13) {
 	            return;
 	        }
 
 	        _this.onChange();
-	    }), _.button({ class: 'btn-edit' }).click(function () {
+	    }), _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(function () {
 	        _this.onClickEditTitle();
 	    })), _.p({ class: 'description' }, _.span({ class: 'rendered' }, this.model.description), _.input({ type: 'text', class: 'selectable edit hidden', value: this.model.description }).on('change blur keyup', function (e) {
 	        if (e.which && e.which != 13) {
@@ -11078,7 +11118,7 @@
 	        }
 
 	        _this.onChange();
-	    }), _.button({ class: 'btn-edit' }).click(function () {
+	    }), _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(function () {
 	        _this.onClickEditDescription();
 	    })));
 	};
@@ -12150,12 +12190,12 @@
 	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
 
 	    // Reporter
-	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field reporter readonly' }, _.label('Reporter'), _.p(this.model.getReporter().displayName || this.model.getReporter().name))),
+	    _.if(resources.collaborators.length > 0, _.div({ class: 'meta-field reporter readonly' }, _.label('Reporter'), _.p(this.model.getReporter() ? this.model.getReporter().displayName || this.model.getReporter().name : '(unknown)'))),
 
 	    // Assignee
-	    _.if(window.resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    _.if(resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
-	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(window.resources.collaborators, function (i, collaborator) {
+	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(resources.collaborators, function (i, collaborator) {
 	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
 	    })).change(function () {
 	        _this.onChange();
@@ -12289,7 +12329,8 @@
 	            spinner('Creating issue');
 
 	            var issue = new Issue({
-	                milestone: this.model.index
+	                milestone: this.model.index,
+	                reporter: ResourceHelper.getCollaborator(User.getCurrent().name)
 	            });
 
 	            ResourceHelper.addResource('issues', issue).then(function (newIssue) {
@@ -13553,13 +13594,13 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var ProjectEditor = function (_View) {
-	    _inherits(ProjectEditor, _View);
+	var RepositoryEditor = function (_View) {
+	    _inherits(RepositoryEditor, _View);
 
-	    function ProjectEditor(params) {
-	        _classCallCheck(this, ProjectEditor);
+	    function RepositoryEditor(params) {
+	        _classCallCheck(this, RepositoryEditor);
 
-	        var _this = _possibleConstructorReturn(this, (ProjectEditor.__proto__ || Object.getPrototypeOf(ProjectEditor)).call(this, params));
+	        var _this = _possibleConstructorReturn(this, (RepositoryEditor.__proto__ || Object.getPrototypeOf(RepositoryEditor)).call(this, params));
 
 	        _this.template = __webpack_require__(47);
 
@@ -13567,25 +13608,25 @@
 	        return _this;
 	    }
 
-	    _createClass(ProjectEditor, [{
+	    _createClass(RepositoryEditor, [{
 	        key: 'onClick',
 	        value: function onClick() {
 	            ResourceHelper.clear();
 
 	            if (this.overrideUrl) {
 	                location = '/#/' + this.model.owner + '/' + this.model.title + this.overrideUrl;
-	            } else if (Router.params.project) {
-	                location = '/#' + location.hash.replace('#', '').replace(Router.params.project, this.model.title).replace(Router.params.user, this.model.owner);
+	            } else if (Router.params.repository) {
+	                location = '/#' + location.hash.replace('#', '').replace(Router.params.repository, this.model.title).replace(Router.params.user, this.model.owner);
 	            } else {
 	                location = '/#/' + this.model.owner + '/' + this.model.title + '/board/kanban/';
 	            }
 	        }
 	    }]);
 
-	    return ProjectEditor;
+	    return RepositoryEditor;
 	}(View);
 
-	module.exports = ProjectEditor;
+	module.exports = RepositoryEditor;
 
 /***/ },
 /* 47 */
@@ -13596,7 +13637,7 @@
 	module.exports = function render() {
 	    var _this = this;
 
-	    return _.div({ class: 'project-editor' }, _.div({ class: 'content' }, _.div({ class: 'owner' }, this.model.owner), _.div({ class: 'header' }, _.h4(this.model.title)), _.div({ class: 'body' }, this.model.description))).click(function () {
+	    return _.div({ class: 'repository-editor' }, _.div({ class: 'content' }, _.div({ class: 'owner' }, this.model.owner), _.div({ class: 'header' }, _.h4(this.model.title)), _.div({ class: 'body' }, this.model.description))).click(function () {
 	        _this.onClick();
 	    });
 	};
@@ -14119,7 +14160,7 @@
 	    var milestone = this.getCurrentMilestone();
 
 	    if (!milestone) {
-	        return _.div({ class: 'burndown-chart analytics-body' }, _.h4('There are no milestones defined in this project'));
+	        return _.div({ class: 'burndown-chart analytics-body' }, _.h4('There are no milestones defined in this repository'));
 	    }
 
 	    var totalDays = milestone.getTotalDays();
@@ -14221,7 +14262,7 @@
 
 	Router.route('/', function () {
 	    ApiHelper.checkConnection().then(function () {
-	        navbar.toggleProjectsList(true);
+	        navbar.toggleRepositoriesList(true);
 
 	        $('.workspace').remove();
 
@@ -14231,19 +14272,19 @@
 	    }).catch(displayError);
 	});
 
-	// Project
-	Router.route('/:user/:project', function () {
-	    location.hash = '/' + Router.params.user + '/' + Router.params.project + '/board/kanban';
+	// Repository
+	Router.route('/:user/:repository', function () {
+	    location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/board/kanban';
 	});
 
 	// Plan
-	Router.route('/:user/:project/plan/', function () {
+	Router.route('/:user/:repository/plan/', function () {
 	    ApiHelper.checkConnection().then(function () {
 	        return ApiHelper.getResources(true);
 	    }).then(function () {
 	        $('.workspace').remove();
 
-	        $('.app-container').append(_.div({ class: 'workspace plan-container' }, _.div({ class: 'workspace-fixed' }, new ProjectBar().$element), new PlanEditor().$element));
+	        $('.app-container').append(_.div({ class: 'workspace plan-container' }, _.div({ class: 'workspace-fixed' }, new RepositoryBar().$element), new PlanEditor().$element));
 
 	        navbar.slideIn();
 	        spinner(false);
@@ -14251,14 +14292,14 @@
 	});
 
 	// Board
-	Router.route('/:user/:project/board/:mode', function () {
+	Router.route('/:user/:repository/board/:mode', function () {
 	    ApiHelper.checkConnection().then(function () {
 	        return ApiHelper.getResources(true);
 	    }).then(function () {
 	        $('.workspace').remove();
 
 	        // Append all milestones
-	        $('.app-container').append(_.div({ class: 'workspace board-container ' + Router.params.mode }, _.div({ class: 'workspace-fixed' }, new ProjectBar().$element, new FilterEditor().$element), _.each(window.resources.milestones, function (i, milestone) {
+	        $('.app-container').append(_.div({ class: 'workspace board-container ' + Router.params.mode }, _.div({ class: 'workspace-fixed' }, new RepositoryBar().$element, new FilterEditor().$element), _.each(window.resources.milestones, function (i, milestone) {
 	            return new MilestoneEditor({
 	                model: milestone
 	            }).$element;
@@ -14294,13 +14335,13 @@
 	});
 
 	// Analytics
-	Router.route('/:user/:project/analytics/', function () {
+	Router.route('/:user/:repository/analytics/', function () {
 	    ApiHelper.checkConnection().then(function () {
 	        return ApiHelper.getResources(true);
 	    }).then(function () {
 	        $('.workspace').remove();
 
-	        $('.app-container').append(_.div({ class: 'workspace analytics' }, _.div({ class: 'workspace-fixed' }, new ProjectBar().$element), _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.button({ class: 'tab active' }, 'BURN DOWN CHART').click(function () {
+	        $('.app-container').append(_.div({ class: 'workspace analytics' }, _.div({ class: 'workspace-fixed' }, new RepositoryBar().$element), _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.button({ class: 'tab active' }, 'BURN DOWN CHART').click(function () {
 	            var index = $(this).index();
 
 	            $(this).parent().children().each(function (i) {
@@ -14318,29 +14359,29 @@
 	});
 
 	// Settings
-	Router.route('/:user/:project/settings/', function () {
-	    location = '/#/' + Router.params.user + '/' + Router.params.project + '/settings/versions';
+	Router.route('/:user/:repository/settings/', function () {
+	    location = '/#/' + Router.params.user + '/' + Router.params.repository + '/settings/versions';
 	});
 
-	Router.route('/:user/:project/settings/:resource', function () {
+	Router.route('/:user/:repository/settings/:resource', function () {
 	    ApiHelper.checkConnection().then(function () {
 	        return ApiHelper.getResources(true);
 	    }).then(function () {
 	        $('.workspace').remove();
 
-	        $('.app-container').append(_.div({ class: 'workspace settings-container' }, _.div({ class: 'workspace-fixed' }, new ProjectBar().$element), _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.each(window.resources, function (name, resource) {
+	        $('.app-container').append(_.div({ class: 'workspace settings-container' }, _.div({ class: 'workspace-fixed' }, new RepositoryBar().$element), _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.each(window.resources, function (name, resource) {
 	            // Read only
 	            if (ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
 	                return;
 	            }
 
 	            // Not editable in resource editor
-	            if (name == 'organizations' || name == 'collaborators' || name == 'issues' || name == 'projects') {
+	            if (name == 'organizations' || name == 'collaborators' || name == 'issues' || name == 'repositories') {
 	                return;
 	            }
 
 	            return _.button({ class: 'tab' + (Router.params.resource == name ? ' active' : '') }, prettyName(name)).click(function () {
-	                location = '/#/' + Router.params.user + '/' + Router.params.project + '/settings/' + name;
+	                location = '/#/' + Router.params.user + '/' + Router.params.repository + '/settings/' + name;
 	            });
 	        })), _.div({ class: 'panes' }, _.each(window.resources, function (name, resource) {
 	            // Read only
@@ -14349,7 +14390,7 @@
 	            }
 
 	            // Not editable in resource editor
-	            if (name == 'issues' || name == 'projects' || name == 'collaborators') {
+	            if (name == 'issues' || name == 'repositories' || name == 'collaborators') {
 	                return;
 	            }
 

@@ -164,7 +164,7 @@ class Issue {
      * @returns {Collaborator} Collaborator object
      */
     getAssignee() {
-        return resources.collaborators[this.assignee || 0];
+        return resources.collaborators[this.assignee];
     }
     
     /**
@@ -173,7 +173,7 @@ class Issue {
      * @returns {Collaborator} Collaborator object
      */
     getReporter() {
-        return resources.collaborators[this.reporter || 0];
+        return resources.collaborators[this.reporter];
     }
 
     /**

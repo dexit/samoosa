@@ -21,7 +21,8 @@ class MilestoneEditor extends View {
         spinner('Creating issue');
 
         let issue = new Issue({
-            milestone: this.model.index
+            milestone: this.model.index,
+            reporter: ResourceHelper.getCollaborator(User.getCurrent().name)
         });
 
         ResourceHelper.addResource('issues', issue)

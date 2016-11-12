@@ -8,7 +8,7 @@ Router.route('/', () => {
 });
 
 // Plan
-Router.route('/:project/plan/', () => {
+Router.route('/:repository/plan/', () => {
     ApiHelper.checkConnection()
     .then(() => {
         ApiHelper.getResources()
@@ -18,7 +18,7 @@ Router.route('/:project/plan/', () => {
 });
 
 // Scope
-Router.route('/:user/:project/scope', () => {
+Router.route('/:user/:repository/scope', () => {
     ApiHelper.checkConnection()
     .then(() => {
         ApiHelper.getResources(['collaborators'])

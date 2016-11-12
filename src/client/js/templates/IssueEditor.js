@@ -76,22 +76,22 @@ module.exports = function render() {
             ),
                 
             // Reporter
-            _.if(window.resources.collaborators.length > 0,
+            _.if(resources.collaborators.length > 0,
                 _.div({class: 'meta-field reporter readonly'},
                     _.label('Reporter'),
-                    _.p(this.model.getReporter().displayName || this.model.getReporter().name)
+                    _.p(this.model.getReporter() ? (this.model.getReporter().displayName || this.model.getReporter().name) : '(unknown)')
                 )
             ),
             
             // Assignee
-            _.if(window.resources.collaborators.length > 0,
+            _.if(resources.collaborators.length > 0,
                 _.div({class: 'meta-field assignee'},
                     _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                         .change((e) => { this.onChangeCheckbox(e); }),
                     _.label('Assignee'),
                     _.select({'data-property': 'assignee', disabled: ApiHelper.isSpectating()},
                         _.option({value: null}, '(unassigned)'),
-                        _.each(window.resources.collaborators, (i, collaborator) => {
+                        _.each(resources.collaborators, (i, collaborator) => {
                             return _.option({value: i}, collaborator.displayName || collaborator.name);
                         })
                     ).change(() => { this.onChange(); }).val(this.model.assignee)

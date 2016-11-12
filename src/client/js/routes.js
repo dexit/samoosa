@@ -4,7 +4,7 @@
 Router.route('/', () => {
     ApiHelper.checkConnection()
     .then(() => {
-        navbar.toggleProjectsList(true);
+        navbar.toggleRepositoriesList(true);
         
         $('.workspace').remove();
 
@@ -19,13 +19,13 @@ Router.route('/', () => {
     .catch(displayError);
 });
 
-// Project
-Router.route('/:user/:project', () => {
-    location.hash = '/' + Router.params.user + '/' + Router.params.project + '/board/kanban';
+// Repository
+Router.route('/:user/:repository', () => {
+    location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/board/kanban';
 });
 
 // Plan
-Router.route('/:user/:project/plan/', () => {
+Router.route('/:user/:repository/plan/', () => {
     ApiHelper.checkConnection()
     .then(() => {
         return ApiHelper.getResources(true);
@@ -36,7 +36,7 @@ Router.route('/:user/:project/plan/', () => {
         $('.app-container').append(
             _.div({class: 'workspace plan-container'},
                 _.div({class: 'workspace-fixed'},
-                    new ProjectBar().$element
+                    new RepositoryBar().$element
                 ),
                 new PlanEditor().$element
             )
@@ -49,7 +49,7 @@ Router.route('/:user/:project/plan/', () => {
 });
 
 // Board
-Router.route('/:user/:project/board/:mode', () => {
+Router.route('/:user/:repository/board/:mode', () => {
     ApiHelper.checkConnection()
     .then(() => {
         return ApiHelper.getResources(true);
@@ -61,7 +61,7 @@ Router.route('/:user/:project/board/:mode', () => {
         $('.app-container').append(
             _.div({class: 'workspace board-container ' + Router.params.mode},
                 _.div({class: 'workspace-fixed'},
-                    new ProjectBar().$element,
+                    new RepositoryBar().$element,
                     new FilterEditor().$element
                 ),
                 _.each(window.resources.milestones, (i, milestone) => {
@@ -105,7 +105,7 @@ Router.route('/:user/:project/board/:mode', () => {
 });
 
 // Analytics
-Router.route('/:user/:project/analytics/', () => {
+Router.route('/:user/:repository/analytics/', () => {
     ApiHelper.checkConnection()
     .then(() => {
         return ApiHelper.getResources(true);
@@ -116,7 +116,7 @@ Router.route('/:user/:project/analytics/', () => {
         $('.app-container').append(
             _.div({class: 'workspace analytics'},
                 _.div({class: 'workspace-fixed'},
-                    new ProjectBar().$element
+                    new RepositoryBar().$element
                 ),
                 _.div({class: 'tabbed-container vertical'},
                     _.div({class: 'tabs'},
@@ -150,11 +150,11 @@ Router.route('/:user/:project/analytics/', () => {
 });
 
 // Settings
-Router.route('/:user/:project/settings/', () => {
-    location = '/#/' + Router.params.user + '/' + Router.params.project + '/settings/versions';
+Router.route('/:user/:repository/settings/', () => {
+    location = '/#/' + Router.params.user + '/' + Router.params.repository + '/settings/versions';
 });
 
-Router.route('/:user/:project/settings/:resource', () => {
+Router.route('/:user/:repository/settings/:resource', () => {
     ApiHelper.checkConnection()
     .then(() => {
         return ApiHelper.getResources(true);
@@ -165,7 +165,7 @@ Router.route('/:user/:project/settings/:resource', () => {
         $('.app-container').append(
             _.div({class: 'workspace settings-container'},
                 _.div({class: 'workspace-fixed'},
-                    new ProjectBar().$element
+                    new RepositoryBar().$element
                 ),
                 _.div({class: 'tabbed-container vertical'},
                     _.div({class: 'tabs'},
@@ -176,14 +176,14 @@ Router.route('/:user/:project/settings/:resource', () => {
                             }
                            
                             // Not editable in resource editor
-                            if(name == 'organizations' || name == 'collaborators' || name == 'issues' || name == 'projects') {
+                            if(name == 'organizations' || name == 'collaborators' || name == 'issues' || name == 'repositories') {
                                 return;
                             }
 
                             return _.button({class: 'tab' + (Router.params.resource == name ? ' active' : '')},
                                 prettyName(name)
                             ).click(() => {
-                                location = '/#/' + Router.params.user + '/' + Router.params.project + '/settings/' + name;
+                                location = '/#/' + Router.params.user + '/' + Router.params.repository + '/settings/' + name;
                             });
                         })
                     ),
@@ -195,7 +195,7 @@ Router.route('/:user/:project/settings/:resource', () => {
                             }
                             
                             // Not editable in resource editor
-                            if(name == 'issues' || name == 'projects' || name == 'collaborators') {
+                            if(name == 'issues' || name == 'repositories' || name == 'collaborators') {
                                 return;
                             }
                             

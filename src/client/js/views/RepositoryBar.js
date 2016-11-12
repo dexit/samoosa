@@ -1,17 +1,17 @@
 'use strict';
 
 /**
- * The project bar view
+ * The repository bar view
  *
  * @class View Navbar
  */
-class ProjectBar extends View {
+class RepositoryBar extends View {
     constructor(params) {
         super(params);
 
-        this.template = require('../templates/ProjectBar');
+        this.template = require('../templates/RepositoryBar');
 
-        this.model = Project.getCurrent();
+        this.model = Repository.getCurrent();
 
         this.fetch();
     }
@@ -60,7 +60,7 @@ class ProjectBar extends View {
         this.model.title = newTitle;
         this.model.description = newDescription;
 
-        ApiHelper.updateProject(this.model, prevTitle)
+        ApiHelper.updateRepository(this.model, prevTitle)
         .then(() => {
             spinner(false);
 
@@ -76,4 +76,4 @@ class ProjectBar extends View {
     }
 }
 
-module.exports = ProjectBar;
+module.exports = RepositoryBar;

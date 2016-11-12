@@ -1,7 +1,7 @@
 'use strict';
 
-module.exports = function ProjectBar() {
-    return _.div({class: 'project-bar'},
+module.exports = function RepositoryBar() {
+    return _.div({class: 'repository-bar'},
         _.h4({class: 'title'},
             _.span({class: 'rendered'}, this.model.title),
             _.input({type: 'text', class: 'selectable edit hidden', value: this.model.title})
@@ -10,7 +10,9 @@ module.exports = function ProjectBar() {
 
                     this.onChange();
                 }),
-            _.button({class: 'btn-edit'}).click(() => { this.onClickEditTitle(); })
+            _.button({class: 'btn-edit'},
+                _.span({class: 'fa fa-edit'})
+            ).click(() => { this.onClickEditTitle(); })
         ),
         _.p({class: 'description'},
             _.span({class: 'rendered'}, this.model.description),
@@ -20,7 +22,9 @@ module.exports = function ProjectBar() {
 
                     this.onChange();
                 }),
-            _.button({class: 'btn-edit'}).click(() => { this.onClickEditDescription(); })
+            _.button({class: 'btn-edit'},
+                _.span({class: 'fa fa-edit'})
+            ).click(() => { this.onClickEditDescription(); })
         )
     );
 };

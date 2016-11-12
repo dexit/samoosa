@@ -254,14 +254,14 @@ class GitHubApi extends ApiHelper {
     }
 
     /**
-     * Gets projects
+     * Gets repositories
      *
      * @returns {Promise} promise
      */
-    getProjects() {
+    getRepositories() {
         return this.get('/user/repos')
         .then((repos) => {
-            this.processProjects(repos);
+            this.processRepositories(repos);
             
             return Promise.resolve();
         });
@@ -277,7 +277,7 @@ class GitHubApi extends ApiHelper {
             return Promise.resolve([]);
         }
 
-        return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators')
+        return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/collaborators')
         .then((collaborators) => {
             this.processCollaborators(collaborators);
         });
@@ -289,7 +289,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssues() {
-        return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', 'state=all', true)
+        return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues', 'state=all', true)
         .then((issues) => {
             this.processIssues(issues);
 
@@ -331,7 +331,7 @@ class GitHubApi extends ApiHelper {
      */
     getLabels() {
         if(!labelCache) {
-            return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels')
+            return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels')
             .then((labels) => {
                 labelCache = labels || [];
 
@@ -382,7 +382,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} Promise
      */
     getIssueAttachments(issue) {
-        let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id;
+        let apiUrl = '/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/contents/issueAttachments/' + issue.id;
 
         return this.get(apiUrl, 'ref=samoosa-resources') 
         .then((response) => {
@@ -458,7 +458,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getMilestones() {
-        return this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones')
+        return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones')
         .then((milestones) => {
             this.processMilestones(milestones);
             
@@ -488,7 +488,7 @@ class GitHubApi extends ApiHelper {
             });
         
         } else {
-            return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues', this.convertIssue(issue))
+            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues', this.convertIssue(issue))
             .then((gitHubIssue) => {
                 issue.id = gitHubIssue.number;
 
@@ -505,7 +505,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addCollaborator(collaborator) {
-        return this.put('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + collaborator);
+        return this.put('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/collaborators/' + collaborator);
     }
     
     /**
@@ -517,7 +517,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} New label
      */
     addLabel(name, color) {
-        return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
+        return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
             name: name,
             color: color || 'ffffff'
         });
@@ -531,7 +531,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addIssueType(type) {
-        return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
+        return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
             name: 'type:' + type,
             color: 'ffffff'
         })
@@ -548,7 +548,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addIssuePriority(priority) {
-        return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
+        return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
             name: 'priority:' + priority,
             color: 'ffffff'
         })
@@ -565,7 +565,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addIssueEstimate(estimate) {
-        return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
+        return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
             name: 'estimate:' + estimate,
             color: 'ffffff'
         })
@@ -582,7 +582,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addIssueColumn(column) {
-        return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
+        return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
             name: 'column:' + column,
             color: 'ffffff'
         })
@@ -600,7 +600,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} Promise
      */
     addIssueAttachment(issue, attachment) {
-        let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
+        let apiUrl = '/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
         let postData = {
             message: 'Added attachment "' + attachment.name + '"',
             content: attachment.base64,
@@ -635,7 +635,7 @@ class GitHubApi extends ApiHelper {
             milestone = new Milestone(milestone);
         }
             
-        return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones', this.convertMilestone(milestone))
+        return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones', this.convertMilestone(milestone))
         .then((gitHubMilestone) => {
             milestone.id = gitHubMilestone.number;
 
@@ -651,7 +651,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     addVersion(version) {
-        return this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels', {
+        return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
             name: 'version:' + version,
             color: 'ffffff'
         })
@@ -738,7 +738,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeCollaborator(index) {
-        return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/collaborators/' + window.resources.collaborators[index]);
+        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/collaborators/' + window.resources.collaborators[index]);
     }
     
     /**
@@ -749,7 +749,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeIssueType(index) {
-        return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/type:' + window.resources.issueTypes[index]);
+        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/type:' + window.resources.issueTypes[index]);
     }
     
     /**
@@ -760,7 +760,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeIssuePriority(index) {
-        return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/priority:' + window.resources.issuePriorities[index]);
+        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/priority:' + window.resources.issuePriorities[index]);
     }
     
     /**
@@ -771,7 +771,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeIssueEstimate(index) {
-        return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/estimate:' + window.resources.issueEstimates[index]);
+        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/estimate:' + window.resources.issueEstimates[index]);
     }
     
     /**
@@ -782,7 +782,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeIssueColumn(index) {
-        return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/column:' + window.resources.issueColumns[index]);
+        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/column:' + window.resources.issueColumns[index]);
     }
     
     /**
@@ -794,7 +794,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} Promise
      */
     removeIssueAttachment(issue, attachment) {
-        let apiUrl = '/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
+        let apiUrl = '/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/contents/issueAttachments/' + issue.id + '/' + attachment.getName();
         let deleteData = {
             message: 'Removed attachment "' + attachment.getName() + '"',
             sha: attachment.sha,
@@ -817,7 +817,7 @@ class GitHubApi extends ApiHelper {
         if(!milestone) {
             return Promise.reject(new Error('Milestone at index "' + index + '" not found'));
         } else {
-            return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones/' + milestone.id);
+            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones/' + milestone.id);
         }
     }
     
@@ -829,21 +829,21 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeVersion(index) {
-        return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/version:' + window.resources.versions[index]);
+        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/version:' + window.resources.versions[index]);
     }
 
     // ----------
     // Resource updaters
     // ----------
     /**
-     * Update project
+     * Update repository
      *
-     * @param {Project} project
+     * @param {Repository} repository
      *
      * @returns {Promise} Promise
      */
-    updateProject(project, previousName) {
-        return this.patch('/repos/' + project.owner + '/' + previousName, this.convertProject(project));
+    updateRepository(repository, previousName) {
+        return this.patch('/repos/' + repository.owner + '/' + previousName, this.convertRepository(repository));
     }
 
     /**
@@ -852,7 +852,7 @@ class GitHubApi extends ApiHelper {
      * @param {Object} issue
      */
     updateIssue(issue) {
-        return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id, this.convertIssue(issue));
+        return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id, this.convertIssue(issue));
     }
 
     /**
@@ -863,7 +863,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateMilestone(milestone) {
-        return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/milestones/' + milestone.id, this.convertMilestone(milestone));
+        return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones/' + milestone.id, this.convertMilestone(milestone));
     }
     
     /**
@@ -875,7 +875,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateIssueType(type, previousName) {
-        return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/type:' + previousName, {
+        return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/type:' + previousName, {
             name: 'type:' + type,
             color: 'ffffff'
         });
@@ -890,7 +890,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateIssuePriority(priority, previousName) {
-        return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/priority:' + previousName, {
+        return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/priority:' + previousName, {
             name: 'priority:' + priority,
             color: 'ffffff'
         });
@@ -905,7 +905,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateIssueEstimate(estimate, previousName) {
-        return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/estimate:' + previousName, {
+        return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/estimate:' + previousName, {
             name: 'estimate:' + estimate,
             color: 'ffffff'
         });
@@ -920,7 +920,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateIssueColumn(column, previousName) {
-        return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/column:' + previousName, {
+        return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/column:' + previousName, {
             name: 'column:' + column,
             color: 'ffffff'
         });
@@ -935,7 +935,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     updateVersion(version, previousName) {
-        return this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/labels/version:' + previousName, {
+        return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/version:' + previousName, {
             name: 'version:' + version,
             color: 'ffffff'
         });
@@ -945,23 +945,23 @@ class GitHubApi extends ApiHelper {
     // Resource processing methods
     // ----------
     /**
-     * Process projects
+     * Process repositories
      *
-     * @param {Array} projects
+     * @param {Array} repositories
      */
-    processProjects(projects) {
-        window.resources.projects = [];
+    processRepositories(repositories) {
+        window.resources.repositories = [];
 
-        for(let i in projects) {
-            let project = {
+        for(let i in repositories) {
+            let repository = {
                 index: i,
-                title: projects[i].name,
-                description: projects[i].description,
-                cloneUrl: projects[i].clone_url,
-                owner: projects[i].owner.login
+                title: repositories[i].name,
+                description: repositories[i].description,
+                cloneUrl: repositories[i].clone_url,
+                owner: repositories[i].owner.login
             };
             
-            window.resources.projects[i] = project;
+            window.resources.repositories[i] = repository;
         }
     }
     
@@ -1210,18 +1210,18 @@ class GitHubApi extends ApiHelper {
     }
 
     /**
-     * Convert project model to GitHub schema
+     * Convert repository model to GitHub schema
      *
-     * @param {Project} project
+     * @param {Repository} repository
      */
-    convertProject(project) {
-        let gitHubProject = {
-            name: project.title,
-            description: project.description,
+    convertRepository(repository) {
+        let gitHubRepository = {
+            name: repository.title,
+            description: repository.description,
             has_issues: true
         };
 
-        return gitHubProject;
+        return gitHubRepository;
     }
 
     /**
@@ -1326,7 +1326,7 @@ class GitHubApi extends ApiHelper {
      */
     addIssueComment(issue, text) {
         return new Promise((callback) => {
-            this.post('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments', {
+            this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments', {
                 body: text
             })
             .then(() => {
@@ -1343,7 +1343,7 @@ class GitHubApi extends ApiHelper {
      */
     updateIssueComment(issue, comment) {
         return new Promise((callback) => {
-            this.patch('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/comments/' + comment.index, {
+            this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/comments/' + comment.index, {
                 body: comment.text
             })
             .then(() => {
@@ -1359,7 +1359,7 @@ class GitHubApi extends ApiHelper {
      * @param {Object} comment
      */
     removeIssueComment(issue, comment) {
-        return this.delete('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/comments/' + comment.index);
+        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/comments/' + comment.index);
     }
 
     /**
@@ -1371,7 +1371,7 @@ class GitHubApi extends ApiHelper {
      */
     getIssueComments(issue) {
         return new Promise((callback) => {
-            this.get('/repos/' + this.getProjectOwner() + '/' + this.getProjectName() + '/issues/' + issue.id + '/comments')
+            this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments')
             .then((gitHubComments) => {
                 let comments = [];
 

@@ -94,29 +94,29 @@ class ApiHelper {
     }
     
     /**
-     * Gets project owner
+     * Gets repository owner
      *
      * @returns {String} Owner
      */    
-    getProjectOwner() {
-        let project = Project.getCurrent();
+    getRepositoryOwner() {
+        let repository = Repository.getCurrent();
         
-        if(!project) { return ''; }
+        if(!repository) { return ''; }
 
-        return project.owner;
+        return repository.owner;
     }
 
     /**
-     * Gets project name
+     * Gets repository name
      *
-     * @returns {String} Project name
+     * @returns {String} Repository name
      */    
-    getProjectName() {
-        let project = Project.getCurrent();
+    getRepositoryName() {
+        let repository = Repository.getCurrent();
         
-        if(!project) { return ''; }
+        if(!repository) { return ''; }
 
-        return project.title;
+        return repository.title;
     }
 
     /**
@@ -241,12 +241,12 @@ class ApiHelper {
     }
    
     /**
-     * Gets projects
+     * Gets repositories
      *
      * @returns {Promise} promise
      */
-    getProjects() {
-        window.resources.projects = [];
+    getRepositories() {
+        window.resources.repositories = [];
         
         return Promise.resolve();
     }
@@ -544,14 +544,14 @@ class ApiHelper {
     }
     
     /**
-     * Updates project
+     * Updates repository
      *
      * @param {Number} index
-     * @param {Object} project
+     * @param {Object} repository
      *
      * @returns {Promise} promise
      */
-    updateProject(index, project) {
+    updateRepository(index, repository) {
         return Promise.resolve();
     }
 
@@ -684,8 +684,8 @@ class ApiHelper {
             case 'issues':
                 return this.removeIssue(index);
             
-            case 'projects':
-                return this.removeProject(index);
+            case 'repositories':
+                return this.removeRepository(index);
             
             default:
                 return Promise.reject(new Error('Resource "' + resource + '" is invalid for DELETE'));
@@ -728,8 +728,8 @@ class ApiHelper {
             case 'issues':
                 return this.addIssue(item);
             
-            case 'projects':
-                return this.addProject(item);
+            case 'repositories':
+                return this.addRepository(item);
         
             default:
                 return Promise.reject(new Error('Resource "' + resource + '" is invalid for PUT'));
@@ -770,8 +770,8 @@ class ApiHelper {
             case 'issues':
                 return this.updateIssue(item);
         
-            case 'projects':
-                return this.updateProject(item);
+            case 'repositories':
+                return this.updateRepository(item);
             
             default:
                 return Promise.reject(new Error('Resource "' + resource + '" is invalid for POST'));
@@ -826,8 +826,8 @@ class ApiHelper {
             case 'issues':
                 return this.getIssues();
             
-            case 'projects':
-                return this.getProjects();
+            case 'repositories':
+                return this.getRepositories();
 
             default:
                 return Promise.reject(new Error('Resource "' + resource + '" is invalid for GET'));
@@ -856,7 +856,7 @@ class ApiHelper {
             }
         }
 
-        return get('projects')
+        return get('repositories')
         .then(() => {
             return get('issueTypes');
         })

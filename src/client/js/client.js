@@ -51,19 +51,19 @@ switch(getSource()) {
 window.Issue = require('./models/Issue');
 window.Milestone = require('./models/Milestone');
 window.User = require('./models/User');
-window.Project = require('./models/Project');
+window.Repository = require('./models/Repository');
 window.Attachment = require('./models/Attachment');
 window.Organization = require('./models/Organization');
 
 // Views
 window.Navbar = require('./views/Navbar');
-window.ProjectBar = require('./views/ProjectBar');
+window.RepositoryBar = require('./views/RepositoryBar');
 window.IssueEditor = require('./views/IssueEditor');
 window.MilestoneEditor = require('./views/MilestoneEditor');
 window.ResourceEditor = require('./views/ResourceEditor');
 window.PlanItemEditor = require('./views/PlanItemEditor');
 window.PlanEditor = require('./views/PlanEditor');
-window.ProjectEditor = require('./views/ProjectEditor');
+window.RepositoryEditor = require('./views/RepositoryEditor');
 window.FilterEditor = require('./views/FilterEditor');
 window.BurnDownChart = require('./views/BurnDownChart');
 
@@ -71,4 +71,4 @@ window.BurnDownChart = require('./views/BurnDownChart');
 require('./routes');
 
 // Title
-$('head title').html((Router.params.project ? Router.params.project +  ' - ' : '') + 'Samoosa');
+$('head title').html((Router.params.repository ? Router.params.repository +  ' - ' : '') + 'Samoosa');

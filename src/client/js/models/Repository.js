@@ -1,6 +1,6 @@
 'use strict';
 
-class Project {
+class Repository {
     constructor(properties) {
         properties = properties || {};
         
@@ -12,36 +12,36 @@ class Project {
     }
 
     /**
-     * Finds a project by title
+     * Finds a repository by title
      *
      * @param {String} title
      *
-     * @returns {Project} Project found
+     * @returns {Repository} Repository found
      */
     static find(title) {
-        for(let project of resources.projects || []) {
-            if(!project) { continue; }
+        for(let repository of resources.repositories || []) {
+            if(!repository) { continue; }
 
-            if(project.title == title) {
-                return project;
+            if(repository.title == title) {
+                return repository;
             }
         }
 
-        debug.warning('Project "' + title + '" not found', this);
+        debug.warning('Repository "' + title + '" not found', this);
 
         return null;
     }
 
     /**
-     * Gets the current project
+     * Gets the current repository
      *
-     * @returns {Project} Current project
+     * @returns {Repository} Current repository
      */
     static getCurrent() {
         if(!Router.params) { return null; }
 
-        return Project.find(Router.params.project);
+        return Repository.find(Router.params.repository);
     }
 }
 
-module.exports = Project;
+module.exports = Repository;

@@ -1,19 +1,30 @@
-.project-bar {
-    padding: 18px 15px;
+.repository-bar {
+    padding: 0px 15px;
     height: 56px;
 
     h1, h2, h3, h4, p {
-        margin: 0px 15px 0px 0px;
+        padding: 0px 25px 0px 0px;
+        margin: 0px;
         display: inline-block;
         position: relative;
+        line-height: 56px;
+
+        &:hover {
+            .btn-edit {
+                display: block;
+            }
+        }
 
         .btn-edit {
+            display: none;
             position: absolute;
-            top: 0px;
-            left: 0px;
-            height: 100%;
-            width: 100%;
-            cursor: text;
+            top: 50%;
+            transform: translateY(-50%);
+            right: 0px;
+            height: 1em;
+            padding: 0px 5px;
+            cursor: pointer;
+            font-size: 12px;
         }
 
         .edit {

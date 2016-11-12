@@ -15,9 +15,9 @@ class SettingsHelper {
     static set(type, key, value, stringify) {
         let prefix = 'settings';
 
-        // Exceptions for types not managed on a project basis
-        if(type != 'projects') { 
-            prefix = localStorage.getItem('settings:projects:current') + prefix + ':';
+        // Exceptions for types not managed on a repository basis
+        if(type != 'repositories') { 
+            prefix = localStorage.getItem('settings:repositories:current') + prefix + ':';
         }
 
         if(stringify) {
@@ -40,9 +40,9 @@ class SettingsHelper {
     static get(type, key, defaultValue, parse) {
         let prefix = 'settings';
 
-        // Exceptions for types not managed on a project basis
-        if(type != 'projects') { 
-            prefix = localStorage.getItem('settings:projects:current') + prefix + ':';
+        // Exceptions for types not managed on a repository basis
+        if(type != 'repositories') { 
+            prefix = localStorage.getItem('settings:repositories:current') + prefix + ':';
         }
 
         let result = localStorage.getItem(prefix + ':' + type + ':' + key);

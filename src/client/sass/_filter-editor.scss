@@ -13,34 +13,55 @@
         .fa {
             margin-left: 5px;
         }
-    }
 
-    .button-container {
-        display: none;
-        line-height: 25px;
+        .filter-indicator {
+            padding: 2px 6px;
+            margin-left: 10px;
+            background-color: #000;
+            color: #fff;
+            border-radius: 10px;
+            line-height: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
     }
 
     &.active {
         .filters {
-            display: flex;
-            padding: 10px 0px 10px 10px;
+            height: 56px;
         }
 
         .button-container {
-            display: block;
-            padding: 10px 0px;
+            height: 56px;
+        }
+    }
+
+    .button-container {
+        height: 0px;
+        overflow-y: hidden;
+        transition: height 0.5s ease;
+        line-height: 25px;
+
+        .btn {
+            height: 36px;
+            margin: 10px 10px 10px 0px;
         }
     }
 
     .filters {
-        display: none;
+        display: flex;
+        height: 0px;
+        transition: height 0.5s ease;
+        overflow-y: hidden;
+        min-width: 10px;
 
         .filter {
+            height: 36px;
             flex-shrink: 0;
             display: flex;
             background-color: material-color('grey', '200');
             border-radius: 15px;
-            margin-right: 30px;
+            margin: 10px 30px 10px 10px;
             position: relative;
 
             &:after {

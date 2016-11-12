@@ -4,9 +4,9 @@ module.exports = function render() {
     let issueKeys = Object.keys(new Issue().getBakedValues());
 
     return _.div({class: 'filter-editor'},
-        _.button({class: 'btn-toggle'},
+        _.button({class: 'btn-toggle', 'data-filter-amount': this.model.length.toString()},
             'Filters', 
-            _.span({class: 'fa fa-filter'})
+            _.span({class: 'filter-indicator'}, this.model.length.toString())
         ).click(() => {
             this.onClickToggle();  
         }),

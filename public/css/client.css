@@ -614,23 +614,40 @@ body, html {
     top: -38px; }
     .filter-editor .btn-toggle .fa {
       margin-left: 5px; }
-  .filter-editor .button-container {
-    display: none;
-    line-height: 25px; }
+    .filter-editor .btn-toggle .filter-indicator {
+      padding: 2px 6px;
+      margin-left: 10px;
+      background-color: #000;
+      color: #fff;
+      border-radius: 10px;
+      line-height: 10px;
+      font-size: 10px;
+      font-weight: bold; }
   .filter-editor.active .filters {
-    display: flex;
-    padding: 10px 0px 10px 10px; }
+    height: 56px; }
   .filter-editor.active .button-container {
-    display: block;
-    padding: 10px 0px; }
+    height: 56px; }
+  .filter-editor .button-container {
+    height: 0px;
+    overflow-y: hidden;
+    transition: height 0.5s ease;
+    line-height: 25px; }
+    .filter-editor .button-container .btn {
+      height: 36px;
+      margin: 10px 10px 10px 0px; }
   .filter-editor .filters {
-    display: none; }
+    display: flex;
+    height: 0px;
+    transition: height 0.5s ease;
+    overflow-y: hidden;
+    min-width: 10px; }
     .filter-editor .filters .filter {
+      height: 36px;
       flex-shrink: 0;
       display: flex;
       background-color: #eeeeee;
       border-radius: 15px;
-      margin-right: 30px;
+      margin: 10px 30px 10px 10px;
       position: relative; }
       .filter-editor .filters .filter:after {
         content: '&';
@@ -1079,7 +1096,7 @@ body, html {
         border-bottom: 1px solid #e0e0e0;
         text-transform: capitalize; }
     .plan-container .plan-editor .dates {
-      height: calc(100% - 110px);
+      height: calc(100% - 95px);
       left: 0px;
       position: relative; }
       .plan-container .plan-editor .dates .date-placeholder {
@@ -1438,16 +1455,27 @@ a {
   outline-color: #E70D3B; }
 
 .filter-editor {
-  background-color: #21303B; }
-  .filter-editor .btn-toggle:hover {
-    color: #E70D3B; }
+  background-color: #171e23; }
+  .filter-editor .btn-toggle {
+    line-height: 56px;
+    height: 56px;
+    background-color: #171e23;
+    top: -56px;
+    right: 0px;
+    padding: 0px 15px; }
+    .filter-editor .btn-toggle:hover {
+      color: #E70D3B; }
+    .filter-editor .btn-toggle[data-filter-amount="0"] .filter-indicator {
+      background-color: #21303B; }
+    .filter-editor .btn-toggle .filter-indicator {
+      background-color: #E70D3B; }
   .filter-editor .filters .filter:after {
     line-height: 36px;
     color: #fff;
     font-family: 'Bree Serif';
     font-size: 16px; }
   .filter-editor .filters .filter .select-container, .filter-editor .filters .filter .select-container select {
-    background-color: #171e23;
+    background-color: #21303B;
     color: #fff; }
   .filter-editor .filters .filter .select-container:first-of-type, .filter-editor .filters .filter .select-container:last-of-type {
     min-width: 90px; }
@@ -1651,7 +1679,7 @@ button.btn-remove {
         background-color: #fff; }
 
 .tabbed-container .tabs {
-  padding-top: 1rem;
+  padding-top: 0px;
   background-image: none;
   background-color: #21303B; }
   .tabbed-container .tabs:nth-child(2) {

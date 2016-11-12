@@ -13691,7 +13691,7 @@
 
 	    var issueKeys = Object.keys(new Issue().getBakedValues());
 
-	    return _.div({ class: 'filter-editor' }, _.button({ class: 'btn-toggle' }, 'Filters', _.span({ class: 'fa fa-filter' })).click(function () {
+	    return _.div({ class: 'filter-editor' }, _.button({ class: 'btn-toggle', 'data-filter-amount': this.model.length.toString() }, 'Filters', _.span({ class: 'filter-indicator' }, this.model.length.toString())).click(function () {
 	        _this.onClickToggle();
 	    }), _.div({ class: 'filters' }, _.each(this.model, function (i, filter) {
 	        var resourceKey = filter.key;

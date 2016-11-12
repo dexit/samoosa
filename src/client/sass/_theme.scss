@@ -332,11 +332,28 @@ a {
 }
 
 .filter-editor {
-    background-color: $teal-dark;
+    background-color: $teal-darker;
 
     .btn-toggle {
+        line-height: 56px;
+        height: 56px;
+        background-color: $teal-darker;
+        top: -56px;
+        right: 0px;
+        padding: 0px 15px;
+
         &:hover {
             color: $pink-medium;
+        }
+        
+        &[data-filter-amount="0"] {
+            .filter-indicator {
+                background-color: $teal-dark;
+            }
+        }
+
+        .filter-indicator {
+            background-color: $pink-medium;
         }
     }
     
@@ -351,7 +368,7 @@ a {
 
             .select-container {
                 &, select {
-                    background-color: $teal-darker;
+                    background-color: $teal-dark;
                     color: $white;
                 }
                 
@@ -705,7 +722,7 @@ button.btn-remove {
     }
 
     .tabs {
-        padding-top: 1rem;
+        padding-top: 0px;
         background-image: none;
         background-color: $teal-dark;
    

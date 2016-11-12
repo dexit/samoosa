@@ -836,6 +836,17 @@ class GitHubApi extends ApiHelper {
     // Resource updaters
     // ----------
     /**
+     * Update project
+     *
+     * @param {Project} project
+     *
+     * @returns {Promise} Promise
+     */
+    updateProject(project, previousName) {
+        return this.patch('/repos/' + project.owner + '/' + previousName, this.convertProject(project));
+    }
+
+    /**
      * Update issue
      *
      * @param {Object} issue
@@ -1196,6 +1207,21 @@ class GitHubApi extends ApiHelper {
                 window.resources.issues[issue.index] = issue;
             }
         }
+    }
+
+    /**
+     * Convert project model to GitHub schema
+     *
+     * @param {Project} project
+     */
+    convertProject(project) {
+        let gitHubProject = {
+            name: project.title,
+            description: project.description,
+            has_issues: true
+        };
+
+        return gitHubProject;
     }
 
     /**

@@ -5,5 +5,29 @@
     h1, h2, h3, h4, p {
         margin: 0px 15px 0px 0px;
         display: inline-block;
+        position: relative;
+
+        .btn-edit {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            height: 100%;
+            width: 100%;
+            cursor: text;
+        }
+
+        .edit {
+            font-size: inherit;
+            color: inherit;
+            line-height: 18px;
+            background-color: transparent;
+            padding: 0px;
+            margin: 0px;
+            border: 0px;
+
+            &, &:focus {
+                outline: none;
+            }
+        }
     }
 }

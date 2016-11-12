@@ -220,7 +220,7 @@ class Navbar extends View {
         url = '/' + ApiHelper.getProjectName() + url;
         
         // Prepend user
-        url = '/' + ApiHelper.getUserName() + url;
+        url = '/' + ApiHelper.getProjectOwner() + url;
         
         return url;
     }

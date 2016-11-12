@@ -6104,6 +6104,20 @@
 	        // Resource updaters
 	        // ----------
 	        /**
+	         * Update project
+	         *
+	         * @param {Project} project
+	         *
+	         * @returns {Promise} Promise
+	         */
+
+	    }, {
+	        key: 'updateProject',
+	        value: function updateProject(project, previousName) {
+	            return this.patch('/repos/' + project.owner + '/' + previousName, this.convertProject(project));
+	        }
+
+	        /**
 	         * Update issue
 	         *
 	         * @param {Object} issue
@@ -6676,6 +6690,24 @@
 	                    }
 	                }
 	            }
+	        }
+
+	        /**
+	         * Convert project model to GitHub schema
+	         *
+	         * @param {Project} project
+	         */
+
+	    }, {
+	        key: 'convertProject',
+	        value: function convertProject(project) {
+	            var gitHubProject = {
+	                name: project.title,
+	                description: project.description,
+	                has_issues: true
+	            };
+
+	            return gitHubProject;
 	        }
 
 	        /**
@@ -10819,7 +10851,7 @@
 	            url = '/' + ApiHelper.getProjectName() + url;
 
 	            // Prepend user
-	            url = '/' + ApiHelper.getUserName() + url;
+	            url = '/' + ApiHelper.getProjectOwner() + url;
 
 	            return url;
 	        }
@@ -10924,6 +10956,8 @@
 	 * @class View Navbar
 	 */
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -10940,9 +10974,81 @@
 
 	        _this.template = __webpack_require__(35);
 
+	        _this.model = Project.getCurrent();
+
 	        _this.fetch();
 	        return _this;
 	    }
+
+	    /**
+	     * Event: Click edit title
+	     */
+
+
+	    _createClass(ProjectBar, [{
+	        key: 'onClickEditTitle',
+	        value: function onClickEditTitle() {
+	            var $title = this.$element.find('.title');
+
+	            $title.find('.edit').focus().toggleClass('hidden', false);
+	            $title.find('.rendered').toggleClass('hidden', true);
+	            $title.find('.btn-edit').toggleClass('hidden', true);
+	        }
+
+	        /**
+	         * Event: Click edit description
+	         */
+
+	    }, {
+	        key: 'onClickEditDescription',
+	        value: function onClickEditDescription() {
+	            var $description = this.$element.find('.description');
+
+	            $description.find('.edit').focus().toggleClass('hidden', false);
+	            $description.find('.rendered').toggleClass('hidden', true);
+	            $description.find('.btn-edit').toggleClass('hidden', true);
+	        }
+
+	        /**
+	         * Event: Change
+	         */
+
+	    }, {
+	        key: 'onChange',
+	        value: function onChange() {
+	            var _this2 = this;
+
+	            var prevTitle = this.model.title;
+	            var prevDescription = this.model.description;
+
+	            var newTitle = this.$element.find('.title .edit').val() || prevTitle;
+	            var newDescription = this.$element.find('.description .edit').val() || prevDescription;
+
+	            if (prevTitle == newTitle && prevDescription == newDescription) {
+	                this.$element.find('.edit').toggleClass('hidden', true);
+	                this.$element.find('.rendered, .btn-edit').toggleClass('hidden', false);
+
+	                return;
+	            }
+
+	            spinner('Updating "' + this.model.title + '"');
+
+	            this.model.title = newTitle;
+	            this.model.description = newDescription;
+
+	            ApiHelper.updateProject(this.model, prevTitle).then(function () {
+	                spinner(false);
+
+	                _this2.render();
+
+	                if (prevTitle != newTitle) {
+	                    location.hash = location.hash.replace(prevTitle, newTitle).replace('#', '');
+
+	                    $('head title').html(newTitle + ' - Samoosa');
+	                }
+	            }).catch(displayError);
+	        }
+	    }]);
 
 	    return ProjectBar;
 	}(View);
@@ -10956,7 +11062,25 @@
 	'use strict';
 
 	module.exports = function ProjectBar() {
-	    return _.div({ class: 'project-bar' }, _.h4(Project.getCurrent().title), _.p(Project.getCurrent().description));
+	    var _this = this;
+
+	    return _.div({ class: 'project-bar' }, _.h4({ class: 'title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden', value: this.model.title }).on('change blur keyup', function (e) {
+	        if (e.which && e.which != 13) {
+	            return;
+	        }
+
+	        _this.onChange();
+	    }), _.button({ class: 'btn-edit' }).click(function () {
+	        _this.onClickEditTitle();
+	    })), _.p({ class: 'description' }, _.span({ class: 'rendered' }, this.model.description), _.input({ type: 'text', class: 'selectable edit hidden', value: this.model.description }).on('change blur keyup', function (e) {
+	        if (e.which && e.which != 13) {
+	            return;
+	        }
+
+	        _this.onChange();
+	    }), _.button({ class: 'btn-edit' }).click(function () {
+	        _this.onClickEditDescription();
+	    })));
 	};
 
 /***/ },
@@ -14211,7 +14335,7 @@
 	            }
 
 	            // Not editable in resource editor
-	            if (name == 'collaborators' || name == 'issues' || name == 'projects') {
+	            if (name == 'organizations' || name == 'collaborators' || name == 'issues' || name == 'projects') {
 	                return;
 	            }
 

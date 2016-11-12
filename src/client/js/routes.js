@@ -176,7 +176,7 @@ Router.route('/:user/:project/settings/:resource', () => {
                             }
                            
                             // Not editable in resource editor
-                            if(name == 'collaborators' || name == 'issues' || name == 'projects') {
+                            if(name == 'organizations' || name == 'collaborators' || name == 'issues' || name == 'projects') {
                                 return;
                             }
 

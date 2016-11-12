@@ -1000,7 +1000,25 @@ body, html {
   height: 56px; }
   .project-bar h1, .project-bar h2, .project-bar h3, .project-bar h4, .project-bar p {
     margin: 0px 15px 0px 0px;
-    display: inline-block; }
+    display: inline-block;
+    position: relative; }
+    .project-bar h1 .btn-edit, .project-bar h2 .btn-edit, .project-bar h3 .btn-edit, .project-bar h4 .btn-edit, .project-bar p .btn-edit {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      height: 100%;
+      width: 100%;
+      cursor: text; }
+    .project-bar h1 .edit, .project-bar h2 .edit, .project-bar h3 .edit, .project-bar h4 .edit, .project-bar p .edit {
+      font-size: inherit;
+      color: inherit;
+      line-height: 18px;
+      background-color: transparent;
+      padding: 0px;
+      margin: 0px;
+      border: 0px; }
+      .project-bar h1 .edit, .project-bar h1 .edit:focus, .project-bar h2 .edit, .project-bar h2 .edit:focus, .project-bar h3 .edit, .project-bar h3 .edit:focus, .project-bar h4 .edit, .project-bar h4 .edit:focus, .project-bar p .edit, .project-bar p .edit:focus {
+        outline: none; }
 
 .source-panel .obscure .content .btn {
   margin-top: 1em; }

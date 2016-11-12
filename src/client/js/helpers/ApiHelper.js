@@ -239,7 +239,7 @@ class ApiHelper {
         
         return Promise.resolve();
     }
-   
+    
     /**
      * Gets repositories
      *

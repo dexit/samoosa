@@ -57,12 +57,12 @@ class RepositoryBar extends View {
 
         spinner('Updating "' + this.model.title + '"');
 
-        this.model.title = newTitle;
-        this.model.description = newDescription;
-
         ApiHelper.updateRepository(this.model, prevTitle)
         .then(() => {
             spinner(false);
+
+            this.model.title = newTitle;
+            this.model.description = newDescription;
 
             this.render();
 
@@ -72,7 +72,11 @@ class RepositoryBar extends View {
                 $('head title').html(newTitle + ' - Samoosa');
             }
         })
-        .catch(displayError);
+        .catch((e) => {
+            displayError(e);
+
+            this.render();
+        });
     }
 }
 

@@ -839,11 +839,9 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} Promise
      */
     updateRepository(repo, previousName) {
-        return this.put('1.0/repositories/' + repo.owner + '/' + previousName, this.convertRepository(repo))
+        return this.put('2.0/repositories/' + repo.owner + '/' + (repo.id || previousName), this.convertRepository(repo))
         .then((bitBucketRepository) => {
-            repository.id = bitBucketRepository.uuid;
-
-            return resolve(repository);  
+            return resolve(repo);  
         });
     }
     
@@ -984,7 +982,7 @@ class BitBucketApi extends ApiHelper {
         for(let i in repositories) {
             let repository = new Repository({
                 index: i,
-                id: repositories[i].slug,
+                id: repositories[i].uuid,
                 title: repositories[i].slug,
                 description: repositories[i].description,
                 owner: repositories[i].owner

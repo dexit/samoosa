@@ -306,6 +306,8 @@ window.displayError = function(error) {
     alert(alertString);
 
     console.log(error.stack);
+
+    spinner(false);
 };
 
 // Convert estimate string to float

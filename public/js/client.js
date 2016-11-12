@@ -4358,6 +4358,8 @@
 	    alert(alertString);
 
 	    console.log(error.stack);
+
+	    spinner(false);
 	};
 
 	// Convert estimate string to float
@@ -8940,10 +8942,8 @@
 	    }, {
 	        key: 'updateRepository',
 	        value: function updateRepository(repo, previousName) {
-	            return this.put('1.0/repositories/' + repo.owner + '/' + previousName, this.convertRepository(repo)).then(function (bitBucketRepository) {
-	                repository.id = bitBucketRepository.uuid;
-
-	                return resolve(repository);
+	            return this.put('2.0/repositories/' + repo.owner + '/' + (repo.id || previousName), this.convertRepository(repo)).then(function (bitBucketRepository) {
+	                return resolve(repo);
 	            });
 	        }
 
@@ -9111,15 +9111,15 @@
 	            window.resources.repositories = [];
 
 	            for (var i in repositories) {
-	                var _repository = new Repository({
+	                var repository = new Repository({
 	                    index: i,
-	                    id: repositories[i].slug,
+	                    id: repositories[i].uuid,
 	                    title: repositories[i].slug,
 	                    description: repositories[i].description,
 	                    owner: repositories[i].owner
 	                });
 
-	                window.resources.repositories[i] = _repository;
+	                window.resources.repositories[i] = repository;
 	            }
 	        }
 
@@ -11073,11 +11073,11 @@
 
 	            spinner('Updating "' + this.model.title + '"');
 
-	            this.model.title = newTitle;
-	            this.model.description = newDescription;
-
 	            ApiHelper.updateRepository(this.model, prevTitle).then(function () {
 	                spinner(false);
+
+	                _this2.model.title = newTitle;
+	                _this2.model.description = newDescription;
 
 	                _this2.render();
 
@@ -11086,7 +11086,11 @@
 
 	                    $('head title').html(newTitle + ' - Samoosa');
 	                }
-	            }).catch(displayError);
+	            }).catch(function (e) {
+	                displayError(e);
+
+	                _this2.render();
+	            });
 	        }
 	    }]);
 

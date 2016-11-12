@@ -252,7 +252,7 @@ class GitHubApi extends ApiHelper {
     getDeletedIssues() {
         return deletedIssuesCache;
     }
-
+    
     /**
      * Gets repositories
      *

@@ -4279,7 +4279,19 @@
 
 	    separator = separator || '.';
 
-	    prettyDate = date.getFullYear() + separator + (date.getMonth() + 1) + separator + date.getDate();
+	    var monthString = date.getMonth() + 1;
+
+	    if (monthString < 10) {
+	        monthString = '0' + monthString;
+	    }
+
+	    var dayString = date.getDate();
+
+	    if (dayString < 10) {
+	        dayString = '0' + dayString;
+	    }
+
+	    prettyDate = date.getFullYear() + separator + monthString + separator + dayString;
 
 	    return prettyDate;
 	};

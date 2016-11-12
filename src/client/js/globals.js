@@ -223,7 +223,19 @@ window.prettyDate = function(inputDate, separator) {
 
     separator = separator || '.';
 
-    prettyDate = date.getFullYear() + separator + (date.getMonth() + 1) + separator + date.getDate();
+    let monthString = date.getMonth() + 1;
+
+    if(monthString < 10) {
+        monthString = '0' + monthString;
+    }
+    
+    let dayString = date.getDate();
+
+    if(dayString < 10) {
+        dayString = '0' + dayString;
+    }
+
+    prettyDate = date.getFullYear() + separator + monthString + separator + dayString;
 
     return prettyDate;
 }

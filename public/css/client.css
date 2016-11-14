@@ -768,7 +768,8 @@ body, html {
       transform: translateY(-50%);
       right: 15px; }
       .milestone-editor > .header .stats .actions {
-        display: inline-block; }
+        display: inline-block;
+        margin-left: 15px; }
         .milestone-editor > .header .stats .actions button {
           line-height: 20px;
           height: 20px;

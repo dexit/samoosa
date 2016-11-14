@@ -91,10 +91,10 @@ Router.route('/:user/:repository/board/:mode', () => {
         // Append the unassigned items
         $('.app-container .board-container').append(
             new MilestoneEditor({
-                model: {
+                model: new Milestone({
                     title: 'Unassigned',
                     description: 'These issues have yet to be assigned to a milestone'
-                }
+                })
             }).$element
         );
 

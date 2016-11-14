@@ -9587,6 +9587,8 @@
 
 	            if (milestone) {
 	                bitBucketIssue.milestone = milestone.originalName;
+	            } else {
+	                bitBucketIssue.milestone = '';
 	            }
 
 	            // Type
@@ -10169,7 +10171,7 @@
 	                        continue;
 	                    }
 
-	                    if (issue.getMilestone() == this) {
+	                    if (issue.getMilestone() == this || !this.index && !issue.milestone) {
 	                        issues[issues.length] = issue;
 	                    }
 	                }
@@ -12330,17 +12332,80 @@
 	    _createClass(MilestoneEditor, [{
 	        key: 'onClickPrint',
 	        value: function onClickPrint() {
-	            var $print = _.div({ class: 'print-modal' }, _.div({ class: 'print-content selectable' }, _.button({ class: 'btn-close' }, _.span({ class: 'fa fa-remove' })).click(function () {
-	                $print.remove();
+	            var html = '';
 
-	                $('.app-container').toggleClass('disabled', false);
-	            }), _.h1(this.model.title), _.p(this.model.description), _.each(this.model.getIssues(), function (i, issue) {
-	                return _.div({}, _.h4(issue.title + ' (' + issue.getEstimate() + ' hour' + (issue.getEstimate() != 1 ? 's' : '') + ')'), markdownToHtml(issue.description));
-	            })));
+	            html += '<!DOCTYPE html>';
+	            html += '<html>';
 
-	            $('body').append($print);
+	            // Header
+	            html += '<head>';
+	            html += '<meta charset="utf-8"/>';
+	            html += '<meta http-equiv="X-UA-Compatible" content="IE=edge"/>';
+	            html += '<meta name="viewport" content="width=device-width initial-scale=1"/>';
+	            html += '<meta name="robots" content"noindex, nofollow"/>';
+	            html += '<title>' + Repository.getCurrent().title + ': ' + this.model.title + '</title>';
+	            html += '<style>body { font-family: sans-serif; }</style>';
+	            html += '</head>';
 
-	            $('.app-container').toggleClass('disabled', true);
+	            // Body
+	            html += '<body>';
+
+	            // Repository title and description
+	            html += '<h1>' + Repository.getCurrent().title + '</h1>';
+
+	            if (Repository.getCurrent().description) {
+	                html += '<p>' + Repository.getCurrent().description + '</p>';
+	            }
+
+	            // Milestone title and description
+	            html += '<h2>' + this.model.title + '</h2>';
+
+	            if (this.model.description) {
+	                html += '<p>' + this.model.description + '</p>';
+	            }
+
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = this.model.getIssues()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var issue = _step.value;
+
+	                    // Issue title
+	                    html += '<h3>' + issue.title;
+
+	                    if (issue.getEstimate() > 0) {
+	                        html += ' (' + issue.getEstimate() + ' hour' + (issue.getEstimate() != 1 ? 's' : '') + ')';
+	                    }
+
+	                    html += '</h3>';
+
+	                    // Issue body
+	                    html += markdownToHtml(issue.description);
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+
+	            html += '</body>';
+	            html += '</html>';
+
+	            // Instantiate window
+	            var printWindow = window.open('', 'PRINT', 'width=780,height=400');
+
+	            printWindow.document.write(html);
 	        }
 
 	        /**
@@ -12463,40 +12528,15 @@
 	            var totalHours = 0;
 	            var completedHours = 0;
 
-	            var _iteratorNormalCompletion = true;
-	            var _didIteratorError = false;
-	            var _iteratorError = undefined;
-
-	            try {
-	                for (var _iterator = total[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                    var issue = _step.value;
-
-	                    totalHours += issue.getEstimate();
-	                }
-	            } catch (err) {
-	                _didIteratorError = true;
-	                _iteratorError = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion && _iterator.return) {
-	                        _iterator.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError) {
-	                        throw _iteratorError;
-	                    }
-	                }
-	            }
-
 	            var _iteratorNormalCompletion2 = true;
 	            var _didIteratorError2 = false;
 	            var _iteratorError2 = undefined;
 
 	            try {
-	                for (var _iterator2 = completed[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                    var _issue = _step2.value;
+	                for (var _iterator2 = total[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                    var issue = _step2.value;
 
-	                    completedHours += _issue.getEstimate();
+	                    totalHours += issue.getEstimate();
 	                }
 	            } catch (err) {
 	                _didIteratorError2 = true;
@@ -12509,6 +12549,31 @@
 	                } finally {
 	                    if (_didIteratorError2) {
 	                        throw _iteratorError2;
+	                    }
+	                }
+	            }
+
+	            var _iteratorNormalCompletion3 = true;
+	            var _didIteratorError3 = false;
+	            var _iteratorError3 = undefined;
+
+	            try {
+	                for (var _iterator3 = completed[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                    var _issue = _step3.value;
+
+	                    completedHours += _issue.getEstimate();
+	                }
+	            } catch (err) {
+	                _didIteratorError3 = true;
+	                _iteratorError3 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                        _iterator3.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError3) {
+	                        throw _iteratorError3;
 	                    }
 	                }
 	            }
@@ -12556,13 +12621,13 @@
 	        value: function getCompletedIssues() {
 	            var issues = [];
 
-	            var _iteratorNormalCompletion3 = true;
-	            var _didIteratorError3 = false;
-	            var _iteratorError3 = undefined;
+	            var _iteratorNormalCompletion4 = true;
+	            var _didIteratorError4 = false;
+	            var _iteratorError4 = undefined;
 
 	            try {
-	                for (var _iterator3 = window.resources.issues[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                    var issue = _step3.value;
+	                for (var _iterator4 = window.resources.issues[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                    var issue = _step4.value;
 
 	                    if (!issue) {
 	                        continue;
@@ -12573,16 +12638,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError3 = true;
-	                _iteratorError3 = err;
+	                _didIteratorError4 = true;
+	                _iteratorError4 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	                        _iterator3.return();
+	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                        _iterator4.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError3) {
-	                        throw _iteratorError3;
+	                    if (_didIteratorError4) {
+	                        throw _iteratorError4;
 	                    }
 	                }
 	            }
@@ -12599,13 +12664,13 @@
 	        value: function getIssues() {
 	            var issues = [];
 
-	            var _iteratorNormalCompletion4 = true;
-	            var _didIteratorError4 = false;
-	            var _iteratorError4 = undefined;
+	            var _iteratorNormalCompletion5 = true;
+	            var _didIteratorError5 = false;
+	            var _iteratorError5 = undefined;
 
 	            try {
-	                for (var _iterator4 = window.resources.issues[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	                    var issue = _step4.value;
+	                for (var _iterator5 = window.resources.issues[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                    var issue = _step5.value;
 
 	                    if (!issue) {
 	                        continue;
@@ -12616,16 +12681,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError4 = true;
-	                _iteratorError4 = err;
+	                _didIteratorError5 = true;
+	                _iteratorError5 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-	                        _iterator4.return();
+	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	                        _iterator5.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError4) {
-	                        throw _iteratorError4;
+	                    if (_didIteratorError5) {
+	                        throw _iteratorError5;
 	                    }
 	                }
 	            }
@@ -12659,7 +12724,7 @@
 	    })), _.div({ class: 'stats' }, _.div({ class: 'actions' }, _.button({ class: 'btn-print' }, _.span({ class: 'fa fa-print' })).click(function () {
 	        _this.onClickPrint();
 	    })), _.span({ class: 'progress-amounts' }, _.span({ class: 'fa fa-exclamation-circle' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })), _.span({ class: 'progress-hours' }, _.span({ class: 'fa fa-clock-o' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })))), _.div({ class: 'columns' }, _.each(window.resources.issueColumns, function (columnIndex, column) {
-	        return _.div({ class: 'column', 'data-index': columnIndex }, _.div({ class: 'header' }, _.h4(column)), _.div({ class: 'body' }, _.each(window.resources.issues, function (issueIndex, issue) {
+	        return _.div({ class: 'column', 'data-index': columnIndex }, _.div({ class: 'header' }, _.h4(column)), _.div({ class: 'body' }, _.each(_this.model.getIssues(), function (issueIndex, issue) {
 	            if (issue.column == columnIndex && issue.milestone == _this.model.index) {
 	                return new IssueEditor({
 	                    model: issue
@@ -14351,10 +14416,10 @@
 
 	        // Append the unassigned items
 	        $('.app-container .board-container').append(new MilestoneEditor({
-	            model: {
+	            model: new Milestone({
 	                title: 'Unassigned',
 	                description: 'These issues have yet to be assigned to a milestone'
-	            }
+	            })
 	        }).$element);
 
 	        navbar.slideIn();

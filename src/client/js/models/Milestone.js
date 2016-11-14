@@ -107,7 +107,7 @@ class Milestone {
         for(let issue of resources.issues || []) {
             if(!issue) { continue; }
             
-            if(issue.getMilestone() == this) {
+            if(issue.getMilestone() == this || (!this.index && !issue.milestone)) {
                 issues[issues.length] = issue;
             }
         }

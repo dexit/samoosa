@@ -18,29 +18,59 @@ class MilestoneEditor extends View {
      * Event: Click print button
      */
     onClickPrint() {
-        let $print = _.div({class: 'print-modal'},
-            _.div({class: 'print-content selectable'},
-                _.button({class: 'btn-close'},
-                    _.span({class: 'fa fa-remove'})
-                ).click(() => {
-                    $print.remove();  
-                    
-                    $('.app-container').toggleClass('disabled', false);
-                }),
-                _.h1(this.model.title),
-                _.p(this.model.description),
-                _.each(this.model.getIssues(), (i, issue) => {
-                    return _.div({},
-                        _.h4(issue.title + ' (' + issue.getEstimate() + ' hour' + (issue.getEstimate() != 1 ? 's' : '') + ')'),
-                        markdownToHtml(issue.description)
-                    );
-                })
-            )
-        );
+        let html = '';
 
-        $('body').append($print);
+        html += '<!DOCTYPE html>';
+        html += '<html>';
+        
+        // Header
+        html += '<head>';
+        html += '<meta charset="utf-8"/>'
+        html += '<meta http-equiv="X-UA-Compatible" content="IE=edge"/>'
+        html += '<meta name="viewport" content="width=device-width initial-scale=1"/>'
+        html += '<meta name="robots" content"noindex, nofollow"/>'
+        html += '<title>' + Repository.getCurrent().title + ': ' + this.model.title + '</title>';
+        html += '<style>body { font-family: sans-serif; }</style>';
+        html += '</head>';
+        
+        // Body
+        html += '<body>';
 
-        $('.app-container').toggleClass('disabled', true);
+        // Repository title and description
+        html += '<h1>' + Repository.getCurrent().title + '</h1>';
+
+        if(Repository.getCurrent().description) {
+            html += '<p>' + Repository.getCurrent().description + '</p>';
+        }
+
+        // Milestone title and description
+        html += '<h2>' + this.model.title + '</h2>';
+
+        if(this.model.description) {
+            html += '<p>' + this.model.description + '</p>';
+        }
+
+        for(let issue of this.model.getIssues()) {
+            // Issue title
+            html += '<h3>' + issue.title;
+            
+            if(issue.getEstimate() > 0) {
+                html += ' (' + issue.getEstimate() + ' hour' + (issue.getEstimate() != 1 ? 's' : '') + ')';
+            }
+            
+            html += '</h3>';
+
+            // Issue body
+            html += markdownToHtml(issue.description);
+        }
+    
+        html += '</body>';
+        html += '</html>';
+        
+        // Instantiate window
+        let printWindow = window.open('', 'PRINT', 'width=780,height=400');
+
+        printWindow.document.write(html);
     }
 
     /**

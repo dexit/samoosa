@@ -1296,6 +1296,8 @@ class BitBucketApi extends ApiHelper {
         
         if(milestone) {
             bitBucketIssue.milestone = milestone.originalName;
+        } else {
+            bitBucketIssue.milestone = '';
         }
 
         // Type

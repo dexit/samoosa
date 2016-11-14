@@ -44,7 +44,7 @@ module.exports = function render() {
                         _.h4(column)
                     ),
                     _.div({class: 'body'},
-                        _.each(window.resources.issues, (issueIndex, issue) => {
+                        _.each(this.model.getIssues(), (issueIndex, issue) => {
                             if(issue.column == columnIndex && issue.milestone == this.model.index) {
                                 return new IssueEditor({
                                     model: issue

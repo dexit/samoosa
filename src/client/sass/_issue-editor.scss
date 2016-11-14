@@ -126,7 +126,7 @@
                         color: material-color('cyan', '500');
                     }
                     
-                    &.feature, &.new feature {
+                    &.feature, &.new-feature {
                         color: material-color('green', '500');
                     }
                     
@@ -151,11 +151,11 @@
                         color: material-color('grey', '500');
                     }
                     
-                    &.high, &.critical {
+                    &.high, &.major {
                         color: material-color('yellow', '500');
                     }
                     
-                    &.blocker {
+                    &.critical, &.blocker {
                         color: material-color('red', '500');
                     }
                 }

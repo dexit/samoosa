@@ -40,6 +40,7 @@ h1, h2, h3, h4, h5, h6 {
     
     margin-top: 0.4em;
     margin-bottom: 0.3em;
+    line-height: 1em;
 }
 
 h1 {
@@ -408,6 +409,12 @@ a {
         }
 
         .stats {
+            .actions {
+                button {
+                    background-color: $pink-medium;
+                }
+            }
+
             .fa {
                 color: $white;
             }

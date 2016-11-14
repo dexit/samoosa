@@ -18,6 +18,13 @@ module.exports = function render() {
                 ).click(() => { this.onClickToggle(); })
             ),
             _.div({class: 'stats'},
+                _.div({class: 'actions'},
+                    _.button({class: 'btn-print'},
+                        _.span({class: 'fa fa-print'})
+                    ).click(() => {
+                        this.onClickPrint();
+                    })
+                ),
                 _.span({class: 'progress-amounts'},
                     _.span({class: 'fa fa-exclamation-circle'}),
                     _.span({class: 'total'}),

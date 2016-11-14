@@ -1026,9 +1026,10 @@ class BitBucketApi extends ApiHelper {
             let milestone = new Milestone({
                 index: i,
                 title: milestones[i].name,
-                id: milestones[i].id,
-                originalName: milestones[i].name
+                id: milestones[i].id
             });
+
+            milestone.originalName = milestones[i].name;
 
             // Parse end date
             let endDateRegex = /{% endDate: (\d+) %}/g;
@@ -1216,17 +1217,6 @@ class BitBucketApi extends ApiHelper {
             issue.version = ResourceHelper.getVersion(bitBucketIssue.metadata.version);
             issue.column = ResourceHelper.getIssueColumn(bitBucketIssue.status);
             
-            // Parse for estimate
-            let estimateRegex = /{% estimate: ((\d+.\d+|\d+)(d|h|m)|(\d+.\d+|\d+)) %}/g;
-            let estimateMatches = estimateRegex.exec(issue.content || '');
-
-            if(estimateMatches && estimateMatches.length > 0) {
-                issue.estimate = ResourceHelper.getIssueEstimates(estimateMatches[0]);
-            }
-
-            // Remove estimate markup
-            issue.description = issue.description.replace(estimateRegex, '');
-
             issue.index = indexCounter;
 
             window.resources.issues[issue.index] = issue;

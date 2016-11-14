@@ -15,6 +15,35 @@ class MilestoneEditor extends View {
     }
 
     /**
+     * Event: Click print button
+     */
+    onClickPrint() {
+        let $print = _.div({class: 'print-modal'},
+            _.div({class: 'print-content selectable'},
+                _.button({class: 'btn-close'},
+                    _.span({class: 'fa fa-remove'})
+                ).click(() => {
+                    $print.remove();  
+                    
+                    $('.app-container').toggleClass('disabled', false);
+                }),
+                _.h1(this.model.title),
+                _.p(this.model.description),
+                _.each(this.model.getIssues(), (i, issue) => {
+                    return _.div({},
+                        _.h4(issue.title + ' (' + issue.getEstimate() + ' hour' + (issue.getEstimate() != 1 ? 's' : '') + ')'),
+                        markdownToHtml(issue.description)
+                    );
+                })
+            )
+        );
+
+        $('body').append($print);
+
+        $('.app-container').toggleClass('disabled', true);
+    }
+
+    /**
      * Event: Click new issue button
      */
     onClickNewIssue() {

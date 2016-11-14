@@ -60,6 +60,22 @@
             transform: translateY(-50%);
             right: 15px;
 
+            .actions {
+                display: inline-block;
+
+                button {
+                    line-height: 20px;
+                    height: 20px;
+                    padding: 0px 5px;
+                    border-radius: 10px;
+                    background-color: material-color('grey', '700');
+
+                    .fa {
+                        margin-right: 0px;
+                    }
+                }
+            }
+
             .fa {
                 margin-right: 5px;
             }

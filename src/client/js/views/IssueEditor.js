@@ -354,7 +354,7 @@ class IssueEditor extends View {
             ViewHelper.get('FilterEditor').applyFilters();
             
             for(let milestoneEditor of ViewHelper.getAll('MilestoneEditor')) {
-                if(milestoneEditor.model.index == this.model.milestone) {
+                if(milestoneEditor.model == this.model.getMilestone()) {
                     milestoneEditor.updateProgress();
                     break;
                 }
@@ -679,11 +679,11 @@ class IssueEditor extends View {
                 icon = 'arrow-up';
                 break;
             
-            case 'high': case 'critical':
+            case 'high': case 'major':
                 icon = 'arrow-up';
                 break;
             
-            case 'blocker':
+            case 'blocker': case 'critical':
                 icon = 'arrow-up';
                 break;
         }

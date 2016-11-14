@@ -137,7 +137,7 @@ class Issue {
      * @returns {String} Version name
      */
     getVersion() {
-        return resources.versions[this.version || 0];
+        return resources.versions[this.version];
     }
 
     /**
@@ -146,7 +146,7 @@ class Issue {
      * @returns {Milestone} Milestone object
      */
     getMilestone() {
-        return resources.milestones[this.milestone || 0];
+        return resources.milestones[this.milestone];
     }
 
     /**

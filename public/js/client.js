@@ -9163,9 +9163,10 @@
 	                var milestone = new Milestone({
 	                    index: i,
 	                    title: milestones[i].name,
-	                    id: milestones[i].id,
-	                    originalName: milestones[i].name
+	                    id: milestones[i].id
 	                });
+
+	                milestone.originalName = milestones[i].name;
 
 	                // Parse end date
 	                var endDateRegex = /{% endDate: (\d+) %}/g;
@@ -9485,17 +9486,6 @@
 	                    issue.type = ResourceHelper.getIssueType(bitBucketIssue.metadata.kind);
 	                    issue.version = ResourceHelper.getVersion(bitBucketIssue.metadata.version);
 	                    issue.column = ResourceHelper.getIssueColumn(bitBucketIssue.status);
-
-	                    // Parse for estimate
-	                    var estimateRegex = /{% estimate: ((\d+.\d+|\d+)(d|h|m)|(\d+.\d+|\d+)) %}/g;
-	                    var estimateMatches = estimateRegex.exec(issue.content || '');
-
-	                    if (estimateMatches && estimateMatches.length > 0) {
-	                        issue.estimate = ResourceHelper.getIssueEstimates(estimateMatches[0]);
-	                    }
-
-	                    // Remove estimate markup
-	                    issue.description = issue.description.replace(estimateRegex, '');
 
 	                    issue.index = indexCounter;
 
@@ -9885,7 +9875,7 @@
 	    }, {
 	        key: 'getVersion',
 	        value: function getVersion() {
-	            return resources.versions[this.version || 0];
+	            return resources.versions[this.version];
 	        }
 
 	        /**
@@ -9897,7 +9887,7 @@
 	    }, {
 	        key: 'getMilestone',
 	        value: function getMilestone() {
-	            return resources.milestones[this.milestone || 0];
+	            return resources.milestones[this.milestone];
 	        }
 
 	        /**
@@ -10197,6 +10187,18 @@
 	                    }
 	                }
 	            }
+
+	            issues.sort(function (a, b) {
+	                if (a.id < b.id) {
+	                    return -1;
+	                }
+
+	                if (a.id > b.id) {
+	                    return 1;
+	                }
+
+	                return 0;
+	            });
 
 	            return issues;
 	        }
@@ -11575,7 +11577,7 @@
 	                    for (var _iterator3 = ViewHelper.getAll('MilestoneEditor')[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
 	                        var milestoneEditor = _step3.value;
 
-	                        if (milestoneEditor.model.index == this.model.milestone) {
+	                        if (milestoneEditor.model == this.model.getMilestone()) {
 	                            milestoneEditor.updateProgress();
 	                            break;
 	                        }
@@ -11997,11 +11999,11 @@
 	                    icon = 'arrow-up';
 	                    break;
 
-	                case 'high':case 'critical':
+	                case 'high':case 'major':
 	                    icon = 'arrow-up';
 	                    break;
 
-	                case 'blocker':
+	                case 'blocker':case 'critical':
 	                    icon = 'arrow-up';
 	                    break;
 	            }
@@ -12321,11 +12323,31 @@
 	    }
 
 	    /**
-	     * Event: Click new issue button
+	     * Event: Click print button
 	     */
 
 
 	    _createClass(MilestoneEditor, [{
+	        key: 'onClickPrint',
+	        value: function onClickPrint() {
+	            var $print = _.div({ class: 'print-modal' }, _.div({ class: 'print-content selectable' }, _.button({ class: 'btn-close' }, _.span({ class: 'fa fa-remove' })).click(function () {
+	                $print.remove();
+
+	                $('.app-container').toggleClass('disabled', false);
+	            }), _.h1(this.model.title), _.p(this.model.description), _.each(this.model.getIssues(), function (i, issue) {
+	                return _.div({}, _.h4(issue.title + ' (' + issue.getEstimate() + ' hour' + (issue.getEstimate() != 1 ? 's' : '') + ')'), markdownToHtml(issue.description));
+	            })));
+
+	            $('body').append($print);
+
+	            $('.app-container').toggleClass('disabled', true);
+	        }
+
+	        /**
+	         * Event: Click new issue button
+	         */
+
+	    }, {
 	        key: 'onClickNewIssue',
 	        value: function onClickNewIssue() {
 	            var _this2 = this;
@@ -12634,7 +12656,9 @@
 
 	    return _.div({ class: 'milestone-editor ' + state, 'data-index': this.model.index, 'data-end-date': this.model.endDate }, _.div({ class: 'header' }, _.div({ class: 'progress-bar', style: 'width: ' + this.getPercentComplete() + '%' }), _.div({ class: 'title' }, _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa fa-chevron-right' }), _.h4(this.model.title), _.p(this.model.description)).click(function () {
 	        _this.onClickToggle();
-	    })), _.div({ class: 'stats' }, _.span({ class: 'progress-amounts' }, _.span({ class: 'fa fa-exclamation-circle' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })), _.span({ class: 'progress-hours' }, _.span({ class: 'fa fa-clock-o' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })))), _.div({ class: 'columns' }, _.each(window.resources.issueColumns, function (columnIndex, column) {
+	    })), _.div({ class: 'stats' }, _.div({ class: 'actions' }, _.button({ class: 'btn-print' }, _.span({ class: 'fa fa-print' })).click(function () {
+	        _this.onClickPrint();
+	    })), _.span({ class: 'progress-amounts' }, _.span({ class: 'fa fa-exclamation-circle' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })), _.span({ class: 'progress-hours' }, _.span({ class: 'fa fa-clock-o' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })))), _.div({ class: 'columns' }, _.each(window.resources.issueColumns, function (columnIndex, column) {
 	        return _.div({ class: 'column', 'data-index': columnIndex }, _.div({ class: 'header' }, _.h4(column)), _.div({ class: 'body' }, _.each(window.resources.issues, function (issueIndex, issue) {
 	            if (issue.column == columnIndex && issue.milestone == _this.model.index) {
 	                return new IssueEditor({

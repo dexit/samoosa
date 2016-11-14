@@ -155,7 +155,7 @@ class Milestone {
         for(let issue of this.getIssues()) {
             if(!issue) { continue; }
 
-            total += issue.getEstimate();
+            total += issue.getEstimatedHours();
         }
 
         return total;
@@ -206,7 +206,7 @@ class Milestone {
         let hours = 0;
 
         for(let issue of this.getRemainingIssuesAtDay(day)) {
-            hours += issue.getEstimate();
+            hours += issue.getEstimatedHours();
         }
 
         return hours;

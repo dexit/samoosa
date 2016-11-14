@@ -8942,8 +8942,8 @@
 	    }, {
 	        key: 'updateRepository',
 	        value: function updateRepository(repo, previousName) {
-	            return this.put('2.0/repositories/' + repo.owner + '/' + (repo.id || previousName), this.convertRepository(repo)).then(function (bitBucketRepository) {
-	                return resolve(repo);
+	            return this.put('1.0/repositories/' + repo.owner + '/' + (repo.id || previousName), this.convertRepository(repo)).then(function (bitBucketRepository) {
+	                return Promise.resolve(repo);
 	            });
 	        }
 
@@ -9108,7 +9108,7 @@
 	    }, {
 	        key: 'processRepositories',
 	        value: function processRepositories(repositories) {
-	            window.resources.repositories = [];
+	            resources.repositories = [];
 
 	            for (var i in repositories) {
 	                var repository = new Repository({
@@ -9119,7 +9119,7 @@
 	                    owner: repositories[i].owner
 	                });
 
-	                window.resources.repositories[i] = repository;
+	                resources.repositories[i] = repository;
 	            }
 	        }
 
@@ -9522,7 +9522,8 @@
 	                name: repository.title,
 	                description: repository.description,
 	                has_issues: true,
-	                is_private: true
+	                is_private: true,
+	                project: repository.project
 	            };
 
 	            return bitBucketRepository;
@@ -9965,15 +9966,27 @@
 	        }
 
 	        /**
+	         * Gets estimate
+	         *
+	         * @returns {String} Estimate
+	         */
+
+	    }, {
+	        key: 'getEstimate',
+	        value: function getEstimate() {
+	            return resources.issueEstimates[this.estimate || 0];
+	        }
+
+	        /**
 	         * Gets estimated hours
 	         *
 	         * @returns {Number} Hours
 	         */
 
 	    }, {
-	        key: 'getEstimate',
-	        value: function getEstimate() {
-	            return estimateToFloat(resources.issueEstimates[this.estimate || 0]);
+	        key: 'getEstimatedHours',
+	        value: function getEstimatedHours() {
+	            return estimateToFloat(this.getEstimate());
 	        }
 
 	        /**
@@ -10250,7 +10263,7 @@
 	                        continue;
 	                    }
 
-	                    total += issue.getEstimate();
+	                    total += issue.getEstimatedHours();
 	                }
 	            } catch (err) {
 	                _didIteratorError3 = true;
@@ -10349,7 +10362,7 @@
 	                for (var _iterator5 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
 	                    var issue = _step5.value;
 
-	                    hours += issue.getEstimate();
+	                    hours += issue.getEstimatedHours();
 	                }
 	            } catch (err) {
 	                _didIteratorError5 = true;
@@ -10856,7 +10869,7 @@
 	                };
 
 	                ApiHelper.getResource('repositories', true).then(function () {
-	                    _.append($content.empty(), _.div({ class: 'repository-list-actions' }, _.button({ class: 'btn repository-list-action' }, 'New repository', _.span({ class: 'fa fa-plus' })).on('click', function (e) {
+	                    _.append($content.empty(), _.div({ class: 'repository-list-actions' }, _.button({ class: 'btn btn-new repository-list-action' }, 'New repository', _.span({ class: 'fa fa-plus' })).on('click', function (e) {
 	                        var name = prompt('Please input the new repository name');
 
 	                        if (!name) {
@@ -12333,6 +12346,7 @@
 	        key: 'onClickPrint',
 	        value: function onClickPrint() {
 	            var html = '';
+	            var repository = Repository.getCurrent();
 
 	            html += '<!DOCTYPE html>';
 	            html += '<html>';
@@ -12343,7 +12357,7 @@
 	            html += '<meta http-equiv="X-UA-Compatible" content="IE=edge"/>';
 	            html += '<meta name="viewport" content="width=device-width initial-scale=1"/>';
 	            html += '<meta name="robots" content"noindex, nofollow"/>';
-	            html += '<title>' + Repository.getCurrent().title + ': ' + this.model.title + '</title>';
+	            html += '<title>' + repository.title + ': ' + this.model.title + '</title>';
 	            html += '<style>body { font-family: sans-serif; }</style>';
 	            html += '</head>';
 
@@ -12351,14 +12365,20 @@
 	            html += '<body>';
 
 	            // Repository title and description
-	            html += '<h1>' + Repository.getCurrent().title + '</h1>';
+	            html += '<h1>' + repository.title + '</h1>';
 
-	            if (Repository.getCurrent().description) {
-	                html += '<p>' + Repository.getCurrent().description + '</p>';
+	            if (repository.description) {
+	                html += '<p>' + repository.description + '</p>';
 	            }
 
 	            // Milestone title and description
-	            html += '<h2>' + this.model.title + '</h2>';
+	            html += '<h2>' + this.model.title;
+
+	            if (this.model.getTotalEstimatedHours() > 0) {
+	                html += ' (' + this.model.getTotalEstimatedHours() + ' hours)';
+	            }
+
+	            html + '</h2>';
 
 	            if (this.model.description) {
 	                html += '<p>' + this.model.description + '</p>';
@@ -12375,8 +12395,8 @@
 	                    // Issue title
 	                    html += '<h3>' + issue.title;
 
-	                    if (issue.getEstimate() > 0) {
-	                        html += ' (' + issue.getEstimate() + ' hour' + (issue.getEstimate() != 1 ? 's' : '') + ')';
+	                    if (issue.getEstimatedHours() > 0) {
+	                        html += ' (' + issue.getEstimatedHours() + ' hour' + (issue.getEstimatedHours() != 1 ? 's' : '') + ')';
 	                    }
 
 	                    html += '</h3>';
@@ -12403,7 +12423,7 @@
 	            html += '</html>';
 
 	            // Instantiate window
-	            var printWindow = window.open('', 'PRINT', 'width=780,height=400');
+	            var printWindow = window.open('', 'PRINT', 'width=780');
 
 	            printWindow.document.write(html);
 	        }
@@ -12500,11 +12520,11 @@
 	            var completedHours = 0;
 
 	            for (var i in total) {
-	                totalHours += total[i].getEstimate();
+	                totalHours += total[i].getEstimatedHours();
 	            }
 
 	            for (var _i in completed) {
-	                completedHours += completed[_i].getEstimate();
+	                completedHours += completed[_i].getEstimatedHours();
 	            }
 
 	            if (total.length > 0 && completed.length > 0) {
@@ -12536,7 +12556,7 @@
 	                for (var _iterator2 = total[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 	                    var issue = _step2.value;
 
-	                    totalHours += issue.getEstimate();
+	                    totalHours += issue.getEstimatedHours();
 	                }
 	            } catch (err) {
 	                _didIteratorError2 = true;
@@ -12561,7 +12581,7 @@
 	                for (var _iterator3 = completed[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
 	                    var _issue = _step3.value;
 
-	                    completedHours += _issue.getEstimate();
+	                    completedHours += _issue.getEstimatedHours();
 	                }
 	            } catch (err) {
 	                _didIteratorError3 = true;
@@ -12721,9 +12741,9 @@
 
 	    return _.div({ class: 'milestone-editor ' + state, 'data-index': this.model.index, 'data-end-date': this.model.endDate }, _.div({ class: 'header' }, _.div({ class: 'progress-bar', style: 'width: ' + this.getPercentComplete() + '%' }), _.div({ class: 'title' }, _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa fa-chevron-right' }), _.h4(this.model.title), _.p(this.model.description)).click(function () {
 	        _this.onClickToggle();
-	    })), _.div({ class: 'stats' }, _.div({ class: 'actions' }, _.button({ class: 'btn-print' }, _.span({ class: 'fa fa-print' })).click(function () {
+	    })), _.div({ class: 'stats' }, _.span({ class: 'progress-amounts' }, _.span({ class: 'fa fa-exclamation-circle' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })), _.span({ class: 'progress-hours' }, _.span({ class: 'fa fa-clock-o' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })), _.div({ class: 'actions' }, _.button({ class: 'btn-print' }, _.span({ class: 'fa fa-print' })).click(function () {
 	        _this.onClickPrint();
-	    })), _.span({ class: 'progress-amounts' }, _.span({ class: 'fa fa-exclamation-circle' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })), _.span({ class: 'progress-hours' }, _.span({ class: 'fa fa-clock-o' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })))), _.div({ class: 'columns' }, _.each(window.resources.issueColumns, function (columnIndex, column) {
+	    })))), _.div({ class: 'columns' }, _.each(window.resources.issueColumns, function (columnIndex, column) {
 	        return _.div({ class: 'column', 'data-index': columnIndex }, _.div({ class: 'header' }, _.h4(column)), _.div({ class: 'body' }, _.each(_this.model.getIssues(), function (issueIndex, issue) {
 	            if (issue.column == columnIndex && issue.milestone == _this.model.index) {
 	                return new IssueEditor({
@@ -13761,10 +13781,45 @@
 
 	        _this.template = __webpack_require__(49);
 
+	        var defaultColumn = '';
+
+	        var _iteratorNormalCompletion = true;
+	        var _didIteratorError = false;
+	        var _iteratorError = undefined;
+
+	        try {
+	            for (var _iterator = resources.issueColumns[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                var column = _step.value;
+
+	                if (column == 'done') {
+	                    defaultColumn = 'done';
+	                    break;
+	                }
+
+	                if (column == 'closed') {
+	                    defaultColumn = 'closed';
+	                    break;
+	                }
+	            }
+	        } catch (err) {
+	            _didIteratorError = true;
+	            _iteratorError = err;
+	        } finally {
+	            try {
+	                if (!_iteratorNormalCompletion && _iterator.return) {
+	                    _iterator.return();
+	                }
+	            } finally {
+	                if (_didIteratorError) {
+	                    throw _iteratorError;
+	                }
+	            }
+	        }
+
 	        _this.defaultFilter = {
 	            key: 'column',
 	            operator: '!=',
-	            value: 'done'
+	            value: defaultColumn
 	        };
 
 	        _this.model = SettingsHelper.get('filters', 'custom', [], true);
@@ -13874,25 +13929,25 @@
 	        value: function applyFilters() {
 	            var issueViews = ViewHelper.getAll('IssueEditor');
 
-	            var _iteratorNormalCompletion = true;
-	            var _didIteratorError = false;
-	            var _iteratorError = undefined;
+	            var _iteratorNormalCompletion2 = true;
+	            var _didIteratorError2 = false;
+	            var _iteratorError2 = undefined;
 
 	            try {
-	                for (var _iterator = issueViews[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                    var issueView = _step.value;
+	                for (var _iterator2 = issueViews[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                    var issueView = _step2.value;
 
 	                    issueView.$element.toggle(true);
 
 	                    var issue = issueView.model.getBakedValues();
 
-	                    var _iteratorNormalCompletion2 = true;
-	                    var _didIteratorError2 = false;
-	                    var _iteratorError2 = undefined;
+	                    var _iteratorNormalCompletion3 = true;
+	                    var _didIteratorError3 = false;
+	                    var _iteratorError3 = undefined;
 
 	                    try {
-	                        for (var _iterator2 = this.model[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                            var filter = _step2.value;
+	                        for (var _iterator3 = this.model[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                            var filter = _step3.value;
 
 	                            try {
 	                                var value = filter.value;
@@ -13914,31 +13969,31 @@
 	                            }
 	                        }
 	                    } catch (err) {
-	                        _didIteratorError2 = true;
-	                        _iteratorError2 = err;
+	                        _didIteratorError3 = true;
+	                        _iteratorError3 = err;
 	                    } finally {
 	                        try {
-	                            if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                                _iterator2.return();
+	                            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                                _iterator3.return();
 	                            }
 	                        } finally {
-	                            if (_didIteratorError2) {
-	                                throw _iteratorError2;
+	                            if (_didIteratorError3) {
+	                                throw _iteratorError3;
 	                            }
 	                        }
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError = true;
-	                _iteratorError = err;
+	                _didIteratorError2 = true;
+	                _iteratorError2 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion && _iterator.return) {
-	                        _iterator.return();
+	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                        _iterator2.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError) {
-	                        throw _iteratorError;
+	                    if (_didIteratorError2) {
+	                        throw _iteratorError2;
 	                    }
 	                }
 	            }
@@ -14330,7 +14385,7 @@
 	        drawNext(1);
 	    };
 
-	    return _.div({ class: 'burndown-chart analytics-body' }, _.div({ class: 'toolbar' }, _.h4({}, 'Milestone', _.select({ class: 'milestone-picker' }, _.each(resources.milestones.concat().sort(this.sortMilestones), function (i, milestone) {
+	    return _.div({ class: 'burndown-chart analytics-body' }, _.div({ class: 'toolbar' }, _.h4({}, 'Milestone', _.select({ class: 'btn milestone-picker' }, _.each(resources.milestones.concat().sort(this.sortMilestones), function (i, milestone) {
 	        return _.option({ value: milestone.index }, milestone.title);
 	    })).val(milestone ? milestone.index : 0).change(function (e) {
 	        _this.onChangeMilestonePicker($(e.target).val());

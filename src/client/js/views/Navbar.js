@@ -174,7 +174,7 @@ class Navbar extends View {
             .then(() => {
                 _.append($content.empty(),
                     _.div({class: 'repository-list-actions'},
-                        _.button({class: 'btn repository-list-action'},
+                        _.button({class: 'btn btn-new repository-list-action'},
                             'New repository',
                             _.span({class: 'fa fa-plus'})
                         ).on('click', (e) => {

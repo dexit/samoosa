@@ -83,7 +83,7 @@ module.exports = function render() {
         _.div({class: 'toolbar'},
             _.h4({},
                 'Milestone',
-                _.select({class: 'milestone-picker'},
+                _.select({class: 'btn milestone-picker'},
                     _.each(resources.milestones.concat().sort(this.sortMilestones), (i, milestone) => {
                         return _.option({value: milestone.index}, milestone.title);
                     })

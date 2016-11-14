@@ -8,10 +8,24 @@ class FilterEditor extends View {
 
         this.template = require('../templates/FilterEditor');
 
+        let defaultColumn = '';
+
+        for(let column of resources.issueColumns) {
+            if(column == 'done') {
+                defaultColumn = 'done';
+                break;
+            }
+
+            if(column == 'closed') {
+                defaultColumn = 'closed';
+                break;
+            }
+        }
+
         this.defaultFilter = {
             key: 'column',
             operator: '!=',
-            value: 'done'
+            value: defaultColumn
         };
 
         this.model = SettingsHelper.get('filters', 'custom', [], true);

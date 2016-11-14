@@ -669,6 +669,11 @@ button.btn, input[type="submit"].btn, select.btn {
 
     option {
         background-color: $pink-medium;
+        font-size: 1em;
+        font-family: 'Bree Serif';
+        text-transform: uppercase;
+        line-height: 36px;
+        height: 36px;
     }
 
     &+.btn {

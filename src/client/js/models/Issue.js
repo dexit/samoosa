@@ -209,14 +209,23 @@ class Issue {
                 
         }
     }
+    
+    /**
+     * Gets estimate
+     *
+     * @returns {String} Estimate
+     */
+    getEstimate() {
+        return resources.issueEstimates[this.estimate || 0];
+    }
 
     /**
      * Gets estimated hours
      *
      * @returns {Number} Hours
      */
-    getEstimate() {
-        return estimateToFloat(resources.issueEstimates[this.estimate || 0]);
+    getEstimatedHours() {
+        return estimateToFloat(this.getEstimate());
     }
 
     /**

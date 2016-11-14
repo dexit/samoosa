@@ -839,9 +839,9 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} Promise
      */
     updateRepository(repo, previousName) {
-        return this.put('2.0/repositories/' + repo.owner + '/' + (repo.id || previousName), this.convertRepository(repo))
+        return this.put('1.0/repositories/' + repo.owner + '/' + (repo.id || previousName), this.convertRepository(repo))
         .then((bitBucketRepository) => {
-            return resolve(repo);  
+            return Promise.resolve(repo);  
         });
     }
     
@@ -977,7 +977,7 @@ class BitBucketApi extends ApiHelper {
      * @param {Array} repositories
      */
     processRepositories(repositories) {
-        window.resources.repositories = [];
+        resources.repositories = [];
 
         for(let i in repositories) {
             let repository = new Repository({
@@ -988,7 +988,7 @@ class BitBucketApi extends ApiHelper {
                 owner: repositories[i].owner
             });
 
-            window.resources.repositories[i] = repository;
+            resources.repositories[i] = repository;
         }
     }
     
@@ -1235,7 +1235,8 @@ class BitBucketApi extends ApiHelper {
             name: repository.title,
             description: repository.description,
             has_issues: true,
-            is_private: true
+            is_private: true,
+            project: repository.project
         };
 
         return bitBucketRepository;

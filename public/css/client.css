@@ -891,13 +891,15 @@ body, html {
         display: flex; }
         .navbar.out.repository-list .obscure > .content .repository-list-actions .repository-list-action {
           flex-shrink: 0; }
+          .navbar.out.repository-list .obscure > .content .repository-list-actions .repository-list-action.btn-new {
+            margin-right: 15px; }
           .navbar.out.repository-list .obscure > .content .repository-list-actions .repository-list-action.search {
             flex-shrink: 1;
             flex-grow: 1;
             width: 100%;
             height: 30px;
             margin-bottom: 15px;
-            padding: 0px 0px 0px 15px;
+            padding: 0px;
             position: relative; }
             .navbar.out.repository-list .obscure > .content .repository-list-actions .repository-list-action.search input {
               border-radius: 18px;
@@ -1704,7 +1706,12 @@ button.btn, input[type="submit"].btn, select.btn {
   margin: 0px;
   border-radius: 0px; }
   button.btn option, input[type="submit"].btn option, select.btn option {
-    background-color: #E70D3B; }
+    background-color: #E70D3B;
+    font-size: 1em;
+    font-family: 'Bree Serif';
+    text-transform: uppercase;
+    line-height: 36px;
+    height: 36px; }
   button.btn + .btn, input[type="submit"].btn + .btn, select.btn + .btn {
     margin-left: 0.5rem; }
   button.btn .fa, input[type="submit"].btn .fa, select.btn .fa {

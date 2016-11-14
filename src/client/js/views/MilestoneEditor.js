@@ -19,6 +19,7 @@ class MilestoneEditor extends View {
      */
     onClickPrint() {
         let html = '';
+        let repository = Repository.getCurrent();
 
         html += '<!DOCTYPE html>';
         html += '<html>';
@@ -29,7 +30,7 @@ class MilestoneEditor extends View {
         html += '<meta http-equiv="X-UA-Compatible" content="IE=edge"/>'
         html += '<meta name="viewport" content="width=device-width initial-scale=1"/>'
         html += '<meta name="robots" content"noindex, nofollow"/>'
-        html += '<title>' + Repository.getCurrent().title + ': ' + this.model.title + '</title>';
+        html += '<title>' + repository.title + ': ' + this.model.title + '</title>';
         html += '<style>body { font-family: sans-serif; }</style>';
         html += '</head>';
         
@@ -37,14 +38,20 @@ class MilestoneEditor extends View {
         html += '<body>';
 
         // Repository title and description
-        html += '<h1>' + Repository.getCurrent().title + '</h1>';
+        html += '<h1>' + repository.title + '</h1>';
 
-        if(Repository.getCurrent().description) {
-            html += '<p>' + Repository.getCurrent().description + '</p>';
+        if(repository.description) {
+            html += '<p>' + repository.description + '</p>';
         }
 
         // Milestone title and description
-        html += '<h2>' + this.model.title + '</h2>';
+        html += '<h2>' + this.model.title;
+
+        if(this.model.getTotalEstimatedHours() > 0) {
+            html += ' (' + this.model.getTotalEstimatedHours() + ' hours)';
+        }
+
+        html + '</h2>';
 
         if(this.model.description) {
             html += '<p>' + this.model.description + '</p>';
@@ -54,8 +61,8 @@ class MilestoneEditor extends View {
             // Issue title
             html += '<h3>' + issue.title;
             
-            if(issue.getEstimate() > 0) {
-                html += ' (' + issue.getEstimate() + ' hour' + (issue.getEstimate() != 1 ? 's' : '') + ')';
+            if(issue.getEstimatedHours() > 0) {
+                html += ' (' + issue.getEstimatedHours() + ' hour' + (issue.getEstimatedHours() != 1 ? 's' : '') + ')';
             }
             
             html += '</h3>';
@@ -68,7 +75,7 @@ class MilestoneEditor extends View {
         html += '</html>';
         
         // Instantiate window
-        let printWindow = window.open('', 'PRINT', 'width=780,height=400');
+        let printWindow = window.open('', 'PRINT', 'width=780');
 
         printWindow.document.write(html);
     }
@@ -156,11 +163,11 @@ class MilestoneEditor extends View {
         let completedHours = 0;
 
         for(let i in total) {
-            totalHours += total[i].getEstimate();
+            totalHours += total[i].getEstimatedHours();
         }
         
         for(let i in completed) {
-             completedHours += completed[i].getEstimate();
+             completedHours += completed[i].getEstimatedHours();
         }
 
         if(total.length > 0 && completed.length > 0) {
@@ -182,11 +189,11 @@ class MilestoneEditor extends View {
         let completedHours = 0;
 
         for(let issue of total) {
-             totalHours += issue.getEstimate();
+             totalHours += issue.getEstimatedHours();
         }
         
         for(let issue of completed) {
-             completedHours += issue.getEstimate();
+             completedHours += issue.getEstimatedHours();
         }
 
         if(total.length > 0 && completed.length > 0) {

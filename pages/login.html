@@ -31,17 +31,6 @@ layout: ~
                             <option value="bitbucket">BitBucket</option>
                         </select>
                     </li>
-                    <li data-hidden=""> 
-                        <label for="input-token">API token</label>
-                        <input id="input-token" type="text" name="token" />
-                    </li>
-                    <li data-hidden="github"> 
-                        <label for="input-refresh">API refresh token</label>
-                        <input id="input-refresh" type="text" name="refresh" />
-                    </li>
-                    <li>
-                        <a id="link-new-token" href="#">Create new token</a>
-                    </li>
                     <li> 
                         <input type="submit" class="btn" value="Log in"/>
                     </li>
@@ -68,51 +57,19 @@ layout: ~
             function onSubmit(e) {
                 e.preventDefault();
                 
-                // Update localStorage
-                $('.login-form input:not([type="submit"]), .login-form select').each(function() {
-                    localStorage.setItem($(this).attr('name'), $(this).val());
-                });
-
-                // Change to default view
-                location = '/';
-            }
-
-            // New token action
-            function onClickNewToken(e) {
-                e.preventDefault();
-
                 var source = $('#input-source').val();
+
+                // No source?
+                if(!source) {
+                    alert('Source was not set');
+                    return;
+                }
 
                 location = 'http://api.samoosa.rocks/oauth/' + source;
             }
 
-            // Event: Change source
-            function onChangeSource() {
-                var source = $('#input-source').val();
-            
-                $('form li').each(function() {
-                    $(this).toggle($(this).data('hidden') != source);
-                });
-            }
-
             // Event hookups
             $('.login-form').on('submit', onSubmit);
-            $('#link-new-token').on('click', onClickNewToken);
-            $('#input-source').on('change', onChangeSource);
-
-            // Receive token parameter
-            var token = getParameterByName('token');
-
-            if(token) {
-                $('input[name="token"]').val(token);
-            }
-            
-            // Receive refresh parameter
-            var refresh = getParameterByName('refresh');
-
-            if(refresh) {
-                $('input[name="refresh"]').val(refresh);
-            }
 
             // Receive source parameter
             var source = getParameterByName('source');
@@ -121,8 +78,16 @@ layout: ~
                 $('#input-source').val(source);
             }
             
-            // Fire init change source
-            onChangeSource();
+            var token = getParameterByName('token');
+            var refresh = getParameterByName('refresh');
+
+            if(token && source) {
+                localStorage.setItem('token', token);
+                localStorage.setItem('refresh', refresh);
+                localStorage.setItem('source', source);
+            
+                location = '/';
+            }
         </script>
     </body>
 </html>

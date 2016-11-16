@@ -68,7 +68,7 @@ class MilestoneEditor extends View {
             html += '</h3>';
 
             // Issue body
-            html += markdownToHtml(issue.description);
+            html += (markdownToHtml(issue.description) || '');
         }
     
         html += '</body>';

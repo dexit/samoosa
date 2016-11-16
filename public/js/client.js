@@ -12431,7 +12431,7 @@
 	                    html += '</h3>';
 
 	                    // Issue body
-	                    html += markdownToHtml(issue.description);
+	                    html += markdownToHtml(issue.description) || '';
 	                }
 	            } catch (err) {
 	                _didIteratorError = true;

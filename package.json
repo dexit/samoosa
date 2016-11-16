@@ -25,7 +25,5 @@
     "style-loader": "^0.13.1",
     "webpack": "^1.13.3"
   },
-  "dependencies": {
-    "babel-polyfill": "^6.16.0"
-  }
+  "dependencies": {}
 }

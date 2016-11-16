@@ -10,7 +10,6 @@ window.app = require('../../../package.json');
 require('exomon');
 window.Promise = require('bluebird');
 window.marked = require('marked');
-require('babel-polyfill');
 
 Promise.onPossiblyUnhandledRejection((error, promise) => {
     throw error;

@@ -77,11 +77,12 @@
             height: calc(100% - 95px);
             left: 0px;
             position: relative;
+            overflow-y: auto;
 
             .date-placeholder {
                 display: block;
                 width: calc(100% / 7);
-                height: calc(100% / 6);
+                height: calc(100% / 4);
                 float: left;
                 border-right: 1px solid material-color('grey', '300');
                 border-bottom: 1px solid material-color('grey', '300');
@@ -90,7 +91,7 @@
             .date {
                 display: block;
                 width: calc(100% / 7);
-                height: calc(100% / 6);
+                height: calc(100% / 4);
                 float: left;
                 border-right: 1px solid material-color('grey', '300');
                 border-bottom: 1px solid material-color('grey', '300');

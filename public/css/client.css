@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700);@import url(https://fonts.googleapis.com/css?family=Bree+Serif);[role="button"],
+[role="button"],
 input[type="text"],
 input[type="submit"],
 input[type="reset"],
@@ -1142,18 +1142,19 @@ body, html {
     .plan-container .plan-editor .dates {
       height: calc(100% - 95px);
       left: 0px;
-      position: relative; }
+      position: relative;
+      overflow-y: auto; }
       .plan-container .plan-editor .dates .date-placeholder {
         display: block;
         width: calc(100% / 7);
-        height: calc(100% / 6);
+        height: calc(100% / 4);
         float: left;
         border-right: 1px solid #e0e0e0;
         border-bottom: 1px solid #e0e0e0; }
       .plan-container .plan-editor .dates .date {
         display: block;
         width: calc(100% / 7);
-        height: calc(100% / 6);
+        height: calc(100% / 4);
         float: left;
         border-right: 1px solid #e0e0e0;
         border-bottom: 1px solid #e0e0e0; }
@@ -1324,6 +1325,24 @@ body > .plan-item-editor {
       position: absolute;
       top: 15px;
       right: 15px; }
+
+/**
+ * Fonts
+ */
+@font-face {
+  font-family: 'Bree Serif';
+  src: url("/public/fonts/BreeSerif-Regular.ttf");
+  font-weight: 400; }
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("/public/fonts/OpenSans-Regular.ttf");
+  font-weight: 400; }
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url("/public/fonts/OpenSans-Bold.ttf");
+  font-weight: 700; }
 
 /**
  * Colours

@@ -995,8 +995,6 @@ body, html {
         transition: width 0.05s ease;
         transition-delay: 0.2s;
         display: block;
-        border-top-left-radius: 2px;
-        border-bottom-left-radius: 2px;
         position: absolute;
         top: 0px;
         right: 0px;

@@ -31,20 +31,35 @@ class ApiHelper {
      * Check whether the connection to the source has been made
      */
     checkConnection() {
-        spinner('Connecting to ' + localStorage.getItem('source'));
+        let userPromise;
+        
+        // Make sure user is logged in
+        if(!User.getCurrent()) {
+            spinner('Connecting to ' + localStorage.getItem('source'));
 
-        debug.log('Getting user...', this);
+            debug.log('Getting user...', this);
 
-        return this.getUser()
-        .then((user) => {
-            if(!user) {
-                return Promise.reject(new Error('User could not be retrieved'));
-            }
+            userPromise = this.getUser()
+            .then((user) => {
+                if(!user) {
+                    return Promise.reject(new Error('User could not be retrieved'));
+                }
+                
+                debug.log('Found user "' + user.name + '"', this);
 
-            debug.log('Found user "' + user.name + '"', this);
+                localStorage.setItem('user', user.name);
 
-            localStorage.setItem('user', user.name);
+                return Promise.resolve();
+            });
+        
+        } else {
+            userPromise = Promise.resolve();
 
+        }
+
+        // Make sure repositories are loaded
+        return userPromise
+        .then(() => {
             if(!resources.repositories || resources.repositories.length < 1) {
                 return this.getRepositories();
             } else {

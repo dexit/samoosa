@@ -6982,19 +6982,31 @@
 	        value: function checkConnection() {
 	            var _this = this;
 
-	            spinner('Connecting to ' + localStorage.getItem('source'));
+	            var userPromise = void 0;
 
-	            debug.log('Getting user...', this);
+	            // Make sure user is logged in
+	            if (!User.getCurrent()) {
+	                spinner('Connecting to ' + localStorage.getItem('source'));
 
-	            return this.getUser().then(function (user) {
-	                if (!user) {
-	                    return Promise.reject(new Error('User could not be retrieved'));
-	                }
+	                debug.log('Getting user...', this);
 
-	                debug.log('Found user "' + user.name + '"', _this);
+	                userPromise = this.getUser().then(function (user) {
+	                    if (!user) {
+	                        return Promise.reject(new Error('User could not be retrieved'));
+	                    }
 
-	                localStorage.setItem('user', user.name);
+	                    debug.log('Found user "' + user.name + '"', _this);
 
+	                    localStorage.setItem('user', user.name);
+
+	                    return Promise.resolve();
+	                });
+	            } else {
+	                userPromise = Promise.resolve();
+	            }
+
+	            // Make sure repositories are loaded
+	            return userPromise.then(function () {
 	                if (!resources.repositories || resources.repositories.length < 1) {
 	                    return _this.getRepositories();
 	                } else {

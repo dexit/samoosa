@@ -57,7 +57,8 @@ module.exports = function render() {
                                     }
                                 }
                             }),
-                            _.button({class: 'btn-transparent'},
+                            _.button({class: 'btn btn-round'},
+                                'New milestone',
                                 _.span({class: 'fa fa-plus'})
                             ).click(() => { this.onClickAddMilestone(date); })
                         )

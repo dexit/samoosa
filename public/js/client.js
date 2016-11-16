@@ -13296,7 +13296,7 @@
 	        _this.onClickClose();
 	    }), _.div({ class: 'header' }, _.h4('Title'), _.input({ class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title })), _.div({ class: 'body' }, _.h4('Description'), _.input({ class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description })), _.div({ class: 'footer' }, _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
 	        _this.onClickDelete();
-	    }), _.button({ class: 'btn' }, 'OK').click(function () {
+	    }), _.button({ class: 'btn' }, 'Apply').click(function () {
 	        _this.onClickOK();
 	    })));
 	};
@@ -13528,10 +13528,38 @@
 	            ResourceHelper.addResource('milestones', new Milestone({
 	                title: 'New milestone',
 	                endDate: date.toISOString()
-	            })).then(function () {
+	            })).then(function (newMilestone) {
 	                _this2.render();
 
 	                spinner(false);
+
+	                var _iteratorNormalCompletion3 = true;
+	                var _didIteratorError3 = false;
+	                var _iteratorError3 = undefined;
+
+	                try {
+	                    for (var _iterator3 = ViewHelper.getAll('PlanItemEditor')[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                        var planItemView = _step3.value;
+
+	                        if (planItemView.model && planItemView.model.id == newMilestone.id) {
+	                            planItemView.openDialog();
+	                            break;
+	                        }
+	                    }
+	                } catch (err) {
+	                    _didIteratorError3 = true;
+	                    _iteratorError3 = err;
+	                } finally {
+	                    try {
+	                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                            _iterator3.return();
+	                        }
+	                    } finally {
+	                        if (_didIteratorError3) {
+	                            throw _iteratorError3;
+	                        }
+	                    }
+	                }
 	            });
 	        }
 	    }, {
@@ -13541,29 +13569,29 @@
 	            var firstDay = new Date(this.currentYear, this.currentMonth, 1);
 	            var firstWeek = firstDay.getWeek();
 
-	            var _iteratorNormalCompletion3 = true;
-	            var _didIteratorError3 = false;
-	            var _iteratorError3 = undefined;
+	            var _iteratorNormalCompletion4 = true;
+	            var _didIteratorError4 = false;
+	            var _iteratorError4 = undefined;
 
 	            try {
-	                for (var _iterator3 = this.getDates()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                    var date = _step3.value;
+	                for (var _iterator4 = this.getDates()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                    var date = _step4.value;
 
 	                    if (weeks.indexOf(date.getWeek()) < 0) {
 	                        weeks.push(date.getWeek());
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError3 = true;
-	                _iteratorError3 = err;
+	                _didIteratorError4 = true;
+	                _iteratorError4 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	                        _iterator3.return();
+	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                        _iterator4.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError3) {
-	                        throw _iteratorError3;
+	                    if (_didIteratorError4) {
+	                        throw _iteratorError4;
 	                    }
 	                }
 	            }
@@ -13593,29 +13621,29 @@
 	    }, {
 	        key: 'getDate',
 	        value: function getDate(week, weekday) {
-	            var _iteratorNormalCompletion4 = true;
-	            var _didIteratorError4 = false;
-	            var _iteratorError4 = undefined;
+	            var _iteratorNormalCompletion5 = true;
+	            var _didIteratorError5 = false;
+	            var _iteratorError5 = undefined;
 
 	            try {
-	                for (var _iterator4 = this.getDates()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	                    var date = _step4.value;
+	                for (var _iterator5 = this.getDates()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                    var date = _step5.value;
 
 	                    if (date.getWeek() == week && date.getISODay() == weekday) {
 	                        return date;
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError4 = true;
-	                _iteratorError4 = err;
+	                _didIteratorError5 = true;
+	                _iteratorError5 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-	                        _iterator4.return();
+	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	                        _iterator5.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError4) {
-	                        throw _iteratorError4;
+	                    if (_didIteratorError5) {
+	                        throw _iteratorError5;
 	                    }
 	                }
 	            }
@@ -13695,7 +13723,7 @@
 	                        }).$element;
 	                    }
 	                }
-	            }), _.button({ class: 'btn-transparent' }, _.span({ class: 'fa fa-plus' })).click(function () {
+	            }), _.button({ class: 'btn btn-round' }, 'New milestone', _.span({ class: 'fa fa-plus' })).click(function () {
 	                _this.onClickAddMilestone(date);
 	            })));
 	        }

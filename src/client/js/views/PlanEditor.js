@@ -155,10 +155,18 @@ class PlanEditor extends View {
             title: 'New milestone',
             endDate: date.toISOString()
         }))
-        .then(() => {
+        .then((newMilestone) => {
             this.render();
 
             spinner(false);
+            
+            for(let planItemView of ViewHelper.getAll('PlanItemEditor')) {
+                if(planItemView.model && planItemView.model.id == newMilestone.id) {
+                    planItemView.openDialog();
+                    break;
+                }
+            }
+
         });
     }
 

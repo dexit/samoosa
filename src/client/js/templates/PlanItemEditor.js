@@ -18,7 +18,7 @@ module.exports = function render() {
         ),
         _.div({class: 'footer'},
             _.button({class: 'btn btn-remove'}, _.span({class: 'fa fa-trash'})).click(() => { this.onClickDelete(); }),
-            _.button({class: 'btn'}, 'OK').click(() => { this.onClickOK(); })
+            _.button({class: 'btn'}, 'Apply').click(() => { this.onClickOK(); })
         )
     );
 };

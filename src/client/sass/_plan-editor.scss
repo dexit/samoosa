@@ -90,11 +90,21 @@
 
             .date {
                 display: block;
+                position: relative;
                 width: calc(100% / 7);
                 height: calc(100% / 4);
                 float: left;
                 border-right: 1px solid material-color('grey', '300');
                 border-bottom: 1px solid material-color('grey', '300');
+                
+                &:hover {
+                    .body { 
+                        >.btn {
+                            display: block;
+                        }
+                    }
+
+                }
 
                 &.hovering {
                     outline: 4px solid material-color('green', '300');
@@ -121,11 +131,9 @@
                 }
 
                 .body {
-                    >button {
-                        float: right;
-                        line-height: 30px;
-                        width: 30px;
-                        text-align: center;
+                    >.btn {
+                        display: none;
+                        width: 100%;
                     }    
                 } 
             }

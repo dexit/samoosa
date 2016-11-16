@@ -1153,11 +1153,14 @@ body, html {
         border-bottom: 1px solid #e0e0e0; }
       .plan-container .plan-editor .dates .date {
         display: block;
+        position: relative;
         width: calc(100% / 7);
         height: calc(100% / 4);
         float: left;
         border-right: 1px solid #e0e0e0;
         border-bottom: 1px solid #e0e0e0; }
+        .plan-container .plan-editor .dates .date:hover .body > .btn {
+          display: block; }
         .plan-container .plan-editor .dates .date.hovering {
           outline: 4px solid #81c784;
           outline-offset: -4px; }
@@ -1172,11 +1175,9 @@ body, html {
           .plan-container .plan-editor .dates .date .header .weeknumber {
             color: #bdbdbd;
             float: right; }
-        .plan-container .plan-editor .dates .date .body > button {
-          float: right;
-          line-height: 30px;
-          width: 30px;
-          text-align: center; }
+        .plan-container .plan-editor .dates .date .body > .btn {
+          display: none;
+          width: 100%; }
 
 body > .plan-item-editor {
   border: 1px solid #9e9e9e;

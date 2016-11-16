@@ -2,7 +2,8 @@
 
 module.exports = function RepositoryBar() {
     return _.div({class: 'repository-bar'},
-        _.h4({class: 'title'},
+        _.h4({class: 'title'}, this.model.title),
+        /*
             _.span({class: 'rendered'}, this.model.title),
             _.input({type: 'text', class: 'selectable edit hidden', value: this.model.title})
                 .on('change blur keyup', (e) => {
@@ -14,7 +15,9 @@ module.exports = function RepositoryBar() {
                 _.span({class: 'fa fa-edit'})
             ).click(() => { this.onClickEditTitle(); })
         ),
-        _.p({class: 'description'},
+        */
+        _.p({class: 'description'}, this.model.description)
+        /*
             _.span({class: 'rendered'}, this.model.description),
             _.input({type: 'text', class: 'selectable edit hidden', value: this.model.description})
                 .on('change blur keyup', (e) => {
@@ -26,5 +29,6 @@ module.exports = function RepositoryBar() {
                 _.span({class: 'fa fa-edit'})
             ).click(() => { this.onClickEditDescription(); })
         )
+        */
     );
 };

@@ -170,43 +170,42 @@ class Navbar extends View {
                 });       
             };
 
-            ApiHelper.getResource('repositories', true)
-            .then(() => {
-                _.append($content.empty(),
-                    _.div({class: 'repository-list-actions'},
-                        _.button({class: 'btn btn-new repository-list-action'},
-                            'New repository',
-                            _.span({class: 'fa fa-plus'})
-                        ).on('click', (e) => {
-                            let name = prompt('Please input the new repository name');
+            _.append($content.empty(),
+                _.div({class: 'repository-list-actions'},
+                    /*
+                    _.button({class: 'btn btn-new repository-list-action'},
+                        'New repository',
+                        _.span({class: 'fa fa-plus'})
+                    ).on('click', (e) => {
+                        let name = prompt('Please input the new repository name');
 
-                            if(!name) { return; }
+                        if(!name) { return; }
 
-                            ResourceHelper.addResource('repositories', name)
-                            .then((repository) => {
-                                location = '/#/' + repository.owner + '/' + repository.title;
-                            });
-                        }),
-                        _.div({class: 'repository-list-action search'},
-                            _.input({type: 'text', placeholder: 'Search in repositories...'})
-                                .on('change keyup paste', (e) => {
-                                    let query = e.target.value;
+                        ResourceHelper.addResource('repositories', name)
+                        .then((repository) => {
+                            location = '/#/' + repository.owner + '/' + repository.title;
+                        });
+                    }),
+                    */
+                    _.div({class: 'repository-list-action search'},
+                        _.input({type: 'text', placeholder: 'Search in repositories...'})
+                            .on('change keyup paste', (e) => {
+                                let query = e.target.value;
 
-                                    filterRepositories(query);
-                                }),
-                            _.span({class: 'fa fa-search'})
-                        )
-                    ),
-                    _.div({class: 'repository-list-items'},
-                        _.each(window.resources.repositories, (i, repository) => {
-                            return new RepositoryEditor({
-                                model: repository,
-                                overrideUrl: overrideUrl
-                            }).$element;
-                        })
+                                filterRepositories(query);
+                            }),
+                        _.span({class: 'fa fa-search'})
                     )
-                );
-            });
+                ),
+                _.div({class: 'repository-list-items'},
+                    _.each(window.resources.repositories, (i, repository) => {
+                        return new RepositoryEditor({
+                            model: repository,
+                            overrideUrl: overrideUrl
+                        }).$element;
+                    })
+                )
+            );
         }, isActive);
     }
 

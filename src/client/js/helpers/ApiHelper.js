@@ -45,7 +45,11 @@ class ApiHelper {
 
             localStorage.setItem('user', user.name);
 
-            return Promise.resolve(user);
+            if(!resources.repositories || resources.repositories.length < 1) {
+                return this.getRepositories();
+            } else {
+                return Promise.resolve()
+            }
         });
     }
 
@@ -856,10 +860,7 @@ class ApiHelper {
             }
         }
 
-        return get('repositories')
-        .then(() => {
-            return get('issueTypes');
-        })
+        return get('issueTypes')
         .then(() => {
             return get('issuePriorities');
         })

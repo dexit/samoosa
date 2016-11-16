@@ -6994,7 +6994,11 @@
 
 	                localStorage.setItem('user', user.name);
 
-	                return Promise.resolve(user);
+	                if (!resources.repositories || resources.repositories.length < 1) {
+	                    return _this.getRepositories();
+	                } else {
+	                    return Promise.resolve();
+	                }
 	            });
 	        }
 
@@ -7967,9 +7971,7 @@
 	                }
 	            };
 
-	            return get('repositories').then(function () {
-	                return get('issueTypes');
-	            }).then(function () {
+	            return get('issueTypes').then(function () {
 	                return get('issuePriorities');
 	            }).then(function () {
 	                return get('issueEstimates');
@@ -10868,28 +10870,30 @@
 	                    });
 	                };
 
-	                ApiHelper.getResource('repositories', true).then(function () {
-	                    _.append($content.empty(), _.div({ class: 'repository-list-actions' }, _.button({ class: 'btn btn-new repository-list-action' }, 'New repository', _.span({ class: 'fa fa-plus' })).on('click', function (e) {
-	                        var name = prompt('Please input the new repository name');
+	                _.append($content.empty(), _.div({ class: 'repository-list-actions' },
+	                /*
+	                _.button({class: 'btn btn-new repository-list-action'},
+	                    'New repository',
+	                    _.span({class: 'fa fa-plus'})
+	                ).on('click', (e) => {
+	                    let name = prompt('Please input the new repository name');
+	                     if(!name) { return; }
+	                     ResourceHelper.addResource('repositories', name)
+	                    .then((repository) => {
+	                        location = '/#/' + repository.owner + '/' + repository.title;
+	                    });
+	                }),
+	                */
+	                _.div({ class: 'repository-list-action search' }, _.input({ type: 'text', placeholder: 'Search in repositories...' }).on('change keyup paste', function (e) {
+	                    var query = e.target.value;
 
-	                        if (!name) {
-	                            return;
-	                        }
-
-	                        ResourceHelper.addResource('repositories', name).then(function (repository) {
-	                            location = '/#/' + repository.owner + '/' + repository.title;
-	                        });
-	                    }), _.div({ class: 'repository-list-action search' }, _.input({ type: 'text', placeholder: 'Search in repositories...' }).on('change keyup paste', function (e) {
-	                        var query = e.target.value;
-
-	                        filterRepositories(query);
-	                    }), _.span({ class: 'fa fa-search' }))), _.div({ class: 'repository-list-items' }, _.each(window.resources.repositories, function (i, repository) {
-	                        return new RepositoryEditor({
-	                            model: repository,
-	                            overrideUrl: overrideUrl
-	                        }).$element;
-	                    })));
-	                });
+	                    filterRepositories(query);
+	                }), _.span({ class: 'fa fa-search' }))), _.div({ class: 'repository-list-items' }, _.each(window.resources.repositories, function (i, repository) {
+	                    return new RepositoryEditor({
+	                        model: repository,
+	                        overrideUrl: overrideUrl
+	                    }).$element;
+	                })));
 	            }, isActive);
 	        }
 
@@ -11123,25 +11127,33 @@
 	'use strict';
 
 	module.exports = function RepositoryBar() {
-	    var _this = this;
-
-	    return _.div({ class: 'repository-bar' }, _.h4({ class: 'title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden', value: this.model.title }).on('change blur keyup', function (e) {
-	        if (e.which && e.which != 13) {
-	            return;
-	        }
-
-	        _this.onChange();
-	    }), _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(function () {
-	        _this.onClickEditTitle();
-	    })), _.p({ class: 'description' }, _.span({ class: 'rendered' }, this.model.description), _.input({ type: 'text', class: 'selectable edit hidden', value: this.model.description }).on('change blur keyup', function (e) {
-	        if (e.which && e.which != 13) {
-	            return;
-	        }
-
-	        _this.onChange();
-	    }), _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(function () {
-	        _this.onClickEditDescription();
-	    })));
+	    return _.div({ class: 'repository-bar' }, _.h4({ class: 'title' }, this.model.title),
+	    /*
+	        _.span({class: 'rendered'}, this.model.title),
+	        _.input({type: 'text', class: 'selectable edit hidden', value: this.model.title})
+	            .on('change blur keyup', (e) => {
+	                if(e.which && e.which != 13) { return; }
+	                 this.onChange();
+	            }),
+	        _.button({class: 'btn-edit'},
+	            _.span({class: 'fa fa-edit'})
+	        ).click(() => { this.onClickEditTitle(); })
+	    ),
+	    */
+	    _.p({ class: 'description' }, this.model.description)
+	    /*
+	        _.span({class: 'rendered'}, this.model.description),
+	        _.input({type: 'text', class: 'selectable edit hidden', value: this.model.description})
+	            .on('change blur keyup', (e) => {
+	                if(e.which && e.which != 13) { return; }
+	                 this.onChange();
+	            }),
+	        _.button({class: 'btn-edit'},
+	            _.span({class: 'fa fa-edit'})
+	        ).click(() => { this.onClickEditDescription(); })
+	    )
+	    */
+	    );
 	};
 
 /***/ },

@@ -239,13 +239,13 @@ class Navbar extends View {
             this.toggleRepositoriesList(true, url);
 
         } else {
-            url = this.getFullUrl(url);
+            let fullUrl = this.getFullUrl(url);
 
-            if(url != Router.url) {
+            if(fullUrl != Router.url) {
                 this.$element.toggleClass('out', true);
                 
                 setTimeout(() => {
-                    location.hash = url;
+                    location.hash = fullUrl;
                 }, 400);
             }
         }
@@ -257,7 +257,7 @@ class Navbar extends View {
     slideIn() {
         if(Router.url) {
             let url = Router.url
-                .replace('/' + ApiHelper.getUserName(), '')
+                .replace('/' + ApiHelper.getRepositoryOwner(), '')
                 .replace('/' + ApiHelper.getRepositoryName(), '');
 
             if(Router.params.resource) {

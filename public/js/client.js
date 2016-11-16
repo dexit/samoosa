@@ -10927,21 +10927,25 @@
 	    }, {
 	        key: 'onClickLink',
 	        value: function onClickLink(url) {
+	            var _this3 = this;
+
 	            this.cleanUpClasses();
 	            this.$element.find('.obscure .content').empty();
 
 	            if (!ApiHelper.getRepositoryName()) {
 	                this.toggleRepositoriesList(true, url);
 	            } else {
-	                url = this.getFullUrl(url);
+	                (function () {
+	                    var fullUrl = _this3.getFullUrl(url);
 
-	                if (url != Router.url) {
-	                    this.$element.toggleClass('out', true);
+	                    if (fullUrl != Router.url) {
+	                        _this3.$element.toggleClass('out', true);
 
-	                    setTimeout(function () {
-	                        location.hash = url;
-	                    }, 400);
-	                }
+	                        setTimeout(function () {
+	                            location.hash = fullUrl;
+	                        }, 400);
+	                    }
+	                })();
 	            }
 	        }
 
@@ -10953,7 +10957,7 @@
 	        key: 'slideIn',
 	        value: function slideIn() {
 	            if (Router.url) {
-	                var url = Router.url.replace('/' + ApiHelper.getUserName(), '').replace('/' + ApiHelper.getRepositoryName(), '');
+	                var url = Router.url.replace('/' + ApiHelper.getRepositoryOwner(), '').replace('/' + ApiHelper.getRepositoryName(), '');
 
 	                if (Router.params.resource) {
 	                    url = url.replace(Router.params.resource, '');

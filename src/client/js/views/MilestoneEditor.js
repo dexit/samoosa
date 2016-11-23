@@ -31,7 +31,12 @@ class MilestoneEditor extends View {
         html += '<meta name="viewport" content="width=device-width initial-scale=1"/>'
         html += '<meta name="robots" content"noindex, nofollow"/>'
         html += '<title>' + repository.title + ': ' + this.model.title + '</title>';
-        html += '<style>body { font-family: sans-serif; }</style>';
+        html += '<style>';
+        html += 'body { font-family: sans-serif; max-width: 900px; margin: 0px auto; }';
+        html += 'h1, h2, h3, h4, h5, h6 { margin-top: 1em; margin-bottom: 0px; }';
+        html += 'h1, h3, h5 { margin-top: 0px; }';
+        html += 'section { margin-top: 1rem; border: 1px solid #000; padding: 1rem; }';
+        html += '</style>';
         html += '</head>';
         
         // Body
@@ -41,7 +46,7 @@ class MilestoneEditor extends View {
         html += '<h1>' + repository.title + '</h1>';
 
         if(repository.description) {
-            html += '<p>' + repository.description + '</p>';
+            html += '<h5>' + repository.description + '</h5>';
         }
 
         // Milestone title and description
@@ -51,24 +56,36 @@ class MilestoneEditor extends View {
             html += ' (' + this.model.getTotalEstimatedHours() + ' hours)';
         }
 
-        html + '</h2>';
+        html += '</h2>';
 
         if(this.model.description) {
-            html += '<p>' + this.model.description + '</p>';
+            html += '<h5>' + this.model.description + '</h5>';
         }
 
         for(let issue of this.model.getIssues()) {
+            html += '<section>';
+
             // Issue title
-            html += '<h3>' + issue.title;
+            html += '<h3>' + issue.id + ': ' + issue.title + '</h3>';
+
+            html += '<h5>';
+
+            // Issue assignee
+            if(issue.getAssignee()) {
+                html += (issue.getAssignee().displayName || issue.getAssignee().name);
+            }
             
+            // Issue estimate
             if(issue.getEstimatedHours() > 0) {
                 html += ' (' + issue.getEstimatedHours() + ' hour' + (issue.getEstimatedHours() != 1 ? 's' : '') + ')';
             }
             
-            html += '</h3>';
+            html += '</h5>';
 
             // Issue body
-            html += (markdownToHtml(issue.description) || '');
+            html += (marked(issue.description) || '');
+            
+            html += '</section>';
         }
     
         html += '</body>';

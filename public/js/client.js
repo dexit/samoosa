@@ -10897,7 +10897,7 @@
 	                    });
 	                }),
 	                */
-	                _.div({ class: 'repository-list-action search' }, _.input({ type: 'text', placeholder: 'Search in repositories...' }).on('change keyup paste', function (e) {
+	                _.div({ class: 'repository-list-action search' }, _.input({ class: 'selectable', type: 'text', placeholder: 'Search in repositories...' }).on('change keyup paste', function (e) {
 	                    var query = e.target.value;
 
 	                    filterRepositories(query);

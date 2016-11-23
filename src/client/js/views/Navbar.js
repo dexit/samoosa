@@ -188,7 +188,7 @@ class Navbar extends View {
                     }),
                     */
                     _.div({class: 'repository-list-action search'},
-                        _.input({type: 'text', placeholder: 'Search in repositories...'})
+                        _.input({class: 'selectable', type: 'text', placeholder: 'Search in repositories...'})
                             .on('change keyup paste', (e) => {
                                 let query = e.target.value;
 

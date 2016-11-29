@@ -187,7 +187,7 @@ module.exports = function render() {
         // Attachments
         _.div({class: 'attachments'},
             _.label('Attachments'),
-            _.input({name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file'})
+            _.input({name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file', multiple: true})
                 .change((e) => { this.onAttachmentFileInputChange(e); }),
             _.label({for: 'input-upload-attachment-' + this.model.id, class: 'btn-upload-attachment'},
                 _.span({class: 'fa fa-upload'})
@@ -203,23 +203,27 @@ module.exports = function render() {
         _.if(!ApiHelper.isSpectating(),
             _.div({class: 'add-comment'},
                 // Add comment input
-                _.textarea({class: 'btn-transparent', placeholder: 'Add comment here...'})
-                    .keyup(this.onKeyUp)
-                    .on('paste', (e) => {
-                        this.onPaste(e);
-                    }),
+                _.div({class: 'comment'},
+                    _.div({class: 'collaborator'},
+                        _.img({title: User.getCurrent().displayName || User.getCurrent().name, src: User.getCurrent().avatar}),
+                    ),
+                    _.textarea({class: 'edit selectable btn-transparent', placeholder: 'Add comment here...'})
+                        .keyup(this.onKeyUp)
+                        .blur(() => { this.onSubmitComment(); })
+                        .on('paste', (e) => { this.onPaste(e); })
+                )
+            )
+        ),
 
+        _.if(!ApiHelper.isSpectating(),
+            _.div({class: 'actions'},
                 // Remove button
                 _.if(!ApiHelper.isSpectating(),
-                    _.button({class: 'btn btn-remove'},
+                    _.button({class: 'btn'},
+                        'Remove issue',
                         _.span({class: 'fa fa-trash'})
                     ).click(() => { this.onClickRemove(); })
-                ),
-
-                // Add comment button
-                _.button({class: 'btn'},
-                    'Comment'
-                ).click(() => { this.onClickComment(); })
+                )
             )
         )
     );

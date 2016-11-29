@@ -443,10 +443,12 @@ class IssueEditor extends View {
     /**
      * Event: Click the comment button
      */
-    onClickComment() {
+    onSubmitComment() {
         if(ApiHelper.isSpectating()) { return; }
         
         let text = this.$element.find('.add-comment textarea').val();
+
+        if(!text) { return; }
 
         this.$element.toggleClass('loading', true);
     
@@ -591,7 +593,7 @@ class IssueEditor extends View {
                 let blob = items[i].getAsFile();
                 let file = null;
 
-                this.attachFile(blob);
+                this.attachFiles(blob);
                 return;
             }
         }
@@ -603,52 +605,90 @@ class IssueEditor extends View {
      * @param {Event} e
      */
     onAttachmentFileInputChange(e) {
-        if(e.target.files && e.target.files.length > 0) {
-            this.attachFile(e.target.files[0]);
-        } 
+        let files = e.target.files;
+        
+        if(files && files.length > 0) {
+            this.attachFiles(files);
+        }
     }
 
     /**
-     * Attaches an image from file
+     * Attaches a file
      *
-     * @param {File} file
+     * @param {Array} files
      */
-    attachFile(file) {
-        let reader = new FileReader();
+    attachFiles(files) {
+        if(files instanceof FileList) {
+            let fileList = files;
 
-        // Event: On file loaded
-        reader.onload = (e) => {
-            let base64 = e.target.result;
-
-            // Remove headers
-            let headersRegex = /data:(.+);base64,/;
-            let headersMatch = headersRegex.exec(base64);
-    
-            base64 = base64.replace(headersRegex, '');
-
-            if(file instanceof File == false) {
-                try {
-                    file = new File([file], 'pasted_' + new Date().getTime() + '.png');
-                
-                } catch(e) {
-
-                }
+            files = [];
+            
+            for(let i = 0; i < fileList.length; i++) {
+                files[i] = fileList[i];
             }
+        }
 
-            spinner('Attaching "' + file.name + '"');
+        if(!Array.isArray(files)) {
+            files = [ files ];
+        }
+        
+        let uploadFile = (file) => {
+            return new Promise((resolve, reject) => {
+                let reader = new FileReader();
 
-            let attachment = new Attachment({
-                name: file.name,
-                file: file,
-                base64: base64,
-                headers: headersMatch ? headersMatch[0] : null
+                // Event: On file loaded
+                reader.onload = (e) => {
+                    // Get base64
+                    let base64 = e.target.result;
+                    let headersRegex = /data:(.+);base64,/;
+                    let headersMatch = headersRegex.exec(base64);
+                    base64 = base64.replace(headersRegex, '');
+
+                    // Create file name if needed
+                    if(file instanceof File == false) {
+                        try {
+                            file = new File([file], 'pasted_' + new Date().getTime() + '.png');
+                        
+                        } catch(e) {
+
+                        }
+                    }
+
+                    spinner('Attaching "' + file.name + '"');
+
+                    // Create attachment object
+                    let attachment = new Attachment({
+                        name: file.name,
+                        file: file,
+                        base64: base64,
+                        headers: headersMatch ? headersMatch[0] : null
+                    });
+
+                    resolve(attachment);
+                };
+
+                // Read the file
+                reader.readAsDataURL(file);
             });
+        };
+  
+        // Handles the next file in the files array 
+        let uploadNextFile = () => {
+            let nextFile = files.pop();
 
-            ApiHelper.addIssueAttachment(this.model, attachment)
-            .then((uploadedAttachment) => {
+            if(!nextFile) {
                 this.getAttachments();
                 
                 spinner(false);
+                return Promise.resolve();
+            }
+            
+            return uploadFile(nextFile)
+            .then((attachment) => {
+                return ApiHelper.addIssueAttachment(this.model, attachment);
+            })
+            .then(() => {
+                return uploadNextFile();
             })
             .catch((e) => {
                 displayError(e);
@@ -657,8 +697,7 @@ class IssueEditor extends View {
             });
         };
 
-        // Read the file
-        reader.readAsDataURL(file);
+        uploadNextFile();
     }
 
     /**
@@ -785,8 +824,7 @@ class IssueEditor extends View {
                     
                     return _.div({class: 'comment', 'data-index': comment.index},
                         _.div({class: 'collaborator'},
-                            _.img({src: collaborator.avatar}),
-                            _.p(collaborator.displayName || collaborator.name)    
+                            _.img({title: collaborator.displayName || collaborator.name, src: collaborator.avatar}),
                         ),
                         _.if(isUser, 
                             _.button({class: 'btn-edit'},

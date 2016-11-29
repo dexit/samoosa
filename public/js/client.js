@@ -11760,8 +11760,8 @@
 	         */
 
 	    }, {
-	        key: 'onClickComment',
-	        value: function onClickComment() {
+	        key: 'onSubmitComment',
+	        value: function onSubmitComment() {
 	            var _this5 = this;
 
 	            if (ApiHelper.isSpectating()) {
@@ -11769,6 +11769,10 @@
 	            }
 
 	            var text = this.$element.find('.add-comment textarea').val();
+
+	            if (!text) {
+	                return;
+	            }
 
 	            this.$element.toggleClass('loading', true);
 
@@ -11949,7 +11953,7 @@
 	                    var blob = items[i].getAsFile();
 	                    var file = null;
 
-	                    this.attachFile(blob);
+	                    this.attachFiles(blob);
 	                    return;
 	                }
 	            }
@@ -11964,53 +11968,90 @@
 	    }, {
 	        key: 'onAttachmentFileInputChange',
 	        value: function onAttachmentFileInputChange(e) {
-	            if (e.target.files && e.target.files.length > 0) {
-	                this.attachFile(e.target.files[0]);
+	            var files = e.target.files;
+
+	            if (files && files.length > 0) {
+	                this.attachFiles(files);
 	            }
 	        }
 
 	        /**
-	         * Attaches an image from file
+	         * Attaches a file
 	         *
-	         * @param {File} file
+	         * @param {Array} files
 	         */
 
 	    }, {
-	        key: 'attachFile',
-	        value: function attachFile(file) {
+	        key: 'attachFiles',
+	        value: function attachFiles(files) {
 	            var _this8 = this;
 
-	            var reader = new FileReader();
+	            if (files instanceof FileList) {
+	                var fileList = files;
 
-	            // Event: On file loaded
-	            reader.onload = function (e) {
-	                var base64 = e.target.result;
+	                files = [];
 
-	                // Remove headers
-	                var headersRegex = /data:(.+);base64,/;
-	                var headersMatch = headersRegex.exec(base64);
-
-	                base64 = base64.replace(headersRegex, '');
-
-	                if (file instanceof File == false) {
-	                    try {
-	                        file = new File([file], 'pasted_' + new Date().getTime() + '.png');
-	                    } catch (e) {}
+	                for (var i = 0; i < fileList.length; i++) {
+	                    files[i] = fileList[i];
 	                }
+	            }
 
-	                spinner('Attaching "' + file.name + '"');
+	            if (!Array.isArray(files)) {
+	                files = [files];
+	            }
 
-	                var attachment = new Attachment({
-	                    name: file.name,
-	                    file: file,
-	                    base64: base64,
-	                    headers: headersMatch ? headersMatch[0] : null
+	            var uploadFile = function uploadFile(file) {
+	                return new Promise(function (resolve, reject) {
+	                    var reader = new FileReader();
+
+	                    // Event: On file loaded
+	                    reader.onload = function (e) {
+	                        // Get base64
+	                        var base64 = e.target.result;
+	                        var headersRegex = /data:(.+);base64,/;
+	                        var headersMatch = headersRegex.exec(base64);
+	                        base64 = base64.replace(headersRegex, '');
+
+	                        // Create file name if needed
+	                        if (file instanceof File == false) {
+	                            try {
+	                                file = new File([file], 'pasted_' + new Date().getTime() + '.png');
+	                            } catch (e) {}
+	                        }
+
+	                        spinner('Attaching "' + file.name + '"');
+
+	                        // Create attachment object
+	                        var attachment = new Attachment({
+	                            name: file.name,
+	                            file: file,
+	                            base64: base64,
+	                            headers: headersMatch ? headersMatch[0] : null
+	                        });
+
+	                        resolve(attachment);
+	                    };
+
+	                    // Read the file
+	                    reader.readAsDataURL(file);
 	                });
+	            };
 
-	                ApiHelper.addIssueAttachment(_this8.model, attachment).then(function (uploadedAttachment) {
+	            // Handles the next file in the files array 
+	            var uploadNextFile = function uploadNextFile() {
+	                var nextFile = files.pop();
+
+	                if (!nextFile) {
 	                    _this8.getAttachments();
 
 	                    spinner(false);
+	                    return Promise.resolve();
+	                }
+
+	                return uploadFile(nextFile).then(function (attachment) {
+	                    return ApiHelper.addIssueAttachment(_this8.model, attachment);
+	                }).then(function () {
+	                    return uploadNextFile();
 	                }).catch(function (e) {
 	                    displayError(e);
 
@@ -12018,8 +12059,7 @@
 	                });
 	            };
 
-	            // Read the file
-	            reader.readAsDataURL(file);
+	            uploadNextFile();
 	        }
 
 	        /**
@@ -12146,7 +12186,7 @@
 	                    var text = markdownToHtml(comment.text);
 	                    var isUser = collaborator.name == user.name;
 
-	                    return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ src: collaborator.avatar }), _.p(collaborator.displayName || collaborator.name)), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this10.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
+	                    return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: collaborator.displayName || collaborator.name, src: collaborator.avatar })), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this10.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
 	                        _this10.$element.toggleClass('loading', true);
 
 	                        comment.text = _this10.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
@@ -12307,7 +12347,7 @@
 	    })),
 
 	    // Attachments
-	    _.div({ class: 'attachments' }, _.label('Attachments'), _.input({ name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file' }).change(function (e) {
+	    _.div({ class: 'attachments' }, _.label('Attachments'), _.input({ name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file', multiple: true }).change(function (e) {
 	        _this.onAttachmentFileInputChange(e);
 	    }), _.label({ for: 'input-upload-attachment-' + this.model.id, class: 'btn-upload-attachment' }, _.span({ class: 'fa fa-upload' }))),
 
@@ -12317,19 +12357,15 @@
 	    // Add comment
 	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'add-comment' },
 	    // Add comment input
-	    _.textarea({ class: 'btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp).on('paste', function (e) {
+	    _.div({ class: 'comment' }, _.div({ class: 'collaborator' }, _.img({ title: User.getCurrent().displayName || User.getCurrent().name, src: User.getCurrent().avatar })), _.textarea({ class: 'edit selectable btn-transparent', placeholder: 'Add comment here...' }).keyup(this.onKeyUp).blur(function () {
+	        _this.onSubmitComment();
+	    }).on('paste', function (e) {
 	        _this.onPaste(e);
-	    }),
-
+	    })))), _.if(!ApiHelper.isSpectating(), _.div({ class: 'actions' },
 	    // Remove button
-	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
+	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn' }, 'Remove issue', _.span({ class: 'fa fa-trash' })).click(function () {
 	        _this.onClickRemove();
-	    })),
-
-	    // Add comment button
-	    _.button({ class: 'btn' }, 'Comment').click(function () {
-	        _this.onClickComment();
-	    }))));
+	    })))));
 	};
 
 /***/ },

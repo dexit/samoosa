@@ -38,7 +38,7 @@
             }
         }
 
-        .attachments, .meta, .body, .operations, .comments, .add-comment {
+        .attachments, .meta, .body, .operations, .actions, .comments, .add-comment {
             display: block;
         }
 
@@ -72,7 +72,7 @@
                 }
             }
 
-            .body, .attachments, .comments, .add-comment {
+            .body, .attachments, .actions, .comments, .add-comment {
                 display: none;
             }
         }
@@ -270,7 +270,7 @@
         }
     }
 
-    .body, .operations, .attachments, .comments, .add-comment {
+    .body, .operations, .attachments, .actions, .comments, .add-comment {
         display: none;
         padding: 15px;
     }
@@ -347,7 +347,7 @@
     }
     
     .attachments {
-        padding: 0px 0px 0px 15px;
+        padding: 0px 0px 10px 15px;
         position: relative;
 
         label {
@@ -371,7 +371,7 @@
         }
 
         div.attachment {
-            margin: 0px 15px 15px 0px;
+            margin: 0px 15px 5px 0px;
             padding: 5px 10px;
             text-decoration: none;
             display: flex;
@@ -393,10 +393,10 @@
             }
         }
     }
-
-    .comments {
+    
+    .add-comment, .comments {
         padding: 0px 15px 0px 15px;
-
+        
         .comment {
             display: flex;
             margin-bottom: 15px;
@@ -407,9 +407,9 @@
             }   
 
             .collaborator {
-                width: 80px;
                 padding-right: 15px;
                 flex-shrink: 0;
+                text-align: left;
 
                 img {
                     max-width: 30px;
@@ -434,9 +434,6 @@
     }
 
     .add-comment {
-        text-align: right;
-        padding: 0px 15px 15px 15px;
-        
         textarea {    
             text-align: left;
             padding: 10px;

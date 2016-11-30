@@ -822,7 +822,7 @@ class IssueEditor extends View {
                     let text = markdownToHtml(comment.text);
                     let isUser = collaborator.name == user.name;
                     
-                    return _.div({class: 'comment', 'data-index': comment.index},
+                    let $comment = _.div({class: 'comment', 'data-index': comment.index},
                         _.div({class: 'collaborator'},
                             _.img({title: collaborator.displayName || collaborator.name, src: collaborator.avatar}),
                         ),
@@ -838,15 +838,23 @@ class IssueEditor extends View {
                             ).change(() => {
                                 this.$element.toggleClass('loading', true);
                                 
-                                comment.text = this.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
+                                comment.text = $comment.find('textarea').val();
 
-                                this.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(
+                                $comment.find('.rendered').html(
                                     markdownToHtml(comment.text) || ''
                                 );
 
                                 ApiHelper.updateIssueComment(this.model, comment)
                                 .then(() => {
                                     this.$element.toggleClass('loading', false);
+
+                                    if(!comment.text) {
+                                        $comment.remove();
+                                    }
+                                })
+                                .catch((e) => {
+                                    this.$element.toggleClass('loading', false);
+                                    displayError(e);
                                 });
                             })
                             .blur(this.onBlur)
@@ -857,6 +865,8 @@ class IssueEditor extends View {
                             )
                         )
                     );
+
+                    return $comment;
                 })
             );
         });

@@ -6816,19 +6816,15 @@
 	         *
 	         * @param {Issue} issue
 	         * @param {String} text
+	         *
+	         * @return {Promise} Promise
 	         */
 
 	    }, {
 	        key: 'addIssueComment',
 	        value: function addIssueComment(issue, text) {
-	            var _this18 = this;
-
-	            return new Promise(function (callback) {
-	                _this18.post('/repos/' + _this18.getRepositoryOwner() + '/' + _this18.getRepositoryName() + '/issues/' + issue.id + '/comments', {
-	                    body: text
-	                }).then(function () {
-	                    callback();
-	                });
+	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments', {
+	                body: text
 	            });
 	        }
 
@@ -6837,19 +6833,19 @@
 	         *
 	         * @param {Issue} issue
 	         * @param {Object} comment
+	         *
+	         * @return {Promise} Promise
 	         */
 
 	    }, {
 	        key: 'updateIssueComment',
 	        value: function updateIssueComment(issue, comment) {
-	            var _this19 = this;
+	            if (!comment || !comment.text) {
+	                return this.removeIssueComment(issue, comment);
+	            }
 
-	            return new Promise(function (callback) {
-	                _this19.patch('/repos/' + _this19.getRepositoryOwner() + '/' + _this19.getRepositoryName() + '/issues/comments/' + comment.index, {
-	                    body: comment.text
-	                }).then(function () {
-	                    callback();
-	                });
+	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/comments/' + comment.index, {
+	                body: comment.text
 	            });
 	        }
 
@@ -6858,6 +6854,8 @@
 	         *
 	         * @param {Issue} issue
 	         * @param {Object} comment
+	         *
+	         * @return {Promise} Promise
 	         */
 
 	    }, {
@@ -6877,45 +6875,41 @@
 	    }, {
 	        key: 'getIssueComments',
 	        value: function getIssueComments(issue) {
-	            var _this20 = this;
+	            return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
+	                var comments = [];
 
-	            return new Promise(function (callback) {
-	                _this20.get('/repos/' + _this20.getRepositoryOwner() + '/' + _this20.getRepositoryName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
-	                    var comments = [];
+	                var _iteratorNormalCompletion11 = true;
+	                var _didIteratorError11 = false;
+	                var _iteratorError11 = undefined;
 
-	                    var _iteratorNormalCompletion11 = true;
-	                    var _didIteratorError11 = false;
-	                    var _iteratorError11 = undefined;
+	                try {
+	                    for (var _iterator11 = gitHubComments[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+	                        var gitHubComment = _step11.value;
 
+	                        var comment = {
+	                            collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
+	                            text: gitHubComment.body,
+	                            index: gitHubComment.id
+	                        };
+
+	                        comments.push(comment);
+	                    }
+	                } catch (err) {
+	                    _didIteratorError11 = true;
+	                    _iteratorError11 = err;
+	                } finally {
 	                    try {
-	                        for (var _iterator11 = gitHubComments[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-	                            var gitHubComment = _step11.value;
-
-	                            var comment = {
-	                                collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
-	                                text: gitHubComment.body,
-	                                index: gitHubComment.id
-	                            };
-
-	                            comments.push(comment);
+	                        if (!_iteratorNormalCompletion11 && _iterator11.return) {
+	                            _iterator11.return();
 	                        }
-	                    } catch (err) {
-	                        _didIteratorError11 = true;
-	                        _iteratorError11 = err;
 	                    } finally {
-	                        try {
-	                            if (!_iteratorNormalCompletion11 && _iterator11.return) {
-	                                _iterator11.return();
-	                            }
-	                        } finally {
-	                            if (_didIteratorError11) {
-	                                throw _iteratorError11;
-	                            }
+	                        if (_didIteratorError11) {
+	                            throw _iteratorError11;
 	                        }
 	                    }
+	                }
 
-	                    callback(comments);
-	                });
+	                return Promise.resolve(comments);
 	            });
 	        }
 	    }]);
@@ -12186,17 +12180,26 @@
 	                    var text = markdownToHtml(comment.text);
 	                    var isUser = collaborator.name == user.name;
 
-	                    return _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: collaborator.displayName || collaborator.name, src: collaborator.avatar })), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this10.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
+	                    var $comment = _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: collaborator.displayName || collaborator.name, src: collaborator.avatar })), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this10.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
 	                        _this10.$element.toggleClass('loading', true);
 
-	                        comment.text = _this10.$element.find('.comments .comment[data-index="' + comment.index + '"] textarea').val();
+	                        comment.text = $comment.find('textarea').val();
 
-	                        _this10.$element.find('.comments .comment[data-index="' + comment.index + '"] .rendered').html(markdownToHtml(comment.text) || '');
+	                        $comment.find('.rendered').html(markdownToHtml(comment.text) || '');
 
 	                        ApiHelper.updateIssueComment(_this10.model, comment).then(function () {
 	                            _this10.$element.toggleClass('loading', false);
+
+	                            if (!comment.text) {
+	                                $comment.remove();
+	                            }
+	                        }).catch(function (e) {
+	                            _this10.$element.toggleClass('loading', false);
+	                            displayError(e);
 	                        });
 	                    }).blur(_this10.onBlur)), _.if(!isUser, _.div({ class: 'text' }, text)));
+
+	                    return $comment;
 	                }));
 	            });
 	        }

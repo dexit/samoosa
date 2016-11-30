@@ -1323,15 +1323,12 @@ class GitHubApi extends ApiHelper {
      *
      * @param {Issue} issue
      * @param {String} text
+     *
+     * @return {Promise} Promise
      */
     addIssueComment(issue, text) {
-        return new Promise((callback) => {
-            this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments', {
-                body: text
-            })
-            .then(() => {
-                callback(); 
-            });
+        return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments', {
+            body: text
         });
     }
 
@@ -1340,15 +1337,16 @@ class GitHubApi extends ApiHelper {
      *
      * @param {Issue} issue
      * @param {Object} comment
+     *
+     * @return {Promise} Promise
      */
     updateIssueComment(issue, comment) {
-        return new Promise((callback) => {
-            this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/comments/' + comment.index, {
-                body: comment.text
-            })
-            .then(() => {
-                callback(); 
-            });
+        if(!comment || !comment.text) {
+            return this.removeIssueComment(issue, comment);
+        }
+
+        return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/comments/' + comment.index, {
+            body: comment.text
         });
     }
     
@@ -1357,6 +1355,8 @@ class GitHubApi extends ApiHelper {
      *
      * @param {Issue} issue
      * @param {Object} comment
+     *
+     * @return {Promise} Promise
      */
     removeIssueComment(issue, comment) {
         return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/comments/' + comment.index);
@@ -1370,23 +1370,21 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getIssueComments(issue) {
-        return new Promise((callback) => {
-            this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments')
-            .then((gitHubComments) => {
-                let comments = [];
+        return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments')
+        .then((gitHubComments) => {
+            let comments = [];
 
-                for(let gitHubComment of gitHubComments) {
-                    let comment = {
-                        collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
-                        text: gitHubComment.body,
-                        index: gitHubComment.id
-                    };
+            for(let gitHubComment of gitHubComments) {
+                let comment = {
+                    collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
+                    text: gitHubComment.body,
+                    index: gitHubComment.id
+                };
 
-                    comments.push(comment);
-                }
+                comments.push(comment);
+            }
 
-                callback(comments);            
-            });
+            return Promise.resolve(comments);            
         });
     }
 }

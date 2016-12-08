@@ -4749,22 +4749,12 @@
 
 	            // Register keydown events
 	            $(document).keydown(function (e) {
-	                switch (e.which) {
-	                    case 16:
-	                        _this.isShiftDown = true;
-	                        break;
-	                }
-
 	                InputHelper.poke();
 	            });
 
 	            // Register keyup events
 	            $(document).keyup(function (e) {
 	                switch (e.which) {
-	                    case 16:
-	                        _this.isShiftDown = false;
-	                        break;
-
 	                    case 27:
 	                        IssueEditor.cancelMultiSelect();
 	                        break;
@@ -4800,6 +4790,8 @@
 	            idleTimer++;
 
 	            if (idleTimer >= IDLE_TIMEOUT) {
+	                idleTimer = 0;
+
 	                // Do something after idle timeout
 	            }
 	        }
@@ -11404,7 +11396,7 @@
 	                return;
 	            }
 
-	            if (!InputHelper.isShiftDown) {
+	            if (!e.shiftKey) {
 	                (function () {
 	                    // Set class on board container
 	                    $('.board-container').toggleClass('dragging', true);
@@ -11744,7 +11736,7 @@
 	                return;
 	            }
 
-	            if (!InputHelper.isShiftDown && !$(this).parents('.issue-editor').hasClass('selected')) {
+	            if (!e.shiftKey && !$(this).parents('.issue-editor').hasClass('selected')) {
 	                $(this).toggleClass('hidden', true).siblings('.rendered').toggleClass('hidden', true).siblings('.edit').toggleClass('hidden', false).focus().select();
 	            }
 	        }
@@ -11877,7 +11869,7 @@
 	            }
 
 	            // Check for shift key
-	            if (InputHelper.isShiftDown) {
+	            if (e.shiftKey) {
 	                e.preventDefault();
 	                e.stopPropagation();
 

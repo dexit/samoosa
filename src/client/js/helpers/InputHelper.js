@@ -14,22 +14,12 @@ class InputHelper {
     static init() {
         // Register keydown events
         $(document).keydown((e) => {
-            switch(e.which) {
-                case 16:
-                    this.isShiftDown = true;
-                    break;
-            }
-            
             InputHelper.poke(); 
         });
         
         // Register keyup events
         $(document).keyup((e) => {
             switch(e.which) {
-                case 16:
-                    this.isShiftDown = false;
-                    break;
-
                 case 27:
                     IssueEditor.cancelMultiSelect();
                     break;
@@ -62,6 +52,8 @@ class InputHelper {
         idleTimer++;
 
         if(idleTimer >= IDLE_TIMEOUT) {
+            idleTimer = 0;
+
             // Do something after idle timeout
         }
     }

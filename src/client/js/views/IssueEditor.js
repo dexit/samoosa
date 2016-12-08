@@ -193,7 +193,7 @@ class IssueEditor extends View {
     onClickDragHandle(e) {
         if(ApiHelper.isSpectating()) { return; }
         
-        if(!InputHelper.isShiftDown) {
+        if(!e.shiftKey) {
             // Set class on board container
             $('.board-container').toggleClass('dragging', true);
 
@@ -428,7 +428,7 @@ class IssueEditor extends View {
 
         if(ApiHelper.isSpectating()) { return; }
         
-        if(!InputHelper.isShiftDown && !$(this).parents('.issue-editor').hasClass('selected')) {
+        if(!e.shiftKey && !$(this).parents('.issue-editor').hasClass('selected')) {
             $(this)
             .toggleClass('hidden', true)
             .siblings('.rendered')
@@ -532,7 +532,7 @@ class IssueEditor extends View {
         if(ApiHelper.isSpectating()) { return; }
         
         // Check for shift key
-        if(InputHelper.isShiftDown) {
+        if(e.shiftKey) {
             e.preventDefault();
             e.stopPropagation();
 

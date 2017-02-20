@@ -674,7 +674,10 @@ select {
     }
 }
 
-button.btn, input[type="submit"].btn, select.btn {
+button.btn, input[type="submit"].btn, select.btn, a.btn {
+    line-height: 35px;
+    text-align: center;
+    text-decoration: none;
     padding: 0px 10px;
     font-size: 1em;
     height: 36px;

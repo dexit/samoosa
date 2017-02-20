@@ -294,28 +294,10 @@ body, html {
       max-width: 128px; }
     .login-form .logo h1 {
       margin: 0px; }
-  .login-form ul {
-    list-style-type: none;
-    padding: 0px; }
-    .login-form ul li {
-      display: flex;
-      margin-bottom: 1rem; }
-      .login-form ul li:last-child {
-        margin-top: 1rem;
-        margin-bottom: 0px; }
-      .login-form ul li a {
-        text-align: right;
-        display: block;
-        width: 100%; }
-      .login-form ul li label {
-        width: 40%;
-        flex-shrink: 0; }
-      .login-form ul li input, .login-form ul li select {
-        flex-grow: 1; }
-      .login-form ul li input[type="text"], .login-form ul li input[type="password"] {
-        padding: 0em 0.4em; }
-      .login-form ul li input[type="submit"] {
-        width: 100%; }
+  .login-form .login-form-buttons {
+    display: flex; }
+    .login-form .login-form-buttons a {
+      flex-grow: 1; }
 
 .board-container.multi-edit .issue-editor:not(.selected) {
   opacity: 0.5; }
@@ -1711,7 +1693,10 @@ select {
     background-color: #171e23;
     font-weight: bold; }
 
-button.btn, input[type="submit"].btn, select.btn {
+button.btn, input[type="submit"].btn, select.btn, a.btn {
+  line-height: 35px;
+  text-align: center;
+  text-decoration: none;
   padding: 0px 10px;
   font-size: 1em;
   height: 36px;
@@ -1721,16 +1706,16 @@ button.btn, input[type="submit"].btn, select.btn {
   background-color: #E70D3B;
   margin: 0px;
   border-radius: 0px; }
-  button.btn option, input[type="submit"].btn option, select.btn option {
+  button.btn option, input[type="submit"].btn option, select.btn option, a.btn option {
     background-color: #E70D3B;
     font-size: 1em;
     font-family: 'Bree Serif';
     text-transform: uppercase;
     line-height: 36px;
     height: 36px; }
-  button.btn + .btn, input[type="submit"].btn + .btn, select.btn + .btn {
+  button.btn + .btn, input[type="submit"].btn + .btn, select.btn + .btn, a.btn + .btn {
     margin-left: 0.5rem; }
-  button.btn .fa, input[type="submit"].btn .fa, select.btn .fa {
+  button.btn .fa, input[type="submit"].btn .fa, select.btn .fa, a.btn .fa {
     margin-left: 0.5em; }
 
 button.btn-remove {

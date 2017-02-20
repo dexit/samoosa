@@ -18,27 +18,18 @@ layout: ~
     </head>
     <body>
         <div class="app-container login-container">
-            <form class="login-form">
+            <div class="login-form">
                 <div class="logo">
                     <img src="../public/svg/logo-medium.svg" />
                     <h1>Samoosa</h1>
                 </div>
-                <ul>
-                    <li>
-                        <label for="input-source">Source</label>
-                        <select class="btn" id="input-source" name="source">
-                            <option value="github">GitHub</option>
-                            <option value="bitbucket">BitBucket</option>
-                        </select>
-                    </li>
-                    <li> 
-                        <input type="submit" class="btn" value="Log in"/>
-                    </li>
-                </ul>
-            </form>
+                <div class="login-form-buttons">
+                    <a class="btn" href="http://api.samoosa.rocks/oauth/github">GitHub<span class="fa fa-github"></span></a>
+                    <a class="btn" href="http://api.samoosa.rocks/oauth/bitbucket">BitBucket<span class="fa fa-bitbucket"></span></a>
+                </div>
+            </div>
         </div>
 
-        <script src="../public/lib/jquery/jquery.min.js"></script>
         <script>
             // Get parameter by name
             function getParameterByName(name, url) {
@@ -53,31 +44,8 @@ layout: ~
                 return decodeURIComponent(results[2].replace(/\+/g, " "));
             }
 
-            // Submit action
-            function onSubmit(e) {
-                e.preventDefault();
-                
-                var source = $('#input-source').val();
-
-                // No source?
-                if(!source) {
-                    alert('Source was not set');
-                    return;
-                }
-
-                location = 'http://api.samoosa.rocks/oauth/' + source;
-            }
-
-            // Event hookups
-            $('.login-form').on('submit', onSubmit);
-
             // Receive source parameter
             var source = getParameterByName('source');
-
-            if(source) {
-                $('#input-source').val(source);
-            }
-            
             var token = getParameterByName('token');
             var refresh = getParameterByName('refresh');
 

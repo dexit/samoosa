@@ -47,7 +47,7 @@ $white: #fff;
  */
 body, textarea, label, input, option, select {
     font-family: 'Open Sans';
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.5em;
 }
 
@@ -776,9 +776,25 @@ button.btn-remove {
             color: $teal-light; 
             height: 2rem;
             line-height: 2rem;
+            max-width: 300px;
+            text-align: center;
+            text-decoration: none;
                 
             &.active {
-                color: $teal-dark; 
+                background-color: transparent;
+                color: $pink-medium;
+                position: relative;
+
+                &:after {
+                    content: '';
+                    display: block;
+                    position: absolute;
+                    bottom: 0px;
+                    left: 0px;
+                    height: 4px;
+                    width: 100%;
+                    background-color: $pink-medium;
+                }
             }
 
             &, &.active {

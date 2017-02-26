@@ -176,6 +176,8 @@ body, html {
   .app-container .workspace {
     padding-top: 56px;
     flex-grow: 1; }
+    .app-container .workspace.board-container {
+      padding-top: 88px; }
     .app-container .workspace .workspace-fixed {
       z-index: 500;
       position: fixed;
@@ -1330,7 +1332,7 @@ body > .plan-item-editor {
  */
 body, textarea, label, input, option, select {
   font-family: 'Open Sans';
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.5em; }
 
 h1, h2, h3, h4, h5, h6 {
@@ -1765,9 +1767,23 @@ button.btn-remove {
     border-radius: 0px;
     color: #5b84a2;
     height: 2rem;
-    line-height: 2rem; }
+    line-height: 2rem;
+    max-width: 300px;
+    text-align: center;
+    text-decoration: none; }
     .tabbed-container .tabs .tab.active {
-      color: #21303B; }
+      background-color: transparent;
+      color: #E70D3B;
+      position: relative; }
+      .tabbed-container .tabs .tab.active:after {
+        content: '';
+        display: block;
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        height: 4px;
+        width: 100%;
+        background-color: #E70D3B; }
     .tabbed-container .tabs .tab, .tabbed-container .tabs .tab.active {
       border: 0px;
       box-shadow: none; }

@@ -95,6 +95,10 @@ body, html {
         padding-top: 56px;
         flex-grow: 1;
 
+        &.board-container {
+            padding-top: 88px;
+        }
+
         .workspace-fixed {
             z-index: 500;
             position: fixed;

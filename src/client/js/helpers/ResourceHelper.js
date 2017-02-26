@@ -67,6 +67,16 @@ class ResourceHelper {
         }
     }
     
+    static getIssueCategory(name) {
+        for(let i in resources.issueCategories) {
+            let category = resources.issueCategories[i];
+            
+            if(category == name) {
+                return i;
+            }
+        }
+    }
+    
     static getVersion(name) {
         for(let i in resources.versions) {
             let version = resources.versions[i];

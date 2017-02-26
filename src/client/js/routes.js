@@ -49,7 +49,11 @@ Router.route('/:user/:repository/plan/', () => {
 });
 
 // Board
-Router.route('/:user/:repository/board/:mode', () => {
+Router.route('/:user/:repository/board/:mode/', () => {
+    location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/all';
+});
+
+Router.route('/:user/:repository/board/:mode/:category', () => {
     ApiHelper.checkConnection()
     .then(() => {
         return ApiHelper.getResources(true);
@@ -62,7 +66,8 @@ Router.route('/:user/:repository/board/:mode', () => {
             _.div({class: 'workspace board-container ' + Router.params.mode},
                 _.div({class: 'workspace-fixed'},
                     new RepositoryBar().$element,
-                    new FilterEditor().$element
+                    new FilterEditor().$element,
+                    new CategoryBar().$element
                 ),
                 _.each(window.resources.milestones, (i, milestone) => {
                     return new MilestoneEditor({

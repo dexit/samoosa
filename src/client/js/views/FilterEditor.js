@@ -28,7 +28,7 @@ class FilterEditor extends View {
             value: defaultColumn
         };
 
-        this.model = SettingsHelper.get('filters', 'custom', [], true);
+        this.model = SettingsHelper.get('filters', 'custom', [], true) || [];
 
         this.fetch();
 
@@ -117,10 +117,11 @@ class FilterEditor extends View {
         let issueViews = ViewHelper.getAll('IssueEditor');
 
         for(let issueView of issueViews) {
-            issueView.$element.toggle(true);
-           
             let issue = issueView.model.getBakedValues();
+            let isCategoryMatch = Router.params.category == 'all' || Router.params.category == issue.category;
 
+            issueView.$element.toggle(isCategoryMatch);
+           
             for(let filter of this.model) {
                 try {
                     let value = filter.value;

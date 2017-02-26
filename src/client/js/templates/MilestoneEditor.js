@@ -46,9 +46,11 @@ module.exports = function render() {
                     _.div({class: 'body'},
                         _.each(this.model.getIssues(), (issueIndex, issue) => {
                             if(issue.column == columnIndex && issue.milestone == this.model.index) {
-                                return new IssueEditor({
+                                let $issueEditor = new IssueEditor({
                                     model: issue
                                 }).$element;      
+
+                                return $issueEditor;
                             }            
                         }),
                         _.if(columnIndex == 0 && !ApiHelper.isSpectating(),

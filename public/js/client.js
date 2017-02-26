@@ -105,17 +105,18 @@
 	// Views
 	window.Navbar = __webpack_require__(33);
 	window.RepositoryBar = __webpack_require__(35);
-	window.IssueEditor = __webpack_require__(37);
-	window.MilestoneEditor = __webpack_require__(39);
-	window.ResourceEditor = __webpack_require__(41);
-	window.PlanItemEditor = __webpack_require__(43);
-	window.PlanEditor = __webpack_require__(45);
-	window.RepositoryEditor = __webpack_require__(47);
-	window.FilterEditor = __webpack_require__(49);
-	window.BurnDownChart = __webpack_require__(51);
+	window.CategoryBar = __webpack_require__(37);
+	window.IssueEditor = __webpack_require__(39);
+	window.MilestoneEditor = __webpack_require__(41);
+	window.ResourceEditor = __webpack_require__(43);
+	window.PlanItemEditor = __webpack_require__(45);
+	window.PlanEditor = __webpack_require__(47);
+	window.RepositoryEditor = __webpack_require__(49);
+	window.FilterEditor = __webpack_require__(51);
+	window.BurnDownChart = __webpack_require__(52);
 
 	// Routes
-	__webpack_require__(53);
+	__webpack_require__(54);
 
 	// Title
 	$('head title').html((Router.params.repository ? Router.params.repository + ' - ' : '') + 'Samoosa');
@@ -194,16 +195,41 @@
 
 	    _createClass(Router, null, [{
 	        key: 'route',
+
+	        /**
+	         * Creates a new route
+	         *
+	         * @param {String} path
+	         * @param {Function} controller
+	         */
 	        value: function route(path, controller) {
 	            routes[path] = {
 	                controller: controller
 	            };
 	        }
+
+	        /**
+	         * Goes to the route
+	         *
+	         * @param {String} url
+	         * @param {Boolean} quiet
+	         */
+
 	    }, {
 	        key: 'go',
-	        value: function go(url) {
-	            location.hash = url;
+	        value: function go(url, quiet) {
+	            if (quiet) {
+	                window.history.pushState(url, url, '#' + url);
+	                this.directToRoute(url, true);
+	            } else {
+	                location.hash = url;
+	            }
 	        }
+
+	        /**
+	         * Goes to the base directory
+	         */
+
 	    }, {
 	        key: 'goToBaseDir',
 	        value: function goToBaseDir() {
@@ -212,6 +238,15 @@
 
 	            this.go(base);
 	        }
+
+	        /**
+	         * Gets a query string parameter
+	         *
+	         * @param {String} name
+	         *
+	         * @returns {String} Value
+	         */
+
 	    }, {
 	        key: 'query',
 	        value: function query(name) {
@@ -227,9 +262,17 @@
 
 	            return decodeURIComponent(results[2].replace(/\+/g, " "));
 	        }
+
+	        /**
+	         * Directs to the route
+	         *
+	         * @param {String} url
+	         * @param {Boolean} quiet
+	         */
+
 	    }, {
 	        key: 'directToRoute',
-	        value: function directToRoute(url) {
+	        value: function directToRoute(url, quiet) {
 	            // Look for route
 	            var context = {};
 	            var route = void 0;
@@ -288,12 +331,17 @@
 	                }
 	            }
 
-	            if (route) {
+	            if (route && !quiet) {
 	                route.controller();
 	            }
 
 	            Router.url = url;
 	        }
+
+	        /**
+	         * Initialise
+	         */
+
 	    }, {
 	        key: 'init',
 	        value: function init() {
@@ -801,12 +849,20 @@
 	        }
 	    } else if (content) {
 	        // jQuery logic
-	        if (typeof jQuery !== 'undefined' && element instanceof jQuery) {
+	        if (typeof jQuery !== 'undefined') {
+	            if (element instanceof jQuery == false) {
+	                element = $(element);
+	            }
+
 	            element.append(content);
 
 	            // Native JavaScript logic
 	        } else {
-	            element.appendChild(content);
+	            if (typeof content === 'number' || typeof content === 'string') {
+	                element.innerHTML += content.toString();
+	            } else {
+	                element.appendChild(content);
+	            }
 	        }
 	    }
 	}
@@ -860,7 +916,7 @@
 	        var _loop = function _loop() {
 	            var shorthand = _step.value;
 
-	            element[shorthand] = function click(callback) {
+	            element[shorthand] = function (callback) {
 	                return element.on(shorthand, callback);
 	            };
 	        };
@@ -896,37 +952,44 @@
 	function create(tag, attr, contents) {
 	    var element = document.createElement(tag.toUpperCase());
 
+	    var isContents = function isContents(obj) {
+	        if (!obj) {
+	            return false;
+	        }
+
+	        return obj instanceof Array || obj instanceof HTMLElement || typeof jQuery !== 'undefined' && obj instanceof jQuery || typeof obj === 'string' || typeof obj === 'number';
+	    };
+
+	    // The attribute parameter is the content
+	    if (isContents(attr)) {
+	        contents = [attr, contents];
+
+	        // The attribute parameter was defined as an object
+	    } else if (typeof attr !== 'undefined' && attr instanceof Object && attr instanceof Array == false) {
+	        try {
+	            for (var k in attr) {
+	                element.setAttribute(k, attr[k]);
+	            }
+	        } catch (e) {
+	            console.log(e);
+
+	            console.log(attr, isContents(attr));
+	        }
+	    }
+
+	    append(element, contents);
+
 	    // jQuery logic
 	    if (typeof jQuery !== 'undefined') {
-	        element = $(element);
-
-	        // If the attribute parameter is a jQuery instance, just reassign the parameter values
-	        if (attr instanceof jQuery || typeof attr === 'string') {
-	            contents = attr;
-	        } else {
-	            for (var k in attr) {
-	                element.attr(k, attr[k]);
-	            }
-	        }
+	        return $(element);
 
 	        // Native JavaScript logic
 	    } else {
 	        // Assign custom event functions to element instead of extending the prototype
 	        assignEvents(element);
 
-	        // If the attribute parameter is a HTMLElement instance, just reassign the parameter values
-	        if (attr instanceof HTMLElement || typeof attr === 'string') {
-	            contents = attr;
-	        } else {
-	            for (var k in attr) {
-	                element.setAttribute(k, attr[k]);
-	            }
-	        }
+	        return element;
 	    }
-
-	    append(element, contents);
-
-	    return element;
 	}
 
 	/**
@@ -1030,14 +1093,16 @@
 	FunctionTemplating.find = function (query) {
 	    var element = document.querySelector(query);
 
-	    if (element) {
-	        if (typeof jQuery !== 'undefined') {
-	            return $(element);
-	        } else {
-	            assignEvents(element);
+	    if (!element) {
+	        return null;
+	    }
 
-	            return element;
-	        }
+	    if (typeof jQuery !== 'undefined') {
+	        return $(element);
+	    } else {
+	        assignEvents(element);
+
+	        return element;
 	    }
 	};
 
@@ -1051,37 +1116,21 @@
 	FunctionTemplating.findAll = function (query) {
 	    var elements = document.querySelectorAll(query);
 
-	    if (elements) {
-	        if (typeof jQuery !== 'undefined') {
-	            return $(elements);
-	        } else {
-	            var _iteratorNormalCompletion2 = true;
-	            var _didIteratorError2 = false;
-	            var _iteratorError2 = undefined;
+	    if (!elements) {
+	        return [];
+	    }
 
-	            try {
-	                for (var _iterator2 = elements[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                    var element = _step2.value;
+	    if (typeof jQuery !== 'undefined') {
+	        return $(elements);
+	    } else {
+	        var array = [];
 
-	                    assignEvents(element);
-	                }
-	            } catch (err) {
-	                _didIteratorError2 = true;
-	                _iteratorError2 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                        _iterator2.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError2) {
-	                        throw _iteratorError2;
-	                    }
-	                }
-	            }
-
-	            return elements;
+	        for (var _i2 = 0; _i2 < elements.length; _i2++) {
+	            array[_i2] = elements[_i2];
+	            assignEvents(array[_i2]);
 	        }
+
+	        return array;
 	    }
 	};
 
@@ -1585,7 +1634,7 @@
 	                        _this2.$element.remove();
 
 	                        // Native JavaScript
-	                    } else if (_this2.element) {
+	                    } else if (_this2.element && _this2.element.parentElement) {
 	                        _this2.element.parentElement.removeChild(_this2.element);
 	                    }
 
@@ -9882,6 +9931,17 @@
 	            }
 	        }
 	    }, {
+	        key: 'getIssueCategory',
+	        value: function getIssueCategory(name) {
+	            for (var i in resources.issueCategories) {
+	                var category = resources.issueCategories[i];
+
+	                if (category == name) {
+	                    return i;
+	                }
+	            }
+	        }
+	    }, {
 	        key: 'getVersion',
 	        value: function getVersion(name) {
 	            for (var i in resources.versions) {
@@ -10898,6 +10958,24 @@
 	        }
 
 	        /**
+	         * Gets issue categories
+	         *
+	         * @returns {Promise} promise
+	         */
+
+	    }, {
+	        key: 'getIssueCategories',
+	        value: function getIssueCategories() {
+	            var _this11 = this;
+
+	            return this.getLabels().then(function (labels) {
+	                _this11.processIssueCategories(labels);
+
+	                return Promise.resolve();
+	            });
+	        }
+
+	        /**
 	         * Gets issue types
 	         *
 	         * @returns {Promise} promise
@@ -10906,10 +10984,10 @@
 	    }, {
 	        key: 'getIssueTypes',
 	        value: function getIssueTypes() {
-	            var _this11 = this;
+	            var _this12 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this11.processIssueTypes(labels);
+	                _this12.processIssueTypes(labels);
 
 	                return Promise.resolve();
 	            });
@@ -10924,10 +11002,10 @@
 	    }, {
 	        key: 'getIssueColumns',
 	        value: function getIssueColumns() {
-	            var _this12 = this;
+	            var _this13 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this12.processIssueColumns(labels);
+	                _this13.processIssueColumns(labels);
 
 	                return Promise.resolve();
 	            });
@@ -11000,10 +11078,10 @@
 	    }, {
 	        key: 'getIssuePriorities',
 	        value: function getIssuePriorities() {
-	            var _this13 = this;
+	            var _this14 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this13.processIssuePriorities(labels);
+	                _this14.processIssuePriorities(labels);
 
 	                return Promise.resolve();
 	            });
@@ -11018,10 +11096,10 @@
 	    }, {
 	        key: 'getIssueEstimates',
 	        value: function getIssueEstimates() {
-	            var _this14 = this;
+	            var _this15 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this14.processIssueEstimates(labels);
+	                _this15.processIssueEstimates(labels);
 
 	                return Promise.resolve();
 	            });
@@ -11036,10 +11114,10 @@
 	    }, {
 	        key: 'getVersions',
 	        value: function getVersions() {
-	            var _this15 = this;
+	            var _this16 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this15.processVersions(labels);
+	                _this16.processVersions(labels);
 
 	                return Promise.resolve();
 	            });
@@ -11054,10 +11132,10 @@
 	    }, {
 	        key: 'getMilestones',
 	        value: function getMilestones() {
-	            var _this16 = this;
+	            var _this17 = this;
 
 	            return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones').then(function (milestones) {
-	                _this16.processMilestones(milestones);
+	                _this17.processMilestones(milestones);
 
 	                return Promise.resolve();
 	            });
@@ -11123,6 +11201,25 @@
 	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
 	                name: name,
 	                color: color || 'ffffff'
+	            });
+	        }
+
+	        /**
+	         * Adds issue category
+	         *
+	         * @param {String} category
+	         *
+	         * @returns {Promise} promise
+	         */
+
+	    }, {
+	        key: 'addIssueCategory',
+	        value: function addIssueCategory(category) {
+	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
+	                name: 'category:' + category,
+	                color: 'ffffff'
+	            }).then(function () {
+	                return Promise.resolve(category);
 	            });
 	        }
 
@@ -11291,7 +11388,7 @@
 	    }, {
 	        key: 'removeIssue',
 	        value: function removeIssue(issue) {
-	            var _this17 = this;
+	            var _this18 = this;
 
 	            issue.deleted = true;
 	            deletedIssuesCache.push(issue);
@@ -11303,7 +11400,7 @@
 
 	            // Get all attachments
 	            .then(function () {
-	                return _this17.getIssueAttachments(issue);
+	                return _this18.getIssueAttachments(issue);
 	            })
 
 	            // Delete attachments one by one
@@ -11312,7 +11409,7 @@
 	                    var attachment = attachments.pop();
 
 	                    if (attachment) {
-	                        return _this17.removeIssueAttachment(issue, attachment).then(function () {
+	                        return _this18.removeIssueAttachment(issue, attachment).then(function () {
 	                            return deleteNextAttachment();
 	                        });
 	                    } else {
@@ -11325,7 +11422,7 @@
 
 	            // Get all comments
 	            .then(function () {
-	                return _this17.getIssueComments(issue);
+	                return _this18.getIssueComments(issue);
 	            })
 
 	            // Delete all comments one by one
@@ -11334,7 +11431,7 @@
 	                    var comment = comments.pop();
 
 	                    if (comment) {
-	                        return _this17.removeIssueComment(issue, comment).then(function () {
+	                        return _this18.removeIssueComment(issue, comment).then(function () {
 	                            return deleteNextComment();
 	                        });
 	                    } else {
@@ -11358,6 +11455,20 @@
 	        key: 'removeCollaborator',
 	        value: function removeCollaborator(index) {
 	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/collaborators/' + window.resources.collaborators[index]);
+	        }
+
+	        /**
+	         * Removes issue category
+	         *
+	         * @param {Number} index
+	         *
+	         * @returns {Promise} promise
+	         */
+
+	    }, {
+	        key: 'removeIssueType',
+	        value: function removeIssueType(index) {
+	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/category:' + window.resources.issueCategories[index]);
 	        }
 
 	        /**
@@ -11513,6 +11624,24 @@
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
 	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones/' + milestone.id, this.convertMilestone(milestone));
+	        }
+
+	        /**
+	         * Updates issue category
+	         *
+	         * @param {String} category
+	         * @param {String} previousName
+	         *
+	         * @returns {Promise} promise
+	         */
+
+	    }, {
+	        key: 'updateIssueCategory',
+	        value: function updateIssueCategory(category, previousName) {
+	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/category:' + previousName, {
+	                name: 'category:' + category,
+	                color: 'ffffff'
+	            });
 	        }
 
 	        /**
@@ -11861,15 +11990,15 @@
 	        }
 
 	        /**
-	         * Process issue types
+	         * Process issue categories
 	         *
 	         * @param {Array} labels
 	         */
 
 	    }, {
-	        key: 'processIssueTypes',
-	        value: function processIssueTypes(labels) {
-	            window.resources.issueTypes = [];
+	        key: 'processIssueCategories',
+	        value: function processIssueCategories(labels) {
+	            window.resources.issueCategories = [];
 
 	            var _iteratorNormalCompletion7 = true;
 	            var _didIteratorError7 = false;
@@ -11879,12 +12008,12 @@
 	                for (var _iterator7 = labels[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
 	                    var label = _step7.value;
 
-	                    var index = label.name.indexOf('type:');
+	                    var index = label.name.indexOf('category:');
 
 	                    if (index > -1) {
-	                        var name = label.name.replace('type:', '');
+	                        var name = label.name.replace('category:', '');
 
-	                        window.resources.issueTypes.push(name);
+	                        window.resources.issueCategories.push(name);
 	                    }
 	                }
 	            } catch (err) {
@@ -11904,28 +12033,31 @@
 	        }
 
 	        /**
-	         * Process collaborators
+	         * Process issue types
 	         *
-	         * @param {Array} collaborators
+	         * @param {Array} labels
 	         */
 
 	    }, {
-	        key: 'processCollaborators',
-	        value: function processCollaborators(collaborators) {
-	            window.resources.collaborators = [];
+	        key: 'processIssueTypes',
+	        value: function processIssueTypes(labels) {
+	            window.resources.issueTypes = [];
 
 	            var _iteratorNormalCompletion8 = true;
 	            var _didIteratorError8 = false;
 	            var _iteratorError8 = undefined;
 
 	            try {
-	                for (var _iterator8 = collaborators[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-	                    var collaborator = _step8.value;
+	                for (var _iterator8 = labels[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+	                    var label = _step8.value;
 
-	                    window.resources.collaborators.push({
-	                        name: collaborator.login,
-	                        avatar: collaborator.avatar_url
-	                    });
+	                    var index = label.name.indexOf('type:');
+
+	                    if (index > -1) {
+	                        var name = label.name.replace('type:', '');
+
+	                        window.resources.issueTypes.push(name);
+	                    }
 	                }
 	            } catch (err) {
 	                _didIteratorError8 = true;
@@ -11944,6 +12076,46 @@
 	        }
 
 	        /**
+	         * Process collaborators
+	         *
+	         * @param {Array} collaborators
+	         */
+
+	    }, {
+	        key: 'processCollaborators',
+	        value: function processCollaborators(collaborators) {
+	            window.resources.collaborators = [];
+
+	            var _iteratorNormalCompletion9 = true;
+	            var _didIteratorError9 = false;
+	            var _iteratorError9 = undefined;
+
+	            try {
+	                for (var _iterator9 = collaborators[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+	                    var collaborator = _step9.value;
+
+	                    window.resources.collaborators.push({
+	                        name: collaborator.login,
+	                        avatar: collaborator.avatar_url
+	                    });
+	                }
+	            } catch (err) {
+	                _didIteratorError9 = true;
+	                _iteratorError9 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion9 && _iterator9.return) {
+	                        _iterator9.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError9) {
+	                        throw _iteratorError9;
+	                    }
+	                }
+	            }
+	        }
+
+	        /**
 	         * Process issues
 	         *
 	         * @param {Array} issues
@@ -11954,13 +12126,13 @@
 	        value: function processIssues(issues) {
 	            window.resources.issues = [];
 
-	            var _iteratorNormalCompletion9 = true;
-	            var _didIteratorError9 = false;
-	            var _iteratorError9 = undefined;
+	            var _iteratorNormalCompletion10 = true;
+	            var _didIteratorError10 = false;
+	            var _iteratorError10 = undefined;
 
 	            try {
-	                for (var _iterator9 = issues[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-	                    var gitHubIssue = _step9.value;
+	                for (var _iterator10 = issues[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+	                    var gitHubIssue = _step10.value;
 
 	                    var issue = new Issue();
 
@@ -11977,15 +12149,16 @@
 
 	                    issue.labels = issue.labels || [];
 
-	                    var _iteratorNormalCompletion10 = true;
-	                    var _didIteratorError10 = false;
-	                    var _iteratorError10 = undefined;
+	                    var _iteratorNormalCompletion11 = true;
+	                    var _didIteratorError11 = false;
+	                    var _iteratorError11 = undefined;
 
 	                    try {
-	                        for (var _iterator10 = gitHubIssue.labels[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-	                            var label = _step10.value;
+	                        for (var _iterator11 = gitHubIssue.labels[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+	                            var label = _step11.value;
 
 	                            var typeIndex = label.name.indexOf('type:');
+	                            var categoryIndex = label.name.indexOf('category:');
 	                            var priorityIndex = label.name.indexOf('priority:');
 	                            var estimateIndex = label.name.indexOf('estimate:');
 	                            var versionIndex = label.name.indexOf('version:');
@@ -11997,37 +12170,41 @@
 	                                var name = label.name.replace('type:', '');
 
 	                                issue.type = ResourceHelper.getIssueType(name);
+	                            } else if (categoryIndex > -1) {
+	                                var _name = label.name.replace('category:', '');
+
+	                                issue.category = ResourceHelper.getIssueCategory(_name);
 	                            } else if (versionIndex > -1) {
-	                                var _name = label.name.replace('version:', '');
+	                                var _name2 = label.name.replace('version:', '');
 
-	                                issue.version = ResourceHelper.getVersion(_name);
+	                                issue.version = ResourceHelper.getVersion(_name2);
 	                            } else if (estimateIndex > -1) {
-	                                var _name2 = label.name.replace('estimate:', '');
+	                                var _name3 = label.name.replace('estimate:', '');
 
-	                                issue.estimate = ResourceHelper.getIssueEstimate(_name2);
+	                                issue.estimate = ResourceHelper.getIssueEstimate(_name3);
 	                            } else if (priorityIndex > -1) {
-	                                var _name3 = label.name.replace('priority:', '');
+	                                var _name4 = label.name.replace('priority:', '');
 
-	                                issue.priority = ResourceHelper.getIssuePriority(_name3);
+	                                issue.priority = ResourceHelper.getIssuePriority(_name4);
 	                            } else if (columnIndex > -1) {
-	                                var _name4 = label.name.replace('column:', '');
+	                                var _name5 = label.name.replace('column:', '');
 
-	                                issue.column = ResourceHelper.getIssueColumn(_name4);
+	                                issue.column = ResourceHelper.getIssueColumn(_name5);
 	                            } else {
 	                                issue.labels.push(label);
 	                            }
 	                        }
 	                    } catch (err) {
-	                        _didIteratorError10 = true;
-	                        _iteratorError10 = err;
+	                        _didIteratorError11 = true;
+	                        _iteratorError11 = err;
 	                    } finally {
 	                        try {
-	                            if (!_iteratorNormalCompletion10 && _iterator10.return) {
-	                                _iterator10.return();
+	                            if (!_iteratorNormalCompletion11 && _iterator11.return) {
+	                                _iterator11.return();
 	                            }
 	                        } finally {
-	                            if (_didIteratorError10) {
-	                                throw _iteratorError10;
+	                            if (_didIteratorError11) {
+	                                throw _iteratorError11;
 	                            }
 	                        }
 	                    }
@@ -12049,16 +12226,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError9 = true;
-	                _iteratorError9 = err;
+	                _didIteratorError10 = true;
+	                _iteratorError10 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion9 && _iterator9.return) {
-	                        _iterator9.return();
+	                    if (!_iteratorNormalCompletion10 && _iterator10.return) {
+	                        _iterator10.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError9) {
-	                        throw _iteratorError9;
+	                    if (_didIteratorError10) {
+	                        throw _iteratorError10;
 	                    }
 	                }
 	            }
@@ -12137,6 +12314,13 @@
 	                gitHubIssue.milestone = issue.getMilestone().id;
 	            } else {
 	                gitHubIssue.milestone = null;
+	            }
+
+	            // Category
+	            var issueCategory = resources.issueCategories[issue.category];
+
+	            if (issueCategory) {
+	                gitHubIssue.labels.push('category:' + issueCategory);
 	            }
 
 	            // Type
@@ -12247,13 +12431,13 @@
 	            return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
 	                var comments = [];
 
-	                var _iteratorNormalCompletion11 = true;
-	                var _didIteratorError11 = false;
-	                var _iteratorError11 = undefined;
+	                var _iteratorNormalCompletion12 = true;
+	                var _didIteratorError12 = false;
+	                var _iteratorError12 = undefined;
 
 	                try {
-	                    for (var _iterator11 = gitHubComments[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-	                        var gitHubComment = _step11.value;
+	                    for (var _iterator12 = gitHubComments[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+	                        var gitHubComment = _step12.value;
 
 	                        var comment = {
 	                            collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
@@ -12264,16 +12448,16 @@
 	                        comments.push(comment);
 	                    }
 	                } catch (err) {
-	                    _didIteratorError11 = true;
-	                    _iteratorError11 = err;
+	                    _didIteratorError12 = true;
+	                    _iteratorError12 = err;
 	                } finally {
 	                    try {
-	                        if (!_iteratorNormalCompletion11 && _iterator11.return) {
-	                            _iterator11.return();
+	                        if (!_iteratorNormalCompletion12 && _iterator12.return) {
+	                            _iterator12.return();
 	                        }
 	                    } finally {
-	                        if (_didIteratorError11) {
-	                            throw _iteratorError11;
+	                        if (_didIteratorError12) {
+	                            throw _iteratorError12;
 	                        }
 	                    }
 	                }
@@ -12533,6 +12717,20 @@
 	        }
 
 	        /**
+	         * Gets issue categories
+	         *
+	         * @returns {Promise} promise
+	         */
+
+	    }, {
+	        key: 'getIssueCategories',
+	        value: function getIssueCategories() {
+	            window.resources.issueCategories = [];
+
+	            return Promise.resolve();
+	        }
+
+	        /**
 	         * Gets issue types
 	         *
 	         * @returns {Promise} promise
@@ -12777,6 +12975,20 @@
 	        }
 
 	        /**
+	         * Removes issue category
+	         *
+	         * @param {Number} index
+	         *
+	         * @returns {Promise} promise
+	         */
+
+	    }, {
+	        key: 'removeIssueCategory',
+	        value: function removeIssueCategory(index) {
+	            return Promise.resolve();
+	        }
+
+	        /**
 	         * Removes issue type
 	         *
 	         * @param {Number} index
@@ -12904,6 +13116,21 @@
 	    }, {
 	        key: 'updateCollaborator',
 	        value: function updateCollaborator(index, collaborator) {
+	            return Promise.resolve();
+	        }
+
+	        /**
+	         * Updates issue type
+	         *
+	         * @param {Number} index
+	         * @param {String} category
+	         *
+	         * @returns {Promise} promise
+	         */
+
+	    }, {
+	        key: 'updateIssueCategory',
+	        value: function updateIssueCategory(index, category) {
 	            return Promise.resolve();
 	        }
 
@@ -13145,6 +13372,9 @@
 	                case 'issueTypes':
 	                    return this.removeIssueType(index);
 
+	                case 'issueCategories':
+	                    return this.removeIssueCategory(index);
+
 	                case 'issuePriorities':
 	                    return this.removeIssuePriority(index);
 
@@ -13192,6 +13422,9 @@
 	                case 'issueTypes':
 	                    return this.addIssueType(item);
 
+	                case 'issueCategories':
+	                    return this.addIssueCategory(item);
+
 	                case 'issuePriorities':
 	                    return this.addIssuePriority(item);
 
@@ -13236,6 +13469,9 @@
 	            switch (resource) {
 	                case 'issueTypes':
 	                    return this.updateIssueType(item, identifier);
+
+	                case 'issueCategories':
+	                    return this.updateIssueCategory(item, identifier);
 
 	                case 'issuePriorities':
 	                    return this.updateIssuePriority(item, identifier);
@@ -13287,6 +13523,9 @@
 
 	                case 'collaborators':
 	                    return this.getCollaborators();
+
+	                case 'issueCategories':
+	                    return this.getIssueCategories();
 
 	                case 'issueTypes':
 	                    return this.getIssueTypes();
@@ -13349,6 +13588,8 @@
 
 	            return get('issueTypes').then(function () {
 	                return get('issuePriorities');
+	            }).then(function () {
+	                return get('issueCategories');
 	            }).then(function () {
 	                return get('issueEstimates');
 	            }).then(function () {
@@ -15108,6 +15349,7 @@
 	        // Optional properties
 	        this.column = properties.column || 0;
 	        this.type = properties.type || 0;
+	        this.category = properties.category;
 	        this.priority = properties.priority || 0;
 	        this.estimate = properties.estimate || 0;
 	        this.version = properties.version;
@@ -15149,6 +15391,10 @@
 
 	                        case 'type':
 	                            this.type = ResourceHelper.getIssueType(value);
+	                            break;
+
+	                        case 'category':
+	                            this.category = ResourceHelper.getIssueCategory(value);
 	                            break;
 
 	                        case 'priority':
@@ -15221,6 +15467,18 @@
 	        key: 'getColumn',
 	        value: function getColumn() {
 	            return resources.issueColumns[this.column || 0];
+	        }
+
+	        /**
+	         * Gets category
+	         *
+	         * @returns {String} Category name
+	         */
+
+	    }, {
+	        key: 'getCategory',
+	        value: function getCategory() {
+	            return resources.issueCategories[this.category];
 	        }
 
 	        /**
@@ -15379,6 +15637,7 @@
 	            return {
 	                column: this.getColumn(),
 	                type: this.getType(),
+	                category: this.getCategory(),
 	                priority: this.getPriority(),
 	                version: this.getVersion(),
 	                milestone: this.getMilestone() ? this.getMilestone().title : null,
@@ -16550,6 +16809,186 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	var CategoryBar = function (_View) {
+	    _inherits(CategoryBar, _View);
+
+	    function CategoryBar(params) {
+	        _classCallCheck(this, CategoryBar);
+
+	        var _this = _possibleConstructorReturn(this, (CategoryBar.__proto__ || Object.getPrototypeOf(CategoryBar)).call(this, params));
+
+	        _this.template = __webpack_require__(55);
+
+	        _this.fetch();
+	        return _this;
+	    }
+
+	    /**
+	     * Event: Click category
+	     *
+	     * @param {String} name
+	     */
+
+
+	    _createClass(CategoryBar, [{
+	        key: 'onClickCategory',
+	        value: function onClickCategory(name) {
+	            var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
+
+	            Router.go(basePath + name, true);
+
+	            this.applyCategory();
+
+	            this.render();
+	        }
+
+	        /**
+	         * Applies selected filters
+	         */
+
+	    }, {
+	        key: 'applyCategory',
+	        value: function applyCategory() {
+	            var issueViews = ViewHelper.getAll('IssueEditor');
+	            var category = Router.params.category;
+
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = issueViews[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var issueView = _step.value;
+
+	                    var isValid = category == 'all' || issueView.model.getCategory() == category;
+
+	                    issueView.$element.toggle(isValid);
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+	        }
+	    }]);
+
+	    return CategoryBar;
+	}(View);
+
+	module.exports = CategoryBar;
+
+/***/ },
+/* 38 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function render() {
+	    var _this = this;
+
+	    var issueKeys = Object.keys(new Issue().getBakedValues());
+
+	    return _.div({ class: 'filter-editor' }, _.button({ class: 'btn-toggle', 'data-filter-amount': this.model.length.toString() }, 'Filters', _.span({ class: 'filter-indicator' }, this.model.length.toString())).click(function () {
+	        _this.onClickToggle();
+	    }), _.div({ class: 'filters' }, _.each(this.model, function (i, filter) {
+	        var resourceKey = filter.key;
+
+	        // Change assignee to collaborator
+	        if (resourceKey == 'assignee') {
+	            resourceKey = 'collaborator';
+	        }
+
+	        // Append 's' for plural
+	        resourceKey += 's';
+
+	        // Correct grammar
+	        resourceKey = resourceKey.replace('ys', 'ies');
+
+	        var resource = resources[resourceKey];
+
+	        // If we didn't find the resource, it's likely that we just need to capitalise it and prepend 'issue'
+	        // For example: 'type' should be 'issueType' when referring to the resource
+	        if (!resource) {
+	            resourceKey = 'issue' + resourceKey.substring(0, 1).toUpperCase() + resourceKey.substring(1);
+
+	            resource = resources[resourceKey];
+	        }
+
+	        var $valueSelect = void 0;
+	        var $filter = _.div({ class: 'filter' }, _.div({ class: 'select-container key' }, _.select({}, _.each(issueKeys, function (i, key) {
+	            return _.option({
+	                value: key,
+	                selected: key == filter.key
+	            }, key);
+	        })).change(function (e) {
+	            filter.key = $filter.find('.key select').val();
+	            filter.value = null;
+
+	            _this.onChange(i);
+	        })), _.div({ class: 'select-container operator' }, _.select({}, _.each(_this.getOperators(), function (operator, label) {
+	            return _.option({ value: operator }, label);
+	        })).val(filter.operator || '!=').change(function (e) {
+	            filter.operator = $filter.find('.operator select').val();
+
+	            _this.onChange(i);
+	        })), _.div({ class: 'select-container value', style: 'min-width: ' + ((filter.value || '').length * 10 + 20) + 'px' }, _.select({}, _.each(resource, function (i, value) {
+	            var valueName = value;
+
+	            if (value.title) {
+	                valueName = value.title;
+	            }
+
+	            if (value.name) {
+	                valueName = value.name;
+	            }
+
+	            var isSelected = valueName == filter.value;
+
+	            if (!filter.value && i == 0) {
+	                isSelected = true;
+	            }
+
+	            return _.option({
+	                value: valueName,
+	                selected: isSelected
+	            }, valueName);
+	        })).change(function (e) {
+	            filter.value = $filter.find('.value select').val();
+
+	            _this.onChange(i);
+	        })), _.button({ class: 'btn-remove' }, _.span({ class: 'fa fa-remove' })).click(function () {
+	            _this.onClickRemove(i);
+	        }));
+
+	        return $filter;
+	    })), _.div({ class: 'button-container' }, _.if(this.model.length < this.MAX_FILTERS, _.button({ class: 'btn btn-add-filter' }, 'Add filter', _.span({ class: 'fa fa-plus' })).click(function () {
+	        _this.onClickAdd();
+	    }))));
+	};
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 	var IssueEditor = function (_View) {
 	    _inherits(IssueEditor, _View);
 
@@ -16558,7 +16997,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (IssueEditor.__proto__ || Object.getPrototypeOf(IssueEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(38);
+	        _this.template = __webpack_require__(40);
 
 	        _this.fetch();
 	        return _this;
@@ -17589,7 +18028,7 @@
 	module.exports = IssueEditor;
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -17741,7 +18180,7 @@
 	};
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -17766,7 +18205,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (MilestoneEditor.__proto__ || Object.getPrototypeOf(MilestoneEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(40);
+	        _this.template = __webpack_require__(42);
 
 	        _this.fetch();
 
@@ -18179,7 +18618,7 @@
 	module.exports = MilestoneEditor;
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18200,9 +18639,11 @@
 	    })))), _.div({ class: 'columns' }, _.each(window.resources.issueColumns, function (columnIndex, column) {
 	        return _.div({ class: 'column', 'data-index': columnIndex }, _.div({ class: 'header' }, _.h4(column)), _.div({ class: 'body' }, _.each(_this.model.getIssues(), function (issueIndex, issue) {
 	            if (issue.column == columnIndex && issue.milestone == _this.model.index) {
-	                return new IssueEditor({
+	                var $issueEditor = new IssueEditor({
 	                    model: issue
 	                }).$element;
+
+	                return $issueEditor;
 	            }
 	        }), _.if(columnIndex == 0 && !ApiHelper.isSpectating(), _.button({ class: 'btn btn-new-issue' }, 'New issue ', _.span({ class: 'fa fa-plus' })).click(function () {
 	            _this.onClickNewIssue();
@@ -18211,7 +18652,7 @@
 	};
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18232,7 +18673,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ResourceEditor.__proto__ || Object.getPrototypeOf(ResourceEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(42);
+	        _this.template = __webpack_require__(44);
 
 	        _this.fetch();
 	        return _this;
@@ -18306,7 +18747,7 @@
 	module.exports = ResourceEditor;
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18342,7 +18783,7 @@
 	};
 
 /***/ },
-/* 43 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18363,7 +18804,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (PlanItemEditor.__proto__ || Object.getPrototypeOf(PlanItemEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(44);
+	        _this.template = __webpack_require__(46);
 
 	        _this.fetch();
 	        return _this;
@@ -18723,7 +19164,7 @@
 	module.exports = PlanItemEditor;
 
 /***/ },
-/* 44 */
+/* 46 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18743,7 +19184,7 @@
 	};
 
 /***/ },
-/* 45 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18771,7 +19212,7 @@
 	            _this.currentMonth = '0' + _this.currentMonth;
 	        }
 
-	        _this.template = __webpack_require__(46);
+	        _this.template = __webpack_require__(48);
 
 	        _this.init();
 	        return _this;
@@ -19122,7 +19563,7 @@
 	module.exports = PlanEditor;
 
 /***/ },
-/* 46 */
+/* 48 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19176,7 +19617,7 @@
 	};
 
 /***/ },
-/* 47 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19197,7 +19638,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (RepositoryEditor.__proto__ || Object.getPrototypeOf(RepositoryEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(48);
+	        _this.template = __webpack_require__(50);
 
 	        _this.fetch();
 	        return _this;
@@ -19224,7 +19665,7 @@
 	module.exports = RepositoryEditor;
 
 /***/ },
-/* 48 */
+/* 50 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19238,7 +19679,7 @@
 	};
 
 /***/ },
-/* 49 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19261,7 +19702,7 @@
 
 	        _this.MAX_FILTERS = 5;
 
-	        _this.template = __webpack_require__(50);
+	        _this.template = __webpack_require__(38);
 
 	        var defaultColumn = '';
 
@@ -19304,7 +19745,7 @@
 	            value: defaultColumn
 	        };
 
-	        _this.model = SettingsHelper.get('filters', 'custom', [], true);
+	        _this.model = SettingsHelper.get('filters', 'custom', [], true) || [];
 
 	        _this.fetch();
 
@@ -19419,9 +19860,10 @@
 	                for (var _iterator2 = issueViews[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 	                    var issueView = _step2.value;
 
-	                    issueView.$element.toggle(true);
-
 	                    var issue = issueView.model.getBakedValues();
+	                    var isCategoryMatch = Router.params.category == 'all' || Router.params.category == issue.category;
+
+	                    issueView.$element.toggle(isCategoryMatch);
 
 	                    var _iteratorNormalCompletion3 = true;
 	                    var _didIteratorError3 = false;
@@ -19488,96 +19930,7 @@
 	module.exports = FilterEditor;
 
 /***/ },
-/* 50 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	module.exports = function render() {
-	    var _this = this;
-
-	    var issueKeys = Object.keys(new Issue().getBakedValues());
-
-	    return _.div({ class: 'filter-editor' }, _.button({ class: 'btn-toggle', 'data-filter-amount': this.model.length.toString() }, 'Filters', _.span({ class: 'filter-indicator' }, this.model.length.toString())).click(function () {
-	        _this.onClickToggle();
-	    }), _.div({ class: 'filters' }, _.each(this.model, function (i, filter) {
-	        var resourceKey = filter.key;
-
-	        // Change assignee to collaborator
-	        if (resourceKey == 'assignee') {
-	            resourceKey = 'collaborator';
-	        }
-
-	        // Append 's' for plural
-	        resourceKey += 's';
-
-	        // Correct grammar
-	        resourceKey = resourceKey.replace('ys', 'ies');
-
-	        var resource = resources[resourceKey];
-
-	        // If we didn't find the resource, it's likely that we just need to capitalise it and prepend 'issue'
-	        // For example: 'type' should be 'issueType' when referring to the resource
-	        if (!resource) {
-	            resourceKey = 'issue' + resourceKey.substring(0, 1).toUpperCase() + resourceKey.substring(1);
-
-	            resource = resources[resourceKey];
-	        }
-
-	        var $valueSelect = void 0;
-	        var $filter = _.div({ class: 'filter' }, _.div({ class: 'select-container key' }, _.select({}, _.each(issueKeys, function (i, key) {
-	            return _.option({
-	                value: key,
-	                selected: key == filter.key
-	            }, key);
-	        })).change(function (e) {
-	            filter.key = $filter.find('.key select').val();
-	            filter.value = null;
-
-	            _this.onChange(i);
-	        })), _.div({ class: 'select-container operator' }, _.select({}, _.each(_this.getOperators(), function (operator, label) {
-	            return _.option({ value: operator }, label);
-	        })).val(filter.operator || '!=').change(function (e) {
-	            filter.operator = $filter.find('.operator select').val();
-
-	            _this.onChange(i);
-	        })), _.div({ class: 'select-container value', style: 'min-width: ' + ((filter.value || '').length * 10 + 20) + 'px' }, _.select({}, _.each(resource, function (i, value) {
-	            var valueName = value;
-
-	            if (value.title) {
-	                valueName = value.title;
-	            }
-
-	            if (value.name) {
-	                valueName = value.name;
-	            }
-
-	            var isSelected = valueName == filter.value;
-
-	            if (!filter.value && i == 0) {
-	                isSelected = true;
-	            }
-
-	            return _.option({
-	                value: valueName,
-	                selected: isSelected
-	            }, valueName);
-	        })).change(function (e) {
-	            filter.value = $filter.find('.value select').val();
-
-	            _this.onChange(i);
-	        })), _.button({ class: 'btn-remove' }, _.span({ class: 'fa fa-remove' })).click(function () {
-	            _this.onClickRemove(i);
-	        }));
-
-	        return $filter;
-	    })), _.div({ class: 'button-container' }, _.if(this.model.length < this.MAX_FILTERS, _.button({ class: 'btn btn-add-filter' }, 'Add filter', _.span({ class: 'fa fa-plus' })).click(function () {
-	        _this.onClickAdd();
-	    }))));
-	};
-
-/***/ },
-/* 51 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19602,7 +19955,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (BurnDownChart.__proto__ || Object.getPrototypeOf(BurnDownChart)).call(this, params));
 
-	        _this.template = __webpack_require__(52);
+	        _this.template = __webpack_require__(53);
 
 	        // Find most relevant milestone
 	        var nearest = void 0;
@@ -19779,7 +20132,7 @@
 	module.exports = BurnDownChart;
 
 /***/ },
-/* 52 */
+/* 53 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19883,7 +20236,7 @@
 	};
 
 /***/ },
-/* 53 */
+/* 54 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19922,14 +20275,18 @@
 	});
 
 	// Board
-	Router.route('/:user/:repository/board/:mode', function () {
+	Router.route('/:user/:repository/board/:mode/', function () {
+	    location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/all';
+	});
+
+	Router.route('/:user/:repository/board/:mode/:category', function () {
 	    ApiHelper.checkConnection().then(function () {
 	        return ApiHelper.getResources(true);
 	    }).then(function () {
 	        $('.workspace').remove();
 
 	        // Append all milestones
-	        $('.app-container').append(_.div({ class: 'workspace board-container ' + Router.params.mode }, _.div({ class: 'workspace-fixed' }, new RepositoryBar().$element, new FilterEditor().$element), _.each(window.resources.milestones, function (i, milestone) {
+	        $('.app-container').append(_.div({ class: 'workspace board-container ' + Router.params.mode }, _.div({ class: 'workspace-fixed' }, new RepositoryBar().$element, new FilterEditor().$element, new CategoryBar().$element), _.each(window.resources.milestones, function (i, milestone) {
 	            return new MilestoneEditor({
 	                model: milestone
 	            }).$element;
@@ -20041,6 +20398,29 @@
 	// Navbar
 	var navbar = new Navbar();
 	$('.app-container').html(navbar.$element);
+
+/***/ },
+/* 55 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function render() {
+	    var _this = this;
+
+	    var activeTab = Router.params.category || 'all';
+	    var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
+
+	    return _.div({ class: 'category-bar tabbed-container' }, _.div({ class: 'tabs' }, _.a({ href: '#' + basePath + 'all', class: 'tab' + (activeTab == 'all' ? ' active' : '') }, 'all').click(function (e) {
+	        e.preventDefault();
+	        _this.onClickCategory('all');
+	    }), _.each(resources.issueCategories || [], function (i, category) {
+	        return _.a({ href: '#' + basePath + category, class: 'tab' + (activeTab == category ? ' active' : '') }, category).click(function (e) {
+	            e.preventDefault();
+	            _this.onClickCategory(category);
+	        });
+	    })));
+	};
 
 /***/ }
 /******/ ]);

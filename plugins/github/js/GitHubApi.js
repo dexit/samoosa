@@ -345,6 +345,20 @@ class GitHubApi extends ApiHelper {
             return Promise.resolve(labelCache);
         }
     }
+    
+    /**
+     * Gets issue categories
+     *
+     * @returns {Promise} promise
+     */
+    getIssueCategories() {
+        return this.getLabels()
+        .then((labels) => {
+            this.processIssueCategories(labels);
+
+            return Promise.resolve();
+        });
+    }
 
     /**
      * Gets issue types
@@ -520,6 +534,23 @@ class GitHubApi extends ApiHelper {
         return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
             name: name,
             color: color || 'ffffff'
+        });
+    }
+    
+    /**
+     * Adds issue category
+     *
+     * @param {String} category
+     *
+     * @returns {Promise} promise
+     */
+    addIssueCategory(category) {
+        return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
+            name: 'category:' + category,
+            color: 'ffffff'
+        })
+        .then(() => {
+            return Promise.resolve(category);  
         });
     }
     
@@ -742,6 +773,17 @@ class GitHubApi extends ApiHelper {
     }
     
     /**
+     * Removes issue category
+     *
+     * @param {Number} index
+     *
+     * @returns {Promise} promise
+     */
+    removeIssueType(index) {
+        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/category:' + window.resources.issueCategories[index]);
+    }
+    
+    /**
      * Removes issue type
      *
      * @param {Number} index
@@ -864,6 +906,21 @@ class GitHubApi extends ApiHelper {
      */
     updateMilestone(milestone) {
         return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones/' + milestone.id, this.convertMilestone(milestone));
+    }
+    
+    /**
+     * Updates issue category
+     *
+     * @param {String} category
+     * @param {String} previousName
+     *
+     * @returns {Promise} promise
+     */
+    updateIssueCategory(category, previousName) {
+        return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/category:' + previousName, {
+            name: 'category:' + category,
+            color: 'ffffff'
+        });
     }
     
     /**
@@ -1090,6 +1147,25 @@ class GitHubApi extends ApiHelper {
         
         window.resources.issueColumns.push('done');
     }
+    
+    /**
+     * Process issue categories
+     *
+     * @param {Array} labels
+     */
+    processIssueCategories(labels) {
+        window.resources.issueCategories = [];
+        
+        for(let label of labels) {
+            let index = label.name.indexOf('category:');
+            
+            if(index > -1) {
+                let name = label.name.replace('category:', '');
+
+                window.resources.issueCategories.push(name);
+            }
+        }
+    }
 
     /**
      * Process issue types
@@ -1152,6 +1228,7 @@ class GitHubApi extends ApiHelper {
 
             for(let label of gitHubIssue.labels) {
                 let typeIndex = label.name.indexOf('type:');
+                let categoryIndex = label.name.indexOf('category:');
                 let priorityIndex = label.name.indexOf('priority:');
                 let estimateIndex = label.name.indexOf('estimate:');
                 let versionIndex = label.name.indexOf('version:');
@@ -1164,6 +1241,11 @@ class GitHubApi extends ApiHelper {
                     let name = label.name.replace('type:', '');
                     
                     issue.type = ResourceHelper.getIssueType(name);
+
+                } else if(categoryIndex > -1) {
+                    let name = label.name.replace('category:', '');
+                    
+                    issue.category = ResourceHelper.getIssueCategory(name);
 
                 } else if(versionIndex > -1) {
                     let name = label.name.replace('version:', '');
@@ -1275,6 +1357,13 @@ class GitHubApi extends ApiHelper {
             gitHubIssue.milestone = issue.getMilestone().id;
         } else {
             gitHubIssue.milestone = null;
+        }
+        
+        // Category
+        let issueCategory = resources.issueCategories[issue.category];
+
+        if(issueCategory) {
+            gitHubIssue.labels.push('category:' + issueCategory);
         }
 
         // Type

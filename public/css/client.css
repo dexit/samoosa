@@ -1427,10 +1427,10 @@ a {
 /**
  * Main layout elements
  */
-.workspace.logo {
+.workspace-content.logo {
   background-color: #21303B;
   position: relative; }
-  .workspace.logo img {
+  .workspace-content.logo img {
     max-width: 200px;
     position: absolute;
     top: 50%;

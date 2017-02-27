@@ -45,7 +45,7 @@ module.exports = function render() {
                                     dueDate.setHours(0);
                                     dueDate.setMinutes(0);
                                     dueDate.setSeconds(0);
-
+                                        
                                     if(
                                         dueDate.getFullYear() == date.getFullYear() &&
                                         dueDate.getMonth() == date.getMonth() &&

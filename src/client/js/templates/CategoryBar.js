@@ -4,7 +4,7 @@ module.exports = function render() {
     let activeTab = Router.params.category || 'all';
     let basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
 
-    return _.div({class: 'category-bar tabbed-container'},
+    return _.div({class: 'category-bar tabbed-container vertical'},
         _.div({class: 'tabs'},
             _.a({href: '#' + basePath + 'all', class: 'tab' + (activeTab == 'all' ? ' active' : '')}, 'all')
             .click((e) => {

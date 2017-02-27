@@ -34,11 +34,10 @@ Router.route('/:user/:repository/plan/', () => {
         $('.workspace').remove();
 
         $('.app-container').append(
-            _.div({class: 'workspace plan-container'},
-                _.div({class: 'workspace-fixed'},
-                    new RepositoryBar().$element
-                ),
-                new PlanEditor().$element
+            _.div({class: 'workspace'},
+                _.div({class: 'workspace-content plan-container'},
+                    new PlanEditor().$element
+                )
             )
         );
         
@@ -63,17 +62,18 @@ Router.route('/:user/:repository/board/:mode/:category', () => {
 
         // Append all milestones
         $('.app-container').append(
-            _.div({class: 'workspace board-container ' + Router.params.mode},
-                _.div({class: 'workspace-fixed'},
-                    new RepositoryBar().$element,
+            _.div({class: 'workspace'},
+                _.div({class: 'workspace-panel'},
                     new FilterEditor().$element,
                     new CategoryBar().$element
                 ),
-                _.each(window.resources.milestones, (i, milestone) => {
-                    return new MilestoneEditor({
-                        model: milestone,
-                    }).$element;
-                })
+                _.div({class: 'workspace-content board-container ' + Router.params.mode},
+                    _.each(window.resources.milestones, (i, milestone) => {
+                        return new MilestoneEditor({
+                            model: milestone,
+                        }).$element;
+                    })
+                )
             )
         );
         
@@ -119,29 +119,28 @@ Router.route('/:user/:repository/analytics/', () => {
         $('.workspace').remove();
 
         $('.app-container').append(
-            _.div({class: 'workspace analytics'},
-                _.div({class: 'workspace-fixed'},
-                    new RepositoryBar().$element
-                ),
-                _.div({class: 'tabbed-container vertical'},
-                    _.div({class: 'tabs'},
-                        _.button({class: 'tab active'},
-                            'BURN DOWN CHART'
-                        ).click(function() {
-                            let index = $(this).index();
-                            
-                            $(this).parent().children().each(function(i) {
-                                $(this).toggleClass('active', i == index);
-                            });
+            _.div({class: 'workspace'},
+                _.div({class: 'workspace-content analytics'},
+                    _.div({class: 'tabbed-container vertical'},
+                        _.div({class: 'tabs'},
+                            _.button({class: 'tab active'},
+                                'BURN DOWN CHART'
+                            ).click(function() {
+                                let index = $(this).index();
+                                
+                                $(this).parent().children().each(function(i) {
+                                    $(this).toggleClass('active', i == index);
+                                });
 
-                            $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
-                                $(this).toggleClass('active', i == index);
-                            });
-                        })
-                    ),
-                    _.div({class: 'panes'},
-                        _.div({class: 'pane active'},
-                            new BurnDownChart().$element
+                                $(this).parents('.tabbed-container').find('.panes .pane').each(function(i) {
+                                    $(this).toggleClass('active', i == index);
+                                });
+                            })
+                        ),
+                        _.div({class: 'panes'},
+                            _.div({class: 'pane active'},
+                                new BurnDownChart().$element
+                            )
                         )
                     )
                 )
@@ -168,49 +167,48 @@ Router.route('/:user/:repository/settings/:resource', () => {
         $('.workspace').remove();
 
         $('.app-container').append(
-            _.div({class: 'workspace settings-container'},
-                _.div({class: 'workspace-fixed'},
-                    new RepositoryBar().$element
-                ),
-                _.div({class: 'tabbed-container vertical'},
-                    _.div({class: 'tabs'},
-                        _.each(window.resources, (name, resource) => {
-                            // Read only
-                            if(ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
-                                return;
-                            }
-                           
-                            // Not editable in resource editor
-                            if(name == 'organizations' || name == 'collaborators' || name == 'issues' || name == 'repositories') {
-                                return;
-                            }
+            _.div({class: 'workspace'},
+                _.div({class: 'workspace-content settings-container'},
+                    _.div({class: 'tabbed-container vertical'},
+                        _.div({class: 'tabs'},
+                            _.each(window.resources, (name, resource) => {
+                                // Read only
+                                if(ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
+                                    return;
+                                }
+                               
+                                // Not editable in resource editor
+                                if(name == 'organizations' || name == 'collaborators' || name == 'issues' || name == 'repositories') {
+                                    return;
+                                }
 
-                            return _.button({class: 'tab' + (Router.params.resource == name ? ' active' : '')},
-                                prettyName(name)
-                            ).click(() => {
-                                location = '/#/' + Router.params.user + '/' + Router.params.repository + '/settings/' + name;
-                            });
-                        })
-                    ),
-                    _.div({class: 'panes'},
-                        _.each(window.resources, (name, resource) => {
-                            // Read only
-                            if(ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
-                                return;
-                            }
-                            
-                            // Not editable in resource editor
-                            if(name == 'issues' || name == 'repositories' || name == 'collaborators') {
-                                return;
-                            }
-                            
-                            return _.div({class: 'pane' + (Router.params.resource == name ? ' active' : '')},
-                                new ResourceEditor({
-                                    name: name,
-                                    model: resource
-                                }).$element
-                            );
-                        })
+                                return _.button({class: 'tab' + (Router.params.resource == name ? ' active' : '')},
+                                    prettyName(name)
+                                ).click(() => {
+                                    location = '/#/' + Router.params.user + '/' + Router.params.repository + '/settings/' + name;
+                                });
+                            })
+                        ),
+                        _.div({class: 'panes'},
+                            _.each(window.resources, (name, resource) => {
+                                // Read only
+                                if(ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
+                                    return;
+                                }
+                                
+                                // Not editable in resource editor
+                                if(name == 'issues' || name == 'repositories' || name == 'collaborators') {
+                                    return;
+                                }
+                                
+                                return _.div({class: 'pane' + (Router.params.resource == name ? ' active' : '')},
+                                    new ResourceEditor({
+                                        name: name,
+                                        model: resource
+                                    }).$element
+                                );
+                            })
+                        )
                     )
                 )
             )

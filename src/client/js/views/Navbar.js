@@ -230,8 +230,9 @@ class Navbar extends View {
      * Event: Click on a link
      *
      * @param {String} url
+     * @param {String} title
      */
-    onClickLink(url) {
+    onClickLink(url, title) {
         this.cleanUpClasses();
         this.$element.find('.obscure .content').empty();
         
@@ -242,12 +243,12 @@ class Navbar extends View {
             let fullUrl = this.getFullUrl(url);
 
             if(fullUrl != Router.url) {
-                this.$element.toggleClass('out', true);
-                
-                setTimeout(() => {
-                    location.hash = fullUrl;
-                }, 400);
+                spinner(title);
+
+                location.hash = fullUrl;
             }
+
+            this.slideIn();
         }
     }
 

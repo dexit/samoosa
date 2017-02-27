@@ -37,7 +37,7 @@ module.exports = function Navbar() {
                             link.handler.call(this);
 
                         } else if(link.url) {
-                            this.onClickLink(link.url);
+                            this.onClickLink(link.url, link.title);
                         
                         }
                     });

@@ -128,6 +128,7 @@ class IssueEditor extends View {
     updateModel() {
         this.model.title = this.getProperty('title'); 
         this.model.type = this.getProperty('type'); 
+        this.model.category = this.getProperty('category'); 
         this.model.priority = this.getProperty('priority');
         this.model.assignee = this.getProperty('assignee');
         this.model.reporter = this.getProperty('reporter');
@@ -143,6 +144,7 @@ class IssueEditor extends View {
         // Update all fields
         this.setProperty('title', this.model.title);
         this.setProperty('type', this.model.type);
+        this.setProperty('category', this.model.category);
         this.setProperty('priority', this.model.priority);
         this.setProperty('assignee', this.model.assignee);
         this.setProperty('version', this.model.version);

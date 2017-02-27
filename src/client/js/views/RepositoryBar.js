@@ -11,8 +11,6 @@ class RepositoryBar extends View {
 
         this.template = require('../templates/RepositoryBar');
 
-        this.model = Repository.getCurrent();
-
         this.fetch();
     }
 

@@ -109,6 +109,18 @@ module.exports = function render() {
                     })
                 ).change(() => { this.onChange(); }).val(this.model.type)
             ),
+            
+            // Category
+            _.div({class: 'meta-field category' + (window.resources.issueCategories.length < 1 ? ' hidden' : '')},
+                _.input({class: 'multi-edit-toggle', type: 'checkbox'})
+                    .change((e) => { this.onChangeCheckbox(e); }),
+                _.label('Category'),
+                _.select({'data-property': 'category', disabled: ApiHelper.isSpectating()},
+                    _.each(window.resources.issueCategories, (i, type) => {
+                        return _.option({value: i}, type);
+                    })
+                ).change(() => { this.onChange(); }).val(this.model.category)
+            ),
 
             // Priority
             _.div({class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '')},

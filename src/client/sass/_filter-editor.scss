@@ -1,25 +1,42 @@
 .filter-editor {
     display: flex;
     width: 100%;
-    background-color: material-color('grey', '800');
-    color: material-color('grey', '200');
+    background-color: $teal-darker;
     position: relative;
+    color: $white;
 
     .btn-toggle {
-        position: absolute;
-        right: 15px;
-        top: -38px;
+        line-height: 56px;
+        height: 56px;
+        width: 100%;
+        text-align: left;
+        background-color: transparent;
+        padding: 0px 15px;
+        display: block;
+        color: $white;
+        font-family: 'Bree Serif';
+        text-transform: uppercase;
 
+        &:hover {
+            color: $pink-medium;
+        }
+        
+        &[data-filter-amount="0"] {
+            .filter-indicator {
+                background-color: $teal-dark;
+            }
+        }
+        
         .fa {
             margin-left: 5px;
         }
 
         .filter-indicator {
+            border-radius: 50%;
             padding: 2px 6px;
             margin-left: 10px;
-            background-color: #000;
+            background-color: $pink-medium;
             color: #fff;
-            border-radius: 10px;
             line-height: 10px;
             font-size: 10px;
             font-weight: bold;
@@ -27,58 +44,38 @@
     }
 
     &.active {
-        .filters {
-            height: 56px;
+        .filters-container {
+            width: 300px;
         }
+    }
 
-        .button-container {
-            height: 56px;
-        }
+    .filters-container {
+        position: absolute;
+        top: 0px;
+        left: 100%;
+        width: 0px;
+        transition: width 0.5s ease;
+        overflow-x: hidden;
+        z-index: 50;
+        background-color: $teal-dark;
     }
 
     .button-container {
-        height: 0px;
-        overflow-y: hidden;
-        transition: height 0.5s ease;
-        line-height: 25px;
-
-        .btn {
-            height: 36px;
-            margin: 10px 10px 10px 0px;
-        }
+        padding: 0rem 10px 10px 10px;
+        width: 300px;
     }
 
     .filters {
-        display: flex;
-        height: 0px;
-        transition: height 0.5s ease;
-        overflow-y: hidden;
-        min-width: 10px;
-
+        padding: 10px 10px 0rem 10px;
+        width: 300px;
+        
         .filter {
             height: 36px;
             flex-shrink: 0;
             display: flex;
-            background-color: material-color('grey', '200');
-            border-radius: 15px;
-            margin: 10px 20px 10px 10px;
+            background-color: $teal-darker;
+            margin: 0rem 0rem 10px 0rem;
             position: relative;
-
-            &:after {
-                content: '&';
-                position: absolute;
-                right: -20px;
-                line-height: 25px;
-                color: material-color('grey', '600');
-            }
-
-            &:last-of-type {
-                margin-right: 10px;
-
-                &:after {
-                    content: none;            
-                }
-            }
 
             span, select, button {
                 font-size: 12px;
@@ -103,20 +100,23 @@
             }
               
             .select-container { 
-                background-color: material-color('grey', '300');
                 overflow-x: hidden;
                 height: 100%;
                 width: 30px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                
+                &, select {
+                    background-color: transparent;
+                    color: $white;
+                }
 
                 &.key {
-                    border-top-left-radius: 15px;
-                    border-bottom-left-radius: 15px;
                     padding-left: 5px;
-                    border-right: 1px solid material-color('grey', '800');
-
+                    border-right: 1px solid $teal-dark;
+                    flex-grow: 1;
+                    
                     select {
                         text-align: left;
                     }
@@ -124,6 +124,7 @@
                 
                 &.operator {
                     width: 48px;
+                    flex-shrink: 0;
 
                     select {
                         text-align: center;
@@ -131,18 +132,16 @@
                 }
 
                 &.value {
-                    border-top-right-radius: 15px;
-                    border-bottom-right-radius: 15px;
                     padding-right: 5px;
-                    border-left: 1px solid material-color('grey', '800');
-                    width: 90px;
+                    border-left: 1px solid $teal-dark;
+                    flex-grow: 1;
                     
                     select {
                         text-align: left;
                         padding-right: 2em;
                     }
                 }
-
+                
                 select {
                     text-align: center;
                     background-color: transparent;

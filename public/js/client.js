@@ -20285,7 +20285,7 @@
 
 	        $('.workspace').remove();
 
-	        $('.app-container').append(_.div({ class: 'workspace logo' }, _.img({ src: '/public/svg/logo-medium.svg' })));
+	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-content logo' }, _.img({ src: '/public/svg/logo-medium.svg' }))));
 
 	        spinner(false);
 	    }).catch(displayError);

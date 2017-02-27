@@ -28,6 +28,8 @@ body, html {
  * Document page
  */
 .document-page {
+    overflow: auto;
+
     .document {
         h1, h2, h3, h4, h5, h6 {
             line-height: 1em;
@@ -75,18 +77,21 @@ body, html {
 .app-container {
     display: flex;
     height: 100%;
-    transition: opacity 0.5s ease;
     flex-direction: column;
+    background-color: $teal-dark;
 
     &.disabled {
         pointer-events: none;
-        opacity: 0.5;
         position: fixed;
         height: 100%;
         overflow-y: hidden;
         width: 100%;
         top: 0px;
         left: 0px;
+
+        .workspace {
+            opacity: 0;
+        }
     }
 
     .navbar {
@@ -94,6 +99,9 @@ body, html {
     }
 
     .workspace {
+        background-color: $white;
+        opacity: 1;
+        transition: opacity 0.5s ease;
         display: flex;
 
         .workspace-content {
@@ -209,9 +217,12 @@ body, html {
         transform: translate(-50%, -50%);
         display: flex;
         padding: 0.5rem 1rem 0.5rem 0.5rem;
+        border-radius: 5px;
+        background-color: $pink-medium;
 
         .spinner-text {
             display: block;
+            color: $white;
             line-height: 32px;
             font-weight: bold;
             text-transform: uppercase;
@@ -221,7 +232,7 @@ body, html {
         .spinner-icon {
             display: block;
             text-align: center;
-            color: material-color('blue', '500');
+            color: $white;
             line-height: 32px;
             height: 32px;
             width: 32px;

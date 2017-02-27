@@ -12,6 +12,9 @@ class RepositoryEditor extends View {
     onClick() {
         ResourceHelper.clear();
 
+        ViewHelper.get('Navbar').slideIn();
+        spinner(this.model.title);
+
         if(this.overrideUrl) {
             location = '/#/' + this.model.owner + '/' + this.model.title + this.overrideUrl;
 

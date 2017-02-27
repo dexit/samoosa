@@ -10,6 +10,10 @@ module.exports = function Navbar() {
             _.div({class: 'content'})
         ),
         _.div({class: 'buttons'},
+            _.button({class: 'btn-logo', title: 'About Samoosa'})
+                .click(() => {
+                    this.onClickAbout();
+                }),
             _.each(this.getLinks(), (i, link) => {
                 if(link.separator) {
                     return _.div({class: 'separator'});

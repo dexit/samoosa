@@ -133,7 +133,7 @@
 
 	module.exports = {
 		"name": "samoosa",
-		"version": "0.3.0",
+		"version": "0.4.0",
 		"description": "",
 		"main": "index.html",
 		"scripts": {
@@ -16607,6 +16607,16 @@
 	                $('.navbar .obscure .content').empty();
 	            }
 	        }
+
+	        /**
+	         * Event: Click about button
+	         */
+
+	    }, {
+	        key: 'onClickAbout',
+	        value: function onClickAbout() {
+	            alert('Samoosa v' + app.version);
+	        }
 	    }]);
 
 	    return Navbar;
@@ -16625,7 +16635,9 @@
 
 	    return _.div({ class: 'navbar' }, _.div({ class: 'backdrop' }).click(function () {
 	        _this.hide();
-	    }), _.div({ class: 'obscure' }, _.div({ class: 'content' })), _.div({ class: 'buttons' }, _.each(this.getLinks(), function (i, link) {
+	    }), _.div({ class: 'obscure' }, _.div({ class: 'content' })), _.div({ class: 'buttons' }, _.button({ class: 'btn-logo', title: 'About Samoosa' }).click(function () {
+	        _this.onClickAbout();
+	    }), _.each(this.getLinks(), function (i, link) {
 	        if (link.separator) {
 	            return _.div({ class: 'separator' });
 	        } else {
@@ -19595,6 +19607,9 @@
 	        key: 'onClick',
 	        value: function onClick() {
 	            ResourceHelper.clear();
+
+	            ViewHelper.get('Navbar').slideIn();
+	            spinner(this.model.title);
 
 	            if (this.overrideUrl) {
 	                location = '/#/' + this.model.owner + '/' + this.model.title + this.overrideUrl;

@@ -273,6 +273,13 @@ class Navbar extends View {
             $('.navbar .obscure .content').empty();
         }
     }
+
+    /**
+     * Event: Click about button
+     */
+    onClickAbout() {
+        alert('Samoosa v' + app.version);
+    }
 }
 
 module.exports = Navbar;

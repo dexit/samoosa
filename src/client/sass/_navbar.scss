@@ -186,12 +186,20 @@
 
     .buttons {
         .separator {
+            &:after {
+                font-family: 'FontAwesome';
+                content: '\f054';
+                color: $teal-medium;
+            }
+
+            text-align: center;
+            line-height: 56px;
             height: 56px;
             display: block;
             float: left;
             width: 3rem;
         }
-
+        
         button {
             border: 0px;
             padding: 0px;
@@ -202,7 +210,14 @@
             text-align: center;
             position: relative;
             background-color: transparent;
-            
+        
+            &.btn-logo {
+                background-image: url('/public/svg/logo-light.svg');
+                background-size: 25px 25px;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
+
             &.active {
                 .fa {
                     color: $pink-medium;
@@ -211,7 +226,7 @@
 
             .fa {
                 color: $white;
-                line-height: 60px;
+                line-height: 56px;
                 font-size: 24px;
                 transition: color 0.25s ease;
             }

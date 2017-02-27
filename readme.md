@@ -40,7 +40,7 @@ Samoosa can be set up to work with GitHub, Bitbucket, your own custom backend, y
 ## Quick start
 1. Make sure you have a [GitHub](https://github.com) or [BitBucket](http://bitbucket.com) account and at least one repository.
 2. Go to the [Samoosa login page]({{ site.url }}/login).
-3. Click "Create new token". You might be prompted to log in.
+3. Click either the GitHub or the BitBucket icon.
 4. Once logged in, click a repo in the navigation menu.
 
 ## Creating an issue
@@ -56,7 +56,7 @@ Samoosa can be set up to work with GitHub, Bitbucket, your own custom backend, y
 3. Click an existing milestone to edit its title and description
 4. Milestones can be dragged and dropped onto the month and year tabs to move them across calendar months
 
-## Managing issue types, priorities, estimates, columns, milestones and versions
+## Managing issue types, categories, priorities, estimates, columns, milestones and versions
 1. Click the "Settings" button on the navbar
 2. Click any of the resources on the left-hand side
 3. Type in a name for a new column and click "add"

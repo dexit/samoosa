@@ -968,8 +968,8 @@
 	    } else if (typeof attr !== 'undefined' && attr instanceof Object && attr instanceof Array == false) {
 	        try {
 	            for (var k in attr) {
-	                // Explicitly set "false" values should not be included at all
-	                if (typeof attr[k] === 'boolean' && attr[k] == false) {
+	                // Null, undefined or false values should not be included
+	                if (!attr[k] && attr[k] !== 0) {
 	                    continue;
 	                }
 

@@ -95,6 +95,10 @@ class MilestoneEditor extends View {
         let printWindow = window.open('', 'PRINT', 'width=780');
 
         printWindow.document.write(html);
+
+        // TODO: Find a more elegant solution to this
+        // Write change log to console
+        console.log(this.model.getChangeLog());
     }
 
     /**

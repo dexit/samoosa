@@ -1972,67 +1972,47 @@
 	        }
 
 	        /**
-	         * Gets elements stack by position
+	         * Gets the hovered drop container
 	         *
-	         * @param {Number} x
-	         * @param {Number} y
-	         *
-	         * @returns {Array} stack
-	         */
-
-	    }, {
-	        key: 'getElementStack',
-	        value: function getElementStack(x, y) {
-	            var stack = [];
-	            var el = document.elementFromPoint(x, y);
-	            var handbrake = 0;
-
-	            while (el && el != document.body && handbrake < 20) {
-	                stack[stack.length] = el;
-	                el.style.display = 'none';
-	                handbrake++;
-
-	                el = document.elementFromPoint(x, y);
-	            }
-
-	            for (var i in stack) {
-	                stack[i].style.display = null;
-	            }
-
-	            return stack;
-	        }
-
-	        /**
-	         * Sorts an array on elements by z proximity to the cursor
-	         *
-	         * @param {Array} elements
 	         * @param {Number} x
 	         * @paraa {Number} y
 	         *
-	         * @return {Array} ranking
+	         * @return {HTMLElement} Hovered drop container
 	         */
 
 	    }, {
-	        key: 'sortByZProximity',
-	        value: function sortByZProximity(elements, x, y) {
-	            if (!elements) {
-	                throw new Error('sortByZProximity: Elements array is null');
-	            }
+	        key: 'getHoveredDropContainer',
+	        value: function getHoveredDropContainer(x, y) {
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
 
-	            if (elements instanceof NodeList) {
-	                throw new Error('sortByZProximity: Elements array is a NodeList');
-	            }
+	            try {
+	                for (var _iterator = (DragDrop.currentDropContainers || [])[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var container = _step.value;
 
-	            var result = [];
-	            var stack = DragDrop.getElementStack(x, y);
+	                    var rect = container.getBoundingClientRect();
 
-	            for (var i in stack) {
-	                if (elements.indexOf(stack[i]) > -1) {
-	                    result[result.length] = stack[i];
+	                    if (x > rect.left && x < rect.right && y > rect.top && y < rect.bottom) {
+	                        return container;
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
 	                }
 	            }
 
-	            return result;
+	            return null;
 	        }
 
 	        /**
@@ -2063,8 +2043,9 @@
 	        config = config || {};
 
 	        this.config = {
+	            scrollContainer: document.body,
 	            dragThreshold: 2,
-	            dragScrollSpeed: 5,
+	            dragScrollSpeed: 2,
 	            dropContainerSelector: '',
 	            dropContainers: [],
 	            lockY: false,
@@ -2240,6 +2221,12 @@
 	            e.preventDefault();
 	            e.stopPropagation();
 
+	            // Cache scroll container position for later restoration
+	            var lastScrollPos = {
+	                top: this.config.scrollContainer.scrollTop,
+	                left: this.config.scrollContainer.scrollLeft
+	            };
+
 	            DragDrop.current = this;
 
 	            // Prevent overlapping mouse interaction on body
@@ -2308,6 +2295,10 @@
 	            if (typeof this.config.onBeginDrag === 'function') {
 	                this.config.onBeginDrag(this);
 	            }
+
+	            // Restore last scroll container scroll position
+	            this.config.scrollContainer.scrollTop = lastScrollPos.top;
+	            this.config.scrollContainer.scrollLeft = lastScrollPos.left;
 	        }
 
 	        /**
@@ -2324,28 +2315,26 @@
 
 	            // Apply new styling to element
 	            if (!this.config.lockY) {
-	                this.element.style.top = e.pageY + this.pointerOffset.top;
+	                this.element.style.top = e.pageY + this.config.scrollContainer.scrollTop + this.pointerOffset.top;
 	            }
 
 	            if (!this.config.lockX) {
-	                this.element.style.left = e.pageX + this.pointerOffset.left;
+	                this.element.style.left = e.pageX + this.config.scrollContainer.scrollLeft + this.pointerOffset.left;
 	            }
 
-	            // Calculate viewport
-	            var viewport = {
-	                x: document.scrollLeft,
-	                y: document.scrollTop,
-	                w: window.width,
-	                h: window.height
-	            };
-
 	            // Scroll page if dragging near the top or bottom
-	            // TODO: Implement for sides too
-	            if (e.pageY > viewport.y + viewport.h - 100) {
-	                //   scroll(1 * this.dragScrollSpeed);
+	            var bounds = this.config.scrollContainer.getBoundingClientRect();
 
-	            } else if (e.pageY < viewport.y + 100) {}
-	            //  scroll(-1 * this.dragScrollSpeed);
+	            // TODO: Figure out why this keeps resetting to 0 every frame
+	            if (e.pageY > bounds.bottom - 50) {
+	                this.config.scrollContainer.scrollTop += this.config.dragScrollSpeed;
+	            } else if (e.pageY < bounds.top + 50) {
+	                this.config.scrollContainer.scrollTop -= this.config.dragScrollSpeed;
+	            } else if (e.pageX > bounds.right - 50) {
+	                this.config.scrollContainer.scrollLeft += this.config.dragScrollSpeed;
+	            } else if (e.pageX < bounds.left + 50) {
+	                this.config.scrollContainer.scrollLeft -= this.config.dragScrollSpeed;
+	            }
 
 	            // Fire drag event
 	            if (typeof this.config.onDrag === 'function') {
@@ -2359,21 +2348,18 @@
 	            elementRect.middle = elementRect.top + elementRect.height / 2;
 
 	            // Use array of drop containers sorted by their "proximity" to the pointer on the Z axis
-	            var hoveredDropContainers = DragDrop.sortByZProximity(DragDrop.currentDropContainers, elementRect.center, elementRect.middle);
-	            var foundDropContainer = void 0;
+	            var hoveredDropContainer = DragDrop.getHoveredDropContainer(e.pageX, e.pageY);
 
 	            // We only need the first index, as that is the closest to the cursor
-	            if (hoveredDropContainers.length > 0) {
-	                foundDropContainer = hoveredDropContainers[0];
-
-	                this.onHoverDropContainer(foundDropContainer);
+	            if (hoveredDropContainer) {
+	                this.onHoverDropContainer(hoveredDropContainer);
 	            }
 
 	            // Make sure to trigger the leave event on any other drop containers, if they were previously hovered
 	            for (var i = 0; i < DragDrop.currentDropContainers.length; i++) {
 	                var dropContainer = DragDrop.currentDropContainers[i];
 
-	                if (dropContainer != foundDropContainer && dropContainer.dataset.dragdropHovering) {
+	                if (dropContainer != hoveredDropContainer && dropContainer.dataset.dragdropHovering) {
 	                    this.onLeaveDropContainer(dropContainer, e);
 	                }
 	            }
@@ -15804,31 +15790,25 @@
 	        }
 
 	        /**
-	         * Gets a list of all issues under this milestone
+	         * Gets a changelog printout
 	         *
-	         * @returns {Array} Issues
+	         * @returns {String} Changelog
 	         */
 
 	    }, {
-	        key: 'getIssues',
-	        value: function getIssues() {
-	            var issues = [];
+	        key: 'getChangeLog',
+	        value: function getChangeLog() {
+	            var log = '';
 
 	            var _iteratorNormalCompletion2 = true;
 	            var _didIteratorError2 = false;
 	            var _iteratorError2 = undefined;
 
 	            try {
-	                for (var _iterator2 = (resources.issues || [])[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                for (var _iterator2 = this.getIssues()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 	                    var issue = _step2.value;
 
-	                    if (!issue) {
-	                        continue;
-	                    }
-
-	                    if (issue.getMilestone() == this || !this.index && !issue.milestone) {
-	                        issues[issues.length] = issue;
-	                    }
+	                    log += '- [' + issue.getType() + '] ' + issue.title + '  \n';
 	                }
 	            } catch (err) {
 	                _didIteratorError2 = true;
@@ -15841,6 +15821,51 @@
 	                } finally {
 	                    if (_didIteratorError2) {
 	                        throw _iteratorError2;
+	                    }
+	                }
+	            }
+
+	            return log;
+	        }
+
+	        /**
+	         * Gets a list of all issues under this milestone
+	         *
+	         * @returns {Array} Issues
+	         */
+
+	    }, {
+	        key: 'getIssues',
+	        value: function getIssues() {
+	            var issues = [];
+
+	            var _iteratorNormalCompletion3 = true;
+	            var _didIteratorError3 = false;
+	            var _iteratorError3 = undefined;
+
+	            try {
+	                for (var _iterator3 = (resources.issues || [])[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                    var issue = _step3.value;
+
+	                    if (!issue) {
+	                        continue;
+	                    }
+
+	                    if (issue.getMilestone() == this || typeof this.index === 'undefiend' && typeof issue.milestone === 'undefined') {
+	                        issues[issues.length] = issue;
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError3 = true;
+	                _iteratorError3 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                        _iterator3.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError3) {
+	                        throw _iteratorError3;
 	                    }
 	                }
 	            }
@@ -15893,13 +15918,13 @@
 	        value: function getTotalEstimatedHours() {
 	            var total = 0;
 
-	            var _iteratorNormalCompletion3 = true;
-	            var _didIteratorError3 = false;
-	            var _iteratorError3 = undefined;
+	            var _iteratorNormalCompletion4 = true;
+	            var _didIteratorError4 = false;
+	            var _iteratorError4 = undefined;
 
 	            try {
-	                for (var _iterator3 = this.getIssues()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                    var issue = _step3.value;
+	                for (var _iterator4 = this.getIssues()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                    var issue = _step4.value;
 
 	                    if (!issue) {
 	                        continue;
@@ -15908,16 +15933,16 @@
 	                    total += issue.getEstimatedHours();
 	                }
 	            } catch (err) {
-	                _didIteratorError3 = true;
-	                _iteratorError3 = err;
+	                _didIteratorError4 = true;
+	                _iteratorError4 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	                        _iterator3.return();
+	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                        _iterator4.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError3) {
-	                        throw _iteratorError3;
+	                    if (_didIteratorError4) {
+	                        throw _iteratorError4;
 	                    }
 	                }
 	            }
@@ -15944,13 +15969,13 @@
 	                return issues;
 	            }
 
-	            var _iteratorNormalCompletion4 = true;
-	            var _didIteratorError4 = false;
-	            var _iteratorError4 = undefined;
+	            var _iteratorNormalCompletion5 = true;
+	            var _didIteratorError5 = false;
+	            var _iteratorError5 = undefined;
 
 	            try {
-	                for (var _iterator4 = this.getIssues()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	                    var issue = _step4.value;
+	                for (var _iterator5 = this.getIssues()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                    var issue = _step5.value;
 
 	                    var closedDate = issue.getClosedDate();
 
@@ -15966,16 +15991,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError4 = true;
-	                _iteratorError4 = err;
+	                _didIteratorError5 = true;
+	                _iteratorError5 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-	                        _iterator4.return();
+	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	                        _iterator5.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError4) {
-	                        throw _iteratorError4;
+	                    if (_didIteratorError5) {
+	                        throw _iteratorError5;
 	                    }
 	                }
 	            }
@@ -15996,27 +16021,27 @@
 	        value: function getRemainingEstimatedHoursAtDay(day) {
 	            var hours = 0;
 
-	            var _iteratorNormalCompletion5 = true;
-	            var _didIteratorError5 = false;
-	            var _iteratorError5 = undefined;
+	            var _iteratorNormalCompletion6 = true;
+	            var _didIteratorError6 = false;
+	            var _iteratorError6 = undefined;
 
 	            try {
-	                for (var _iterator5 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	                    var issue = _step5.value;
+	                for (var _iterator6 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+	                    var issue = _step6.value;
 
 	                    hours += issue.getEstimatedHours();
 	                }
 	            } catch (err) {
-	                _didIteratorError5 = true;
-	                _iteratorError5 = err;
+	                _didIteratorError6 = true;
+	                _iteratorError6 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
-	                        _iterator5.return();
+	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
+	                        _iterator6.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError5) {
-	                        throw _iteratorError5;
+	                    if (_didIteratorError6) {
+	                        throw _iteratorError6;
 	                    }
 	                }
 	            }
@@ -18276,6 +18301,10 @@
 	            var printWindow = window.open('', 'PRINT', 'width=780');
 
 	            printWindow.document.write(html);
+
+	            // TODO: Find a more elegant solution to this
+	            // Write change log to console
+	            console.log(this.model.getChangeLog());
 	        }
 
 	        /**

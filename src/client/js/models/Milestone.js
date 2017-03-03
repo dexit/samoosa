@@ -97,6 +97,21 @@ class Milestone {
     }
 
     /**
+     * Gets a changelog printout
+     *
+     * @returns {String} Changelog
+     */
+    getChangeLog() {
+        let log = '';
+
+        for(let issue of this.getIssues()) {
+            log += '- [' + issue.getType() + '] ' + issue.title + '  \n';
+        }
+
+        return log;
+    }
+
+    /**
      * Gets a list of all issues under this milestone
      *
      * @returns {Array} Issues
@@ -107,7 +122,7 @@ class Milestone {
         for(let issue of resources.issues || []) {
             if(!issue) { continue; }
             
-            if(issue.getMilestone() == this || (!this.index && !issue.milestone)) {
+            if(issue.getMilestone() == this || (typeof this.index === 'undefiend' && typeof issue.milestone === 'undefined')) {
                 issues[issues.length] = issue;
             }
         }

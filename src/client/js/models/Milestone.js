@@ -122,7 +122,7 @@ class Milestone {
         for(let issue of resources.issues || []) {
             if(!issue) { continue; }
             
-            if(issue.getMilestone() == this || (typeof this.index === 'undefiend' && typeof issue.milestone === 'undefined')) {
+            if(issue.getMilestone() == this || (typeof this.index === 'undefined' && typeof issue.milestone === 'undefined')) {
                 issues[issues.length] = issue;
             }
         }

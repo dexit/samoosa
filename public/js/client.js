@@ -13779,6 +13779,8 @@
 	                            localStorage.setItem('token', result.token);
 
 	                            resolve();
+
+	                            spinner(false);
 	                        } else {
 	                            reject(new Error(result));
 	                        }

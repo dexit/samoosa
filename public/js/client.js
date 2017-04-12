@@ -13712,7 +13712,7 @@
 	    }, {
 	        key: 'getIssueColumns',
 	        value: function getIssueColumns() {
-	            resources.issueColumns = ['new', 'open', 'resolved', 'closed'];
+	            resources.issueColumns = ['new', 'open', 'closed'];
 
 	            return Promise.resolve();
 	        }

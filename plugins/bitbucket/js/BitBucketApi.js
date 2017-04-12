@@ -461,7 +461,6 @@ class BitBucketApi extends ApiHelper {
         resources.issueColumns = [
             'new',
             'open',
-            'resolved',
             'closed'
         ];
             

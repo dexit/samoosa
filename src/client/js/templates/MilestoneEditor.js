@@ -8,6 +8,8 @@ module.exports = function render() {
 
     let remainingData = this.model.getRemainingData();
 
+    let highPriorityIssues = this.model.getIncompleteHighPriorityIssues();
+
     return _.div({class: 'milestone-editor' + (this.model.isOverdue() ? ' overdue' : '') + (this.model.isClosed() ? ' closed' : ''), 'data-id': this.model.id},
         _.button({class: 'btn btn-print'}, _.span({class: 'fa fa-print'}))
             .on('click', () => {
@@ -31,7 +33,15 @@ module.exports = function render() {
         ),
         _.if(remainingData.issues > 0,
             _.div({class: 'issues'},
-                remainingData.issues + ' issues left (' + remainingData.hours + ' hours)'
+                _.span({class: 'remaining'}, remainingData.issues + ' issues left (' + remainingData.hours + ' hours)'),
+                _.if(highPriorityIssues.length > 0,
+                    _.h6('High priority issues:'),
+                    _.ul({class: 'important'},
+                        _.each(highPriorityIssues, (i, issue) => {
+                            return _.li(issue.title);
+                        })
+                    )
+                )
             )
         ),
         _.div({class: 'buttons'}, 

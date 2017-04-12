@@ -7,7 +7,7 @@ body, textarea, label, input, option, select {
     line-height: 1.5em;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4 {
     &, input, a, span {
         font-family: 'Bree Serif';
     }
@@ -35,14 +35,17 @@ h4 {
 
 h5 {
     font-size: 1rem;
+    font-weight: bold;
 }
 
 h6 {
+    margin-top: 0.5rem;
     font-size: 0.8rem;
+    font-weight: bold;
 }
 
 ul {
-    padding-left: 1.2em;
+    padding-left: 1.3em;
     list-style-type: disc;
 }
 

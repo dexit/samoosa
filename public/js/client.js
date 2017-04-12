@@ -15433,14 +15433,14 @@
 	        }
 
 	        /**
-	         * Gets a list of completed issues
+	         * Gets a list of incomplete high priority issues
 	         *
 	         * @returns {Array} Issues
 	         */
 
 	    }, {
-	        key: 'getCompletedIssues',
-	        value: function getCompletedIssues() {
+	        key: 'getIncompleteHighPriorityIssues',
+	        value: function getIncompleteHighPriorityIssues() {
 	            var issues = [];
 
 	            var _iteratorNormalCompletion7 = true;
@@ -15451,7 +15451,7 @@
 	                for (var _iterator7 = this.getIssues()[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
 	                    var issue = _step7.value;
 
-	                    if (issue.isClosed()) {
+	                    if (!issue.isClosed() && (issue.priority == ISSUE_PRIORITIES.high || issue.priority == ISSUE_PRIORITIES.blocker)) {
 	                        issues.push(issue);
 	                    }
 	                }
@@ -15466,6 +15466,47 @@
 	                } finally {
 	                    if (_didIteratorError7) {
 	                        throw _iteratorError7;
+	                    }
+	                }
+	            }
+
+	            return issues;
+	        }
+
+	        /**
+	         * Gets a list of completed issues
+	         *
+	         * @returns {Array} Issues
+	         */
+
+	    }, {
+	        key: 'getCompletedIssues',
+	        value: function getCompletedIssues() {
+	            var issues = [];
+
+	            var _iteratorNormalCompletion8 = true;
+	            var _didIteratorError8 = false;
+	            var _iteratorError8 = undefined;
+
+	            try {
+	                for (var _iterator8 = this.getIssues()[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+	                    var issue = _step8.value;
+
+	                    if (issue.isClosed()) {
+	                        issues.push(issue);
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError8 = true;
+	                _iteratorError8 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
+	                        _iterator8.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError8) {
+	                        throw _iteratorError8;
 	                    }
 	                }
 	            }
@@ -15523,13 +15564,13 @@
 	                return issues;
 	            }
 
-	            var _iteratorNormalCompletion8 = true;
-	            var _didIteratorError8 = false;
-	            var _iteratorError8 = undefined;
+	            var _iteratorNormalCompletion9 = true;
+	            var _didIteratorError9 = false;
+	            var _iteratorError9 = undefined;
 
 	            try {
-	                for (var _iterator8 = this.getIssues()[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-	                    var issue = _step8.value;
+	                for (var _iterator9 = this.getIssues()[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+	                    var issue = _step9.value;
 
 	                    var closedDate = issue.getClosedDate();
 
@@ -15545,16 +15586,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError8 = true;
-	                _iteratorError8 = err;
+	                _didIteratorError9 = true;
+	                _iteratorError9 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
-	                        _iterator8.return();
+	                    if (!_iteratorNormalCompletion9 && _iterator9.return) {
+	                        _iterator9.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError8) {
-	                        throw _iteratorError8;
+	                    if (_didIteratorError9) {
+	                        throw _iteratorError9;
 	                    }
 	                }
 	            }
@@ -15575,27 +15616,27 @@
 	        value: function getRemainingEstimatedHoursAtDay(day) {
 	            var hours = 0;
 
-	            var _iteratorNormalCompletion9 = true;
-	            var _didIteratorError9 = false;
-	            var _iteratorError9 = undefined;
+	            var _iteratorNormalCompletion10 = true;
+	            var _didIteratorError10 = false;
+	            var _iteratorError10 = undefined;
 
 	            try {
-	                for (var _iterator9 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-	                    var issue = _step9.value;
+	                for (var _iterator10 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+	                    var issue = _step10.value;
 
 	                    hours += issue.getEstimatedHours();
 	                }
 	            } catch (err) {
-	                _didIteratorError9 = true;
-	                _iteratorError9 = err;
+	                _didIteratorError10 = true;
+	                _iteratorError10 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion9 && _iterator9.return) {
-	                        _iterator9.return();
+	                    if (!_iteratorNormalCompletion10 && _iterator10.return) {
+	                        _iterator10.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError9) {
-	                        throw _iteratorError9;
+	                    if (_didIteratorError10) {
+	                        throw _iteratorError10;
 	                    }
 	                }
 	            }
@@ -17892,9 +17933,13 @@
 
 	    var remainingData = this.model.getRemainingData();
 
+	    var highPriorityIssues = this.model.getIncompleteHighPriorityIssues();
+
 	    return _.div({ class: 'milestone-editor' + (this.model.isOverdue() ? ' overdue' : '') + (this.model.isClosed() ? ' closed' : ''), 'data-id': this.model.id }, _.button({ class: 'btn btn-print' }, _.span({ class: 'fa fa-print' })).on('click', function () {
 	        _this.onClickPrint();
-	    }), _.div({ class: 'input-group' }, _.label('Title'), _.input({ name: 'title', class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title })), _.div({ class: 'input-group' }, _.label('Description'), _.input({ name: 'description', class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description })), _.div({ class: 'date-input input-group' }, _.label('End date'), _.input({ placeholder: 'YYYY', name: 'year', type: 'number', value: year }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'MM', name: 'month', min: 1, max: 12, type: 'number', value: month }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'DD', name: 'day', min: 1, max: 31, type: 'number', value: day })), _.if(remainingData.issues > 0, _.div({ class: 'issues' }, remainingData.issues + ' issues left (' + remainingData.hours + ' hours)')), _.div({ class: 'buttons' }, _.button({ class: 'btn btn-primary' }, 'Remove').click(function () {
+	    }), _.div({ class: 'input-group' }, _.label('Title'), _.input({ name: 'title', class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title })), _.div({ class: 'input-group' }, _.label('Description'), _.input({ name: 'description', class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description })), _.div({ class: 'date-input input-group' }, _.label('End date'), _.input({ placeholder: 'YYYY', name: 'year', type: 'number', value: year }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'MM', name: 'month', min: 1, max: 12, type: 'number', value: month }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'DD', name: 'day', min: 1, max: 31, type: 'number', value: day })), _.if(remainingData.issues > 0, _.div({ class: 'issues' }, _.span({ class: 'remaining' }, remainingData.issues + ' issues left (' + remainingData.hours + ' hours)'), _.if(highPriorityIssues.length > 0, _.h6('High priority issues:'), _.ul({ class: 'important' }, _.each(highPriorityIssues, function (i, issue) {
+	        return _.li(issue.title);
+	    }))))), _.div({ class: 'buttons' }, _.button({ class: 'btn btn-primary' }, 'Remove').click(function () {
 	        _this.onClickDelete();
 	    }), _.button({ class: 'btn btn-primary' }, 'Save').click(function () {
 	        _this.onClickSave();

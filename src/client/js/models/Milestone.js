@@ -224,6 +224,27 @@ class Milestone {
     }
 
     /**
+     * Gets a list of incomplete high priority issues
+     *
+     * @returns {Array} Issues
+     */
+    getIncompleteHighPriorityIssues() {
+        let issues = [];
+
+        for(let issue of this.getIssues()) {
+            if(
+                !issue.isClosed() && 
+                (issue.priority == ISSUE_PRIORITIES.high ||
+                issue.priority == ISSUE_PRIORITIES.blocker)
+            ) {
+                issues.push(issue);
+            }
+        }
+
+        return issues;
+    }
+
+    /**
      * Gets a list of completed issues
      *
      * @returns {Array} Issues

@@ -6,9 +6,8 @@ module.exports = function render() {
     let month = date ? date.getMonth() + 1 : new Date().getMonth() + 1;
     let day = date ? date.getDate() : new Date().getDate();
 
-    let remainingData = this.model.getRemainingData();
-
-    let highPriorityIssues = this.model.getIncompleteHighPriorityIssues();
+    let remainingIssues = this.model.getIncompletedIssues();
+    let remainingHours = this.model.getIncompletedHours();
 
     return _.div({class: 'milestone-editor' + (this.model.isOverdue() ? ' overdue' : '') + (this.model.isClosed() ? ' closed' : ''), 'data-id': this.model.id},
         _.button({class: 'btn btn-print'}, _.span({class: 'fa fa-print'}))
@@ -31,16 +30,13 @@ module.exports = function render() {
             _.span({class: 'separator'}, '/'),
             _.input({placeholder: 'DD', name: 'day', min: 1, max: 31, type: 'number', value: day})
         ),
-        _.if(remainingData.issues > 0,
+        _.if(remainingIssues.length > 0,
             _.div({class: 'issues'},
-                _.span({class: 'remaining'}, remainingData.issues + ' issues left (' + remainingData.hours + ' hours)'),
-                _.if(highPriorityIssues.length > 0,
-                    _.h6('High priority issues:'),
-                    _.ul({class: 'important'},
-                        _.each(highPriorityIssues, (i, issue) => {
-                            return _.li(issue.title);
-                        })
-                    )
+                _.h6({class: 'remaining'}, remainingIssues.length + ' issues left (' + remainingHours + ' hours)'),
+                _.ul({class: 'important'},
+                    _.each(remainingIssues, (i, issue) => {
+                        return _.li(issue.title);
+                    })
                 )
             )
         ),

@@ -15333,18 +15333,15 @@
 	        }
 
 	        /**
-	         * Gets remaining data
+	         * Gets remaining hours
 	         *
-	         * @returns {Object} Data
+	         * @returns {Number} Hours
 	         */
 
 	    }, {
-	        key: 'getRemainingData',
-	        value: function getRemainingData() {
-	            var data = {
-	                issues: 0,
-	                hours: 0
-	            };
+	        key: 'getIncompletedHours',
+	        value: function getIncompletedHours() {
+	            var hours = 0;
 
 	            var _iteratorNormalCompletion5 = true;
 	            var _didIteratorError5 = false;
@@ -15355,8 +15352,7 @@
 	                    var issue = _step5.value;
 
 	                    if (!issue.isClosed()) {
-	                        data.issues++;
-	                        data.hours += issue.getEstimatedHours();
+	                        hours += issue.getEstimatedHours();
 	                    }
 	                }
 	            } catch (err) {
@@ -15374,7 +15370,7 @@
 	                }
 	            }
 
-	            return data;
+	            return hours;
 	        }
 
 	        /**
@@ -15439,8 +15435,8 @@
 	         */
 
 	    }, {
-	        key: 'getIncompleteHighPriorityIssues',
-	        value: function getIncompleteHighPriorityIssues() {
+	        key: 'getIncompletedIssues',
+	        value: function getIncompletedIssues() {
 	            var issues = [];
 
 	            var _iteratorNormalCompletion7 = true;
@@ -15451,7 +15447,7 @@
 	                for (var _iterator7 = this.getIssues()[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
 	                    var issue = _step7.value;
 
-	                    if (!issue.isClosed() && (issue.priority == ISSUE_PRIORITIES.high || issue.priority == ISSUE_PRIORITIES.blocker)) {
+	                    if (!issue.isClosed()) {
 	                        issues.push(issue);
 	                    }
 	                }
@@ -17931,15 +17927,14 @@
 	    var month = date ? date.getMonth() + 1 : new Date().getMonth() + 1;
 	    var day = date ? date.getDate() : new Date().getDate();
 
-	    var remainingData = this.model.getRemainingData();
-
-	    var highPriorityIssues = this.model.getIncompleteHighPriorityIssues();
+	    var remainingIssues = this.model.getIncompletedIssues();
+	    var remainingHours = this.model.getIncompletedHours();
 
 	    return _.div({ class: 'milestone-editor' + (this.model.isOverdue() ? ' overdue' : '') + (this.model.isClosed() ? ' closed' : ''), 'data-id': this.model.id }, _.button({ class: 'btn btn-print' }, _.span({ class: 'fa fa-print' })).on('click', function () {
 	        _this.onClickPrint();
-	    }), _.div({ class: 'input-group' }, _.label('Title'), _.input({ name: 'title', class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title })), _.div({ class: 'input-group' }, _.label('Description'), _.input({ name: 'description', class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description })), _.div({ class: 'date-input input-group' }, _.label('End date'), _.input({ placeholder: 'YYYY', name: 'year', type: 'number', value: year }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'MM', name: 'month', min: 1, max: 12, type: 'number', value: month }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'DD', name: 'day', min: 1, max: 31, type: 'number', value: day })), _.if(remainingData.issues > 0, _.div({ class: 'issues' }, _.span({ class: 'remaining' }, remainingData.issues + ' issues left (' + remainingData.hours + ' hours)'), _.if(highPriorityIssues.length > 0, _.h6('High priority issues:'), _.ul({ class: 'important' }, _.each(highPriorityIssues, function (i, issue) {
+	    }), _.div({ class: 'input-group' }, _.label('Title'), _.input({ name: 'title', class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title })), _.div({ class: 'input-group' }, _.label('Description'), _.input({ name: 'description', class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description })), _.div({ class: 'date-input input-group' }, _.label('End date'), _.input({ placeholder: 'YYYY', name: 'year', type: 'number', value: year }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'MM', name: 'month', min: 1, max: 12, type: 'number', value: month }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'DD', name: 'day', min: 1, max: 31, type: 'number', value: day })), _.if(remainingIssues.length > 0, _.div({ class: 'issues' }, _.h6({ class: 'remaining' }, remainingIssues.length + ' issues left (' + remainingHours + ' hours)'), _.ul({ class: 'important' }, _.each(remainingIssues, function (i, issue) {
 	        return _.li(issue.title);
-	    }))))), _.div({ class: 'buttons' }, _.button({ class: 'btn btn-primary' }, 'Remove').click(function () {
+	    })))), _.div({ class: 'buttons' }, _.button({ class: 'btn btn-primary' }, 'Remove').click(function () {
 	        _this.onClickDelete();
 	    }), _.button({ class: 'btn btn-primary' }, 'Save').click(function () {
 	        _this.onClickSave();

@@ -177,24 +177,20 @@ class Milestone {
     }
 
     /**
-     * Gets remaining data
+     * Gets remaining hours
      *
-     * @returns {Object} Data
+     * @returns {Number} Hours
      */
-    getRemainingData() {
-        let data = {
-            issues: 0,
-            hours: 0
-        };
+    getIncompletedHours() {
+        let hours = 0;
 
         for(let issue of this.getIssues()) {
             if(!issue.isClosed()) {
-                data.issues++;
-                data.hours += issue.getEstimatedHours();
+                hours += issue.getEstimatedHours();
             }
         }
 
-        return data;
+        return hours;
     }
 
     /**
@@ -228,15 +224,11 @@ class Milestone {
      *
      * @returns {Array} Issues
      */
-    getIncompleteHighPriorityIssues() {
+    getIncompletedIssues() {
         let issues = [];
 
         for(let issue of this.getIssues()) {
-            if(
-                !issue.isClosed() && 
-                (issue.priority == ISSUE_PRIORITIES.high ||
-                issue.priority == ISSUE_PRIORITIES.blocker)
-            ) {
+            if(!issue.isClosed()) {
                 issues.push(issue);
             }
         }

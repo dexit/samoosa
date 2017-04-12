@@ -46,8 +46,36 @@
 
 	'use strict';
 
-	// Style
+	// Constants
 
+	window.ISSUE_ESTIMATES = {
+	    '15m': 0,
+	    '30m': 1,
+	    '1h': 2,
+	    '2h': 3,
+	    '3h': 4,
+	    '4h': 5,
+	    '5h': 6,
+	    '6h': 7,
+	    '7h': 8,
+	    '8h': 9
+	};
+
+	window.ISSUE_TYPES = {
+	    'bug': 0,
+	    'improvement': 1,
+	    'new feature': 2,
+	    'task': 3
+	};
+
+	window.ISSUE_PRIORITIES = {
+	    'low': 0,
+	    'medium': 1,
+	    'high': 2,
+	    'blocker': 3
+	};
+
+	// Style
 	__webpack_require__(1);
 
 	// Package
@@ -1826,7 +1854,9 @@
 	    _createClass(ContextMenu, [{
 	        key: 'render',
 	        value: function render() {
-	            this.$element.html(_.each(this.model, function (label, func) {
+	            var view = this;
+
+	            view.$element.html(_.each(view.model, function (label, func) {
 	                if (func == '---') {
 	                    return _.li({ class: 'dropdown-header' }, label);
 	                } else {
@@ -1837,21 +1867,13 @@
 	                        if (func) {
 	                            func(e);
 
-	                            this.remove();
+	                            view.remove();
 	                        }
 	                    }));
 	                }
 	            }));
 
-	            $('body').append(this.$element);
-
-	            var rect = this.$element[0].getBoundingClientRect();
-
-	            if (rect.left + rect.width > window.innerWidth) {
-	                this.$element.css('left', rect.left - rect.width + 'px');
-	            } else if (rect.bottom > window.innerHeight) {
-	                this.$element.css('top', rect.top - rect.height + 'px');
-	            }
+	            $('body').append(view.$element);
 	        }
 	    }]);
 
@@ -9594,10 +9616,21 @@
 
 	'use strict';
 
-	// Display error message
+	// Get key by value
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+	window.getKey = function getKey(obj, value) {
+	    for (var prop in obj) {
+	        if (obj.hasOwnProperty(prop)) {
+	            if (obj[prop] === value) {
+	                return prop;
+	            }
+	        }
+	    }
+	};
+
+	// Display error message
 	window.displayError = function displayError(e) {
 	    alert(e.mesage);
 
@@ -9989,28 +10022,6 @@
 	            }
 	        }
 	    }, {
-	        key: 'getIssuePriority',
-	        value: function getIssuePriority(name) {
-	            for (var i in resources.issuePriorities) {
-	                var type = resources.issuePriorities[i];
-
-	                if (type == name) {
-	                    return i;
-	                }
-	            }
-	        }
-	    }, {
-	        key: 'getIssueEstimate',
-	        value: function getIssueEstimate(name) {
-	            for (var i in resources.issueEstimates) {
-	                var estimate = resources.issueEstimates[i];
-
-	                if (estimate == name) {
-	                    return i;
-	                }
-	            }
-	        }
-	    }, {
 	        key: 'getIssueColumn',
 	        value: function getIssueColumn(name) {
 	            for (var i in resources.issueColumns) {
@@ -10035,17 +10046,6 @@
 	            }
 
 	            return 0;
-	        }
-	    }, {
-	        key: 'getIssueType',
-	        value: function getIssueType(name) {
-	            for (var i in resources.issueTypes) {
-	                var type = resources.issueTypes[i];
-
-	                if (type == name) {
-	                    return i;
-	                }
-	            }
 	        }
 	    }, {
 	        key: 'getTeam',
@@ -10102,23 +10102,6 @@
 	        key: 'sortResource',
 	        value: function sortResource(resource) {
 	            switch (resource) {
-	                case 'issueEstimates':
-	                    resources.issueEstimates.sort(function (a, b) {
-	                        a = estimateToFloat(a);
-	                        b = estimateToFloat(b);
-
-	                        if (a < b) {
-	                            return -1;
-	                        }
-
-	                        if (a > b) {
-	                            return 1;
-	                        }
-
-	                        return 0;
-	                    });
-	                    break;
-
 	                case 'milestones':
 	                    resources.milestones.sort(function (a, b) {
 	                        a = a.getEndDate() || 0;
@@ -10747,7 +10730,7 @@
 	                            }
 	                        },
 	                        error: function error(e) {
-	                            reject(new Error(e.responseJSON.message));
+	                            reject(new Error(e.responseJSON ? e.responseJSON.message : e.statusText));
 	                        }
 	                    });
 	                }
@@ -11136,24 +11119,6 @@
 	        }
 
 	        /**
-	         * Gets issue types
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'getIssueTypes',
-	        value: function getIssueTypes() {
-	            var _this12 = this;
-
-	            return this.getLabels().then(function (labels) {
-	                _this12.processIssueTypes(labels);
-
-	                return Promise.resolve();
-	            });
-	        }
-
-	        /**
 	         * Gets issue columns
 	         *
 	         * @returns {Promise} promise
@@ -11162,10 +11127,10 @@
 	    }, {
 	        key: 'getIssueColumns',
 	        value: function getIssueColumns() {
-	            var _this13 = this;
+	            var _this12 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this13.processIssueColumns(labels);
+	                _this12.processIssueColumns(labels);
 
 	                return Promise.resolve();
 	            });
@@ -11230,42 +11195,6 @@
 	        }
 
 	        /**
-	         * Gets issue priorities
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'getIssuePriorities',
-	        value: function getIssuePriorities() {
-	            var _this14 = this;
-
-	            return this.getLabels().then(function (labels) {
-	                _this14.processIssuePriorities(labels);
-
-	                return Promise.resolve();
-	            });
-	        }
-
-	        /**
-	         * Gets issue estimates
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'getIssueEstimates',
-	        value: function getIssueEstimates() {
-	            var _this15 = this;
-
-	            return this.getLabels().then(function (labels) {
-	                _this15.processIssueEstimates(labels);
-
-	                return Promise.resolve();
-	            });
-	        }
-
-	        /**
 	         * Gets versions
 	         *
 	         * @returns {Promise} promise
@@ -11274,10 +11203,10 @@
 	    }, {
 	        key: 'getVersions',
 	        value: function getVersions() {
-	            var _this16 = this;
+	            var _this13 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this16.processVersions(labels);
+	                _this13.processVersions(labels);
 
 	                return Promise.resolve();
 	            });
@@ -11292,10 +11221,10 @@
 	    }, {
 	        key: 'getMilestones',
 	        value: function getMilestones() {
-	            var _this17 = this;
+	            var _this14 = this;
 
 	            return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones').then(function (milestones) {
-	                _this17.processMilestones(milestones);
+	                _this14.processMilestones(milestones);
 
 	                return Promise.resolve();
 	            });
@@ -11380,25 +11309,6 @@
 	                color: 'ffffff'
 	            }).then(function () {
 	                return Promise.resolve(type);
-	            });
-	        }
-
-	        /**
-	         * Adds issue priority
-	         *
-	         * @param {String} priority
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'addIssuePriority',
-	        value: function addIssuePriority(priority) {
-	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
-	                name: 'priority:' + priority,
-	                color: 'ffffff'
-	            }).then(function () {
-	                return Promise.resolve(priority);
 	            });
 	        }
 
@@ -11529,7 +11439,7 @@
 	    }, {
 	        key: 'removeIssue',
 	        value: function removeIssue(issue) {
-	            var _this18 = this;
+	            var _this15 = this;
 
 	            issue.deleted = true;
 	            deletedIssuesCache.push(issue);
@@ -11541,7 +11451,7 @@
 
 	            // Get all attachments
 	            .then(function () {
-	                return _this18.getIssueAttachments(issue);
+	                return _this15.getIssueAttachments(issue);
 	            })
 
 	            // Delete attachments one by one
@@ -11550,7 +11460,7 @@
 	                    var attachment = attachments.pop();
 
 	                    if (attachment) {
-	                        return _this18.removeIssueAttachment(issue, attachment).then(function () {
+	                        return _this15.removeIssueAttachment(issue, attachment).then(function () {
 	                            return deleteNextAttachment();
 	                        });
 	                    } else {
@@ -11563,7 +11473,7 @@
 
 	            // Get all comments
 	            .then(function () {
-	                return _this18.getIssueComments(issue);
+	                return _this15.getIssueComments(issue);
 	            })
 
 	            // Delete all comments one by one
@@ -11572,7 +11482,7 @@
 	                    var comment = comments.pop();
 
 	                    if (comment) {
-	                        return _this18.removeIssueComment(issue, comment).then(function () {
+	                        return _this15.removeIssueComment(issue, comment).then(function () {
 	                            return deleteNextComment();
 	                        });
 	                    } else {
@@ -11609,21 +11519,7 @@
 	    }, {
 	        key: 'removeIssueType',
 	        value: function removeIssueType(index) {
-	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/type:' + window.resources.issueTypes[index]);
-	        }
-
-	        /**
-	         * Removes issue priority
-	         *
-	         * @param {Number} index
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'removeIssuePriority',
-	        value: function removeIssuePriority(index) {
-	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/priority:' + window.resources.issuePriorities[index]);
+	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/type:' + ISSUE_TYPES[index]);
 	        }
 
 	        /**
@@ -11637,7 +11533,7 @@
 	    }, {
 	        key: 'removeIssueEstimate',
 	        value: function removeIssueEstimate(index) {
-	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/estimate:' + window.resources.issueEstimates[index]);
+	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/estimate:' + ISSUE_ESTIMATES[index]);
 	        }
 
 	        /**
@@ -11767,24 +11663,6 @@
 	        value: function updateIssueType(type, previousName) {
 	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/type:' + previousName, {
 	                name: 'type:' + type,
-	                color: 'ffffff'
-	            });
-	        }
-
-	        /**
-	         * Updates issue priority
-	         *
-	         * @param {String} priority
-	         * @param {String} previousName
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'updateIssuePriority',
-	        value: function updateIssuePriority(priority, previousName) {
-	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/priority:' + previousName, {
-	                name: 'priority:' + priority,
 	                color: 'ffffff'
 	            });
 	        }
@@ -11966,15 +11844,17 @@
 	        }
 
 	        /**
-	         * Process issue priotities
+	         * Process issue columns
 	         *
 	         * @param {Array} labels
 	         */
 
 	    }, {
-	        key: 'processIssuePriorities',
-	        value: function processIssuePriorities(labels) {
-	            window.resources.issuePriorities = [];
+	        key: 'processIssueColumns',
+	        value: function processIssueColumns(labels) {
+	            window.resources.issueColumns = [];
+
+	            window.resources.issueColumns.push('to do');
 
 	            var _iteratorNormalCompletion4 = true;
 	            var _didIteratorError4 = false;
@@ -11984,12 +11864,12 @@
 	                for (var _iterator4 = labels[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
 	                    var label = _step4.value;
 
-	                    var index = label.name.indexOf('priority:');
+	                    var index = label.name.indexOf('column:');
 
 	                    if (index > -1) {
-	                        var name = label.name.replace('priority:', '');
+	                        var name = label.name.replace('column:', '');
 
-	                        window.resources.issuePriorities.push(name);
+	                        window.resources.issueColumns.push(name);
 	                    }
 	                }
 	            } catch (err) {
@@ -12003,94 +11883,6 @@
 	                } finally {
 	                    if (_didIteratorError4) {
 	                        throw _iteratorError4;
-	                    }
-	                }
-	            }
-	        }
-
-	        /**
-	         * Process issue estimates
-	         *
-	         * @param {Array} labels
-	         */
-
-	    }, {
-	        key: 'processIssueEstimates',
-	        value: function processIssueEstimates(labels) {
-	            window.resources.issueEstimates = [];
-
-	            var _iteratorNormalCompletion5 = true;
-	            var _didIteratorError5 = false;
-	            var _iteratorError5 = undefined;
-
-	            try {
-	                for (var _iterator5 = labels[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	                    var label = _step5.value;
-
-	                    var index = label.name.indexOf('estimate:');
-
-	                    if (index > -1) {
-	                        var name = label.name.replace('estimate:', '');
-
-	                        window.resources.issueEstimates.push(name);
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError5 = true;
-	                _iteratorError5 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
-	                        _iterator5.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError5) {
-	                        throw _iteratorError5;
-	                    }
-	                }
-	            }
-	        }
-
-	        /**
-	         * Process issue columns
-	         *
-	         * @param {Array} labels
-	         */
-
-	    }, {
-	        key: 'processIssueColumns',
-	        value: function processIssueColumns(labels) {
-	            window.resources.issueColumns = [];
-
-	            window.resources.issueColumns.push('to do');
-
-	            var _iteratorNormalCompletion6 = true;
-	            var _didIteratorError6 = false;
-	            var _iteratorError6 = undefined;
-
-	            try {
-	                for (var _iterator6 = labels[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-	                    var label = _step6.value;
-
-	                    var index = label.name.indexOf('column:');
-
-	                    if (index > -1) {
-	                        var name = label.name.replace('column:', '');
-
-	                        window.resources.issueColumns.push(name);
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError6 = true;
-	                _iteratorError6 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
-	                        _iterator6.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError6) {
-	                        throw _iteratorError6;
 	                    }
 	                }
 	            }
@@ -12109,70 +11901,27 @@
 	        value: function processTeams(teams) {
 	            window.resources.teams = [];
 
-	            var _iteratorNormalCompletion7 = true;
-	            var _didIteratorError7 = false;
-	            var _iteratorError7 = undefined;
+	            var _iteratorNormalCompletion5 = true;
+	            var _didIteratorError5 = false;
+	            var _iteratorError5 = undefined;
 
 	            try {
-	                for (var _iterator7 = teams[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-	                    var team = _step7.value;
+	                for (var _iterator5 = teams[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                    var team = _step5.value;
 
 	                    window.resources.teams.push(team.name);
 	                }
 	            } catch (err) {
-	                _didIteratorError7 = true;
-	                _iteratorError7 = err;
+	                _didIteratorError5 = true;
+	                _iteratorError5 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion7 && _iterator7.return) {
-	                        _iterator7.return();
+	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	                        _iterator5.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError7) {
-	                        throw _iteratorError7;
-	                    }
-	                }
-	            }
-	        }
-
-	        /**
-	         * Process issue types
-	         *
-	         * @param {Array} labels
-	         */
-
-	    }, {
-	        key: 'processIssueTypes',
-	        value: function processIssueTypes(labels) {
-	            window.resources.issueTypes = [];
-
-	            var _iteratorNormalCompletion8 = true;
-	            var _didIteratorError8 = false;
-	            var _iteratorError8 = undefined;
-
-	            try {
-	                for (var _iterator8 = labels[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-	                    var label = _step8.value;
-
-	                    var index = label.name.indexOf('type:');
-
-	                    if (index > -1) {
-	                        var name = label.name.replace('type:', '');
-
-	                        window.resources.issueTypes.push(name);
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError8 = true;
-	                _iteratorError8 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
-	                        _iterator8.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError8) {
-	                        throw _iteratorError8;
+	                    if (_didIteratorError5) {
+	                        throw _iteratorError5;
 	                    }
 	                }
 	            }
@@ -12189,13 +11938,13 @@
 	        value: function processCollaborators(collaborators) {
 	            window.resources.collaborators = [];
 
-	            var _iteratorNormalCompletion9 = true;
-	            var _didIteratorError9 = false;
-	            var _iteratorError9 = undefined;
+	            var _iteratorNormalCompletion6 = true;
+	            var _didIteratorError6 = false;
+	            var _iteratorError6 = undefined;
 
 	            try {
-	                for (var _iterator9 = collaborators[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-	                    var collaborator = _step9.value;
+	                for (var _iterator6 = collaborators[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+	                    var collaborator = _step6.value;
 
 	                    window.resources.collaborators.push({
 	                        name: collaborator.login,
@@ -12203,16 +11952,16 @@
 	                    });
 	                }
 	            } catch (err) {
-	                _didIteratorError9 = true;
-	                _iteratorError9 = err;
+	                _didIteratorError6 = true;
+	                _iteratorError6 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion9 && _iterator9.return) {
-	                        _iterator9.return();
+	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
+	                        _iterator6.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError9) {
-	                        throw _iteratorError9;
+	                    if (_didIteratorError6) {
+	                        throw _iteratorError6;
 	                    }
 	                }
 	            }
@@ -12229,13 +11978,13 @@
 	        value: function processIssues(issues) {
 	            window.resources.issues = [];
 
-	            var _iteratorNormalCompletion10 = true;
-	            var _didIteratorError10 = false;
-	            var _iteratorError10 = undefined;
+	            var _iteratorNormalCompletion7 = true;
+	            var _didIteratorError7 = false;
+	            var _iteratorError7 = undefined;
 
 	            try {
-	                for (var _iterator10 = issues[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-	                    var gitHubIssue = _step10.value;
+	                for (var _iterator7 = issues[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+	                    var gitHubIssue = _step7.value;
 
 	                    var issue = new Issue();
 
@@ -12252,13 +12001,13 @@
 
 	                    issue.labels = issue.labels || [];
 
-	                    var _iteratorNormalCompletion11 = true;
-	                    var _didIteratorError11 = false;
-	                    var _iteratorError11 = undefined;
+	                    var _iteratorNormalCompletion8 = true;
+	                    var _didIteratorError8 = false;
+	                    var _iteratorError8 = undefined;
 
 	                    try {
-	                        for (var _iterator11 = gitHubIssue.labels[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-	                            var label = _step11.value;
+	                        for (var _iterator8 = gitHubIssue.labels[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+	                            var label = _step8.value;
 
 	                            var typeIndex = label.name.indexOf('type:');
 	                            var teamIndex = label.name.indexOf('team:');
@@ -12272,7 +12021,7 @@
 	                            } else if (typeIndex > -1) {
 	                                var name = label.name.replace('type:', '');
 
-	                                issue.type = ResourceHelper.getIssueType(name);
+	                                issue.type = ISSUE_TYPES[name];
 	                            } else if (teamIndex > -1) {
 	                                var _name = label.name.replace('team:', '');
 
@@ -12284,11 +12033,11 @@
 	                            } else if (estimateIndex > -1) {
 	                                var _name3 = label.name.replace('estimate:', '');
 
-	                                issue.estimate = ResourceHelper.getIssueEstimate(_name3);
+	                                issue.estimate = ISSUE_ESTIMATES[_name3];
 	                            } else if (priorityIndex > -1) {
 	                                var _name4 = label.name.replace('priority:', '');
 
-	                                issue.priority = ResourceHelper.getIssuePriority(_name4);
+	                                issue.priority = ISSUE_PRIORITIES[_name4];
 	                            } else if (columnIndex > -1) {
 	                                var _name5 = label.name.replace('column:', '');
 
@@ -12298,16 +12047,16 @@
 	                            }
 	                        }
 	                    } catch (err) {
-	                        _didIteratorError11 = true;
-	                        _iteratorError11 = err;
+	                        _didIteratorError8 = true;
+	                        _iteratorError8 = err;
 	                    } finally {
 	                        try {
-	                            if (!_iteratorNormalCompletion11 && _iterator11.return) {
-	                                _iterator11.return();
+	                            if (!_iteratorNormalCompletion8 && _iterator8.return) {
+	                                _iterator8.return();
 	                            }
 	                        } finally {
-	                            if (_didIteratorError11) {
-	                                throw _iteratorError11;
+	                            if (_didIteratorError8) {
+	                                throw _iteratorError8;
 	                            }
 	                        }
 	                    }
@@ -12329,16 +12078,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError10 = true;
-	                _iteratorError10 = err;
+	                _didIteratorError7 = true;
+	                _iteratorError7 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion10 && _iterator10.return) {
-	                        _iterator10.return();
+	                    if (!_iteratorNormalCompletion7 && _iterator7.return) {
+	                        _iterator7.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError10) {
-	                        throw _iteratorError10;
+	                    if (_didIteratorError7) {
+	                        throw _iteratorError7;
 	                    }
 	                }
 	            }
@@ -12427,10 +12176,8 @@
 	            }
 
 	            // Type
-	            var issueType = resources.issueTypes[issue.type];
-
-	            if (issueType) {
-	                gitHubIssue.labels.push('type:' + issueType);
+	            if (issue.getType()) {
+	                gitHubIssue.labels.push('type:' + issue.getType());
 	            }
 
 	            // Version
@@ -12441,17 +12188,13 @@
 	            }
 
 	            // Estimate
-	            var issueEstimate = resources.issueEstimates[issue.estimate];
-
-	            if (issueEstimate) {
-	                gitHubIssue.labels.push('estimate:' + issueEstimate);
+	            if (issue.getEstimate()) {
+	                gitHubIssue.labels.push('estimate:' + issue.getEstimate());
 	            }
 
 	            // Priority
-	            var issuePriority = resources.issuePriorities[issue.priority];
-
-	            if (issuePriority) {
-	                gitHubIssue.labels.push('priority:' + issuePriority);
+	            if (issue.getPriority()) {
+	                gitHubIssue.labels.push('priority:' + issue.getPriority());
 	            }
 
 	            // Column
@@ -12534,13 +12277,13 @@
 	            return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments').then(function (gitHubComments) {
 	                var comments = [];
 
-	                var _iteratorNormalCompletion12 = true;
-	                var _didIteratorError12 = false;
-	                var _iteratorError12 = undefined;
+	                var _iteratorNormalCompletion9 = true;
+	                var _didIteratorError9 = false;
+	                var _iteratorError9 = undefined;
 
 	                try {
-	                    for (var _iterator12 = gitHubComments[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
-	                        var gitHubComment = _step12.value;
+	                    for (var _iterator9 = gitHubComments[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+	                        var gitHubComment = _step9.value;
 
 	                        var comment = {
 	                            collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
@@ -12551,16 +12294,16 @@
 	                        comments.push(comment);
 	                    }
 	                } catch (err) {
-	                    _didIteratorError12 = true;
-	                    _iteratorError12 = err;
+	                    _didIteratorError9 = true;
+	                    _iteratorError9 = err;
 	                } finally {
 	                    try {
-	                        if (!_iteratorNormalCompletion12 && _iterator12.return) {
-	                            _iterator12.return();
+	                        if (!_iteratorNormalCompletion9 && _iterator9.return) {
+	                            _iterator9.return();
 	                        }
 	                    } finally {
-	                        if (_didIteratorError12) {
-	                            throw _iteratorError12;
+	                        if (_didIteratorError9) {
+	                            throw _iteratorError9;
 	                        }
 	                    }
 	                }
@@ -12834,48 +12577,6 @@
 	        }
 
 	        /**
-	         * Gets issue types
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'getIssueTypes',
-	        value: function getIssueTypes() {
-	            window.resources.issueTypes = [];
-
-	            return Promise.resolve();
-	        }
-
-	        /**
-	         * Gets issue priorities
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'getIssuePriorities',
-	        value: function getIssuePriorities() {
-	            window.resources.issuePriorities = [];
-
-	            return Promise.resolve();
-	        }
-
-	        /**
-	         * Gets issue estimates
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'getIssueEstimates',
-	        value: function getIssueEstimates() {
-	            window.resources.issueEstimates = [];
-
-	            return Promise.resolve();
-	        }
-
-	        /**
 	         * Gets issue columns
 	         *
 	         * @returns {Promise} promise
@@ -12963,48 +12664,6 @@
 	        }
 
 	        /**
-	         * Adds issue type
-	         *
-	         * @param {String} type
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'addIssueType',
-	        value: function addIssueType(type) {
-	            return Promise.resolve();
-	        }
-
-	        /**
-	         * Adds issue priority
-	         *
-	         * @param {String} priority
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'addIssuePriority',
-	        value: function addIssuePriority(priority) {
-	            return Promise.resolve();
-	        }
-
-	        /**
-	         * Adds issue estimate
-	         *
-	         * @param {String} estimate
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'addIssueEstimate',
-	        value: function addIssueEstimate(estimate) {
-	            return Promise.resolve();
-	        }
-
-	        /**
 	         * Adds issue column
 	         *
 	         * @param {String} column
@@ -13074,48 +12733,6 @@
 	    }, {
 	        key: 'removeCollaborator',
 	        value: function removeCollaborator(index) {
-	            return Promise.resolve();
-	        }
-
-	        /**
-	         * Removes issue type
-	         *
-	         * @param {Number} index
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'removeIssueType',
-	        value: function removeIssueType(index) {
-	            return Promise.resolve();
-	        }
-
-	        /**
-	         * Removes issue priority
-	         *
-	         * @param {Number} index
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'removeIssuePriority',
-	        value: function removeIssuePriority(index) {
-	            return Promise.resolve();
-	        }
-
-	        /**
-	         * Removes issue estimate
-	         *
-	         * @param {Number} index
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'removeIssueEstimate',
-	        value: function removeIssueEstimate(index) {
 	            return Promise.resolve();
 	        }
 
@@ -13205,51 +12822,6 @@
 	    }, {
 	        key: 'updateCollaborator',
 	        value: function updateCollaborator(index, collaborator) {
-	            return Promise.resolve();
-	        }
-
-	        /**
-	         * Updates issue type
-	         *
-	         * @param {Number} index
-	         * @param {String} type
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'updateIssueType',
-	        value: function updateIssueType(index, type) {
-	            return Promise.resolve();
-	        }
-
-	        /**
-	         * Updates issue priority
-	         *
-	         * @param {Number} index
-	         * @param {String} priority
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'updateIssuePriority',
-	        value: function updateIssuePriority(index, priority) {
-	            return Promise.resolve();
-	        }
-
-	        /**
-	         * Updates issue estimate
-	         *
-	         * @param {Number} index
-	         * @param {String} estimate
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'updateIssueEstimate',
-	        value: function updateIssueEstimate(index, estimate) {
 	            return Promise.resolve();
 	        }
 
@@ -13443,15 +13015,6 @@
 	                case 'collaborators':
 	                    return this.removeCollaborator(index);
 
-	                case 'issueTypes':
-	                    return this.removeIssueType(index);
-
-	                case 'issuePriorities':
-	                    return this.removeIssuePriority(index);
-
-	                case 'issueEstimates':
-	                    return this.removeIssueEstimate(index);
-
 	                case 'issueColumns':
 	                    return this.removeIssueColumn(index);
 
@@ -13490,15 +13053,6 @@
 	                case 'collaborators':
 	                    return this.addCollaborator(item);
 
-	                case 'issueTypes':
-	                    return this.addIssueType(item);
-
-	                case 'issuePriorities':
-	                    return this.addIssuePriority(item);
-
-	                case 'issueEstimates':
-	                    return this.addIssueEstimate(item);
-
 	                case 'issueColumns':
 	                    return this.addIssueColumn(item);
 
@@ -13535,15 +13089,6 @@
 	            debug.log('Updating item for ' + resource + '...', this);
 
 	            switch (resource) {
-	                case 'issueTypes':
-	                    return this.updateIssueType(item, identifier);
-
-	                case 'issuePriorities':
-	                    return this.updateIssuePriority(item, identifier);
-
-	                case 'issueEstimates':
-	                    return this.updateIssueEstimate(item, identifier);
-
 	                case 'issueColumns':
 	                    return this.updateIssueColumn(item, identifier);
 
@@ -13591,19 +13136,6 @@
 
 	                case 'teams':
 	                    return this.getTeams();
-
-	                case 'issueTypes':
-	                    return this.getIssueTypes();
-
-	                case 'issuePriorities':
-	                    return this.getIssuePriorities();
-
-	                case 'issueEstimates':
-	                    return this.getIssueEstimates().then(function () {
-	                        ResourceHelper.sortResource('issueEstimates');
-
-	                        return Promise.resolve();
-	                    });
 
 	                case 'issueColumns':
 	                    return this.getIssueColumns();
@@ -13655,13 +13187,7 @@
 	                }
 	            };
 
-	            return get('issueTypes').then(function () {
-	                return get('issuePriorities');
-	            }).then(function () {
-	                return get('teams');
-	            }).then(function () {
-	                return get('issueEstimates');
-	            }).then(function () {
+	            return get('teams').then(function () {
 	                return get('issueColumns');
 	            }).then(function () {
 	                return get('collaborators');
@@ -13715,7 +13241,7 @@
 	         */
 	        value: function getConfig() {
 	            return {
-	                readonlyResources: ['issueTypes', 'issueEstimates', 'issuePriorities', 'issueColumns']
+	                readonlyResources: ['issueColumns']
 	            };
 	        }
 
@@ -14178,20 +13704,6 @@
 	        }
 
 	        /**
-	         * Gets issue types
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'getIssueTypes',
-	        value: function getIssueTypes() {
-	            resources.issueTypes = ['bug', 'enhancement', 'proposal', 'task'];
-
-	            return Promise.resolve();
-	        }
-
-	        /**
 	         * Gets issue columns
 	         *
 	         * @returns {Promise} promise
@@ -14268,34 +13780,6 @@
 	            }).catch(function () {
 	                return Promise.resolve([]);
 	            });
-	        }
-
-	        /**
-	         * Gets issue priorities
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'getIssuePriorities',
-	        value: function getIssuePriorities() {
-	            resources.issuePriorities = ['trivial', 'minor', 'major', 'critical', 'blocker'];
-
-	            return Promise.resolve();
-	        }
-
-	        /**
-	         * Gets issue estimates
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'getIssueEstimates',
-	        value: function getIssueEstimates() {
-	            resources.issueEstimates = ['15m', '30m', '1h', '2h', '3h', '4h', '5h', '6h', '7h', '8h'];
-
-	            return Promise.resolve();
 	        }
 
 	        /**
@@ -14376,52 +13860,6 @@
 	        }
 
 	        /**
-	         * Adds issue type
-	         *
-	         * @param {String} type
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'addIssueType',
-	        value: function addIssueType(type) {
-	            var _this14 = this;
-
-	            return new Promise(function (callback) {
-	                _this14.post('1.0/repositories/' + _this14.getRepositoryOwner() + '/' + _this14.getRepositoryName() + '/labels', {
-	                    name: 'type:' + type,
-	                    color: 'ffffff'
-	                }).then(function () {
-	                    callback();
-	                });
-	            });
-	        }
-
-	        /**
-	         * Adds issue priority
-	         *
-	         * @param {String} priority
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'addIssuePriority',
-	        value: function addIssuePriority(priority) {
-	            var _this15 = this;
-
-	            return new Promise(function (callback) {
-	                _this15.post('1.0/repositories/' + _this15.getRepositoryOwner() + '/' + _this15.getRepositoryName() + '/labels', {
-	                    name: 'priority:' + priority,
-	                    color: 'ffffff'
-	                }).then(function () {
-	                    callback();
-	                });
-	            });
-	        }
-
-	        /**
 	         * Adds issue estimate
 	         *
 	         * @param {String} estimate
@@ -14432,10 +13870,10 @@
 	    }, {
 	        key: 'addIssueEstimate',
 	        value: function addIssueEstimate(estimate) {
-	            var _this16 = this;
+	            var _this14 = this;
 
 	            return new Promise(function (callback) {
-	                _this16.post('1.0/repositories/' + _this16.getRepositoryOwner() + '/' + _this16.getRepositoryName() + '/labels', {
+	                _this14.post('1.0/repositories/' + _this14.getRepositoryOwner() + '/' + _this14.getRepositoryName() + '/labels', {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -14455,10 +13893,10 @@
 	    }, {
 	        key: 'addIssueColumn',
 	        value: function addIssueColumn(column) {
-	            var _this17 = this;
+	            var _this15 = this;
 
 	            return new Promise(function (callback) {
-	                _this17.post('1.0/repositories/' + _this17.getRepositoryOwner() + '/' + _this17.getRepositoryName() + '/labels', {
+	                _this15.post('1.0/repositories/' + _this15.getRepositoryOwner() + '/' + _this15.getRepositoryName() + '/labels', {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -14593,12 +14031,12 @@
 	    }, {
 	        key: 'removeMilestone',
 	        value: function removeMilestone(index) {
-	            var _this18 = this;
+	            var _this16 = this;
 
 	            var milestone = resources.milestones[index];
 
 	            return new Promise(function (callback) {
-	                _this18.delete('1.0/repositories/' + _this18.getRepositoryOwner() + '/' + _this18.getRepositoryName() + '/issues/milestones/' + milestone.id).then(function () {
+	                _this16.delete('1.0/repositories/' + _this16.getRepositoryOwner() + '/' + _this16.getRepositoryName() + '/issues/milestones/' + milestone.id).then(function () {
 	                    callback();
 	                });
 	            });
@@ -14662,58 +14100,10 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            var _this19 = this;
+	            var _this17 = this;
 
 	            return new Promise(function (callback) {
-	                _this19.put('1.0/repositories/' + _this19.getRepositoryOwner() + '/' + _this19.getRepositoryName() + '/issues/milestones/' + milestone.id, _this19.convertMilestone(milestone)).then(function () {
-	                    callback();
-	                });
-	            });
-	        }
-
-	        /**
-	         * Updates issue type
-	         *
-	         * @param {String} type
-	         * @param {String} previousName
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'updateIssueType',
-	        value: function updateIssueType(type, previousName) {
-	            var _this20 = this;
-
-	            return new Promise(function (callback) {
-	                _this20.patch('1.0/repositories/' + _this20.getRepositoryOwner() + '/' + _this20.getRepositoryName() + '/labels/type:' + previousName, {
-	                    name: 'type:' + type,
-	                    color: 'ffffff'
-	                }).then(function () {
-	                    callback();
-	                });
-	            });
-	        }
-
-	        /**
-	         * Updates issue priority
-	         *
-	         * @param {String} priority
-	         * @param {String} previousName
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'updateIssuePriority',
-	        value: function updateIssuePriority(priority, previousName) {
-	            var _this21 = this;
-
-	            return new Promise(function (callback) {
-	                _this21.patch('1.0/repositories/' + _this21.getRepositoryOwner() + '/' + _this21.getRepositoryName() + '/labels/priority:' + previousName, {
-	                    name: 'priority:' + priority,
-	                    color: 'ffffff'
-	                }).then(function () {
+	                _this17.put('1.0/repositories/' + _this17.getRepositoryOwner() + '/' + _this17.getRepositoryName() + '/issues/milestones/' + milestone.id, _this17.convertMilestone(milestone)).then(function () {
 	                    callback();
 	                });
 	            });
@@ -14731,10 +14121,10 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(estimate, previousName) {
-	            var _this22 = this;
+	            var _this18 = this;
 
 	            return new Promise(function (callback) {
-	                _this22.patch('1.0/repositories/' + _this22.getRepositoryOwner() + '/' + _this22.getRepositoryName() + '/labels/estimate:' + previousName, {
+	                _this18.patch('1.0/repositories/' + _this18.getRepositoryOwner() + '/' + _this18.getRepositoryName() + '/labels/estimate:' + previousName, {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -14755,10 +14145,10 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            var _this23 = this;
+	            var _this19 = this;
 
 	            return new Promise(function (callback) {
-	                _this23.patch('1.0/repositories/' + _this23.getRepositoryOwner() + '/' + _this23.getRepositoryName() + '/labels/column:' + previousName, {
+	                _this19.patch('1.0/repositories/' + _this19.getRepositoryOwner() + '/' + _this19.getRepositoryName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -14898,15 +14288,17 @@
 	        }
 
 	        /**
-	         * Process issue priotities
+	         * Process issue columns
 	         *
 	         * @param {Array} labels
 	         */
 
 	    }, {
-	        key: 'processIssuePriorities',
-	        value: function processIssuePriorities(labels) {
-	            window.resources.issuePriorities = [];
+	        key: 'processIssueColumns',
+	        value: function processIssueColumns(labels) {
+	            window.resources.issueColumns = [];
+
+	            window.resources.issueColumns.push('to do');
 
 	            var _iteratorNormalCompletion2 = true;
 	            var _didIteratorError2 = false;
@@ -14916,12 +14308,12 @@
 	                for (var _iterator2 = labels[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 	                    var label = _step2.value;
 
-	                    var index = label.name.indexOf('priority:');
+	                    var index = label.name.indexOf('column:');
 
 	                    if (index > -1) {
-	                        var name = label.name.replace('priority:', '');
+	                        var name = label.name.replace('column:', '');
 
-	                        window.resources.issuePriorities.push(name);
+	                        window.resources.issueColumns.push(name);
 	                    }
 	                }
 	            } catch (err) {
@@ -14938,154 +14330,8 @@
 	                    }
 	                }
 	            }
-	        }
-
-	        /**
-	         * Process issue estimates
-	         *
-	         * @param {Array} labels
-	         */
-
-	    }, {
-	        key: 'processIssueEstimates',
-	        value: function processIssueEstimates(labels) {
-	            window.resources.issueEstimates = [];
-
-	            var _iteratorNormalCompletion3 = true;
-	            var _didIteratorError3 = false;
-	            var _iteratorError3 = undefined;
-
-	            try {
-	                for (var _iterator3 = labels[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                    var label = _step3.value;
-
-	                    var index = label.name.indexOf('estimate:');
-
-	                    if (index > -1) {
-	                        var name = label.name.replace('estimate:', '');
-
-	                        window.resources.issueEstimates.push(name);
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError3 = true;
-	                _iteratorError3 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	                        _iterator3.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError3) {
-	                        throw _iteratorError3;
-	                    }
-	                }
-	            }
-
-	            window.resources.issueEstimates.sort(function (a, b) {
-	                a = parseFloat(a);
-	                b = parseFloat(b);
-
-	                if (a < b) {
-	                    return -1;
-	                }
-
-	                if (a > b) {
-	                    return 1;
-	                }
-
-	                return 0;
-	            });
-	        }
-
-	        /**
-	         * Process issue columns
-	         *
-	         * @param {Array} labels
-	         */
-
-	    }, {
-	        key: 'processIssueColumns',
-	        value: function processIssueColumns(labels) {
-	            window.resources.issueColumns = [];
-
-	            window.resources.issueColumns.push('to do');
-
-	            var _iteratorNormalCompletion4 = true;
-	            var _didIteratorError4 = false;
-	            var _iteratorError4 = undefined;
-
-	            try {
-	                for (var _iterator4 = labels[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	                    var label = _step4.value;
-
-	                    var index = label.name.indexOf('column:');
-
-	                    if (index > -1) {
-	                        var name = label.name.replace('column:', '');
-
-	                        window.resources.issueColumns.push(name);
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError4 = true;
-	                _iteratorError4 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-	                        _iterator4.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError4) {
-	                        throw _iteratorError4;
-	                    }
-	                }
-	            }
 
 	            window.resources.issueColumns.push('done');
-	        }
-
-	        /**
-	         * Process issue types
-	         *
-	         * @param {Array} labels
-	         */
-
-	    }, {
-	        key: 'processIssueTypes',
-	        value: function processIssueTypes(labels) {
-	            window.resources.issueTypes = [];
-
-	            var _iteratorNormalCompletion5 = true;
-	            var _didIteratorError5 = false;
-	            var _iteratorError5 = undefined;
-
-	            try {
-	                for (var _iterator5 = labels[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	                    var label = _step5.value;
-
-	                    var index = label.name.indexOf('type:');
-
-	                    if (index > -1) {
-	                        var name = label.name.replace('type:', '');
-
-	                        window.resources.issueTypes.push(name);
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError5 = true;
-	                _iteratorError5 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
-	                        _iterator5.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError5) {
-	                        throw _iteratorError5;
-	                    }
-	                }
-	            }
 	        }
 
 	        /**
@@ -15099,13 +14345,13 @@
 	        value: function processMembers(members) {
 	            resources.collaborators = [];
 
-	            var _iteratorNormalCompletion6 = true;
-	            var _didIteratorError6 = false;
-	            var _iteratorError6 = undefined;
+	            var _iteratorNormalCompletion3 = true;
+	            var _didIteratorError3 = false;
+	            var _iteratorError3 = undefined;
 
 	            try {
-	                for (var _iterator6 = (members || [])[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-	                    var member = _step6.value;
+	                for (var _iterator3 = (members || [])[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                    var member = _step3.value;
 
 	                    resources.collaborators.push({
 	                        id: member.username,
@@ -15115,16 +14361,16 @@
 	                    });
 	                }
 	            } catch (err) {
-	                _didIteratorError6 = true;
-	                _iteratorError6 = err;
+	                _didIteratorError3 = true;
+	                _iteratorError3 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
-	                        _iterator6.return();
+	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                        _iterator3.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError6) {
-	                        throw _iteratorError6;
+	                    if (_didIteratorError3) {
+	                        throw _iteratorError3;
 	                    }
 	                }
 	            }
@@ -15143,13 +14389,13 @@
 
 	            var indexCounter = 0;
 
-	            var _iteratorNormalCompletion7 = true;
-	            var _didIteratorError7 = false;
-	            var _iteratorError7 = undefined;
+	            var _iteratorNormalCompletion4 = true;
+	            var _didIteratorError4 = false;
+	            var _iteratorError4 = undefined;
 
 	            try {
-	                for (var _iterator7 = issues[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-	                    var bitBucketIssue = _step7.value;
+	                for (var _iterator4 = issues[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                    var bitBucketIssue = _step4.value;
 
 	                    var issue = new Issue();
 
@@ -15168,14 +14414,44 @@
 	                        issue.assignee = ResourceHelper.getCollaborator(bitBucketIssue.responsible.username);
 	                    }
 
+	                    // Remap issue type names
+	                    switch (bitBucketIssue.metadata.kind) {
+	                        case 'enhancement':
+	                            bitBucketIssue.metadata.kind = 'improvement';
+	                            break;
+
+	                        case 'proposal':
+	                            bitBucketIssue.metadata.kind = 'new feature';
+	                            break;
+	                    }
+
+	                    // Remap issue priority names
+	                    switch (bitBucketIssue.priority) {
+	                        case 'trivial':
+	                            bitBucketIssue.priority = 'low';
+	                            break;
+
+	                        case 'minor':
+	                            bitBucketIssue.priority = 'medium';
+	                            break;
+
+	                        case 'major':
+	                            bitBucketIssue.priority = 'high';
+	                            break;
+
+	                        case 'critical':
+	                            bitBucketIssue.priority = 'blocker';
+	                            break;
+	                    }
+
 	                    // Clean up milestone name
 	                    var milestoneDateRegex = /{% (start|end)Date: (\d+) %}/g;
 
 	                    bitBucketIssue.metadata.milestone = (bitBucketIssue.metadata.milestone || '').replace(milestoneDateRegex, '');
 
-	                    issue.priority = ResourceHelper.getIssuePriority(bitBucketIssue.priority);
+	                    issue.priority = ISSUE_PRIORITIES[bitBucketIssue.priority];
 	                    issue.milestone = ResourceHelper.getMilestone(bitBucketIssue.metadata.milestone);
-	                    issue.type = ResourceHelper.getIssueType(bitBucketIssue.metadata.kind);
+	                    issue.type = ISSUE_TYPES[bitBucketIssue.metadata.kind];
 	                    issue.version = ResourceHelper.getVersion(bitBucketIssue.metadata.version);
 	                    issue.column = ResourceHelper.getIssueColumn(bitBucketIssue.status);
 
@@ -15186,16 +14462,16 @@
 	                    indexCounter++;
 	                }
 	            } catch (err) {
-	                _didIteratorError7 = true;
-	                _iteratorError7 = err;
+	                _didIteratorError4 = true;
+	                _iteratorError4 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion7 && _iterator7.return) {
-	                        _iterator7.return();
+	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                        _iterator4.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError7) {
-	                        throw _iteratorError7;
+	                    if (_didIteratorError4) {
+	                        throw _iteratorError4;
 	                    }
 	                }
 	            }
@@ -15287,6 +14563,16 @@
 	            // Type
 	            var issueType = issue.getType();
 
+	            switch (issueType) {
+	                case 'improvement':
+	                    issueType = 'enhancement';
+	                    break;
+
+	                case 'new feature':
+	                    issueType = 'proposal';
+	                    break;
+	            }
+
 	            bitBucketIssue.kind = issueType;
 
 	            // Version
@@ -15295,13 +14581,27 @@
 	            bitBucketIssue.version = version;
 
 	            // Estimate
-	            var issueEstimate = resources.issueEstimates[issue.estimate];
+	            var issueEstimate = issue.getEstimate();
 	            var estimateString = '{% estimate:' + issueEstimate + ' %}';
 
 	            bitBucketIssue.content += estimateString;
 
 	            // Priority
 	            var issuePriority = issue.getPriority();
+
+	            switch (issuePriority) {
+	                case 'low':
+	                    issuePriority = 'trivial';
+	                    break;
+
+	                case 'medium':
+	                    issuePriority = 'minor';
+	                    break;
+
+	                case 'high':
+	                    issuePriority = 'major';
+	                    break;
+	            }
 
 	            bitBucketIssue.priority = issuePriority;
 
@@ -15352,13 +14652,13 @@
 	            return this.get('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/comments').then(function (bitBucketComments) {
 	                var comments = [];
 
-	                var _iteratorNormalCompletion8 = true;
-	                var _didIteratorError8 = false;
-	                var _iteratorError8 = undefined;
+	                var _iteratorNormalCompletion5 = true;
+	                var _didIteratorError5 = false;
+	                var _iteratorError5 = undefined;
 
 	                try {
-	                    for (var _iterator8 = bitBucketComments[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-	                        var bitBucketComment = _step8.value;
+	                    for (var _iterator5 = bitBucketComments[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                        var bitBucketComment = _step5.value;
 
 	                        var comment = {
 	                            collaborator: ResourceHelper.getCollaborator(bitBucketComment.author_info.username),
@@ -15369,16 +14669,16 @@
 	                        comments.push(comment);
 	                    }
 	                } catch (err) {
-	                    _didIteratorError8 = true;
-	                    _iteratorError8 = err;
+	                    _didIteratorError5 = true;
+	                    _iteratorError5 = err;
 	                } finally {
 	                    try {
-	                        if (!_iteratorNormalCompletion8 && _iterator8.return) {
-	                            _iterator8.return();
+	                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	                            _iterator5.return();
 	                        }
 	                    } finally {
-	                        if (_didIteratorError8) {
-	                            throw _iteratorError8;
+	                        if (_didIteratorError5) {
+	                            throw _iteratorError5;
 	                        }
 	                    }
 	                }
@@ -15463,7 +14763,7 @@
 	                            break;
 
 	                        case 'type':
-	                            this.type = ResourceHelper.getIssueType(value);
+	                            this.type = ISSUE_TYPES[value];
 	                            break;
 
 	                        case 'team':
@@ -15471,11 +14771,11 @@
 	                            break;
 
 	                        case 'priority':
-	                            this.priority = ResourceHelper.getIssuePriority(value);
+	                            this.priority = ISSUE_PRIORITIES[value];
 	                            break;
 
 	                        case 'estimate':
-	                            this.estimate = ResourceHelper.getIssueEstimate(value);
+	                            this.estimate = ISSUE_ESTIMATES[value];
 	                            break;
 
 	                        case 'version':
@@ -15563,7 +14863,7 @@
 	    }, {
 	        key: 'getType',
 	        value: function getType() {
-	            return resources.issueTypes[this.type || 0];
+	            return getKey(ISSUE_TYPES, this.type || 0);
 	        }
 
 	        /**
@@ -15575,7 +14875,7 @@
 	    }, {
 	        key: 'getPriority',
 	        value: function getPriority() {
-	            return resources.issuePriorities[this.priority || 0];
+	            return getKey(ISSUE_PRIORITIES, this.priority || 0);
 	        }
 
 	        /**
@@ -15683,7 +14983,7 @@
 	    }, {
 	        key: 'getEstimate',
 	        value: function getEstimate() {
-	            return resources.issueEstimates[this.estimate || 0];
+	            return getKey(ISSUE_ESTIMATES, this.estimate || 0);
 	        }
 
 	        /**
@@ -15715,7 +15015,7 @@
 	                version: this.getVersion(),
 	                milestone: this.getMilestone() ? this.getMilestone().title : null,
 	                assignee: this.getAssignee() ? this.getAssignee().name : null,
-	                estimate: resources.issueEstimates[this.estimate || -1]
+	                estimate: ISSUE_ESTIMATES[this.estimate || -1]
 	            };
 	        }
 
@@ -17331,6 +16631,10 @@
 	                }
 	            }
 
+	            if (value && !isNaN(value)) {
+	                value = parseFloat(value);
+	            }
+
 	            return value;
 	        }
 
@@ -17384,7 +16688,7 @@
 	            this.setProperty('estimate', this.model.estimate);
 
 	            // Update data type attribute
-	            this.$element.attr('data-type', resources.issueTypes[this.model.type]);
+	            this.$element.attr('data-type', ISSUE_TYPES[this.model.type]);
 
 	            // Update avatar image
 	            this.$element.find('.header .assignee-avatar').html(this.getAssigneeAvatar());
@@ -18210,7 +17514,7 @@
 	module.exports = function render() {
 	    var _this = this;
 
-	    return _.div({ class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type] },
+	    return _.div({ class: 'issue-editor', 'data-index': this.model.index, 'data-type': ISSUE_TYPES[this.model.type] },
 
 	    // Header
 	    _.div({ class: 'header' },
@@ -18274,9 +17578,9 @@
 	    }).val(this.model.assignee))),
 
 	    // Type
-	    _.div({ class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    _.div({ class: 'meta-field type' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
-	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueTypes, function (i, type) {
+	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(ISSUE_TYPES, function (type, i) {
 	        return _.option({ value: i }, type);
 	    })).change(function () {
 	        _this.onChange();
@@ -18292,9 +17596,9 @@
 	    }).val(this.model.team)),
 
 	    // Priority
-	    _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    _.div({ class: 'meta-field priority' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
-	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issuePriorities, function (i, priority) {
+	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(ISSUE_PRIORITIES, function (priority, i) {
 	        return _.option({ value: i }, priority);
 	    })).change(function () {
 	        _this.onChange();
@@ -18310,9 +17614,9 @@
 	    }).val(this.model.version)),
 
 	    // Estimate
-	    _.div({ class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    _.div({ class: 'meta-field estimate' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
-	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueEstimates, function (i, estimate) {
+	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(ISSUE_ESTIMATES, function (estimate, i) {
 	        return _.option({ value: i }, estimate);
 	    })).change(function () {
 	        _this.onChange();
@@ -18865,12 +18169,6 @@
 
 	    // Set regex for individual cases
 	    var regex = void 0;
-
-	    switch (this.name) {
-	        case 'issueEstimates':
-	            regex = '(\\d+.\\d+|\\d+)(d|h|m)';
-	            break;
-	    }
 
 	    return _.div({ class: 'resource-editor' }, _.div({ class: 'body' }, _.each(this.model, function (i, item) {
 	        // Do not handle issue columns "to do" and "done"
@@ -19848,7 +19146,7 @@
 	        $('.workspace').remove();
 
 	        var canEdit = function canEdit(name) {
-	            return name !== 'organizations' && name !== 'milestones' && name !== 'issues' && name !== 'repositories' && name !== 'collaborators';
+	            return name !== 'organizations' && name !== 'teams' && name !== 'milestones' && name !== 'issues' && name !== 'repositories' && name !== 'collaborators';
 	        };
 
 	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-content settings-container' }, _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.each(window.resources, function (name, resource) {

@@ -1,5 +1,33 @@
 'use strict';
 
+// Constants
+window.ISSUE_ESTIMATES = {
+    '15m': 0,
+    '30m': 1,
+    '1h': 2,
+    '2h': 3,
+    '3h': 4,
+    '4h': 5,
+    '5h': 6,
+    '6h': 7,
+    '7h': 8,
+    '8h': 9
+};
+
+window.ISSUE_TYPES = {
+    'bug': 0,
+    'improvement': 1,
+    'new feature': 2,
+    'task': 3
+};
+
+window.ISSUE_PRIORITIES = {
+    'low': 0,
+    'medium': 1,
+    'high': 2,
+    'blocker': 3
+};
+
 // Style
 require('../sass/client');
 

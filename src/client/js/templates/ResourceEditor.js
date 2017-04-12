@@ -4,12 +4,6 @@ module.exports = function render() {
     // Set regex for individual cases
     let regex;
 
-    switch(this.name) {
-        case 'issueEstimates':
-            regex = '(\\d+.\\d+|\\d+)(d|h|m)';
-            break;
-    }
-
     return _.div({class: 'resource-editor'},
         _.div({class: 'body'},
             _.each(this.model, (i, item) => {

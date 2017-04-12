@@ -154,6 +154,7 @@ Router.route('/:user/:repository/settings/:resource', () => {
 
         let canEdit = (name) => {
             return name !== 'organizations' &&
+            name !== 'teams' &&
             name !== 'milestones' &&
             name !== 'issues' &&
             name !== 'repositories' &&

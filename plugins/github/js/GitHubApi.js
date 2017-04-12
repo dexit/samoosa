@@ -49,7 +49,7 @@ class GitHubApi extends ApiHelper {
                         }
                     },
                     error: (e) => {
-                        reject(new Error(e.responseJSON.message));
+                        reject(new Error(e.responseJSON ? e.responseJSON.message : e.statusText));
                     }
                 });
             }
@@ -367,20 +367,6 @@ class GitHubApi extends ApiHelper {
     }
 
     /**
-     * Gets issue types
-     *
-     * @returns {Promise} promise
-     */
-    getIssueTypes() {
-        return this.getLabels()
-        .then((labels) => {
-            this.processIssueTypes(labels);
-
-            return Promise.resolve();
-        });
-    }
-    
-    /**
      * Gets issue columns
      *
      * @returns {Promise} promise
@@ -427,34 +413,6 @@ class GitHubApi extends ApiHelper {
         })
         .catch(() => {
             return Promise.resolve([]);  
-        });
-    }
-    
-    /**
-     * Gets issue priorities
-     *
-     * @returns {Promise} promise
-     */
-    getIssuePriorities() {
-        return this.getLabels()
-        .then((labels) => {
-            this.processIssuePriorities(labels);
-
-            return Promise.resolve();
-        });
-    }
-    
-    /**
-     * Gets issue estimates
-     *
-     * @returns {Promise} promise
-     */
-    getIssueEstimates() {
-        return this.getLabels()
-        .then((labels) => {
-            this.processIssueEstimates(labels);
-
-            return Promise.resolve();
         });
     }
     
@@ -557,23 +515,6 @@ class GitHubApi extends ApiHelper {
         })
         .then(() => {
             return Promise.resolve(type);  
-        });
-    }
-    
-    /**
-     * Adds issue priority
-     *
-     * @param {String} priority
-     *
-     * @returns {Promise} promise
-     */
-    addIssuePriority(priority) {
-        return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
-            name: 'priority:' + priority,
-            color: 'ffffff'
-        })
-        .then(() => {
-            return Promise.resolve(priority);  
         });
     }
     
@@ -769,18 +710,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeIssueType(index) {
-        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/type:' + window.resources.issueTypes[index]);
-    }
-    
-    /**
-     * Removes issue priority
-     *
-     * @param {Number} index
-     *
-     * @returns {Promise} promise
-     */
-    removeIssuePriority(index) {
-        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/priority:' + window.resources.issuePriorities[index]);
+        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/type:' + ISSUE_TYPES[index]);
     }
     
     /**
@@ -791,7 +721,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     removeIssueEstimate(index) {
-        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/estimate:' + window.resources.issueEstimates[index]);
+        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/estimate:' + ISSUE_ESTIMATES[index]);
     }
     
     /**
@@ -897,21 +827,6 @@ class GitHubApi extends ApiHelper {
     updateIssueType(type, previousName) {
         return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/type:' + previousName, {
             name: 'type:' + type,
-            color: 'ffffff'
-        });
-    }
-    
-    /**
-     * Updates issue priority
-     *
-     * @param {String} priority
-     * @param {String} previousName
-     *
-     * @returns {Promise} promise
-     */
-    updateIssuePriority(priority, previousName) {
-        return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/priority:' + previousName, {
-            name: 'priority:' + priority,
             color: 'ffffff'
         });
     }
@@ -1051,44 +966,6 @@ class GitHubApi extends ApiHelper {
     }
     
     /**
-     * Process issue priotities
-     *
-     * @param {Array} labels
-     */
-    processIssuePriorities(labels) {
-        window.resources.issuePriorities = [];
-        
-        for(let label of labels) {
-            let index = label.name.indexOf('priority:');
-            
-            if(index > -1) {
-                let name = label.name.replace('priority:', '');
-
-                window.resources.issuePriorities.push(name);
-            }
-        }
-    }
-    
-    /**
-     * Process issue estimates
-     *
-     * @param {Array} labels
-     */
-    processIssueEstimates(labels) {
-        window.resources.issueEstimates = [];
-        
-        for(let label of labels) {
-            let index = label.name.indexOf('estimate:');
-            
-            if(index > -1) {
-                let name = label.name.replace('estimate:', '');
-
-                window.resources.issueEstimates.push(name);
-            }
-        }
-    }
-
-    /**
      * Process issue columns
      *
      * @param {Array} labels
@@ -1121,25 +998,6 @@ class GitHubApi extends ApiHelper {
         
         for(let team of teams) {
             window.resources.teams.push(team.name);
-        }
-    }
-
-    /**
-     * Process issue types
-     *
-     * @param {Array} labels
-     */
-    processIssueTypes(labels) {
-        window.resources.issueTypes = [];
-        
-        for(let label of labels) {
-            let index = label.name.indexOf('type:');
-            
-            if(index > -1) {
-                let name = label.name.replace('type:', '');
-
-                window.resources.issueTypes.push(name);
-            }
         }
     }
 
@@ -1197,7 +1055,7 @@ class GitHubApi extends ApiHelper {
                 } else if(typeIndex > -1) {
                     let name = label.name.replace('type:', '');
                     
-                    issue.type = ResourceHelper.getIssueType(name);
+                    issue.type = ISSUE_TYPES[name];
 
                 } else if(teamIndex > -1) {
                     let name = label.name.replace('team:', '');
@@ -1212,13 +1070,13 @@ class GitHubApi extends ApiHelper {
                 } else if(estimateIndex > -1) {
                     let name = label.name.replace('estimate:', '');
                    
-                    issue.estimate = ResourceHelper.getIssueEstimate(name);
+                    issue.estimate = ISSUE_ESTIMATES[name];
 
                 } else if(priorityIndex > -1) {
                     let name = label.name.replace('priority:', '');
                     
-                    issue.priority = ResourceHelper.getIssuePriority(name);
-
+                    issue.priority = ISSUE_PRIORITIES[name];
+        
                 } else if(columnIndex > -1) {
                     let name = label.name.replace('column:', '');
                     
@@ -1324,10 +1182,8 @@ class GitHubApi extends ApiHelper {
         }
 
         // Type
-        let issueType = resources.issueTypes[issue.type];
-
-        if(issueType) {
-            gitHubIssue.labels.push('type:' + issueType);
+        if(issue.getType()) {
+            gitHubIssue.labels.push('type:' + issue.getType());
         }
 
         // Version
@@ -1338,17 +1194,13 @@ class GitHubApi extends ApiHelper {
         }
        
         // Estimate
-        let issueEstimate = resources.issueEstimates[issue.estimate];
-
-        if(issueEstimate) {
-            gitHubIssue.labels.push('estimate:' + issueEstimate);
+        if(issue.getEstimate()) {
+            gitHubIssue.labels.push('estimate:' + issue.getEstimate());
         }
 
         // Priority
-        let issuePriority = resources.issuePriorities[issue.priority];
-
-        if(issuePriority) {
-            gitHubIssue.labels.push('priority:' + issuePriority);
+        if(issue.getPriority()) {
+            gitHubIssue.labels.push('priority:' + issue.getPriority());
         }
 
         // Column

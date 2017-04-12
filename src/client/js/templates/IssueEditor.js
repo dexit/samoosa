@@ -2,7 +2,7 @@
  * Issue editor template
  */
 module.exports = function render() {
-    return _.div({class: 'issue-editor', 'data-index': this.model.index, 'data-type': resources.issueTypes[this.model.type]},
+    return _.div({class: 'issue-editor', 'data-index': this.model.index, 'data-type': ISSUE_TYPES[this.model.type]},
 
         // Header
         _.div({class: 'header'},
@@ -99,12 +99,12 @@ module.exports = function render() {
             ),
 
             // Type
-            _.div({class: 'meta-field type' + (window.resources.issueTypes.length < 1 ? ' hidden' : '')},
+            _.div({class: 'meta-field type'},
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); }),
                 _.label('Type'),
                 _.select({'data-property': 'type', disabled: ApiHelper.isSpectating()},
-                    _.each(window.resources.issueTypes, (i, type) => {
+                    _.each(ISSUE_TYPES, (type, i) => {
                         return _.option({value: i}, type);
                     })
                 ).change(() => { this.onChange(); }).val(this.model.type)
@@ -123,12 +123,12 @@ module.exports = function render() {
             ),
 
             // Priority
-            _.div({class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '')},
+            _.div({class: 'meta-field priority'},
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); }),
                 _.label('Priority'),
                 _.select({'data-property': 'priority', disabled: ApiHelper.isSpectating()},
-                    _.each(window.resources.issuePriorities, (i, priority) => {
+                    _.each(ISSUE_PRIORITIES, (priority, i) => {
                         return _.option({value: i}, priority);
                     })
                 ).change(() => { this.onChange(); }).val(this.model.priority)
@@ -147,12 +147,12 @@ module.exports = function render() {
             ),
 
             // Estimate
-            _.div({class: 'meta-field estimate' + (window.resources.issueEstimates.length < 1 ? ' hidden' : '')},
+            _.div({class: 'meta-field estimate'},
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); }),
                 _.label('Estimate'),
                 _.select({'data-property': 'estimate', disabled: ApiHelper.isSpectating()},
-                    _.each(window.resources.issueEstimates, (i, estimate) => {
+                    _.each(ISSUE_ESTIMATES, (estimate, i) => {
                         return _.option({value: i}, estimate);
                     })
                 ).change(() => { this.onChange(); }).val(this.model.estimate)

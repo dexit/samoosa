@@ -205,39 +205,6 @@ class ApiHelper {
     }
     
     /**
-     * Gets issue types
-     *
-     * @returns {Promise} promise
-     */
-    getIssueTypes() {
-        window.resources.issueTypes = [];
-            
-        return Promise.resolve();
-    }
-    
-    /**
-     * Gets issue priorities
-     *
-     * @returns {Promise} promise
-     */
-    getIssuePriorities() {
-        window.resources.issuePriorities = [];
-        
-        return Promise.resolve();
-    }
-    
-    /**
-     * Gets issue estimates
-     *
-     * @returns {Promise} promise
-     */
-    getIssueEstimates() {
-        window.resources.issueEstimates = [];
-            
-        return Promise.resolve();
-    }
-    
-    /**
      * Gets issue columns
      *
      * @returns {Promise} promise
@@ -307,39 +274,6 @@ class ApiHelper {
     }
     
     /**
-     * Adds issue type
-     *
-     * @param {String} type
-     *
-     * @returns {Promise} promise
-     */
-    addIssueType(type) {
-        return Promise.resolve();
-    }
-    
-    /**
-     * Adds issue priority
-     *
-     * @param {String} priority
-     *
-     * @returns {Promise} promise
-     */
-    addIssuePriority(priority) {
-        return Promise.resolve();
-    }
-    
-    /**
-     * Adds issue estimate
-     *
-     * @param {String} estimate
-     *
-     * @returns {Promise} promise
-     */
-    addIssueEstimate(estimate) {
-        return Promise.resolve();
-    }
-    
-    /**
      * Adds issue column
      *
      * @param {String} column
@@ -394,39 +328,6 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     removeCollaborator(index) {
-        return Promise.resolve();
-    }
-    
-    /**
-     * Removes issue type
-     *
-     * @param {Number} index
-     *
-     * @returns {Promise} promise
-     */
-    removeIssueType(index) {
-        return Promise.resolve();
-    }
-    
-    /**
-     * Removes issue priority
-     *
-     * @param {Number} index
-     *
-     * @returns {Promise} promise
-     */
-    removeIssuePriority(index) {
-        return Promise.resolve();
-    }
-    
-    /**
-     * Removes issue estimate
-     *
-     * @param {Number} index
-     *
-     * @returns {Promise} promise
-     */
-    removeIssueEstimate(index) {
         return Promise.resolve();
     }
     
@@ -501,42 +402,6 @@ class ApiHelper {
         return Promise.resolve();
     }
 
-    /**
-     * Updates issue type
-     *
-     * @param {Number} index
-     * @param {String} type
-     *
-     * @returns {Promise} promise
-     */
-    updateIssueType(index, type) {
-        return Promise.resolve();
-    }
-    
-    /**
-     * Updates issue priority
-     *
-     * @param {Number} index
-     * @param {String} priority
-     *
-     * @returns {Promise} promise
-     */
-    updateIssuePriority(index, priority) {
-        return Promise.resolve();
-    }
-    
-    /**
-     * Updates issue estimate
-     *
-     * @param {Number} index
-     * @param {String} estimate
-     *
-     * @returns {Promise} promise
-     */
-    updateIssueEstimate(index, estimate) {
-        return Promise.resolve();
-    }
-    
     /**
      * Updates issue column
      *
@@ -693,15 +558,6 @@ class ApiHelper {
             case 'collaborators':
                 return this.removeCollaborator(index);
 
-            case 'issueTypes':
-                return this.removeIssueType(index);
-            
-            case 'issuePriorities':
-                return this.removeIssuePriority(index);
-
-            case 'issueEstimates':
-                return this.removeIssueEstimate(index);
-
             case 'issueColumns':
                 return this.removeIssueColumn(index);
             
@@ -737,15 +593,6 @@ class ApiHelper {
             case 'collaborators':
                 return this.addCollaborator(item);
 
-            case 'issueTypes':
-                return this.addIssueType(item);
-            
-            case 'issuePriorities':
-                return this.addIssuePriority(item);
-
-            case 'issueEstimates':
-                return this.addIssueEstimate(item);
-
             case 'issueColumns':
                 return this.addIssueColumn(item);
 
@@ -779,15 +626,6 @@ class ApiHelper {
         debug.log('Updating item for ' + resource + '...', this);
 
         switch(resource) {
-            case 'issueTypes':
-                return this.updateIssueType(item, identifier);
-            
-            case 'issuePriorities':
-                return this.updateIssuePriority(item, identifier);
-
-            case 'issueEstimates':
-                return this.updateIssueEstimate(item, identifier);
-
             case 'issueColumns':
                 return this.updateIssueColumn(item, identifier);
             
@@ -832,20 +670,6 @@ class ApiHelper {
             
             case 'teams':
                 return this.getTeams();
-
-            case 'issueTypes':
-                return this.getIssueTypes();
-
-            case 'issuePriorities':
-                return this.getIssuePriorities();
-
-            case 'issueEstimates':
-                return this.getIssueEstimates()
-                .then(() => {
-                    ResourceHelper.sortResource('issueEstimates');
-
-                    return Promise.resolve();  
-                });
 
             case 'issueColumns':
                 return this.getIssueColumns();
@@ -894,16 +718,7 @@ class ApiHelper {
             }
         }
 
-        return get('issueTypes')
-        .then(() => {
-            return get('issuePriorities');
-        })
-        .then(() => {
-            return get('teams');
-        })
-        .then(() => {
-            return get('issueEstimates');
-        })
+        return get('teams')
         .then(() => {
             return get('issueColumns');
         })

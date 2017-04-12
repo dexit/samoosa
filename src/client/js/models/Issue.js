@@ -51,7 +51,7 @@ class Issue {
                         break;
                     
                     case 'type':
-                        this.type = ResourceHelper.getIssueType(value);
+                        this.type = ISSUE_TYPES[value];
                         break;
                     
                     case 'team':
@@ -59,11 +59,11 @@ class Issue {
                         break;
                     
                     case 'priority':
-                        this.priority = ResourceHelper.getIssuePriority(value);
+                        this.priority = ISSUE_PRIORITIES[value];
                         break;
                     
                     case 'estimate':
-                        this.estimate = ResourceHelper.getIssueEstimate(value);
+                        this.estimate = ISSUE_ESTIMATES[value];
                         break;
                     
                     case 'version':
@@ -133,7 +133,7 @@ class Issue {
      * @returns {String} Type name
      */
     getType() {
-        return resources.issueTypes[this.type || 0];
+        return getKey(ISSUE_TYPES, this.type || 0);
     }
 
     /**
@@ -142,7 +142,7 @@ class Issue {
      * @returns {String} Priority name
      */
     getPriority() {
-        return resources.issuePriorities[this.priority || 0];
+        return getKey(ISSUE_PRIORITIES, this.priority || 0);
     }
 
     /**
@@ -230,7 +230,7 @@ class Issue {
      * @returns {String} Estimate
      */
     getEstimate() {
-        return resources.issueEstimates[this.estimate || 0];
+        return getKey(ISSUE_ESTIMATES, this.estimate || 0);
     }
 
     /**
@@ -256,7 +256,7 @@ class Issue {
             version: this.getVersion(),
             milestone: this.getMilestone() ? this.getMilestone().title : null,
             assignee: this.getAssignee() ? this.getAssignee().name : null,
-            estimate: resources.issueEstimates[this.estimate || -1]
+            estimate: ISSUE_ESTIMATES[this.estimate || -1]
         };
     }
 

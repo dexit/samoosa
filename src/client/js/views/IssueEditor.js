@@ -108,6 +108,10 @@ class IssueEditor extends View {
             }
         }
 
+        if(value && !isNaN(value)) {
+            value = parseFloat(value);
+        }
+
         return value;
     }
     
@@ -152,7 +156,7 @@ class IssueEditor extends View {
         this.setProperty('estimate', this.model.estimate);
 
         // Update data type attribute
-        this.$element.attr('data-type', resources.issueTypes[this.model.type]);
+        this.$element.attr('data-type', ISSUE_TYPES[this.model.type]);
 
         // Update avatar image
         this.$element.find('.header .assignee-avatar').html(

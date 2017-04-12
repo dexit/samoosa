@@ -9,9 +9,6 @@ class BitBucketApi extends ApiHelper {
     getConfig() {
         return {
             readonlyResources: [
-                'issueTypes',
-                'issueEstimates',
-                'issuePriorities',
                 'issueColumns'
             ]
         };
@@ -456,22 +453,6 @@ class BitBucketApi extends ApiHelper {
     }
     
     /**
-     * Gets issue types
-     *
-     * @returns {Promise} promise
-     */
-    getIssueTypes() {
-        resources.issueTypes = [
-            'bug',
-            'enhancement',
-            'proposal',
-            'task'
-        ];
-            
-        return Promise.resolve();
-    }
-    
-    /**
      * Gets issue columns
      *
      * @returns {Promise} promise
@@ -524,45 +505,6 @@ class BitBucketApi extends ApiHelper {
         });
     }
 
-    /**
-     * Gets issue priorities
-     *
-     * @returns {Promise} promise
-     */
-    getIssuePriorities() {
-        resources.issuePriorities = [
-            'trivial',
-            'minor',
-            'major',
-            'critical',
-            'blocker'
-        ];
-
-        return Promise.resolve();
-    }
-    
-    /**
-     * Gets issue estimates
-     *
-     * @returns {Promise} promise
-     */
-    getIssueEstimates() {
-        resources.issueEstimates = [
-            '15m',
-            '30m',
-            '1h',
-            '2h',
-            '3h',
-            '4h',
-            '5h',
-            '6h',
-            '7h',
-            '8h'
-        ];
-
-        return Promise.resolve();
-    }
-    
     /**
      * Gets versions
      *
@@ -623,44 +565,6 @@ class BitBucketApi extends ApiHelper {
             .then(() => {
                 callback();
             });    
-        });
-    }
-    
-    /**
-     * Adds issue type
-     *
-     * @param {String} type
-     *
-     * @returns {Promise} promise
-     */
-    addIssueType(type) {
-        return new Promise((callback) => {
-            this.post('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
-                name: 'type:' + type,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
-        });
-    }
-    
-    /**
-     * Adds issue priority
-     *
-     * @param {String} priority
-     *
-     * @returns {Promise} promise
-     */
-    addIssuePriority(priority) {
-        return new Promise((callback) => {
-            this.post('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
-                name: 'priority:' + priority,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
         });
     }
     
@@ -876,46 +780,6 @@ class BitBucketApi extends ApiHelper {
     }
     
     /**
-     * Updates issue type
-     *
-     * @param {String} type
-     * @param {String} previousName
-     *
-     * @returns {Promise} promise
-     */
-    updateIssueType(type, previousName) {
-        return new Promise((callback) => {
-            this.patch('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/type:' + previousName, {
-                name: 'type:' + type,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
-        });
-    }
-    
-    /**
-     * Updates issue priority
-     *
-     * @param {String} priority
-     * @param {String} previousName
-     *
-     * @returns {Promise} promise
-     */
-    updateIssuePriority(priority, previousName) {
-        return new Promise((callback) => {
-            this.patch('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/priority:' + previousName, {
-                name: 'priority:' + priority,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
-        });
-    }
-    
-    /**
      * Updates issue estimate
      *
      * @param {String} estimate
@@ -1071,59 +935,6 @@ class BitBucketApi extends ApiHelper {
     }
     
     /**
-     * Process issue priotities
-     *
-     * @param {Array} labels
-     */
-    processIssuePriorities(labels) {
-        window.resources.issuePriorities = [];
-        
-        for(let label of labels) {
-            let index = label.name.indexOf('priority:');
-            
-            if(index > -1) {
-                let name = label.name.replace('priority:', '');
-
-                window.resources.issuePriorities.push(name);
-            }
-        }
-    }
-    
-    /**
-     * Process issue estimates
-     *
-     * @param {Array} labels
-     */
-    processIssueEstimates(labels) {
-        window.resources.issueEstimates = [];
-        
-        for(let label of labels) {
-            let index = label.name.indexOf('estimate:');
-            
-            if(index > -1) {
-                let name = label.name.replace('estimate:', '');
-
-                window.resources.issueEstimates.push(name);
-            }
-        }
-
-        window.resources.issueEstimates.sort((a, b) => {
-            a = parseFloat(a);
-            b = parseFloat(b);
-
-            if(a < b) {
-                return -1;
-            }
-            
-            if(a > b) {
-                return 1;
-            }
-
-            return 0;
-        });
-    }
-
-    /**
      * Process issue columns
      *
      * @param {Array} labels
@@ -1144,25 +955,6 @@ class BitBucketApi extends ApiHelper {
         }
         
         window.resources.issueColumns.push('done');
-    }
-
-    /**
-     * Process issue types
-     *
-     * @param {Array} labels
-     */
-    processIssueTypes(labels) {
-        window.resources.issueTypes = [];
-        
-        for(let label of labels) {
-            let index = label.name.indexOf('type:');
-            
-            if(index > -1) {
-                let name = label.name.replace('type:', '');
-
-                window.resources.issueTypes.push(name);
-            }
-        }
     }
 
     /**
@@ -1211,14 +1003,44 @@ class BitBucketApi extends ApiHelper {
                 issue.assignee = ResourceHelper.getCollaborator(bitBucketIssue.responsible.username);
             }
 
+            // Remap issue type names
+            switch(bitBucketIssue.metadata.kind) {
+                case 'enhancement':
+                    bitBucketIssue.metadata.kind = 'improvement';
+                    break;
+                
+                case 'proposal':
+                    bitBucketIssue.metadata.kind = 'new feature';
+                    break;
+            }
+            
+            // Remap issue priority names
+            switch(bitBucketIssue.priority) {
+                case 'trivial':
+                    bitBucketIssue.priority = 'low';
+                    break;
+                
+                case 'minor':
+                    bitBucketIssue.priority = 'medium';
+                    break;
+                
+                case 'major':
+                    bitBucketIssue.priority = 'high';
+                    break;
+                
+                case 'critical':
+                    bitBucketIssue.priority = 'blocker';
+                    break;
+            }
+
             // Clean up milestone name
             let milestoneDateRegex = /{% (start|end)Date: (\d+) %}/g;
 
             bitBucketIssue.metadata.milestone = (bitBucketIssue.metadata.milestone || '').replace(milestoneDateRegex, '');
 
-            issue.priority = ResourceHelper.getIssuePriority(bitBucketIssue.priority);
+            issue.priority = ISSUE_PRIORITIES[bitBucketIssue.priority];
             issue.milestone = ResourceHelper.getMilestone(bitBucketIssue.metadata.milestone);
-            issue.type = ResourceHelper.getIssueType(bitBucketIssue.metadata.kind);
+            issue.type = ISSUE_TYPES[bitBucketIssue.metadata.kind];
             issue.version = ResourceHelper.getVersion(bitBucketIssue.metadata.version);
             issue.column = ResourceHelper.getIssueColumn(bitBucketIssue.status);
             
@@ -1309,6 +1131,16 @@ class BitBucketApi extends ApiHelper {
         // Type
         let issueType = issue.getType();
 
+        switch(issueType) {
+            case 'improvement':
+                issueType = 'enhancement';
+                break;
+            
+            case 'new feature':
+                issueType = 'proposal';
+                break;
+        }
+
         bitBucketIssue.kind = issueType;
 
         // Version
@@ -1317,13 +1149,27 @@ class BitBucketApi extends ApiHelper {
         bitBucketIssue.version = version;
        
         // Estimate
-        let issueEstimate = resources.issueEstimates[issue.estimate];
+        let issueEstimate = issue.getEstimate();
         let estimateString = '{% estimate:' + issueEstimate + ' %}';
 
         bitBucketIssue.content += estimateString;
 
         // Priority
         let issuePriority = issue.getPriority();
+
+        switch(issuePriority) {
+            case 'low':
+                issuePriority = 'trivial';
+                break;
+
+            case 'medium':
+                issuePriority = 'minor';
+                break;
+            
+            case 'high':
+                issuePriority = 'major';
+                break;
+        }
 
         bitBucketIssue.priority = issuePriority;
 

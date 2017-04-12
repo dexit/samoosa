@@ -13,26 +13,6 @@ class ResourceHelper {
         }
     }
     
-    static getIssuePriority(name) {
-        for(let i in resources.issuePriorities) {
-            let type = resources.issuePriorities[i];
-            
-            if(type == name) {
-                return i;
-            }
-        }
-    }
-    
-    static getIssueEstimate(name) {
-        for(let i in resources.issueEstimates) {
-            let estimate = resources.issueEstimates[i];
-
-            if(estimate == name) {
-                return i;
-            }
-        }
-    }
-    
     static getIssueColumn(name) {
         for(let i in resources.issueColumns) {
             let type = resources.issueColumns[i];
@@ -55,16 +35,6 @@ class ResourceHelper {
         }
 
         return 0;
-    }
-    
-    static getIssueType(name) {
-        for(let i in resources.issueTypes) {
-            let type = resources.issueTypes[i];
-            
-            if(type == name) {
-                return i;
-            }
-        }
     }
     
     static getTeam(name) {
@@ -114,23 +84,6 @@ class ResourceHelper {
 
     static sortResource(resource) {
         switch(resource) {
-            case 'issueEstimates':
-                resources.issueEstimates.sort((a, b) => {
-                    a = estimateToFloat(a);
-                    b = estimateToFloat(b);
-
-                    if(a < b) {
-                        return -1;
-                    }
-                    
-                    if(a > b) {
-                        return 1;
-                    }
-
-                    return 0;
-                });
-                break;
-
             case 'milestones':
                 resources.milestones.sort((a, b) => {
                     a = a.getEndDate() || 0;

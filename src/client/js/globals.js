@@ -1,5 +1,16 @@
 'use strict';
 
+// Get key by value
+window.getKey = function getKey(obj, value) {
+    for(let prop in obj) {
+        if(obj.hasOwnProperty(prop)) {
+            if(obj[prop] === value) {
+                return prop;
+            }
+        }
+    }
+}
+
 // Display error message
 window.displayError = function displayError(e) {
     alert(e.mesage);

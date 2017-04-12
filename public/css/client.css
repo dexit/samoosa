@@ -1140,6 +1140,11 @@ body, html {
   transition: height 0.3s ease, background 0.3s ease; }
   .milestone-editor.closed {
     height: 7rem; }
+  .milestone-editor.overdue .issues:before {
+    content: '\F06A';
+    color: #E70D3B;
+    font-size: 1.2rem;
+    margin-right: 0.5rem; }
   .milestone-editor:hover .btn-print {
     transform: none; }
     .milestone-editor:hover .btn-print .fa {
@@ -1162,14 +1167,17 @@ body, html {
   .milestone-editor.editing {
     cursor: auto;
     height: 11rem; }
-    .milestone-editor.editing .data {
+    .milestone-editor.editing .issues {
       display: none; }
     .milestone-editor.editing input {
       margin-bottom: 1rem;
       padding: 0rem 0.5rem; }
-  .milestone-editor .data {
-    font-size: 0.8rem; }
-    .milestone-editor .data .fa {
+  .milestone-editor .issues {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    margin-top: 1rem; }
+    .milestone-editor .issues .fa {
       display: block;
       margin: 0.5rem 0rem;
       font-size: 1rem;

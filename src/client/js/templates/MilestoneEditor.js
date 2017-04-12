@@ -8,7 +8,7 @@ module.exports = function render() {
 
     let remainingData = this.model.getRemainingData();
 
-    return _.div({class: 'milestone-editor' + (this.model.isClosed() ? ' closed' : ''), 'data-id': this.model.id},
+    return _.div({class: 'milestone-editor' + (this.model.isOverdue() ? ' overdue' : '') + (this.model.isClosed() ? ' closed' : ''), 'data-id': this.model.id},
         _.button({class: 'btn btn-print'}, _.span({class: 'fa fa-print'}))
             .on('click', () => {
                 this.onClickPrint();
@@ -30,9 +30,8 @@ module.exports = function render() {
             _.input({placeholder: 'DD', name: 'day', min: 1, max: 31, type: 'number', value: day})
         ),
         _.if(remainingData.issues > 0,
-            _.div({class: 'data'},
-                _.span({class: 'fa fa-ellipsis-h'}),
-                _.span(remainingData.issues + ' issues left (' + remainingData.hours + ' hours)')
+            _.div({class: 'issues'},
+                remainingData.issues + ' issues left (' + remainingData.hours + ' hours)'
             )
         ),
         _.div({class: 'buttons'}, 

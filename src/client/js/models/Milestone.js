@@ -196,7 +196,18 @@ class Milestone {
 
         return data;
     }
-   
+
+    /**
+     * Returns whether this milestone is overdue
+     *
+     * @returns {Boolean} Overdue
+     */
+    isOverdue() {
+        if(!this.getEndDate() || this.isClosed()) { return false; }
+
+        return this.getEndDate() < new Date();
+    }
+
     /**
      * Returns whether this milestone is closed
      *

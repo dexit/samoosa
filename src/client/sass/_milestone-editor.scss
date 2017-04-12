@@ -10,6 +10,17 @@
         height: 7rem;
     }
 
+    &.overdue {
+        .issues {
+            &:before {
+                content: '\f06a';
+                color: $pink-medium;
+                font-size: 1.2rem;
+                margin-right: 0.5rem;
+            }
+        }
+    }
+
     &:hover {
         .btn-print { 
             transform: none;
@@ -45,7 +56,7 @@
         cursor: auto;
         height: 11rem;
  
-        .data {
+        .issues {
             display: none;
         }
 
@@ -55,8 +66,11 @@
         }
     }
 
-    .data {
+    .issues {
         font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        margin-top: 1rem;
 
         .fa {
             display: block;

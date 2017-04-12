@@ -44,7 +44,7 @@ button::-moz-focus-inner {
   -ms-user-select: none; }
 
 html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+h1, h2, h3, h4, .milestone-editor:not(.editing) input[name="title"], h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
 del, dfn, em, img, ins, kbd, q, s, samp,
 small, strike, strong, sub, sup, tt, var,
@@ -135,7 +135,7 @@ body, html {
       -webkit-user-select: text;
       -moz-user-select: text;
       user-select: text; }
-  body h4, html h4 {
+  body h4, body .milestone-editor:not(.editing) input[name="title"], .milestone-editor:not(.editing) body input[name="title"], html h4, html .milestone-editor:not(.editing) input[name="title"], .milestone-editor:not(.editing) html input[name="title"] {
     font-size: 16px; }
 
 /**
@@ -147,7 +147,7 @@ body, html {
     max-width: 800px;
     margin: 0em auto;
     padding: 5em 2em; }
-    .document-page .document h1, .document-page .document h2, .document-page .document h3, .document-page .document h4, .document-page .document h5, .document-page .document h6 {
+    .document-page .document h1, .document-page .document h2, .document-page .document h3, .document-page .document h4, .document-page .document .milestone-editor:not(.editing) input[name="title"], .milestone-editor:not(.editing) .document-page .document input[name="title"], .document-page .document h5, .document-page .document h6 {
       line-height: 1em; }
 
 /**
@@ -486,11 +486,11 @@ body, html {
       .issue-editor > .header .btn-toggle .fa {
         line-height: 1em;
         margin: 0px; }
-    .issue-editor > .header span, .issue-editor > .header input, .issue-editor > .header h4 {
+    .issue-editor > .header span, .issue-editor > .header input, .issue-editor > .header h4, .issue-editor > .header .milestone-editor:not(.editing) input[name="title"], .milestone-editor:not(.editing) .issue-editor > .header input[name="title"] {
       line-height: 1em; }
-      .issue-editor > .header span.icon-close, .issue-editor > .header input.icon-close, .issue-editor > .header h4.icon-close {
+      .issue-editor > .header span.icon-close, .issue-editor > .header input.icon-close, .issue-editor > .header h4.icon-close, .issue-editor > .header .milestone-editor:not(.editing) input.icon-close[name="title"], .milestone-editor:not(.editing) .issue-editor > .header input.icon-close[name="title"] {
         display: none; }
-      .issue-editor > .header span.icon-open, .issue-editor > .header input.icon-open, .issue-editor > .header h4.icon-open {
+      .issue-editor > .header span.icon-open, .issue-editor > .header input.icon-open, .issue-editor > .header h4.icon-open, .issue-editor > .header .milestone-editor:not(.editing) input.icon-open[name="title"], .milestone-editor:not(.editing) .issue-editor > .header input.icon-open[name="title"] {
         display: inline; }
   .issue-editor .body, .issue-editor .operations, .issue-editor .attachments, .issue-editor .actions, .issue-editor .comments, .issue-editor .add-comment {
     display: none;
@@ -757,7 +757,7 @@ body, html {
         text-align: left;
         position: relative;
         width: 100%; }
-        .milestone-viewer > .header .title .btn-toggle h4 {
+        .milestone-viewer > .header .title .btn-toggle h4, .milestone-viewer > .header .title .btn-toggle .milestone-editor:not(.editing) input[name="title"], .milestone-editor:not(.editing) .milestone-viewer > .header .title .btn-toggle input[name="title"] {
           margin-top: 0px;
           margin-bottom: 0px; }
         .milestone-viewer > .header .title .btn-toggle p {
@@ -834,7 +834,7 @@ body, html {
         border-right: 0px; }
       .milestone-viewer .columns .column > .header {
         margin-bottom: 15px; }
-        .milestone-viewer .columns .column > .header h4 {
+        .milestone-viewer .columns .column > .header h4, .milestone-viewer .columns .column > .header .milestone-editor:not(.editing) input[name="title"], .milestone-editor:not(.editing) .milestone-viewer .columns .column > .header input[name="title"] {
           margin: 0px;
           text-transform: uppercase;
           opacity: 0.5; }
@@ -955,7 +955,7 @@ body, html {
         box-shadow: none; }
         .navbar.out .obscure .content .repository-editor:hover {
           outline-color: #E70D3B; }
-        .navbar.out .obscure .content .repository-editor .content .header h4 {
+        .navbar.out .obscure .content .repository-editor .content .header h4, .navbar.out .obscure .content .repository-editor .content .header .milestone-editor:not(.editing) input[name="title"], .milestone-editor:not(.editing) .navbar.out .obscure .content .repository-editor .content .header input[name="title"] {
           font-weight: normal; }
         .navbar.out .obscure .content .repository-editor .content .owner {
           color: #5b84a2; }
@@ -1019,15 +1019,15 @@ body, html {
 .repository-bar {
   padding: 0px 15px;
   height: 56px; }
-  .repository-bar h1, .repository-bar h2, .repository-bar h3, .repository-bar h4, .repository-bar p {
+  .repository-bar h1, .repository-bar h2, .repository-bar h3, .repository-bar h4, .repository-bar .milestone-editor:not(.editing) input[name="title"], .milestone-editor:not(.editing) .repository-bar input[name="title"], .repository-bar p {
     padding: 0px 25px 0px 0px;
     margin: 0px;
     display: inline-block;
     position: relative;
     line-height: 56px; }
-    .repository-bar h1:hover .btn-edit, .repository-bar h2:hover .btn-edit, .repository-bar h3:hover .btn-edit, .repository-bar h4:hover .btn-edit, .repository-bar p:hover .btn-edit {
+    .repository-bar h1:hover .btn-edit, .repository-bar h2:hover .btn-edit, .repository-bar h3:hover .btn-edit, .repository-bar h4:hover .btn-edit, .repository-bar .milestone-editor:not(.editing) input[name="title"]:hover .btn-edit, .milestone-editor:not(.editing) .repository-bar input[name="title"]:hover .btn-edit, .repository-bar p:hover .btn-edit {
       display: block; }
-    .repository-bar h1 .btn-edit, .repository-bar h2 .btn-edit, .repository-bar h3 .btn-edit, .repository-bar h4 .btn-edit, .repository-bar p .btn-edit {
+    .repository-bar h1 .btn-edit, .repository-bar h2 .btn-edit, .repository-bar h3 .btn-edit, .repository-bar h4 .btn-edit, .repository-bar .milestone-editor:not(.editing) input[name="title"] .btn-edit, .milestone-editor:not(.editing) .repository-bar input[name="title"] .btn-edit, .repository-bar p .btn-edit {
       display: none;
       position: absolute;
       top: 50%;
@@ -1037,7 +1037,7 @@ body, html {
       padding: 0px 5px;
       cursor: pointer;
       font-size: 12px; }
-    .repository-bar h1 .edit, .repository-bar h2 .edit, .repository-bar h3 .edit, .repository-bar h4 .edit, .repository-bar p .edit {
+    .repository-bar h1 .edit, .repository-bar h2 .edit, .repository-bar h3 .edit, .repository-bar h4 .edit, .repository-bar .milestone-editor:not(.editing) input[name="title"] .edit, .milestone-editor:not(.editing) .repository-bar input[name="title"] .edit, .repository-bar p .edit {
       font-size: inherit;
       color: inherit;
       line-height: 18px;
@@ -1045,7 +1045,7 @@ body, html {
       padding: 0px;
       margin: 0px;
       border: 0px; }
-      .repository-bar h1 .edit, .repository-bar h1 .edit:focus, .repository-bar h2 .edit, .repository-bar h2 .edit:focus, .repository-bar h3 .edit, .repository-bar h3 .edit:focus, .repository-bar h4 .edit, .repository-bar h4 .edit:focus, .repository-bar p .edit, .repository-bar p .edit:focus {
+      .repository-bar h1 .edit, .repository-bar h1 .edit:focus, .repository-bar h2 .edit, .repository-bar h2 .edit:focus, .repository-bar h3 .edit, .repository-bar h3 .edit:focus, .repository-bar h4 .edit, .repository-bar .milestone-editor:not(.editing) input[name="title"] .edit, .milestone-editor:not(.editing) .repository-bar input[name="title"] .edit, .repository-bar h4 .edit:focus, .repository-bar .milestone-editor:not(.editing) input[name="title"] .edit:focus, .milestone-editor:not(.editing) .repository-bar input[name="title"] .edit:focus, .repository-bar p .edit, .repository-bar p .edit:focus {
         outline: none; }
 
 .source-panel .obscure .content .btn {
@@ -1121,7 +1121,9 @@ body, html {
     text-align: right; }
 
 .milestones-editor h2.year,
-.milestones-editor h4.month {
+.milestones-editor h4.month,
+.milestones-editor .milestone-editor:not(.editing) input.month[name="title"], .milestone-editor:not(.editing)
+.milestones-editor input.month[name="title"] {
   text-transform: uppercase;
   color: #E70D3B;
   padding: 2rem;
@@ -1130,54 +1132,64 @@ body, html {
   margin: 0px; }
 
 .milestone-editor {
-  padding: 1.5rem;
+  padding: 2rem 1rem 2rem 2rem;
   position: relative;
   cursor: pointer;
-  margin-left: 8rem; }
+  margin-left: 8rem;
+  height: 10rem;
+  transition: height 0.3s ease, background 0.3s ease; }
+  .milestone-editor.closed {
+    height: 7rem; }
   .milestone-editor:hover .btn-print {
-    display: block; }
+    transform: none; }
+    .milestone-editor:hover .btn-print .fa {
+      opacity: 1; }
   .milestone-editor:hover, .milestone-editor.editing {
-    background-color: #e8e8e8; }
+    background-color: #efefef; }
   .milestone-editor .btn-print {
-    display: none;
+    transform: scale(0.2);
+    transition: transform 0.3s ease;
     position: absolute;
-    left: -1rem;
-    top: 1.2rem;
+    left: -16px;
+    top: 27px;
     z-index: 90;
     width: 35px;
     border-radius: 50%; }
     .milestone-editor .btn-print .fa {
+      opacity: 0;
+      transition: opacity 0.3 ease;
       margin: 0px; }
   .milestone-editor.editing {
-    cursor: auto; }
+    cursor: auto;
+    height: 11rem; }
+    .milestone-editor.editing .data {
+      display: none; }
     .milestone-editor.editing input {
       margin-bottom: 1rem;
       padding: 0rem 0.5rem; }
-    .milestone-editor.editing .buttons, .milestone-editor.editing .date-input {
-      display: block; }
-  .milestone-editor:before {
-    content: '';
-    border-radius: 50%;
-    width: 0.5rem;
-    height: 0.5rem;
-    background-color: #E70D3B;
-    display: block;
-    position: absolute;
-    left: -3px;
-    top: 33px; }
+  .milestone-editor .data {
+    font-size: 0.8rem; }
+    .milestone-editor .data .fa {
+      display: block;
+      margin: 0.5rem 0rem;
+      font-size: 1rem;
+      color: #e8e8e8; }
   .milestone-editor .buttons {
-    display: none;
-    text-align: right; }
-  .milestone-editor h4 {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem; }
+  .milestone-editor h4, .milestone-editor:not(.editing) input[name="title"] {
     margin: 0rem; }
   .milestone-editor .date-input {
-    display: none; }
+    display: none;
+    width: 23rem; }
     .milestone-editor .date-input input {
       width: auto;
       display: inline;
       padding: 0px;
       padding-left: 15px;
-      text-align: center; }
+      text-align: center;
+      margin-bottom: 0px; }
     .milestone-editor .date-input .separator {
       opacity: 0.5;
       margin: 0rem 0.5rem; }
@@ -1186,9 +1198,6 @@ body, html {
     .milestone-editor .date-input input[name="month"],
     .milestone-editor .date-input input[name="day"] {
       width: 34px; }
-  .milestone-editor input {
-    font-size: inherit;
-    width: 100%; }
   .milestone-editor:not(.editing) input {
     pointer-events: none;
     padding: 0px;
@@ -1197,6 +1206,18 @@ body, html {
       box-shadow: none;
       border: 0px;
       outline: 0px; }
+  .milestone-editor:not(.editing) label,
+  .milestone-editor:not(.editing) .date-input,
+  .milestone-editor:not(.editing) .buttons {
+    display: none; }
+  .milestone-editor .input-group {
+    display: flex; }
+    .milestone-editor .input-group input {
+      font-size: inherit;
+      width: auto;
+      flex-grow: 1; }
+    .milestone-editor .input-group label {
+      flex-basis: 8rem; }
 
 .repository-editor {
   padding: 15px;
@@ -1208,7 +1229,7 @@ body, html {
   cursor: pointer; }
   .repository-editor:hover {
     outline: 2px solid #2196f3; }
-  .repository-editor .content .header h4 {
+  .repository-editor .content .header h4, .repository-editor .content .header .milestone-editor:not(.editing) input[name="title"], .milestone-editor:not(.editing) .repository-editor .content .header input[name="title"] {
     font-weight: bold;
     margin-top: 0px; }
   .repository-editor .content .owner {
@@ -1293,11 +1314,11 @@ body, textarea, label, input, option, select {
   font-size: 14px;
   line-height: 1.5em; }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, .milestone-editor:not(.editing) input[name="title"], h5, h6 {
   margin-top: 0.4em;
   margin-bottom: 0.3em;
   line-height: 1em; }
-  h1, h1 input, h1 a, h1 span, h2, h2 input, h2 a, h2 span, h3, h3 input, h3 a, h3 span, h4, h4 input, h4 a, h4 span, h5, h5 input, h5 a, h5 span, h6, h6 input, h6 a, h6 span {
+  h1, h1 input, h1 a, h1 span, h2, h2 input, h2 a, h2 span, h3, h3 input, h3 a, h3 span, h4, .milestone-editor:not(.editing) input[name="title"], h4 input, .milestone-editor:not(.editing) input[name="title"] input, h4 a, .milestone-editor:not(.editing) input[name="title"] a, h4 span, .milestone-editor:not(.editing) input[name="title"] span, h5, h5 input, h5 a, h5 span, h6, h6 input, h6 a, h6 span {
     font-family: 'Bree Serif'; }
 
 h1 {
@@ -1309,7 +1330,7 @@ h2 {
 h3 {
   font-size: 1.6rem; }
 
-h4 {
+h4, .milestone-editor:not(.editing) input[name="title"] {
   font-size: 1rem; }
 
 h5 {
@@ -1469,7 +1490,7 @@ a {
       color: #E70D3B; }
   .issue-editor > .header {
     background-color: transparent; }
-    .issue-editor > .header h4, .issue-editor > .header h4 input {
+    .issue-editor > .header h4, .issue-editor > .header .milestone-editor:not(.editing) input[name="title"], .milestone-editor:not(.editing) .issue-editor > .header input[name="title"], .issue-editor > .header h4 input, .issue-editor > .header .milestone-editor:not(.editing) input[name="title"] input, .milestone-editor:not(.editing) .issue-editor > .header input[name="title"] input {
       color: #fff; }
     .issue-editor > .header .issue-id {
       font-family: 'Bree Serif';

@@ -1,61 +1,75 @@
 .milestone-editor {
-    padding: 1.5rem;
+    padding: 2rem 1rem 2rem 2rem;
     position: relative;
     cursor: pointer;
     margin-left: 8rem;
+    height: 10rem;
+    transition: height 0.3s ease, background 0.3s ease;
+
+    &.closed {
+        height: 7rem;
+    }
 
     &:hover {
         .btn-print { 
-            display: block;
+            transform: none;
+
+            .fa {
+                opacity: 1;
+            }
         }
     }
 
     &:hover, &.editing {
-        background-color: $grey-lighter;
+        background-color: $grey-lightest;
     }
 
     .btn-print {
-        display: none;
+        transform: scale(0.2);
+        transition: transform 0.3s ease;
         position: absolute;
-        left: -1rem;
-        top: 1.2rem;
+        left: -16px;
+        top: 27px;
         z-index: 90;
         width: 35px;
         border-radius: 50%;
 
         .fa {
+            opacity: 0;
+            transition: opacity 0.3 ease;
             margin: 0px;
         }
     }
 
     &.editing {
         cursor: auto;
+        height: 11rem;
  
+        .data {
+            display: none;
+        }
+
         input {
             margin-bottom: 1rem;
             padding: 0rem 0.5rem;
         }
+    }
 
-        .buttons, .date-input {
+    .data {
+        font-size: 0.8rem;
+
+        .fa {
             display: block;
+            margin: 0.5rem 0rem;
+            font-size: 1rem;
+            color: $grey-lighter;
         }
     }
 
-    &:before {
-        content: '';
-        border-radius: 50%;
-        width: 0.5rem;
-        height: 0.5rem;
-        background-color: $pink-medium;
-        display: block;
-        position: absolute;
-        left: -3px;
-        top: 33px;
-    }
-
     .buttons {
-        display: none;
-        text-align: right;
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
     }
 
     h4 {
@@ -64,6 +78,7 @@
 
     .date-input {
         display: none;
+        width: 23rem;
 
         input {
             width: auto;
@@ -71,6 +86,7 @@
             padding: 0px;
             padding-left: 15px;
             text-align: center;
+            margin-bottom: 0px;
         }
 
         .separator {
@@ -88,20 +104,41 @@
         }
     }
     
-    input {
-        font-size: inherit;
-        width: 100%;
+    &:not(.editing) {
+        input {
+            pointer-events: none;
+            padding: 0px;
+            background-color: transparent;
+
+            &, &:focus {
+                box-shadow: none;
+                border: 0px;
+                outline: 0px;
+            }
+        }
+    
+        input[name="title"] {
+            @extend h4;
+        }
+
+        label,
+        .date-input,
+        .buttons {
+            display: none;
+        }
     }
 
-    &:not(.editing) input {
-        pointer-events: none;
-        padding: 0px;
-        background-color: transparent;
+    .input-group {
+        display: flex;
+        
+        input {
+            font-size: inherit;
+            width: auto;
+            flex-grow: 1;
+        }
 
-        &, &:focus {
-            box-shadow: none;
-            border: 0px;
-            outline: 0px;
+        label {
+            flex-basis: 8rem;
         }
     }
 }

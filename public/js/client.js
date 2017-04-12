@@ -108,15 +108,15 @@
 	window.CategoryBar = __webpack_require__(72);
 	window.IssueEditor = __webpack_require__(74);
 	window.MilestoneEditor = __webpack_require__(76);
-	window.MilestoneViewer = __webpack_require__(77);
-	window.ResourceEditor = __webpack_require__(79);
-	window.MilestonesEditor = __webpack_require__(81);
-	window.RepositoryEditor = __webpack_require__(83);
-	window.FilterEditor = __webpack_require__(85);
-	window.BurnDownChart = __webpack_require__(87);
+	window.MilestoneViewer = __webpack_require__(78);
+	window.ResourceEditor = __webpack_require__(80);
+	window.MilestonesEditor = __webpack_require__(82);
+	window.RepositoryEditor = __webpack_require__(84);
+	window.FilterEditor = __webpack_require__(86);
+	window.BurnDownChart = __webpack_require__(88);
 
 	// Routes
-	__webpack_require__(89);
+	__webpack_require__(90);
 
 	// Title
 	$('head title').html((Router.params.repository ? Router.params.repository + ' - ' : '') + 'Samoosa');
@@ -16161,14 +16161,14 @@
 	        }
 
 	        /**
-	         * Gets a list of completed
+	         * Returns whether this milestone is closed
+	         *
+	         * @returns {Boolean} Is closed
 	         */
 
 	    }, {
-	        key: 'getCompletedIssues',
-	        value: function getCompletedIssues() {
-	            var issues = [];
-
+	        key: 'isClosed',
+	        value: function isClosed() {
 	            var _iteratorNormalCompletion6 = true;
 	            var _didIteratorError6 = false;
 	            var _iteratorError6 = undefined;
@@ -16177,8 +16177,8 @@
 	                for (var _iterator6 = this.getIssues()[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
 	                    var issue = _step6.value;
 
-	                    if (issue.isClosed()) {
-	                        issues.push(issue);
+	                    if (!issue.isClosed()) {
+	                        return false;
 	                    }
 	                }
 	            } catch (err) {
@@ -16192,6 +16192,47 @@
 	                } finally {
 	                    if (_didIteratorError6) {
 	                        throw _iteratorError6;
+	                    }
+	                }
+	            }
+
+	            return true;
+	        }
+
+	        /**
+	         * Gets a list of completed issues
+	         *
+	         * @returns {Array} Issues
+	         */
+
+	    }, {
+	        key: 'getCompletedIssues',
+	        value: function getCompletedIssues() {
+	            var issues = [];
+
+	            var _iteratorNormalCompletion7 = true;
+	            var _didIteratorError7 = false;
+	            var _iteratorError7 = undefined;
+
+	            try {
+	                for (var _iterator7 = this.getIssues()[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+	                    var issue = _step7.value;
+
+	                    if (issue.isClosed()) {
+	                        issues.push(issue);
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError7 = true;
+	                _iteratorError7 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion7 && _iterator7.return) {
+	                        _iterator7.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError7) {
+	                        throw _iteratorError7;
 	                    }
 	                }
 	            }
@@ -16249,13 +16290,13 @@
 	                return issues;
 	            }
 
-	            var _iteratorNormalCompletion7 = true;
-	            var _didIteratorError7 = false;
-	            var _iteratorError7 = undefined;
+	            var _iteratorNormalCompletion8 = true;
+	            var _didIteratorError8 = false;
+	            var _iteratorError8 = undefined;
 
 	            try {
-	                for (var _iterator7 = this.getIssues()[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-	                    var issue = _step7.value;
+	                for (var _iterator8 = this.getIssues()[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+	                    var issue = _step8.value;
 
 	                    var closedDate = issue.getClosedDate();
 
@@ -16271,16 +16312,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError7 = true;
-	                _iteratorError7 = err;
+	                _didIteratorError8 = true;
+	                _iteratorError8 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion7 && _iterator7.return) {
-	                        _iterator7.return();
+	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
+	                        _iterator8.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError7) {
-	                        throw _iteratorError7;
+	                    if (_didIteratorError8) {
+	                        throw _iteratorError8;
 	                    }
 	                }
 	            }
@@ -16301,27 +16342,27 @@
 	        value: function getRemainingEstimatedHoursAtDay(day) {
 	            var hours = 0;
 
-	            var _iteratorNormalCompletion8 = true;
-	            var _didIteratorError8 = false;
-	            var _iteratorError8 = undefined;
+	            var _iteratorNormalCompletion9 = true;
+	            var _didIteratorError9 = false;
+	            var _iteratorError9 = undefined;
 
 	            try {
-	                for (var _iterator8 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-	                    var issue = _step8.value;
+	                for (var _iterator9 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+	                    var issue = _step9.value;
 
 	                    hours += issue.getEstimatedHours();
 	                }
 	            } catch (err) {
-	                _didIteratorError8 = true;
-	                _iteratorError8 = err;
+	                _didIteratorError9 = true;
+	                _iteratorError9 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
-	                        _iterator8.return();
+	                    if (!_iteratorNormalCompletion9 && _iterator9.return) {
+	                        _iterator9.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError8) {
-	                        throw _iteratorError8;
+	                    if (_didIteratorError9) {
+	                        throw _iteratorError9;
 	                    }
 	                }
 	            }
@@ -18461,7 +18502,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (PlanItemEditor.__proto__ || Object.getPrototypeOf(PlanItemEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(90);
+	        _this.template = __webpack_require__(77);
 
 	        _this.fetch();
 	        return _this;
@@ -18654,6 +18695,31 @@
 
 /***/ },
 /* 77 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function render() {
+	    var _this = this;
+
+	    var date = this.model.getEndDate();
+	    var year = date ? date.getFullYear() : new Date().getFullYear();
+	    var month = date ? date.getMonth() + 1 : new Date().getMonth() + 1;
+	    var day = date ? date.getDate() : new Date().getDate();
+
+	    var remainingData = this.model.getRemainingData();
+
+	    return _.div({ class: 'milestone-editor' + (this.model.isClosed() ? ' closed' : ''), 'data-id': this.model.id }, _.button({ class: 'btn btn-print' }, _.span({ class: 'fa fa-print' })).on('click', function () {
+	        _this.onClickPrint();
+	    }), _.div({ class: 'input-group' }, _.label('Title'), _.input({ name: 'title', class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title })), _.div({ class: 'input-group' }, _.label('Description'), _.input({ name: 'description', class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description })), _.div({ class: 'date-input input-group' }, _.label('End date'), _.input({ placeholder: 'YYYY', name: 'year', type: 'number', value: year }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'MM', name: 'month', min: 1, max: 12, type: 'number', value: month }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'DD', name: 'day', min: 1, max: 31, type: 'number', value: day })), _.if(remainingData.issues > 0, _.div({ class: 'data' }, _.span({ class: 'fa fa-ellipsis-h' }), _.span(remainingData.issues + ' issues left (' + remainingData.hours + ' hours)'))), _.div({ class: 'buttons' }, _.button({ class: 'btn btn-primary' }, 'Remove').click(function () {
+	        _this.onClickDelete();
+	    }), _.button({ class: 'btn btn-primary' }, 'Save').click(function () {
+	        _this.onClickSave();
+	    })));
+	};
+
+/***/ },
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18678,7 +18744,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (MilestoneEditor.__proto__ || Object.getPrototypeOf(MilestoneEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(78);
+	        _this.template = __webpack_require__(79);
 
 	        _this.fetch();
 	        return _this;
@@ -18787,7 +18853,7 @@
 	module.exports = MilestoneEditor;
 
 /***/ },
-/* 78 */
+/* 79 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18815,7 +18881,7 @@
 	};
 
 /***/ },
-/* 79 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18836,7 +18902,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ResourceEditor.__proto__ || Object.getPrototypeOf(ResourceEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(80);
+	        _this.template = __webpack_require__(81);
 
 	        _this.fetch();
 	        return _this;
@@ -18910,7 +18976,7 @@
 	module.exports = ResourceEditor;
 
 /***/ },
-/* 80 */
+/* 81 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18946,7 +19012,7 @@
 	};
 
 /***/ },
-/* 81 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18967,7 +19033,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (MilestonesEditor.__proto__ || Object.getPrototypeOf(MilestonesEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(82);
+	        _this.template = __webpack_require__(83);
 
 	        _this.init();
 
@@ -19044,7 +19110,7 @@
 	module.exports = MilestonesEditor;
 
 /***/ },
-/* 82 */
+/* 83 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19087,7 +19153,7 @@
 	};
 
 /***/ },
-/* 83 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19108,7 +19174,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (RepositoryEditor.__proto__ || Object.getPrototypeOf(RepositoryEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(84);
+	        _this.template = __webpack_require__(85);
 
 	        _this.fetch();
 	        return _this;
@@ -19138,7 +19204,7 @@
 	module.exports = RepositoryEditor;
 
 /***/ },
-/* 84 */
+/* 85 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19152,7 +19218,7 @@
 	};
 
 /***/ },
-/* 85 */
+/* 86 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19175,7 +19241,7 @@
 
 	        _this.MAX_FILTERS = 5;
 
-	        _this.template = __webpack_require__(86);
+	        _this.template = __webpack_require__(87);
 
 	        var defaultColumn = '';
 
@@ -19403,7 +19469,7 @@
 	module.exports = FilterEditor;
 
 /***/ },
-/* 86 */
+/* 87 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19492,7 +19558,7 @@
 	};
 
 /***/ },
-/* 87 */
+/* 88 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19517,7 +19583,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (BurnDownChart.__proto__ || Object.getPrototypeOf(BurnDownChart)).call(this, params));
 
-	        _this.template = __webpack_require__(88);
+	        _this.template = __webpack_require__(89);
 
 	        // Find most relevant milestone
 	        var nearest = void 0;
@@ -19694,7 +19760,7 @@
 	module.exports = BurnDownChart;
 
 /***/ },
-/* 88 */
+/* 89 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19798,7 +19864,7 @@
 	};
 
 /***/ },
-/* 89 */
+/* 90 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19944,31 +20010,6 @@
 	// Navbar
 	var navbar = new Navbar();
 	$('.app-container').html(navbar.$element);
-
-/***/ },
-/* 90 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	module.exports = function render() {
-	    var _this = this;
-
-	    var date = this.model.getEndDate();
-	    var year = date ? date.getFullYear() : new Date().getFullYear();
-	    var month = date ? date.getMonth() + 1 : new Date().getMonth() + 1;
-	    var day = date ? date.getDate() : new Date().getDate();
-
-	    var remainingData = this.model.getRemainingData();
-
-	    return _.div({ class: 'milestone-editor', 'data-id': this.model.id }, _.button({ class: 'btn btn-print' }, _.span({ class: 'fa fa-print' })).on('click', function () {
-	        _this.onClickPrint();
-	    }), _.h4(_.input({ name: 'title', class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title })), _.input({ name: 'description', class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description }), _.div({ class: 'data' }, _.if(remainingData.issues > 0, _.span(remainingData.issues + ' issues left (' + remainingData.hours + ' hours)'))), _.div({ class: 'date-input' }, _.input({ placeholder: 'YYYY', name: 'year', type: 'number', value: year }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'MM', name: 'month', min: 1, max: 12, type: 'number', value: month }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'DD', name: 'day', min: 1, max: 31, type: 'number', value: day })), _.div({ class: 'buttons' }, _.button({ class: 'btn btn-primary' }, 'Remove').click(function () {
-	        _this.onClickDelete();
-	    }), _.button({ class: 'btn btn-primary' }, 'Save').click(function () {
-	        _this.onClickSave();
-	    })));
-	};
 
 /***/ }
 /******/ ]);

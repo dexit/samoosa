@@ -196,9 +196,26 @@ class Milestone {
 
         return data;
     }
-    
+   
     /**
-     * Gets a list of completed
+     * Returns whether this milestone is closed
+     *
+     * @returns {Boolean} Is closed
+     */
+    isClosed() {
+        for(let issue of this.getIssues()) {
+            if(!issue.isClosed()) {
+                return false;
+            }            
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets a list of completed issues
+     *
+     * @returns {Array} Issues
      */
     getCompletedIssues() {
         let issues = []; 

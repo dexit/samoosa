@@ -352,9 +352,15 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getTeams() {
-        return this.get('/user/teams')
+        return this.get('/orgs/' + this.getRepositoryOwner() + '/teams')
         .then((teams) => {
             this.processTeams(teams);
+
+            return Promise.resolve();
+        })
+        // No teams found
+        .catch(() => {
+            resources.teams = [];
 
             return Promise.resolve();
         });

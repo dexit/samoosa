@@ -11116,8 +11116,14 @@
 	        value: function getTeams() {
 	            var _this11 = this;
 
-	            return this.get('/user/teams').then(function (teams) {
+	            return this.get('/orgs/' + this.getRepositoryOwner() + '/teams').then(function (teams) {
 	                _this11.processTeams(teams);
+
+	                return Promise.resolve();
+	            })
+	            // No teams found
+	            .catch(function () {
+	                resources.teams = [];
 
 	                return Promise.resolve();
 	            });

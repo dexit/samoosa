@@ -105,7 +105,7 @@
 	// Views
 	window.Navbar = __webpack_require__(68);
 	window.RepositoryBar = __webpack_require__(70);
-	window.CategoryBar = __webpack_require__(72);
+	window.TeamBar = __webpack_require__(91);
 	window.IssueEditor = __webpack_require__(74);
 	window.MilestoneEditor = __webpack_require__(76);
 	window.MilestoneViewer = __webpack_require__(78);
@@ -10042,12 +10042,12 @@
 	            }
 	        }
 	    }, {
-	        key: 'getIssueCategory',
-	        value: function getIssueCategory(name) {
-	            for (var i in resources.issueCategories) {
-	                var category = resources.issueCategories[i];
+	        key: 'getTeam',
+	        value: function getTeam(name) {
+	            for (var i in resources.teams) {
+	                var team = resources.teams[i];
 
-	                if (category == name) {
+	                if (team == name) {
 	                    return i;
 	                }
 	            }
@@ -11106,18 +11106,18 @@
 	        }
 
 	        /**
-	         * Gets issue categories
+	         * Gets teams
 	         *
 	         * @returns {Promise} promise
 	         */
 
 	    }, {
-	        key: 'getIssueCategories',
-	        value: function getIssueCategories() {
+	        key: 'getTeams',
+	        value: function getTeams() {
 	            var _this11 = this;
 
-	            return this.getLabels().then(function (labels) {
-	                _this11.processIssueCategories(labels);
+	            return this.get('/user/teams').then(function (teams) {
+	                _this11.processTeams(teams);
 
 	                return Promise.resolve();
 	            });
@@ -11349,25 +11349,6 @@
 	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
 	                name: name,
 	                color: color || 'ffffff'
-	            });
-	        }
-
-	        /**
-	         * Adds issue category
-	         *
-	         * @param {String} category
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'addIssueCategory',
-	        value: function addIssueCategory(category) {
-	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
-	                name: 'category:' + category,
-	                color: 'ffffff'
-	            }).then(function () {
-	                return Promise.resolve(category);
 	            });
 	        }
 
@@ -11606,20 +11587,6 @@
 	        }
 
 	        /**
-	         * Removes issue category
-	         *
-	         * @param {Number} index
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'removeIssueType',
-	        value: function removeIssueType(index) {
-	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/category:' + window.resources.issueCategories[index]);
-	        }
-
-	        /**
 	         * Removes issue type
 	         *
 	         * @param {Number} index
@@ -11772,24 +11739,6 @@
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
 	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones/' + milestone.id, this.convertMilestone(milestone));
-	        }
-
-	        /**
-	         * Updates issue category
-	         *
-	         * @param {String} category
-	         * @param {String} previousName
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'updateIssueCategory',
-	        value: function updateIssueCategory(category, previousName) {
-	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/category:' + previousName, {
-	                name: 'category:' + category,
-	                color: 'ffffff'
-	            });
 	        }
 
 	        /**
@@ -12138,31 +12087,25 @@
 	        }
 
 	        /**
-	         * Process issue categories
+	         * Process teams
 	         *
-	         * @param {Array} labels
+	         * @param {Array} teams
 	         */
 
 	    }, {
-	        key: 'processIssueCategories',
-	        value: function processIssueCategories(labels) {
-	            window.resources.issueCategories = [];
+	        key: 'processTeams',
+	        value: function processTeams(teams) {
+	            window.resources.teams = [];
 
 	            var _iteratorNormalCompletion7 = true;
 	            var _didIteratorError7 = false;
 	            var _iteratorError7 = undefined;
 
 	            try {
-	                for (var _iterator7 = labels[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-	                    var label = _step7.value;
+	                for (var _iterator7 = teams[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+	                    var team = _step7.value;
 
-	                    var index = label.name.indexOf('category:');
-
-	                    if (index > -1) {
-	                        var name = label.name.replace('category:', '');
-
-	                        window.resources.issueCategories.push(name);
-	                    }
+	                    window.resources.teams.push(team.name);
 	                }
 	            } catch (err) {
 	                _didIteratorError7 = true;
@@ -12306,7 +12249,7 @@
 	                            var label = _step11.value;
 
 	                            var typeIndex = label.name.indexOf('type:');
-	                            var categoryIndex = label.name.indexOf('category:');
+	                            var teamIndex = label.name.indexOf('team:');
 	                            var priorityIndex = label.name.indexOf('priority:');
 	                            var estimateIndex = label.name.indexOf('estimate:');
 	                            var versionIndex = label.name.indexOf('version:');
@@ -12318,10 +12261,10 @@
 	                                var name = label.name.replace('type:', '');
 
 	                                issue.type = ResourceHelper.getIssueType(name);
-	                            } else if (categoryIndex > -1) {
-	                                var _name = label.name.replace('category:', '');
+	                            } else if (teamIndex > -1) {
+	                                var _name = label.name.replace('team:', '');
 
-	                                issue.category = ResourceHelper.getIssueCategory(_name);
+	                                issue.team = ResourceHelper.getTeam(_name);
 	                            } else if (versionIndex > -1) {
 	                                var _name2 = label.name.replace('version:', '');
 
@@ -12464,11 +12407,11 @@
 	                gitHubIssue.milestone = null;
 	            }
 
-	            // Category
-	            var issueCategory = resources.issueCategories[issue.category];
+	            // Team
+	            var team = resources.teams[issue.team];
 
-	            if (issueCategory) {
-	                gitHubIssue.labels.push('category:' + issueCategory);
+	            if (team) {
+	                gitHubIssue.labels.push('team:' + team);
 	            }
 
 	            // Type
@@ -12865,15 +12808,15 @@
 	        }
 
 	        /**
-	         * Gets issue categories
+	         * Gets teams
 	         *
 	         * @returns {Promise} promise
 	         */
 
 	    }, {
-	        key: 'getIssueCategories',
-	        value: function getIssueCategories() {
-	            window.resources.issueCategories = [];
+	        key: 'getTeams',
+	        value: function getTeams() {
+	            window.resources.teams = [];
 
 	            return Promise.resolve();
 	        }
@@ -13123,20 +13066,6 @@
 	        }
 
 	        /**
-	         * Removes issue category
-	         *
-	         * @param {Number} index
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'removeIssueCategory',
-	        value: function removeIssueCategory(index) {
-	            return Promise.resolve();
-	        }
-
-	        /**
 	         * Removes issue type
 	         *
 	         * @param {Number} index
@@ -13264,21 +13193,6 @@
 	    }, {
 	        key: 'updateCollaborator',
 	        value: function updateCollaborator(index, collaborator) {
-	            return Promise.resolve();
-	        }
-
-	        /**
-	         * Updates issue type
-	         *
-	         * @param {Number} index
-	         * @param {String} category
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'updateIssueCategory',
-	        value: function updateIssueCategory(index, category) {
 	            return Promise.resolve();
 	        }
 
@@ -13520,9 +13434,6 @@
 	                case 'issueTypes':
 	                    return this.removeIssueType(index);
 
-	                case 'issueCategories':
-	                    return this.removeIssueCategory(index);
-
 	                case 'issuePriorities':
 	                    return this.removeIssuePriority(index);
 
@@ -13570,9 +13481,6 @@
 	                case 'issueTypes':
 	                    return this.addIssueType(item);
 
-	                case 'issueCategories':
-	                    return this.addIssueCategory(item);
-
 	                case 'issuePriorities':
 	                    return this.addIssuePriority(item);
 
@@ -13617,9 +13525,6 @@
 	            switch (resource) {
 	                case 'issueTypes':
 	                    return this.updateIssueType(item, identifier);
-
-	                case 'issueCategories':
-	                    return this.updateIssueCategory(item, identifier);
 
 	                case 'issuePriorities':
 	                    return this.updateIssuePriority(item, identifier);
@@ -13672,8 +13577,8 @@
 	                case 'collaborators':
 	                    return this.getCollaborators();
 
-	                case 'issueCategories':
-	                    return this.getIssueCategories();
+	                case 'teams':
+	                    return this.getTeams();
 
 	                case 'issueTypes':
 	                    return this.getIssueTypes();
@@ -13741,7 +13646,7 @@
 	            return get('issueTypes').then(function () {
 	                return get('issuePriorities');
 	            }).then(function () {
-	                return get('issueCategories');
+	                return get('teams');
 	            }).then(function () {
 	                return get('issueEstimates');
 	            }).then(function () {
@@ -15505,7 +15410,7 @@
 	        // Optional properties
 	        this.column = properties.column || 0;
 	        this.type = properties.type || 0;
-	        this.category = properties.category;
+	        this.team = properties.team;
 	        this.priority = properties.priority || 0;
 	        this.estimate = properties.estimate || 0;
 	        this.version = properties.version;
@@ -15549,8 +15454,8 @@
 	                            this.type = ResourceHelper.getIssueType(value);
 	                            break;
 
-	                        case 'category':
-	                            this.category = ResourceHelper.getIssueCategory(value);
+	                        case 'team':
+	                            this.team = ResourceHelper.getTeam(value);
 	                            break;
 
 	                        case 'priority':
@@ -15626,15 +15531,15 @@
 	        }
 
 	        /**
-	         * Gets category
+	         * Gets team
 	         *
-	         * @returns {String} Category name
+	         * @returns {String} Team name
 	         */
 
 	    }, {
-	        key: 'getCategory',
-	        value: function getCategory() {
-	            return resources.issueCategories[this.category];
+	        key: 'getTeam',
+	        value: function getTeam() {
+	            return resources.teams[this.team];
 	        }
 
 	        /**
@@ -15793,7 +15698,7 @@
 	            return {
 	                column: this.getColumn(),
 	                type: this.getType(),
-	                category: this.getCategory(),
+	                team: this.getTeam(),
 	                priority: this.getPriority(),
 	                version: this.getVersion(),
 	                milestone: this.getMilestone() ? this.getMilestone().title : null,
@@ -17170,120 +17075,8 @@
 	};
 
 /***/ },
-/* 72 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var CategoryBar = function (_View) {
-	    _inherits(CategoryBar, _View);
-
-	    function CategoryBar(params) {
-	        _classCallCheck(this, CategoryBar);
-
-	        var _this = _possibleConstructorReturn(this, (CategoryBar.__proto__ || Object.getPrototypeOf(CategoryBar)).call(this, params));
-
-	        _this.template = __webpack_require__(73);
-
-	        _this.fetch();
-	        return _this;
-	    }
-
-	    /**
-	     * Event: Click category
-	     *
-	     * @param {String} name
-	     */
-
-
-	    _createClass(CategoryBar, [{
-	        key: 'onClickCategory',
-	        value: function onClickCategory(name) {
-	            var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
-
-	            Router.go(basePath + name, true);
-
-	            this.applyCategory();
-
-	            this.render();
-	        }
-
-	        /**
-	         * Applies selected filters
-	         */
-
-	    }, {
-	        key: 'applyCategory',
-	        value: function applyCategory() {
-	            var issueViews = ViewHelper.getAll('IssueEditor');
-	            var category = Router.params.category;
-
-	            var _iteratorNormalCompletion = true;
-	            var _didIteratorError = false;
-	            var _iteratorError = undefined;
-
-	            try {
-	                for (var _iterator = issueViews[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                    var issueView = _step.value;
-
-	                    var isValid = category == 'all' || issueView.model.getCategory() == category;
-
-	                    issueView.$element.toggle(isValid);
-	                }
-	            } catch (err) {
-	                _didIteratorError = true;
-	                _iteratorError = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion && _iterator.return) {
-	                        _iterator.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError) {
-	                        throw _iteratorError;
-	                    }
-	                }
-	            }
-	        }
-	    }]);
-
-	    return CategoryBar;
-	}(View);
-
-	module.exports = CategoryBar;
-
-/***/ },
-/* 73 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	module.exports = function render() {
-	    var _this = this;
-
-	    var activeTab = Router.params.category || 'all';
-	    var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
-
-	    return _.div({ class: 'category-bar tabbed-container vertical' }, _.div({ class: 'tabs' }, _.a({ href: '#' + basePath + 'all', class: 'tab' + (activeTab == 'all' ? ' active' : '') }, 'all').click(function (e) {
-	        e.preventDefault();
-	        _this.onClickCategory('all');
-	    }), _.each(resources.issueCategories || [], function (i, category) {
-	        return _.a({ href: '#' + basePath + category, class: 'tab' + (activeTab == category ? ' active' : '') }, category).click(function (e) {
-	            e.preventDefault();
-	            _this.onClickCategory(category);
-	        });
-	    })));
-	};
-
-/***/ },
+/* 72 */,
+/* 73 */,
 /* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -17440,7 +17233,7 @@
 	        value: function updateModel() {
 	            this.model.title = this.getProperty('title');
 	            this.model.type = this.getProperty('type');
-	            this.model.category = this.getProperty('category');
+	            this.model.team = this.getProperty('team');
 	            this.model.priority = this.getProperty('priority');
 	            this.model.assignee = this.getProperty('assignee');
 	            this.model.reporter = this.getProperty('reporter');
@@ -17459,7 +17252,7 @@
 	            // Update all fields
 	            this.setProperty('title', this.model.title);
 	            this.setProperty('type', this.model.type);
-	            this.setProperty('category', this.model.category);
+	            this.setProperty('team', this.model.team);
 	            this.setProperty('priority', this.model.priority);
 	            this.setProperty('assignee', this.model.assignee);
 	            this.setProperty('version', this.model.version);
@@ -18419,14 +18212,14 @@
 	        _this.onChange();
 	    }).val(this.model.type)),
 
-	    // Category
-	    _.div({ class: 'meta-field category' + (window.resources.issueCategories.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	    // Team
+	    _.div({ class: 'meta-field team' + (window.resources.teams.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
-	    }), _.label('Category'), _.select({ 'data-property': 'category', disabled: ApiHelper.isSpectating() }, _.each(window.resources.issueCategories, function (i, type) {
+	    }), _.label('Team'), _.select({ 'data-property': 'team', disabled: ApiHelper.isSpectating() }, _.each(window.resources.teams, function (i, type) {
 	        return _.option({ value: i }, type);
 	    })).change(function () {
 	        _this.onChange();
-	    }).val(this.model.category)),
+	    }).val(this.model.team)),
 
 	    // Priority
 	    _.div({ class: 'meta-field priority' + (window.resources.issuePriorities.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
@@ -18780,7 +18573,7 @@
 
 	            var issue = new Issue({
 	                milestone: this.model.index,
-	                category: Router.params.category == 'all' ? null : ResourceHelper.getIssueCategory(Router.params.category),
+	                team: Router.params.team == 'all' ? null : ResourceHelper.getTeam(Router.params.team),
 	                reporter: ResourceHelper.getCollaborator(User.getCurrent().name),
 	                assignee: ResourceHelper.getCollaborator(User.getCurrent().name)
 	            });
@@ -19416,9 +19209,9 @@
 	                    var issueView = _step2.value;
 
 	                    var issue = issueView.model.getBakedValues();
-	                    var isCategoryMatch = Router.params.category == 'all' || Router.params.category == issue.category;
+	                    var isTeamMatch = Router.params.team == 'all' || Router.params.team == issue.team;
 
-	                    issueView.$element.toggle(isCategoryMatch);
+	                    issueView.$element.toggle(isTeamMatch);
 
 	                    var _iteratorNormalCompletion3 = true;
 	                    var _didIteratorError3 = false;
@@ -19923,14 +19716,14 @@
 	    location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/all';
 	});
 
-	Router.route('/:user/:repository/board/:mode/:category', function () {
+	Router.route('/:user/:repository/board/:mode/:team', function () {
 	    ApiHelper.checkConnection().then(function () {
 	        return ApiHelper.getResources(true);
 	    }).then(function () {
 	        $('.workspace').remove();
 
 	        // Append all milestones
-	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-panel' }, new FilterEditor().$element, new CategoryBar().$element), _.div({ class: 'workspace-content board-container ' + Router.params.mode }, _.each(window.resources.milestones, function (i, milestone) {
+	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-panel' }, new FilterEditor().$element, new TeamBar().$element), _.div({ class: 'workspace-content board-container ' + Router.params.mode }, _.each(window.resources.milestones, function (i, milestone) {
 	            return new MilestoneViewer({
 	                model: milestone
 	            }).$element;
@@ -19984,6 +19777,10 @@
 	    }).then(function () {
 	        $('.workspace').remove();
 
+	        var canEdit = function canEdit(name) {
+	            return name !== 'organizations' && name !== 'milestones' && name !== 'issues' && name !== 'repositories' && name !== 'collaborators';
+	        };
+
 	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-content settings-container' }, _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.each(window.resources, function (name, resource) {
 	            // Read only
 	            if (ApiHelper.getConfig().readonlyResources.indexOf(name) > -1) {
@@ -19991,7 +19788,7 @@
 	            }
 
 	            // Not editable in resource editor
-	            if (name == 'organizations' || name == 'collaborators' || name == 'issues' || name == 'repositories') {
+	            if (!canEdit(name)) {
 	                return;
 	            }
 
@@ -20005,7 +19802,7 @@
 	            }
 
 	            // Not editable in resource editor
-	            if (name == 'issues' || name == 'repositories' || name == 'collaborators') {
+	            if (!canEdit(name)) {
 	                return;
 	            }
 
@@ -20026,6 +19823,120 @@
 	// Navbar
 	var navbar = new Navbar();
 	$('.app-container').html(navbar.$element);
+
+/***/ },
+/* 91 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var TeamBar = function (_View) {
+	    _inherits(TeamBar, _View);
+
+	    function TeamBar(params) {
+	        _classCallCheck(this, TeamBar);
+
+	        var _this = _possibleConstructorReturn(this, (TeamBar.__proto__ || Object.getPrototypeOf(TeamBar)).call(this, params));
+
+	        _this.template = __webpack_require__(92);
+
+	        _this.fetch();
+	        return _this;
+	    }
+
+	    /**
+	     * Event: Click team
+	     *
+	     * @param {String} name
+	     */
+
+
+	    _createClass(TeamBar, [{
+	        key: 'onClickTeam',
+	        value: function onClickTeam(name) {
+	            var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
+
+	            Router.go(basePath + name, true);
+
+	            this.applyTeam();
+
+	            this.render();
+	        }
+
+	        /**
+	         * Applies selected filters
+	         */
+
+	    }, {
+	        key: 'applyTeam',
+	        value: function applyTeam() {
+	            var issueViews = ViewHelper.getAll('IssueEditor');
+	            var team = Router.params.team;
+
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = issueViews[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var issueView = _step.value;
+
+	                    var isValid = team == 'all' || issueView.model.getTeam() == team;
+
+	                    issueView.$element.toggle(isValid);
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+	        }
+	    }]);
+
+	    return TeamBar;
+	}(View);
+
+	module.exports = TeamBar;
+
+/***/ },
+/* 92 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function render() {
+	    var _this = this;
+
+	    var activeTab = Router.params.team || 'all';
+	    var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
+
+	    return _.div({ class: 'team-bar tabbed-container vertical' }, _.div({ class: 'tabs' }, _.a({ href: '#' + basePath + 'all', class: 'tab' + (activeTab == 'all' ? ' active' : '') }, 'all teams').click(function (e) {
+	        e.preventDefault();
+	        _this.onClickTeam('all');
+	    }), _.each(resources.teams || [], function (i, team) {
+	        return _.a({ href: '#' + basePath + team, class: 'tab' + (activeTab == team ? ' active' : '') }, team).click(function (e) {
+	            e.preventDefault();
+	            _this.onClickTeam(team);
+	        });
+	    })));
+	};
 
 /***/ }
 /******/ ]);

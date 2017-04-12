@@ -67,11 +67,11 @@ class ResourceHelper {
         }
     }
     
-    static getIssueCategory(name) {
-        for(let i in resources.issueCategories) {
-            let category = resources.issueCategories[i];
+    static getTeam(name) {
+        for(let i in resources.teams) {
+            let team = resources.teams[i];
             
-            if(category == name) {
+            if(team == name) {
                 return i;
             }
         }

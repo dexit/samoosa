@@ -54,7 +54,7 @@ Router.route('/:user/:repository/board/:mode/', () => {
     location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/all';
 });
 
-Router.route('/:user/:repository/board/:mode/:category', () => {
+Router.route('/:user/:repository/board/:mode/:team', () => {
     ApiHelper.checkConnection()
     .then(() => {
         return ApiHelper.getResources(true);
@@ -67,7 +67,7 @@ Router.route('/:user/:repository/board/:mode/:category', () => {
             _.div({class: 'workspace'},
                 _.div({class: 'workspace-panel'},
                     new FilterEditor().$element,
-                    new CategoryBar().$element
+                    new TeamBar().$element
                 ),
                 _.div({class: 'workspace-content board-container ' + Router.params.mode},
                     _.each(window.resources.milestones, (i, milestone) => {
@@ -152,6 +152,14 @@ Router.route('/:user/:repository/settings/:resource', () => {
     .then(() => {
         $('.workspace').remove();
 
+        let canEdit = (name) => {
+            return name !== 'organizations' &&
+            name !== 'milestones' &&
+            name !== 'issues' &&
+            name !== 'repositories' &&
+            name !== 'collaborators';
+        }
+
         $('.app-container').append(
             _.div({class: 'workspace'},
                 _.div({class: 'workspace-content settings-container'},
@@ -164,7 +172,7 @@ Router.route('/:user/:repository/settings/:resource', () => {
                                 }
                                
                                 // Not editable in resource editor
-                                if(name == 'organizations' || name == 'collaborators' || name == 'issues' || name == 'repositories') {
+                                if(!canEdit(name)) {
                                     return;
                                 }
 
@@ -183,7 +191,7 @@ Router.route('/:user/:repository/settings/:resource', () => {
                                 }
                                 
                                 // Not editable in resource editor
-                                if(name == 'issues' || name == 'repositories' || name == 'collaborators') {
+                                if(!canEdit(name)) {
                                     return;
                                 }
                                 

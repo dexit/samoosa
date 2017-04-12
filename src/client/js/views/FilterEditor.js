@@ -118,9 +118,9 @@ class FilterEditor extends View {
 
         for(let issueView of issueViews) {
             let issue = issueView.model.getBakedValues();
-            let isCategoryMatch = Router.params.category == 'all' || Router.params.category == issue.category;
+            let isTeamMatch = Router.params.team == 'all' || Router.params.team == issue.team;
 
-            issueView.$element.toggle(isCategoryMatch);
+            issueView.$element.toggle(isTeamMatch);
            
             for(let filter of this.model) {
                 try {

@@ -110,16 +110,16 @@ module.exports = function render() {
                 ).change(() => { this.onChange(); }).val(this.model.type)
             ),
             
-            // Category
-            _.div({class: 'meta-field category' + (window.resources.issueCategories.length < 1 ? ' hidden' : '')},
+            // Team
+            _.div({class: 'meta-field team' + (window.resources.teams.length < 1 ? ' hidden' : '')},
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); }),
-                _.label('Category'),
-                _.select({'data-property': 'category', disabled: ApiHelper.isSpectating()},
-                    _.each(window.resources.issueCategories, (i, type) => {
+                _.label('Team'),
+                _.select({'data-property': 'team', disabled: ApiHelper.isSpectating()},
+                    _.each(window.resources.teams, (i, type) => {
                         return _.option({value: i}, type);
                     })
-                ).change(() => { this.onChange(); }).val(this.model.category)
+                ).change(() => { this.onChange(); }).val(this.model.team)
             ),
 
             // Priority

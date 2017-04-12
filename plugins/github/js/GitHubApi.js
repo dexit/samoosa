@@ -347,14 +347,14 @@ class GitHubApi extends ApiHelper {
     }
     
     /**
-     * Gets issue categories
+     * Gets teams
      *
      * @returns {Promise} promise
      */
-    getIssueCategories() {
-        return this.getLabels()
-        .then((labels) => {
-            this.processIssueCategories(labels);
+    getTeams() {
+        return this.get('/user/teams')
+        .then((teams) => {
+            this.processTeams(teams);
 
             return Promise.resolve();
         });
@@ -534,23 +534,6 @@ class GitHubApi extends ApiHelper {
         return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
             name: name,
             color: color || 'ffffff'
-        });
-    }
-    
-    /**
-     * Adds issue category
-     *
-     * @param {String} category
-     *
-     * @returns {Promise} promise
-     */
-    addIssueCategory(category) {
-        return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
-            name: 'category:' + category,
-            color: 'ffffff'
-        })
-        .then(() => {
-            return Promise.resolve(category);  
         });
     }
     
@@ -773,17 +756,6 @@ class GitHubApi extends ApiHelper {
     }
     
     /**
-     * Removes issue category
-     *
-     * @param {Number} index
-     *
-     * @returns {Promise} promise
-     */
-    removeIssueType(index) {
-        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/category:' + window.resources.issueCategories[index]);
-    }
-    
-    /**
      * Removes issue type
      *
      * @param {Number} index
@@ -906,21 +878,6 @@ class GitHubApi extends ApiHelper {
      */
     updateMilestone(milestone) {
         return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones/' + milestone.id, this.convertMilestone(milestone));
-    }
-    
-    /**
-     * Updates issue category
-     *
-     * @param {String} category
-     * @param {String} previousName
-     *
-     * @returns {Promise} promise
-     */
-    updateIssueCategory(category, previousName) {
-        return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/category:' + previousName, {
-            name: 'category:' + category,
-            color: 'ffffff'
-        });
     }
     
     /**
@@ -1149,21 +1106,15 @@ class GitHubApi extends ApiHelper {
     }
     
     /**
-     * Process issue categories
+     * Process teams
      *
-     * @param {Array} labels
+     * @param {Array} teams
      */
-    processIssueCategories(labels) {
-        window.resources.issueCategories = [];
+    processTeams(teams) {
+        window.resources.teams = [];
         
-        for(let label of labels) {
-            let index = label.name.indexOf('category:');
-            
-            if(index > -1) {
-                let name = label.name.replace('category:', '');
-
-                window.resources.issueCategories.push(name);
-            }
+        for(let team of teams) {
+            window.resources.teams.push(team.name);
         }
     }
 
@@ -1228,7 +1179,7 @@ class GitHubApi extends ApiHelper {
 
             for(let label of gitHubIssue.labels) {
                 let typeIndex = label.name.indexOf('type:');
-                let categoryIndex = label.name.indexOf('category:');
+                let teamIndex = label.name.indexOf('team:');
                 let priorityIndex = label.name.indexOf('priority:');
                 let estimateIndex = label.name.indexOf('estimate:');
                 let versionIndex = label.name.indexOf('version:');
@@ -1242,10 +1193,10 @@ class GitHubApi extends ApiHelper {
                     
                     issue.type = ResourceHelper.getIssueType(name);
 
-                } else if(categoryIndex > -1) {
-                    let name = label.name.replace('category:', '');
+                } else if(teamIndex > -1) {
+                    let name = label.name.replace('team:', '');
                     
-                    issue.category = ResourceHelper.getIssueCategory(name);
+                    issue.team = ResourceHelper.getTeam(name);
 
                 } else if(versionIndex > -1) {
                     let name = label.name.replace('version:', '');
@@ -1359,11 +1310,11 @@ class GitHubApi extends ApiHelper {
             gitHubIssue.milestone = null;
         }
         
-        // Category
-        let issueCategory = resources.issueCategories[issue.category];
+        // Team
+        let team = resources.teams[issue.team];
 
-        if(issueCategory) {
-            gitHubIssue.labels.push('category:' + issueCategory);
+        if(team) {
+            gitHubIssue.labels.push('team:' + team);
         }
 
         // Type

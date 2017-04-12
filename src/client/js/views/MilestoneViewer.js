@@ -20,7 +20,7 @@ class MilestoneEditor extends View {
 
         let issue = new Issue({
             milestone: this.model.index,
-            category: Router.params.category == 'all' ? null : ResourceHelper.getIssueCategory(Router.params.category),
+            team: Router.params.team == 'all' ? null : ResourceHelper.getTeam(Router.params.team),
             reporter: ResourceHelper.getCollaborator(User.getCurrent().name),
             assignee: ResourceHelper.getCollaborator(User.getCurrent().name)
         });

@@ -1,25 +1,25 @@
 'use strict';
 
-class CategoryBar extends View {
+class TeamBar extends View {
     constructor(params) {
         super(params);
 
-        this.template = require('../templates/CategoryBar');
+        this.template = require('../templates/TeamBar');
 
         this.fetch();
     }
     
     /**
-     * Event: Click category
+     * Event: Click team
      *
      * @param {String} name
      */
-    onClickCategory(name) {
+    onClickTeam(name) {
         let basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
         
         Router.go(basePath + name, true);  
 
-        this.applyCategory();
+        this.applyTeam();
 
         this.render();
     }
@@ -27,16 +27,16 @@ class CategoryBar extends View {
     /**
      * Applies selected filters
      */
-    applyCategory() {
+    applyTeam() {
         let issueViews = ViewHelper.getAll('IssueEditor');
-        let category = Router.params.category;
+        let team = Router.params.team;
 
         for(let issueView of issueViews) {
-            let isValid = category == 'all' || issueView.model.getCategory() == category;
+            let isValid = team == 'all' || issueView.model.getTeam() == team;
 
             issueView.$element.toggle(isValid);
         }
     }
 }
 
-module.exports = CategoryBar;
+module.exports = TeamBar;

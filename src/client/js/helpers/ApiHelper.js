@@ -194,12 +194,12 @@ class ApiHelper {
     }
     
     /**
-     * Gets issue categories
+     * Gets teams
      *
      * @returns {Promise} promise
      */
-    getIssueCategories() {
-        window.resources.issueCategories = [];
+    getTeams() {
+        window.resources.teams = [];
             
         return Promise.resolve();
     }
@@ -398,17 +398,6 @@ class ApiHelper {
     }
     
     /**
-     * Removes issue category
-     *
-     * @param {Number} index
-     *
-     * @returns {Promise} promise
-     */
-    removeIssueCategory(index) {
-        return Promise.resolve();
-    }
-    
-    /**
      * Removes issue type
      *
      * @param {Number} index
@@ -509,18 +498,6 @@ class ApiHelper {
      * @returns {Promise} promise
      */
     updateCollaborator(index, collaborator) {
-        return Promise.resolve();
-    }
-    
-    /**
-     * Updates issue type
-     *
-     * @param {Number} index
-     * @param {String} category
-     *
-     * @returns {Promise} promise
-     */
-    updateIssueCategory(index, category) {
         return Promise.resolve();
     }
 
@@ -719,9 +696,6 @@ class ApiHelper {
             case 'issueTypes':
                 return this.removeIssueType(index);
             
-            case 'issueCategories':
-                return this.removeIssueCategory(index);
-
             case 'issuePriorities':
                 return this.removeIssuePriority(index);
 
@@ -766,9 +740,6 @@ class ApiHelper {
             case 'issueTypes':
                 return this.addIssueType(item);
             
-            case 'issueCategories':
-                return this.addIssueCategory(item);
-
             case 'issuePriorities':
                 return this.addIssuePriority(item);
 
@@ -811,9 +782,6 @@ class ApiHelper {
             case 'issueTypes':
                 return this.updateIssueType(item, identifier);
             
-            case 'issueCategories':
-                return this.updateIssueCategory(item, identifier);
-
             case 'issuePriorities':
                 return this.updateIssuePriority(item, identifier);
 
@@ -862,8 +830,8 @@ class ApiHelper {
             case 'collaborators':
                 return this.getCollaborators();
             
-            case 'issueCategories':
-                return this.getIssueCategories();
+            case 'teams':
+                return this.getTeams();
 
             case 'issueTypes':
                 return this.getIssueTypes();
@@ -931,7 +899,7 @@ class ApiHelper {
             return get('issuePriorities');
         })
         .then(() => {
-            return get('issueCategories');
+            return get('teams');
         })
         .then(() => {
             return get('issueEstimates');

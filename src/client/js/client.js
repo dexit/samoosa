@@ -58,7 +58,7 @@ window.Organization = require('./models/Organization');
 // Views
 window.Navbar = require('./views/Navbar');
 window.RepositoryBar = require('./views/RepositoryBar');
-window.CategoryBar = require('./views/CategoryBar');
+window.TeamBar = require('./views/TeamBar');
 window.IssueEditor = require('./views/IssueEditor');
 window.MilestoneEditor = require('./views/MilestoneEditor');
 window.MilestoneViewer = require('./views/MilestoneViewer');

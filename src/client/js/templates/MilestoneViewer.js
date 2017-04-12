@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function render() {
-    let state = SettingsHelper.get('milestone', this.model.index) || '';
+    let state = SettingsHelper.get('milestone', this.model.index) || 'collapsed';
     
     return _.div({class: 'milestone-viewer ' + state, 'data-index': this.model.index, 'data-end-date': this.model.endDate},
         _.div({class: 'header'},

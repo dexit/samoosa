@@ -46,13 +46,13 @@ class Navbar extends View {
         
         links.push({
             title: 'Kanban',
-            url: '/board/kanban/',
+            url: '/board/kanban/all',
             icon: 'columns'
         });
 
         links.push({
             title: 'List',
-            url: '/board/list/',
+            url: '/board/list/all',
             icon: 'list'
         });
         

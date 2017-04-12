@@ -333,11 +333,6 @@ class IssueEditor extends View {
 
         // Cancel multiselect
         IssueEditor.cancelMultiSelect();
-
-        // Update milestones progress
-        for(let milestoneEditor of ViewHelper.getAll('MilestoneEditor')) {
-            milestoneEditor.updateProgress();
-        }
     }
 
     /**
@@ -354,13 +349,6 @@ class IssueEditor extends View {
         
             // Update filters
             ViewHelper.get('FilterEditor').applyFilters();
-            
-            for(let milestoneEditor of ViewHelper.getAll('MilestoneEditor')) {
-                if(milestoneEditor.model == this.model.getMilestone()) {
-                    milestoneEditor.updateProgress();
-                    break;
-                }
-            }
         }
     }
    

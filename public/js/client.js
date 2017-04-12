@@ -105,7 +105,7 @@
 	// Views
 	window.Navbar = __webpack_require__(68);
 	window.RepositoryBar = __webpack_require__(70);
-	window.TeamBar = __webpack_require__(91);
+	window.TeamBar = __webpack_require__(72);
 	window.IssueEditor = __webpack_require__(74);
 	window.MilestoneEditor = __webpack_require__(76);
 	window.MilestoneViewer = __webpack_require__(78);
@@ -133,7 +133,7 @@
 
 	module.exports = {
 		"name": "samoosa",
-		"version": "0.4.0",
+		"version": "0.5.0",
 		"description": "",
 		"main": "index.html",
 		"scripts": {
@@ -1826,9 +1826,7 @@
 	    _createClass(ContextMenu, [{
 	        key: 'render',
 	        value: function render() {
-	            var view = this;
-
-	            view.$element.html(_.each(view.model, function (label, func) {
+	            this.$element.html(_.each(this.model, function (label, func) {
 	                if (func == '---') {
 	                    return _.li({ class: 'dropdown-header' }, label);
 	                } else {
@@ -1839,13 +1837,21 @@
 	                        if (func) {
 	                            func(e);
 
-	                            view.remove();
+	                            this.remove();
 	                        }
 	                    }));
 	                }
 	            }));
 
-	            $('body').append(view.$element);
+	            $('body').append(this.$element);
+
+	            var rect = this.$element[0].getBoundingClientRect();
+
+	            if (rect.left + rect.width > window.innerWidth) {
+	                this.$element.css('left', rect.left - rect.width + 'px');
+	            } else if (rect.bottom > window.innerHeight) {
+	                this.$element.css('top', rect.top - rect.height + 'px');
+	            }
 	        }
 	    }]);
 
@@ -12614,7 +12620,7 @@
 	    }, {
 	        key: 'isSpectating',
 	        value: function isSpectating() {
-	            return Router.query('spectate') == 'true';
+	            return Router.query('token') !== null;
 	        }
 
 	        /**
@@ -16652,13 +16658,13 @@
 
 	            links.push({
 	                title: 'Kanban',
-	                url: '/board/kanban/',
+	                url: '/board/kanban/all',
 	                icon: 'columns'
 	            });
 
 	            links.push({
 	                title: 'List',
-	                url: '/board/list/',
+	                url: '/board/list/all',
 	                icon: 'list'
 	            });
 
@@ -17081,8 +17087,120 @@
 	};
 
 /***/ },
-/* 72 */,
-/* 73 */,
+/* 72 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var TeamBar = function (_View) {
+	    _inherits(TeamBar, _View);
+
+	    function TeamBar(params) {
+	        _classCallCheck(this, TeamBar);
+
+	        var _this = _possibleConstructorReturn(this, (TeamBar.__proto__ || Object.getPrototypeOf(TeamBar)).call(this, params));
+
+	        _this.template = __webpack_require__(73);
+
+	        _this.fetch();
+	        return _this;
+	    }
+
+	    /**
+	     * Event: Click team
+	     *
+	     * @param {String} name
+	     */
+
+
+	    _createClass(TeamBar, [{
+	        key: 'onClickTeam',
+	        value: function onClickTeam(name) {
+	            var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
+
+	            Router.go(basePath + name, true);
+
+	            this.applyTeam();
+
+	            this.render();
+	        }
+
+	        /**
+	         * Applies selected filters
+	         */
+
+	    }, {
+	        key: 'applyTeam',
+	        value: function applyTeam() {
+	            var issueViews = ViewHelper.getAll('IssueEditor');
+	            var team = Router.params.team;
+
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = issueViews[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var issueView = _step.value;
+
+	                    var isValid = team == 'all' || issueView.model.getTeam() == team;
+
+	                    issueView.$element.toggle(isValid);
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+	        }
+	    }]);
+
+	    return TeamBar;
+	}(View);
+
+	module.exports = TeamBar;
+
+/***/ },
+/* 73 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function render() {
+	    var _this = this;
+
+	    var activeTab = Router.params.team || 'all';
+	    var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
+
+	    return _.div({ class: 'team-bar tabbed-container vertical' }, _.div({ class: 'tabs' }, _.a({ href: '#' + basePath + 'all', class: 'tab' + (activeTab == 'all' ? ' active' : '') }, 'all teams').click(function (e) {
+	        e.preventDefault();
+	        _this.onClickTeam('all');
+	    }), _.each(resources.teams || [], function (i, team) {
+	        return _.a({ href: '#' + basePath + team, class: 'tab' + (activeTab == team ? ' active' : '') }, team).click(function (e) {
+	            e.preventDefault();
+	            _this.onClickTeam(team);
+	        });
+	    })));
+	};
+
+/***/ },
 /* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -17474,32 +17592,6 @@
 
 	            // Cancel multiselect
 	            IssueEditor.cancelMultiSelect();
-
-	            // Update milestones progress
-	            var _iteratorNormalCompletion2 = true;
-	            var _didIteratorError2 = false;
-	            var _iteratorError2 = undefined;
-
-	            try {
-	                for (var _iterator2 = ViewHelper.getAll('MilestoneEditor')[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                    var milestoneEditor = _step2.value;
-
-	                    milestoneEditor.updateProgress();
-	                }
-	            } catch (err) {
-	                _didIteratorError2 = true;
-	                _iteratorError2 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                        _iterator2.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError2) {
-	                        throw _iteratorError2;
-	                    }
-	                }
-	            }
 	        }
 
 	        /**
@@ -17521,34 +17613,6 @@
 
 	                // Update filters
 	                ViewHelper.get('FilterEditor').applyFilters();
-
-	                var _iteratorNormalCompletion3 = true;
-	                var _didIteratorError3 = false;
-	                var _iteratorError3 = undefined;
-
-	                try {
-	                    for (var _iterator3 = ViewHelper.getAll('MilestoneEditor')[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                        var milestoneEditor = _step3.value;
-
-	                        if (milestoneEditor.model == this.model.getMilestone()) {
-	                            milestoneEditor.updateProgress();
-	                            break;
-	                        }
-	                    }
-	                } catch (err) {
-	                    _didIteratorError3 = true;
-	                    _iteratorError3 = err;
-	                } finally {
-	                    try {
-	                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	                            _iterator3.return();
-	                        }
-	                    } finally {
-	                        if (_didIteratorError3) {
-	                            throw _iteratorError3;
-	                        }
-	                    }
-	                }
 	            }
 	        }
 
@@ -17569,13 +17633,13 @@
 
 	            // Look for other IssueEditor views and update them as needed
 	            if (this.usingMultiEdit()) {
-	                var _iteratorNormalCompletion4 = true;
-	                var _didIteratorError4 = false;
-	                var _iteratorError4 = undefined;
+	                var _iteratorNormalCompletion2 = true;
+	                var _didIteratorError2 = false;
+	                var _iteratorError2 = undefined;
 
 	                try {
-	                    for (var _iterator4 = ViewHelper.getAll('IssueEditor')[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	                        var view = _step4.value;
+	                    for (var _iterator2 = ViewHelper.getAll('IssueEditor')[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                        var view = _step2.value;
 
 	                        if (view != this && view.$element.hasClass('selected')) {
 	                            view.model.type = this.getProperty('type', true) || view.model.type;
@@ -17589,16 +17653,16 @@
 	                        }
 	                    }
 	                } catch (err) {
-	                    _didIteratorError4 = true;
-	                    _iteratorError4 = err;
+	                    _didIteratorError2 = true;
+	                    _iteratorError2 = err;
 	                } finally {
 	                    try {
-	                        if (!_iteratorNormalCompletion4 && _iterator4.return) {
-	                            _iterator4.return();
+	                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                            _iterator2.return();
 	                        }
 	                    } finally {
-	                        if (_didIteratorError4) {
-	                            throw _iteratorError4;
+	                        if (_didIteratorError2) {
+	                            throw _iteratorError2;
 	                        }
 	                    }
 	                }
@@ -17711,13 +17775,13 @@
 	                var fuzzyMatch = void 0;
 	                var typedName = string.replace('@', '').replace(' ', '').toLowerCase();
 
-	                var _iteratorNormalCompletion5 = true;
-	                var _didIteratorError5 = false;
-	                var _iteratorError5 = undefined;
+	                var _iteratorNormalCompletion3 = true;
+	                var _didIteratorError3 = false;
+	                var _iteratorError3 = undefined;
 
 	                try {
-	                    for (var _iterator5 = (resources.collaborators || [])[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	                        var collaborator = _step5.value;
+	                    for (var _iterator3 = (resources.collaborators || [])[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                        var collaborator = _step3.value;
 
 	                        if (!collaborator) {
 	                            continue;
@@ -17732,16 +17796,16 @@
 	                        }
 	                    }
 	                } catch (err) {
-	                    _didIteratorError5 = true;
-	                    _iteratorError5 = err;
+	                    _didIteratorError3 = true;
+	                    _iteratorError3 = err;
 	                } finally {
 	                    try {
-	                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
-	                            _iterator5.return();
+	                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                            _iterator3.return();
 	                        }
 	                    } finally {
-	                        if (_didIteratorError5) {
-	                            throw _iteratorError5;
+	                        if (_didIteratorError3) {
+	                            throw _iteratorError3;
 	                        }
 	                    }
 	                }
@@ -18676,7 +18740,7 @@
 	module.exports = function render() {
 	    var _this = this;
 
-	    var state = SettingsHelper.get('milestone', this.model.index) || '';
+	    var state = SettingsHelper.get('milestone', this.model.index) || 'collapsed';
 
 	    return _.div({ class: 'milestone-viewer ' + state, 'data-index': this.model.index, 'data-end-date': this.model.endDate }, _.div({ class: 'header' }, _.div({ class: 'title' }, _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa fa-chevron-right' }), _.h4(this.model.title), _.p(this.model.description)).click(function () {
 	        _this.onClickToggle();
@@ -19829,120 +19893,6 @@
 	// Navbar
 	var navbar = new Navbar();
 	$('.app-container').html(navbar.$element);
-
-/***/ },
-/* 91 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var TeamBar = function (_View) {
-	    _inherits(TeamBar, _View);
-
-	    function TeamBar(params) {
-	        _classCallCheck(this, TeamBar);
-
-	        var _this = _possibleConstructorReturn(this, (TeamBar.__proto__ || Object.getPrototypeOf(TeamBar)).call(this, params));
-
-	        _this.template = __webpack_require__(92);
-
-	        _this.fetch();
-	        return _this;
-	    }
-
-	    /**
-	     * Event: Click team
-	     *
-	     * @param {String} name
-	     */
-
-
-	    _createClass(TeamBar, [{
-	        key: 'onClickTeam',
-	        value: function onClickTeam(name) {
-	            var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
-
-	            Router.go(basePath + name, true);
-
-	            this.applyTeam();
-
-	            this.render();
-	        }
-
-	        /**
-	         * Applies selected filters
-	         */
-
-	    }, {
-	        key: 'applyTeam',
-	        value: function applyTeam() {
-	            var issueViews = ViewHelper.getAll('IssueEditor');
-	            var team = Router.params.team;
-
-	            var _iteratorNormalCompletion = true;
-	            var _didIteratorError = false;
-	            var _iteratorError = undefined;
-
-	            try {
-	                for (var _iterator = issueViews[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                    var issueView = _step.value;
-
-	                    var isValid = team == 'all' || issueView.model.getTeam() == team;
-
-	                    issueView.$element.toggle(isValid);
-	                }
-	            } catch (err) {
-	                _didIteratorError = true;
-	                _iteratorError = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion && _iterator.return) {
-	                        _iterator.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError) {
-	                        throw _iteratorError;
-	                    }
-	                }
-	            }
-	        }
-	    }]);
-
-	    return TeamBar;
-	}(View);
-
-	module.exports = TeamBar;
-
-/***/ },
-/* 92 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	module.exports = function render() {
-	    var _this = this;
-
-	    var activeTab = Router.params.team || 'all';
-	    var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
-
-	    return _.div({ class: 'team-bar tabbed-container vertical' }, _.div({ class: 'tabs' }, _.a({ href: '#' + basePath + 'all', class: 'tab' + (activeTab == 'all' ? ' active' : '') }, 'all teams').click(function (e) {
-	        e.preventDefault();
-	        _this.onClickTeam('all');
-	    }), _.each(resources.teams || [], function (i, team) {
-	        return _.a({ href: '#' + basePath + team, class: 'tab' + (activeTab == team ? ' active' : '') }, team).click(function (e) {
-	            e.preventDefault();
-	            _this.onClickTeam(team);
-	        });
-	    })));
-	};
 
 /***/ }
 /******/ ]);

@@ -872,8 +872,8 @@ class ApiHelper {
                 return this.getIssuePriorities();
 
             case 'issueEstimates':
-                return this.getIssueEstimates().
-                then(() => {
+                return this.getIssueEstimates()
+                .then(() => {
                     ResourceHelper.sortResource('issueEstimates');
 
                     return Promise.resolve();  
@@ -883,7 +883,12 @@ class ApiHelper {
                 return this.getIssueColumns();
 
             case 'milestones':
-                return this.getMilestones();
+                return this.getMilestones()
+                .then(() => {
+                    ResourceHelper.sortResource('milestones');
+
+                    return Promise.resolve();  
+                });
 
             case 'versions':
                 return this.getVersions();

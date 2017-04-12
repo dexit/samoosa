@@ -210,7 +210,7 @@ a {
 
 .board-container {
     &.dragging {
-        .milestone-editor {
+        .milestone-viewer {
             .columns {
                 .column {
                     &.hovering {
@@ -229,7 +229,7 @@ a {
     }
 }
 
-.milestone-editor {
+.milestone-viewer {
     >.header {
         border-bottom: 1px solid $grey-light;
 
@@ -424,38 +424,6 @@ a {
                 color: $pink-medium
             }
         }
-    }
-}
-
-.plan-container {
-    .plan-editor {
-        .years button.hovering, .months button.hovering, .dates .date.hovering {
-            outline-color: $pink-medium;
-        }
-    }
-    
-    .plan-item-editor {
-        background-color: $teal-dark;
-
-        .drag-handle {
-            padding: 0.5rem 1rem 0.9em 1em;
-            font-family: 'Bree Serif';
-        }
-    }
-}
-
-body >.plan-item-editor {
-    border: 0px;
-    border-radius: 0px;
-    background-color: $teal-dark;
-    color: $white;
-
-    .body {
-        position: relative;
-    }
-
-    .btn-close {
-        color: $white;
     }
 }
 

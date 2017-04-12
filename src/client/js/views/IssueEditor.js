@@ -233,7 +233,7 @@ class IssueEditor extends View {
             }); 
             
             // Column mouse hover events
-            $('.milestone-editor .columns .column')
+            $('.milestone-viewer .columns .column')
                 .on('mouseenter', function() {
                     $(this).toggleClass('hovering', true);
                 })
@@ -305,12 +305,12 @@ class IssueEditor extends View {
         $element.removeAttr('style');
         
         // Place this element into the hovered column
-        $('.milestone-editor .columns .column.hovering .body')
+        $('.milestone-viewer .columns .column.hovering .body')
             .first()
             .prepend($element);
         
         // Unregister column mouse events and unset hovering state
-        $('.milestone-editor .columns .column')
+        $('.milestone-viewer .columns .column')
             .off('mouseenter')
             .off('mouseleave').
             toggleClass('hovering', false);
@@ -319,7 +319,7 @@ class IssueEditor extends View {
         $element.each(function(i) {
             for(let view of ViewHelper.getAll('IssueEditor')) {
                 if(this == view.$element[0]) {
-                    view.model.milestone = view.$element.parents('.milestone-editor').attr('data-index');
+                    view.model.milestone = view.$element.parents('.milestone-viewer').attr('data-index');
                     view.model.column = view.$element.parents('.column').attr('data-index');
                 
                     // Trigger the sync event

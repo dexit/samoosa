@@ -1,19 +1,14 @@
 'use strict';
 
-/**
- * An editor for milestones, displaying issues in columns or rows
- */
-class MilestoneEditor extends View {
+class PlanItemEditor extends View {
     constructor(params) {
         super(params);
 
         this.template = require('../templates/MilestoneEditor');
 
         this.fetch();
-
-        this.updateProgress();
     }
-
+    
     /**
      * Event: Click print button
      */
@@ -101,210 +96,65 @@ class MilestoneEditor extends View {
         console.log(this.model.getChangeLog());
     }
 
+
     /**
-     * Event: Click new issue button
+     * Event: Click save
      */
-    onClickNewIssue() {
-        spinner('Creating issue');
+    onClickSave() {
+        let year = this.$element.find('input[name="year"]').val();
+        let month = this.$element.find('input[name="month"]').val();
+        let day = this.$element.find('input[name="day"]').val();
+        let dateString = year + '-' + month + '-' + day;
 
-        let issue = new Issue({
-            milestone: this.model.index,
-            category: Router.params.category == 'all' ? null : ResourceHelper.getIssueCategory(Router.params.category),
-            reporter: ResourceHelper.getCollaborator(User.getCurrent().name),
-            assignee: ResourceHelper.getCollaborator(User.getCurrent().name)
-        });
+        // Update model data with new information based on DOM location
+        this.model.title = this.$element.find('input[name="title"]').val();
+        this.model.description = this.$element.find('input[name="description"]').val();
+      
+        if(dateString) {
+            try {
+                let date = new Date(dateString);
 
-        ResourceHelper.addResource('issues', issue)
-        .then((newIssue) => {
-            let editor = new IssueEditor({
-                model: newIssue
-            }); 
+                this.model.endDate = date.toISOString();
+            } catch(e) {
+                displayError(new Error(dateString + ' is an invalid date'));
+                return;
+            }
+        } else {
+            this.model.endDate = null;
+        }
 
-            let $issue = editor.$element;
+        // Update DOM elements to match model
+        this.$element.find('.drag-handle').text(this.model.title);
 
-            this.$element.find('.column[data-index="' + newIssue.column + '"] .btn-new-issue').before($issue);
-           
-            editor.onClickToggle();
+        // Start loading
+        this.$element.toggleClass('loading', true);
+        
+        ResourceHelper.updateResource('milestones', this.model)
+        .then(() => {
+            this.$element.toggleClass('loading', false);
 
-            this.updateProgress();
+            ViewHelper.get('MilestonesEditor').render();
+            ViewHelper.get('MilestonesEditor').focus(this.model);
+        }); 
+    }
+
+    /**
+     * Event: Click delete button
+     */
+    onClickDelete() {
+        if(!confirm('Are you sure you want to delete the milestone "' + this.model.title + '"?')) { return; }
+
+        spinner('Deleting milestone');
+
+        ResourceHelper.removeResource('milestones', this.model.index)
+        .then(() => {
+            ViewHelper.get('MilestonesEditor').render();
+
+            $('.app-container').removeClass('disabled');
 
             spinner(false);
         });
-
-        if(this.$element.hasClass('collapsed')) {
-            this.onClickToggle();
-        }
-    }
-
-    /**
-     * Event: Click toggle button
-     */
-    onClickToggle() {
-        let wasCollapsed = this.$element.hasClass('collapsed');
-        let newKey = wasCollapsed ? 'expanded' : 'collapsed';
-        
-        toggleExpand(this.$element);
-
-        SettingsHelper.set(
-            'milestone',
-            this.model.index,
-            newKey
-        );
-    }
-
-    /**
-     * Gets remaining days
-     *
-     * @returns {Number} days
-     */
-    getRemainingDays() {
-        let endDate = this.model.endDate;
-        let nowDate = new Date();
-
-        if(!endDate) {
-            return 0;
-        }
-
-        if(endDate.constructor === String) {
-            endDate = new Date(endDate);
-        }
-
-        return Math.round((endDate-nowDate)/(1000*60*60*24)) + 1;
-    }
-
-    /**
-     * Get percent complete
-     *
-     * @returns {Number} percent
-     */
-    getPercentComplete() {
-        let total = this.getIssues();
-        let completed = this.getCompletedIssues();
-        let percentage = 0;
-
-        let totalHours = 0;
-        let completedHours = 0;
-
-        for(let i in total) {
-            totalHours += total[i].getEstimatedHours();
-        }
-        
-        for(let i in completed) {
-             completedHours += completed[i].getEstimatedHours();
-        }
-
-        if(total.length > 0 && completed.length > 0) {
-            percentage = (completed.length / total.length) * 100;
-        }
-
-        return percentage;
-    }
-
-    /**
-     * Update progress indicators
-     */
-    updateProgress() {
-        let total = this.getIssues();
-        let completed = this.getCompletedIssues();
-        let percentage = 0;
-
-        let totalHours = 0;
-        let completedHours = 0;
-
-        for(let issue of total) {
-             totalHours += issue.getEstimatedHours();
-        }
-        
-        for(let issue of completed) {
-             completedHours += issue.getEstimatedHours();
-        }
-
-        if(total.length > 0 && completed.length > 0) {
-            percentage = (completed.length / total.length) * 100;
-        }
-        
-        this.$element.find('.header .progress-bar').css({
-            width: percentage + '%'
-        });
-        
-        this.$element.find('.header .progress-amounts .total').html(total.length);
-        this.$element.find('.header .progress-hours .total').html(totalHours + 'h');
-        
-        this.$element.find('.header .progress-amounts .remaining').html(total.length - completed.length);
-        this.$element.find('.header .progress-hours .remaining').html((totalHours - completedHours) + 'h');
-
-        // Due date
-        if(this.model.endDate) {
-            let $dueDate = this.$element.find('.header .due-date');
-
-            if($dueDate.length < 1) {
-                $dueDate = _.span({class: 'due-date'}).prependTo(this.$element.find('.header .stats'));
-            }
-
-            _.append($dueDate.empty(),
-                _.span({class: 'fa fa-calendar'}),
-                _.span({class: 'date'},
-                    prettyDate(this.model.endDate)
-                ),
-                // No time left
-                _.if(this.getRemainingDays() < 1 && this.getPercentComplete() < 100,
-                    _.span({class: 'remaining warn-red'},
-                        this.getRemainingDays() + 'd'
-                    )
-                ),
-                // Little time left
-                _.if(this.getRemainingDays() >= 1 && this.getRemainingDays() < 3 && this.getPercentComplete() < 100,
-                    _.span({class: 'remaining warn-yellow'},
-                        this.getRemainingDays() + 'd'
-                    )
-                ),
-                // More time left
-                _.if(this.getRemainingDays() >= 3 && this.getPercentComplete() < 100,
-                    _.span({class: 'remaining'},
-                        this.getRemainingDays() + 'd'
-                    )
-                ),
-                // Complete
-                _.if(this.getPercentComplete() == 100,
-                    _.span({class: 'remaining ok fa fa-check'})
-                )
-            )
-        }
-    }
-
-    /**
-     * Gets a list of completed
-     */
-    getCompletedIssues() {
-        let issues = []; 
-        
-        for(let issue of window.resources.issues) {
-            if(!issue) { continue; }
-
-            if(issue.milestone == this.model.index && issue.isClosed()) {
-                issues.push(issue);
-            }            
-        }
-
-        return issues;
-    }
-
-    /**
-     * Gets a list of all issues
-     */
-    getIssues() {
-        let issues = []; 
-        
-        for(let issue of window.resources.issues) {
-            if(!issue) { continue; }
-
-            if(issue.milestone == this.model.index) {
-                issues.push(issue);
-            }            
-        }
-
-        return issues;
     }
 }
 
-module.exports = MilestoneEditor;
+module.exports = PlanItemEditor;

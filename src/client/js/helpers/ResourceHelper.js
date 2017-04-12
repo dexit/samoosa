@@ -97,6 +97,21 @@ class ResourceHelper {
         }
     }
 
+    /**
+     * Updates the indices of every resource item
+     *
+     * @param {String} resource
+     */
+    static updateResourceIndices(resource) {
+       for(let i in resources[resource]) {
+            let r = resources[resource][i];
+
+            if(typeof r === 'object') {
+                r.index = i;
+            }
+       }
+    }
+
     static sortResource(resource) {
         switch(resource) {
             case 'issueEstimates':
@@ -115,7 +130,26 @@ class ResourceHelper {
                     return 0;
                 });
                 break;
+
+            case 'milestones':
+                resources.milestones.sort((a, b) => {
+                    a = a.getEndDate() || 0;
+                    b = b.getEndDate() || 0;
+
+                    if(a < b) {
+                        return -1;
+                    }
+                    
+                    if(a > b) {
+                        return 1;
+                    }
+
+                    return 0;
+                });
+                break;
         }   
+
+        this.updateResourceIndices(resource);
     }
 
     static clear() {

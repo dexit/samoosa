@@ -738,31 +738,31 @@ body, html {
       .filter-editor .filters .filter span, .filter-editor .filters .filter select, .filter-editor .filters .filter button {
         flex-shrink: 0; }
 
-.milestone-editor {
+.milestone-viewer {
   transition: height 0.5s ease;
   overflow-y: hidden; }
-  .milestone-editor.collapsed > .header .title .btn-toggle .fa {
+  .milestone-viewer.collapsed > .header .title .btn-toggle .fa {
     transform: translateY(-50%) rotate(0deg); }
-  .milestone-editor.collapsed .columns {
+  .milestone-viewer.collapsed .columns {
     display: none; }
-  .milestone-editor > .header {
+  .milestone-viewer > .header {
     border-bottom: 1px solid #bdbdbd;
     padding: 15px;
     position: relative; }
-    .milestone-editor > .header .title {
+    .milestone-viewer > .header .title {
       margin: 0px; }
-      .milestone-editor > .header .title .btn-toggle {
+      .milestone-viewer > .header .title .btn-toggle {
         padding: 0px 0px 0px 30px;
         display: block;
         text-align: left;
         position: relative;
         width: 100%; }
-        .milestone-editor > .header .title .btn-toggle h4 {
+        .milestone-viewer > .header .title .btn-toggle h4 {
           margin-top: 0px;
           margin-bottom: 0px; }
-        .milestone-editor > .header .title .btn-toggle p {
+        .milestone-viewer > .header .title .btn-toggle p {
           margin-bottom: 0px; }
-        .milestone-editor > .header .title .btn-toggle .fa {
+        .milestone-viewer > .header .title .btn-toggle .fa {
           width: 20px;
           text-align: center;
           position: absolute;
@@ -770,25 +770,25 @@ body, html {
           top: 50%;
           transform: translateY(-50%) rotate(90deg);
           transition: transform 0.25s ease; }
-    .milestone-editor > .header .stats {
+    .milestone-viewer > .header .stats {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
       right: 15px; }
-      .milestone-editor > .header .stats .actions {
+      .milestone-viewer > .header .stats .actions {
         display: inline-block;
         margin-left: 15px; }
-        .milestone-editor > .header .stats .actions button {
+        .milestone-viewer > .header .stats .actions button {
           line-height: 20px;
           height: 20px;
           padding: 0px 5px;
           border-radius: 10px;
           background-color: #616161; }
-          .milestone-editor > .header .stats .actions button .fa {
+          .milestone-viewer > .header .stats .actions button .fa {
             margin-right: 0px; }
-      .milestone-editor > .header .stats .fa {
+      .milestone-viewer > .header .stats .fa {
         margin-right: 5px; }
-      .milestone-editor > .header .stats > span {
+      .milestone-viewer > .header .stats > span {
         display: inline-block;
         padding: 0px 8px 0px 5px;
         border-radius: 10px;
@@ -798,22 +798,22 @@ body, html {
         margin-left: 10px;
         font-size: 12px;
         color: #e0e0e0; }
-        .milestone-editor > .header .stats > span .total {
+        .milestone-viewer > .header .stats > span .total {
           color: #bdbdbd; }
-        .milestone-editor > .header .stats > span .remaining {
+        .milestone-viewer > .header .stats > span .remaining {
           border-left: 1px solid #e0e0e0;
           padding-left: 5px;
           margin-left: 5px;
           margin-right: 0px; }
-          .milestone-editor > .header .stats > span .remaining.warn-red {
+          .milestone-viewer > .header .stats > span .remaining.warn-red {
             color: #f44336; }
-          .milestone-editor > .header .stats > span .remaining.warn-yellow {
+          .milestone-viewer > .header .stats > span .remaining.warn-yellow {
             color: #ffeb3b; }
-          .milestone-editor > .header .stats > span .remaining.ok {
+          .milestone-viewer > .header .stats > span .remaining.ok {
             color: #4caf50; }
-        .milestone-editor > .header .stats > span .remaining, .milestone-editor > .header .stats > span .total {
+        .milestone-viewer > .header .stats > span .remaining, .milestone-viewer > .header .stats > span .total {
           font-weight: bold; }
-    .milestone-editor > .header .progress-bar {
+    .milestone-viewer > .header .progress-bar {
       position: absolute;
       top: 0px;
       left: 0px;
@@ -822,48 +822,48 @@ body, html {
       z-index: -1;
       transition: width 0.5s ease;
       box-shadow: none; }
-  .milestone-editor .columns {
+  .milestone-viewer .columns {
     display: flex; }
-    .milestone-editor .columns .column {
+    .milestone-viewer .columns .column {
       flex-grow: 1;
       flex-basis: 0;
       border-right: 1px solid #bdbdbd;
       border-bottom: 1px solid #bdbdbd;
       padding: 15px; }
-      .milestone-editor .columns .column:last-child {
+      .milestone-viewer .columns .column:last-child {
         border-right: 0px; }
-      .milestone-editor .columns .column > .header {
+      .milestone-viewer .columns .column > .header {
         margin-bottom: 15px; }
-        .milestone-editor .columns .column > .header h4 {
+        .milestone-viewer .columns .column > .header h4 {
           margin: 0px;
           text-transform: uppercase;
           opacity: 0.5; }
-      .milestone-editor .columns .column .btn-new-issue {
+      .milestone-viewer .columns .column .btn-new-issue {
         margin-top: 1em; }
 
-.board-container.list .milestone-editor > .header {
+.board-container.list .milestone-viewer > .header {
   border-top: 1px solid #bdbdbd;
   border-bottom: none; }
-  .board-container.list .milestone-editor > .header .btn-toggle {
+  .board-container.list .milestone-viewer > .header .btn-toggle {
     margin: 0px auto; }
-  .board-container.list .milestone-editor > .header .title .fa {
+  .board-container.list .milestone-viewer > .header .title .fa {
     width: 18px;
     margin-right: 5px; }
 
-.board-container.list .milestone-editor:not(.collapsed) > .header {
+.board-container.list .milestone-viewer:not(.collapsed) > .header {
   border-bottom: 1px solid #bdbdbd; }
 
-.board-container.list .milestone-editor:not(.collapsed) .columns {
+.board-container.list .milestone-viewer:not(.collapsed) .columns {
   display: block; }
-  .board-container.list .milestone-editor:not(.collapsed) .columns .column {
+  .board-container.list .milestone-viewer:not(.collapsed) .columns .column {
     border: 0px;
     width: 600px;
     margin-left: auto;
     margin-right: auto; }
-    .board-container.list .milestone-editor:not(.collapsed) .columns .column:last-of-type {
+    .board-container.list .milestone-viewer:not(.collapsed) .columns .column:last-of-type {
       margin-bottom: 15px; }
 
-.board-container.dragging .milestone-editor .columns .column.hovering {
+.board-container.dragging .milestone-viewer .columns .column.hovering {
   outline: 4px solid #81c784;
   outline-offset: -4px; }
 
@@ -1092,155 +1092,111 @@ body, html {
     .resource-editor .footer .btn-add {
       flex-shrink: 0; }
 
-.plan-container {
+.milestones-editor .milestones {
+  max-width: 900px;
+  margin: 0px auto;
   position: relative;
-  overflow: hidden; }
-  .plan-container .plan-editor {
+  padding-bottom: 8rem; }
+  .milestones-editor .milestones:before {
+    content: '';
+    display: block;
+    background-color: #E70D3B;
+    width: 2px;
+    height: 100%;
+    top: 0px;
+    left: 8rem;
     position: absolute;
-    height: calc(100% - 56px);
-    width: 100%; }
-    .plan-container .plan-editor .years, .plan-container .plan-editor .months {
-      line-height: 30px;
-      width: 100%;
-      display: flex; }
-      .plan-container .plan-editor .years button, .plan-container .plan-editor .months button {
-        background-color: transparent;
-        flex-grow: 1;
-        flex-basis: 0;
-        border: 0px;
-        padding: 0px;
-        text-transform: capitalize; }
-    .plan-container .plan-editor .undated {
-      position: absolute;
-      z-index: 99;
-      bottom: 0px;
-      right: 0px;
-      width: calc((100% / 7) + 20px);
-      border-top-left-radius: 5px;
-      padding: 10px;
-      background-color: #f44336; }
-      .plan-container .plan-editor .undated h4 {
-        margin-top: 0px;
-        font-weight: bold;
-        color: #fff; }
-    .plan-container .plan-editor .years button.hovering {
-      outline: 4px solid #81c784;
-      outline-offset: -4px; }
-    .plan-container .plan-editor .months button.hovering {
-      outline: 4px solid #81c784;
-      outline-offset: -4px; }
-    .plan-container .plan-editor .weekdays {
-      height: 30px;
-      width: 100%;
-      display: flex; }
-      .plan-container .plan-editor .weekdays .weekday {
-        flex-grow: 1;
-        flex-basis: 0;
-        height: 30px;
-        text-align: center;
-        line-height: 30px;
-        border-bottom: 1px solid #e0e0e0;
-        text-transform: capitalize; }
-    .plan-container .plan-editor .dates {
-      height: calc(100% - 95px);
-      left: 0px;
-      position: relative;
-      overflow-y: auto; }
-      .plan-container .plan-editor .dates .date-placeholder {
-        display: block;
-        width: calc(100% / 7);
-        height: calc(100% / 4);
-        float: left;
-        border-right: 1px solid #e0e0e0;
-        border-bottom: 1px solid #e0e0e0; }
-      .plan-container .plan-editor .dates .date {
-        display: block;
-        position: relative;
-        width: calc(100% / 7);
-        height: calc(100% / 4);
-        float: left;
-        border-right: 1px solid #e0e0e0;
-        border-bottom: 1px solid #e0e0e0; }
-        .plan-container .plan-editor .dates .date:hover .body > .btn {
-          display: block; }
-        .plan-container .plan-editor .dates .date.hovering {
-          outline: 4px solid #81c784;
-          outline-offset: -4px; }
-        .plan-container .plan-editor .dates .date .header {
-          padding: 5px; }
-          .plan-container .plan-editor .dates .date .header .datenumber {
-            font-weight: bold; }
-          .plan-container .plan-editor .dates .date .header .weekday {
-            color: #bdbdbd;
-            font-weight: bold;
-            margin-left: 5px; }
-          .plan-container .plan-editor .dates .date .header .weeknumber {
-            color: #bdbdbd;
-            float: right; }
-        .plan-container .plan-editor .dates .date .body > .btn {
-          display: none;
-          width: 100%; }
+    z-index: 50; }
 
-body > .plan-item-editor {
-  border: 1px solid #9e9e9e;
-  background-color: #fff;
-  padding: 15px;
-  border-radius: 5px;
-  width: 600px; }
-  body > .plan-item-editor .btn-close, body > .plan-item-editor .header, body > .plan-item-editor .body, body > .plan-item-editor .footer {
-    height: auto; }
-  body > .plan-item-editor .drag-handle {
-    display: none; }
-  body > .plan-item-editor input {
-    border-radius: 0px;
-    border: 1px solid #e0e0e0;
-    display: block;
-    line-height: 30px;
+.milestones-editor .btn-new-fixer {
+  position: fixed;
+  bottom: 1rem;
+  right: 0rem;
+  width: 100%; }
+  .milestones-editor .btn-new-fixer .btn-new-container {
+    padding: 0rem 1rem;
     width: 100%;
-    padding: 0px 5px; }
-  body > .plan-item-editor .btn-close {
-    float: right;
-    line-height: 0px; }
-  body > .plan-item-editor .header input {
-    width: 100%; }
-  body > .plan-item-editor .footer {
-    margin-top: 15px;
+    margin: 0px auto;
+    max-width: 900px;
     text-align: right; }
-    body > .plan-item-editor .footer .btn-remove {
-      padding-left: 0px;
-      padding-right: 0px;
-      float: left;
-      font-size: 16px; }
 
-.plan-container .plan-item-editor {
-  overflow: hidden;
-  padding: 0px;
-  width: 100%;
-  background-color: #424242;
-  color: #f5f5f5;
-  border-left: 0px;
-  border-right: 0px;
-  border-bottom: 0px;
-  border-radius: 0px; }
-  .plan-container .plan-item-editor.loading {
-    opacity: 0.5;
-    pointer-event: none; }
-  .plan-container .plan-item-editor .drag-handle {
-    display: block;
-    cursor: move;
-    padding: 5px 10px; }
-  .plan-container .plan-item-editor .btn-close, .plan-container .plan-item-editor .header, .plan-container .plan-item-editor .body, .plan-container .plan-item-editor .footer {
+.milestones-editor h2.year,
+.milestones-editor h4.month {
+  text-transform: uppercase;
+  color: #E70D3B;
+  padding: 2rem;
+  width: 8rem;
+  text-align: right;
+  margin: 0px; }
+
+.milestone-editor {
+  padding: 1.5rem;
+  position: relative;
+  cursor: pointer;
+  margin-left: 8rem; }
+  .milestone-editor:hover .btn-print {
+    display: block; }
+  .milestone-editor:hover, .milestone-editor.editing {
+    background-color: #e8e8e8; }
+  .milestone-editor .btn-print {
     display: none;
-    overflow: hidden;
-    height: 0px;
-    opacity: 0; }
-
-.plan-item-editor.closing .btn-close, .plan-item-editor.closing .header, .plan-item-editor.closing .body, .plan-item-editor.closing .footer, .plan-item-editor.opening .btn-close, .plan-item-editor.opening .header, .plan-item-editor.opening .body, .plan-item-editor.opening .footer {
-  opacity: 0; }
-
-.plan-item-editor .btn-close, .plan-item-editor .header, .plan-item-editor .body, .plan-item-editor .footer {
-  transition: opacity 0.25s ease;
-  opacity: 1; }
+    position: absolute;
+    left: -1rem;
+    top: 1.2rem;
+    z-index: 90;
+    width: 35px;
+    border-radius: 50%; }
+    .milestone-editor .btn-print .fa {
+      margin: 0px; }
+  .milestone-editor.editing {
+    cursor: auto; }
+    .milestone-editor.editing input {
+      margin-bottom: 1rem;
+      padding: 0rem 0.5rem; }
+    .milestone-editor.editing .buttons, .milestone-editor.editing .date-input {
+      display: block; }
+  .milestone-editor:before {
+    content: '';
+    border-radius: 50%;
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: #E70D3B;
+    display: block;
+    position: absolute;
+    left: -3px;
+    top: 33px; }
+  .milestone-editor .buttons {
+    display: none;
+    text-align: right; }
+  .milestone-editor h4 {
+    margin: 0rem; }
+  .milestone-editor .date-input {
+    display: none; }
+    .milestone-editor .date-input input {
+      width: auto;
+      display: inline;
+      padding: 0px;
+      padding-left: 15px;
+      text-align: center; }
+    .milestone-editor .date-input .separator {
+      opacity: 0.5;
+      margin: 0rem 0.5rem; }
+    .milestone-editor .date-input input[name="year"] {
+      width: 50px; }
+    .milestone-editor .date-input input[name="month"],
+    .milestone-editor .date-input input[name="day"] {
+      width: 34px; }
+  .milestone-editor input {
+    font-size: inherit;
+    width: 100%; }
+  .milestone-editor:not(.editing) input {
+    pointer-events: none;
+    padding: 0px;
+    background-color: transparent; }
+    .milestone-editor:not(.editing) input, .milestone-editor:not(.editing) input:focus {
+      box-shadow: none;
+      border: 0px;
+      outline: 0px; }
 
 .repository-editor {
   padding: 15px;
@@ -1478,22 +1434,22 @@ a {
     line-height: 27px;
     border: 0px; }
 
-.board-container.dragging .milestone-editor .columns .column.hovering {
+.board-container.dragging .milestone-viewer .columns .column.hovering {
   outline-color: #E70D3B; }
 
 .resource-editor input {
   line-height: 36px;
   height: 36px; }
 
-.milestone-editor > .header {
+.milestone-viewer > .header {
   border-bottom: 1px solid #cccccc; }
-  .milestone-editor > .header .btn-toggle .fa {
+  .milestone-viewer > .header .btn-toggle .fa {
     color: #888888; }
-  .milestone-editor > .header .stats .actions button {
+  .milestone-viewer > .header .stats .actions button {
     background-color: #E70D3B; }
-  .milestone-editor > .header .stats .fa {
+  .milestone-viewer > .header .stats .fa {
     color: #fff; }
-  .milestone-editor > .header .progress-bar {
+  .milestone-viewer > .header .progress-bar {
     background-color: #e8e8e8; }
 
 .issue-editor {
@@ -1584,25 +1540,6 @@ a {
       color: #fff; }
     .issue-editor .comments .comment a, .issue-editor .add-comment .comment a {
       color: #E70D3B; }
-
-.plan-container .plan-editor .years button.hovering, .plan-container .plan-editor .months button.hovering, .plan-container .plan-editor .dates .date.hovering {
-  outline-color: #E70D3B; }
-
-.plan-container .plan-item-editor {
-  background-color: #21303B; }
-  .plan-container .plan-item-editor .drag-handle {
-    padding: 0.5rem 1rem 0.9em 1em;
-    font-family: 'Bree Serif'; }
-
-body > .plan-item-editor {
-  border: 0px;
-  border-radius: 0px;
-  background-color: #21303B;
-  color: #fff; }
-  body > .plan-item-editor .body {
-    position: relative; }
-  body > .plan-item-editor .btn-close {
-    color: #fff; }
 
 /**
  * Widgets

@@ -177,6 +177,70 @@ class Milestone {
     }
 
     /**
+     * Gets remaining data
+     *
+     * @returns {Object} Data
+     */
+    getRemainingData() {
+        let data = {
+            issues: 0,
+            hours: 0
+        };
+
+        for(let issue of this.getIssues()) {
+            if(!issue.isClosed()) {
+                data.issues++;
+                data.hours += issue.getEstimatedHours();
+            }
+        }
+
+        return data;
+    }
+    
+    /**
+     * Gets a list of completed
+     */
+    getCompletedIssues() {
+        let issues = []; 
+        
+        for(let issue of this.getIssues()) {
+            if(issue.isClosed()) {
+                issues.push(issue);
+            }            
+        }
+
+        return issues;
+    }
+
+    /**
+     * Get percent complete
+     *
+     * @returns {Number} percent
+     */
+    getPercentComplete() {
+        let total = this.getIssues();
+        let completed = this.getCompletedIssues();
+        let percentage = 0;
+
+        let totalHours = 0;
+        let completedHours = 0;
+
+        for(let i in total) {
+            totalHours += total[i].getEstimatedHours();
+        }
+        
+        for(let i in completed) {
+             completedHours += completed[i].getEstimatedHours();
+        }
+
+        if(total.length > 0 && completed.length > 0) {
+            percentage = (completed.length / total.length) * 100;
+        }
+
+        return percentage;
+    }
+
+    /**
      * Gets remaining issues at day
      *
      * @param {Number} day

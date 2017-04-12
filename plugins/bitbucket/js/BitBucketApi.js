@@ -134,7 +134,10 @@ class BitBucketApi extends ApiHelper {
                             self.refresh()
                             .then(() => {
                                 getPage(page);
-                            });    
+                            })
+							.catch((e) => {
+								reject(e);
+							});    
                         
                         } else {
                             reject(new Error(xhr.responseText));

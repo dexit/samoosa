@@ -26,8 +26,8 @@ Router.route('/:user/:repository', () => {
     location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/board/kanban';
 });
 
-// Plan
-Router.route('/:user/:repository/plan/', () => {
+// Milestones
+Router.route('/:user/:repository/milestones/', () => {
     ApiHelper.checkConnection()
     .then(() => {
         return ApiHelper.getResources(true);
@@ -37,8 +37,8 @@ Router.route('/:user/:repository/plan/', () => {
 
         $('.app-container').append(
             _.div({class: 'workspace'},
-                _.div({class: 'workspace-content plan-container'},
-                    new PlanEditor().$element
+                _.div({class: 'workspace-content milestones-container'},
+                    new MilestonesEditor().$element
                 )
             )
         );
@@ -71,7 +71,7 @@ Router.route('/:user/:repository/board/:mode/:category', () => {
                 ),
                 _.div({class: 'workspace-content board-container ' + Router.params.mode},
                     _.each(window.resources.milestones, (i, milestone) => {
-                        return new MilestoneEditor({
+                        return new MilestoneViewer({
                             model: milestone,
                         }).$element;
                     })
@@ -79,25 +79,9 @@ Router.route('/:user/:repository/board/:mode/:category', () => {
             )
         );
         
-        // Sort milestones by end date
-        $('.app-container .board-container .milestone-editor').sort((a, b) => {
-            let aDate = new Date(a.getAttribute('data-end-date'));
-            let bDate = new Date(b.getAttribute('data-end-date'));
-
-            if(aDate < bDate) {
-                return -1;
-            }
-            
-            if(aDate > bDate) {
-                return 1;
-            }
-
-            return 0;
-        }).detach().appendTo('.app-container .board-container');
-
         // Append the unassigned items
         $('.app-container .board-container').append(
-            new MilestoneEditor({
+            new MilestoneViewer({
                 model: new Milestone({
                     title: 'Unassigned',
                     description: 'These issues have yet to be assigned to a milestone'

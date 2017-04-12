@@ -108,15 +108,15 @@
 	window.CategoryBar = __webpack_require__(72);
 	window.IssueEditor = __webpack_require__(74);
 	window.MilestoneEditor = __webpack_require__(76);
-	window.ResourceEditor = __webpack_require__(78);
-	window.PlanItemEditor = __webpack_require__(80);
-	window.PlanEditor = __webpack_require__(82);
-	window.RepositoryEditor = __webpack_require__(84);
-	window.FilterEditor = __webpack_require__(86);
-	window.BurnDownChart = __webpack_require__(88);
+	window.MilestoneViewer = __webpack_require__(77);
+	window.ResourceEditor = __webpack_require__(79);
+	window.MilestonesEditor = __webpack_require__(81);
+	window.RepositoryEditor = __webpack_require__(83);
+	window.FilterEditor = __webpack_require__(85);
+	window.BurnDownChart = __webpack_require__(87);
 
 	// Routes
-	__webpack_require__(90);
+	__webpack_require__(89);
 
 	// Title
 	$('head title').html((Router.params.repository ? Router.params.repository + ' - ' : '') + 'Samoosa');
@@ -9588,10 +9588,17 @@
 
 	'use strict';
 
-	// Get source
+	// Display error message
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+	window.displayError = function displayError(e) {
+	    alert(e.mesage);
+
+	    throw e;
+	};
+
+	// Get source
 	window.getSource = function getSource() {
 	    var source = localStorage.getItem('source');
 
@@ -10067,6 +10074,24 @@
 	                }
 	            }
 	        }
+
+	        /**
+	         * Updates the indices of every resource item
+	         *
+	         * @param {String} resource
+	         */
+
+	    }, {
+	        key: 'updateResourceIndices',
+	        value: function updateResourceIndices(resource) {
+	            for (var i in resources[resource]) {
+	                var r = resources[resource][i];
+
+	                if ((typeof r === 'undefined' ? 'undefined' : _typeof(r)) === 'object') {
+	                    r.index = i;
+	                }
+	            }
+	        }
 	    }, {
 	        key: 'sortResource',
 	        value: function sortResource(resource) {
@@ -10087,7 +10112,26 @@
 	                        return 0;
 	                    });
 	                    break;
+
+	                case 'milestones':
+	                    resources.milestones.sort(function (a, b) {
+	                        a = a.getEndDate() || 0;
+	                        b = b.getEndDate() || 0;
+
+	                        if (a < b) {
+	                            return -1;
+	                        }
+
+	                        if (a > b) {
+	                            return 1;
+	                        }
+
+	                        return 0;
+	                    });
+	                    break;
 	            }
+
+	            this.updateResourceIndices(resource);
 	        }
 	    }, {
 	        key: 'clear',
@@ -13648,7 +13692,11 @@
 	                    return this.getIssueColumns();
 
 	                case 'milestones':
-	                    return this.getMilestones();
+	                    return this.getMilestones().then(function () {
+	                        ResourceHelper.sortResource('milestones');
+
+	                        return Promise.resolve();
+	                    });
 
 	                case 'versions':
 	                    return this.getVersions();
@@ -13869,6 +13917,8 @@
 	                            if (self.shouldRefresh(xhr)) {
 	                                self.refresh().then(function () {
 	                                    getPage(page);
+	                                }).catch(function (e) {
+	                                    reject(e);
 	                                });
 	                            } else {
 	                                reject(new Error(xhr.responseText));
@@ -16066,6 +16116,121 @@
 	        }
 
 	        /**
+	         * Gets remaining data
+	         *
+	         * @returns {Object} Data
+	         */
+
+	    }, {
+	        key: 'getRemainingData',
+	        value: function getRemainingData() {
+	            var data = {
+	                issues: 0,
+	                hours: 0
+	            };
+
+	            var _iteratorNormalCompletion5 = true;
+	            var _didIteratorError5 = false;
+	            var _iteratorError5 = undefined;
+
+	            try {
+	                for (var _iterator5 = this.getIssues()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                    var issue = _step5.value;
+
+	                    if (!issue.isClosed()) {
+	                        data.issues++;
+	                        data.hours += issue.getEstimatedHours();
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError5 = true;
+	                _iteratorError5 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	                        _iterator5.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError5) {
+	                        throw _iteratorError5;
+	                    }
+	                }
+	            }
+
+	            return data;
+	        }
+
+	        /**
+	         * Gets a list of completed
+	         */
+
+	    }, {
+	        key: 'getCompletedIssues',
+	        value: function getCompletedIssues() {
+	            var issues = [];
+
+	            var _iteratorNormalCompletion6 = true;
+	            var _didIteratorError6 = false;
+	            var _iteratorError6 = undefined;
+
+	            try {
+	                for (var _iterator6 = this.getIssues()[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+	                    var issue = _step6.value;
+
+	                    if (issue.isClosed()) {
+	                        issues.push(issue);
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError6 = true;
+	                _iteratorError6 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
+	                        _iterator6.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError6) {
+	                        throw _iteratorError6;
+	                    }
+	                }
+	            }
+
+	            return issues;
+	        }
+
+	        /**
+	         * Get percent complete
+	         *
+	         * @returns {Number} percent
+	         */
+
+	    }, {
+	        key: 'getPercentComplete',
+	        value: function getPercentComplete() {
+	            var total = this.getIssues();
+	            var completed = this.getCompletedIssues();
+	            var percentage = 0;
+
+	            var totalHours = 0;
+	            var completedHours = 0;
+
+	            for (var i in total) {
+	                totalHours += total[i].getEstimatedHours();
+	            }
+
+	            for (var _i in completed) {
+	                completedHours += completed[_i].getEstimatedHours();
+	            }
+
+	            if (total.length > 0 && completed.length > 0) {
+	                percentage = completed.length / total.length * 100;
+	            }
+
+	            return percentage;
+	        }
+
+	        /**
 	         * Gets remaining issues at day
 	         *
 	         * @param {Number} day
@@ -16084,13 +16249,13 @@
 	                return issues;
 	            }
 
-	            var _iteratorNormalCompletion5 = true;
-	            var _didIteratorError5 = false;
-	            var _iteratorError5 = undefined;
+	            var _iteratorNormalCompletion7 = true;
+	            var _didIteratorError7 = false;
+	            var _iteratorError7 = undefined;
 
 	            try {
-	                for (var _iterator5 = this.getIssues()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	                    var issue = _step5.value;
+	                for (var _iterator7 = this.getIssues()[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+	                    var issue = _step7.value;
 
 	                    var closedDate = issue.getClosedDate();
 
@@ -16106,16 +16271,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError5 = true;
-	                _iteratorError5 = err;
+	                _didIteratorError7 = true;
+	                _iteratorError7 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
-	                        _iterator5.return();
+	                    if (!_iteratorNormalCompletion7 && _iterator7.return) {
+	                        _iterator7.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError5) {
-	                        throw _iteratorError5;
+	                    if (_didIteratorError7) {
+	                        throw _iteratorError7;
 	                    }
 	                }
 	            }
@@ -16136,27 +16301,27 @@
 	        value: function getRemainingEstimatedHoursAtDay(day) {
 	            var hours = 0;
 
-	            var _iteratorNormalCompletion6 = true;
-	            var _didIteratorError6 = false;
-	            var _iteratorError6 = undefined;
+	            var _iteratorNormalCompletion8 = true;
+	            var _didIteratorError8 = false;
+	            var _iteratorError8 = undefined;
 
 	            try {
-	                for (var _iterator6 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-	                    var issue = _step6.value;
+	                for (var _iterator8 = this.getRemainingIssuesAtDay(day)[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+	                    var issue = _step8.value;
 
 	                    hours += issue.getEstimatedHours();
 	                }
 	            } catch (err) {
-	                _didIteratorError6 = true;
-	                _iteratorError6 = err;
+	                _didIteratorError8 = true;
+	                _iteratorError8 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
-	                        _iterator6.return();
+	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
+	                        _iterator8.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError6) {
-	                        throw _iteratorError6;
+	                    if (_didIteratorError8) {
+	                        throw _iteratorError8;
 	                    }
 	                }
 	            }
@@ -16512,9 +16677,9 @@
 	            });
 
 	            links.push({
-	                title: 'Schedule',
-	                url: '/plan/',
-	                icon: 'calendar'
+	                title: 'Milestones',
+	                url: '/milestones/',
+	                icon: 'map-signs'
 	            });
 
 	            links.push({
@@ -17338,7 +17503,7 @@
 	                });
 
 	                // Column mouse hover events
-	                $('.milestone-editor .columns .column').on('mouseenter', function () {
+	                $('.milestone-viewer .columns .column').on('mouseenter', function () {
 	                    $(this).toggleClass('hovering', true);
 	                }).on('mouseleave', function () {
 	                    $(this).toggleClass('hovering', false);
@@ -17409,10 +17574,10 @@
 	            $element.removeAttr('style');
 
 	            // Place this element into the hovered column
-	            $('.milestone-editor .columns .column.hovering .body').first().prepend($element);
+	            $('.milestone-viewer .columns .column.hovering .body').first().prepend($element);
 
 	            // Unregister column mouse events and unset hovering state
-	            $('.milestone-editor .columns .column').off('mouseenter').off('mouseleave').toggleClass('hovering', false);
+	            $('.milestone-viewer .columns .column').off('mouseenter').off('mouseleave').toggleClass('hovering', false);
 
 	            // Update model data with new information based on DOM location
 	            $element.each(function (i) {
@@ -17425,7 +17590,7 @@
 	                        var view = _step.value;
 
 	                        if (this == view.$element[0]) {
-	                            view.model.milestone = view.$element.parents('.milestone-editor').attr('data-index');
+	                            view.model.milestone = view.$element.parents('.milestone-viewer').attr('data-index');
 	                            view.model.column = view.$element.parents('.column').attr('data-index');
 
 	                            // Trigger the sync event
@@ -18280,10 +18445,6 @@
 
 	'use strict';
 
-	/**
-	 * An editor for milestones, displaying issues in columns or rows
-	 */
-
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -18292,19 +18453,17 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var MilestoneEditor = function (_View) {
-	    _inherits(MilestoneEditor, _View);
+	var PlanItemEditor = function (_View) {
+	    _inherits(PlanItemEditor, _View);
 
-	    function MilestoneEditor(params) {
-	        _classCallCheck(this, MilestoneEditor);
+	    function PlanItemEditor(params) {
+	        _classCallCheck(this, PlanItemEditor);
 
-	        var _this = _possibleConstructorReturn(this, (MilestoneEditor.__proto__ || Object.getPrototypeOf(MilestoneEditor)).call(this, params));
+	        var _this = _possibleConstructorReturn(this, (PlanItemEditor.__proto__ || Object.getPrototypeOf(PlanItemEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(77);
+	        _this.template = __webpack_require__(90);
 
 	        _this.fetch();
-
-	        _this.updateProgress();
 	        return _this;
 	    }
 
@@ -18313,7 +18472,7 @@
 	     */
 
 
-	    _createClass(MilestoneEditor, [{
+	    _createClass(PlanItemEditor, [{
 	        key: 'onClickPrint',
 	        value: function onClickPrint() {
 	            var html = '';
@@ -18421,10 +18580,116 @@
 	        }
 
 	        /**
-	         * Event: Click new issue button
+	         * Event: Click save
 	         */
 
 	    }, {
+	        key: 'onClickSave',
+	        value: function onClickSave() {
+	            var _this2 = this;
+
+	            var year = this.$element.find('input[name="year"]').val();
+	            var month = this.$element.find('input[name="month"]').val();
+	            var day = this.$element.find('input[name="day"]').val();
+	            var dateString = year + '-' + month + '-' + day;
+
+	            // Update model data with new information based on DOM location
+	            this.model.title = this.$element.find('input[name="title"]').val();
+	            this.model.description = this.$element.find('input[name="description"]').val();
+
+	            if (dateString) {
+	                try {
+	                    var date = new Date(dateString);
+
+	                    this.model.endDate = date.toISOString();
+	                } catch (e) {
+	                    displayError(new Error(dateString + ' is an invalid date'));
+	                    return;
+	                }
+	            } else {
+	                this.model.endDate = null;
+	            }
+
+	            // Update DOM elements to match model
+	            this.$element.find('.drag-handle').text(this.model.title);
+
+	            // Start loading
+	            this.$element.toggleClass('loading', true);
+
+	            ResourceHelper.updateResource('milestones', this.model).then(function () {
+	                _this2.$element.toggleClass('loading', false);
+
+	                ViewHelper.get('MilestonesEditor').render();
+	                ViewHelper.get('MilestonesEditor').focus(_this2.model);
+	            });
+	        }
+
+	        /**
+	         * Event: Click delete button
+	         */
+
+	    }, {
+	        key: 'onClickDelete',
+	        value: function onClickDelete() {
+	            if (!confirm('Are you sure you want to delete the milestone "' + this.model.title + '"?')) {
+	                return;
+	            }
+
+	            spinner('Deleting milestone');
+
+	            ResourceHelper.removeResource('milestones', this.model.index).then(function () {
+	                ViewHelper.get('MilestonesEditor').render();
+
+	                $('.app-container').removeClass('disabled');
+
+	                spinner(false);
+	            });
+	        }
+	    }]);
+
+	    return PlanItemEditor;
+	}(View);
+
+	module.exports = PlanItemEditor;
+
+/***/ },
+/* 77 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/**
+	 * An editor for milestones, displaying issues in columns or rows
+	 */
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var MilestoneEditor = function (_View) {
+	    _inherits(MilestoneEditor, _View);
+
+	    function MilestoneEditor(params) {
+	        _classCallCheck(this, MilestoneEditor);
+
+	        var _this = _possibleConstructorReturn(this, (MilestoneEditor.__proto__ || Object.getPrototypeOf(MilestoneEditor)).call(this, params));
+
+	        _this.template = __webpack_require__(78);
+
+	        _this.fetch();
+	        return _this;
+	    }
+
+	    /**
+	     * Event: Click new issue button
+	     */
+
+
+	    _createClass(MilestoneEditor, [{
 	        key: 'onClickNewIssue',
 	        value: function onClickNewIssue() {
 	            var _this2 = this;
@@ -18448,8 +18713,6 @@
 	                _this2.$element.find('.column[data-index="' + newIssue.column + '"] .btn-new-issue').before($issue);
 
 	                editor.onClickToggle();
-
-	                _this2.updateProgress();
 
 	                spinner(false);
 	            });
@@ -18475,201 +18738,6 @@
 	        }
 
 	        /**
-	         * Gets remaining days
-	         *
-	         * @returns {Number} days
-	         */
-
-	    }, {
-	        key: 'getRemainingDays',
-	        value: function getRemainingDays() {
-	            var endDate = this.model.endDate;
-	            var nowDate = new Date();
-
-	            if (!endDate) {
-	                return 0;
-	            }
-
-	            if (endDate.constructor === String) {
-	                endDate = new Date(endDate);
-	            }
-
-	            return Math.round((endDate - nowDate) / (1000 * 60 * 60 * 24)) + 1;
-	        }
-
-	        /**
-	         * Get percent complete
-	         *
-	         * @returns {Number} percent
-	         */
-
-	    }, {
-	        key: 'getPercentComplete',
-	        value: function getPercentComplete() {
-	            var total = this.getIssues();
-	            var completed = this.getCompletedIssues();
-	            var percentage = 0;
-
-	            var totalHours = 0;
-	            var completedHours = 0;
-
-	            for (var i in total) {
-	                totalHours += total[i].getEstimatedHours();
-	            }
-
-	            for (var _i in completed) {
-	                completedHours += completed[_i].getEstimatedHours();
-	            }
-
-	            if (total.length > 0 && completed.length > 0) {
-	                percentage = completed.length / total.length * 100;
-	            }
-
-	            return percentage;
-	        }
-
-	        /**
-	         * Update progress indicators
-	         */
-
-	    }, {
-	        key: 'updateProgress',
-	        value: function updateProgress() {
-	            var total = this.getIssues();
-	            var completed = this.getCompletedIssues();
-	            var percentage = 0;
-
-	            var totalHours = 0;
-	            var completedHours = 0;
-
-	            var _iteratorNormalCompletion2 = true;
-	            var _didIteratorError2 = false;
-	            var _iteratorError2 = undefined;
-
-	            try {
-	                for (var _iterator2 = total[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                    var issue = _step2.value;
-
-	                    totalHours += issue.getEstimatedHours();
-	                }
-	            } catch (err) {
-	                _didIteratorError2 = true;
-	                _iteratorError2 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                        _iterator2.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError2) {
-	                        throw _iteratorError2;
-	                    }
-	                }
-	            }
-
-	            var _iteratorNormalCompletion3 = true;
-	            var _didIteratorError3 = false;
-	            var _iteratorError3 = undefined;
-
-	            try {
-	                for (var _iterator3 = completed[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                    var _issue = _step3.value;
-
-	                    completedHours += _issue.getEstimatedHours();
-	                }
-	            } catch (err) {
-	                _didIteratorError3 = true;
-	                _iteratorError3 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	                        _iterator3.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError3) {
-	                        throw _iteratorError3;
-	                    }
-	                }
-	            }
-
-	            if (total.length > 0 && completed.length > 0) {
-	                percentage = completed.length / total.length * 100;
-	            }
-
-	            this.$element.find('.header .progress-bar').css({
-	                width: percentage + '%'
-	            });
-
-	            this.$element.find('.header .progress-amounts .total').html(total.length);
-	            this.$element.find('.header .progress-hours .total').html(totalHours + 'h');
-
-	            this.$element.find('.header .progress-amounts .remaining').html(total.length - completed.length);
-	            this.$element.find('.header .progress-hours .remaining').html(totalHours - completedHours + 'h');
-
-	            // Due date
-	            if (this.model.endDate) {
-	                var $dueDate = this.$element.find('.header .due-date');
-
-	                if ($dueDate.length < 1) {
-	                    $dueDate = _.span({ class: 'due-date' }).prependTo(this.$element.find('.header .stats'));
-	                }
-
-	                _.append($dueDate.empty(), _.span({ class: 'fa fa-calendar' }), _.span({ class: 'date' }, prettyDate(this.model.endDate)),
-	                // No time left
-	                _.if(this.getRemainingDays() < 1 && this.getPercentComplete() < 100, _.span({ class: 'remaining warn-red' }, this.getRemainingDays() + 'd')),
-	                // Little time left
-	                _.if(this.getRemainingDays() >= 1 && this.getRemainingDays() < 3 && this.getPercentComplete() < 100, _.span({ class: 'remaining warn-yellow' }, this.getRemainingDays() + 'd')),
-	                // More time left
-	                _.if(this.getRemainingDays() >= 3 && this.getPercentComplete() < 100, _.span({ class: 'remaining' }, this.getRemainingDays() + 'd')),
-	                // Complete
-	                _.if(this.getPercentComplete() == 100, _.span({ class: 'remaining ok fa fa-check' })));
-	            }
-	        }
-
-	        /**
-	         * Gets a list of completed
-	         */
-
-	    }, {
-	        key: 'getCompletedIssues',
-	        value: function getCompletedIssues() {
-	            var issues = [];
-
-	            var _iteratorNormalCompletion4 = true;
-	            var _didIteratorError4 = false;
-	            var _iteratorError4 = undefined;
-
-	            try {
-	                for (var _iterator4 = window.resources.issues[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	                    var issue = _step4.value;
-
-	                    if (!issue) {
-	                        continue;
-	                    }
-
-	                    if (issue.milestone == this.model.index && issue.isClosed()) {
-	                        issues.push(issue);
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError4 = true;
-	                _iteratorError4 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-	                        _iterator4.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError4) {
-	                        throw _iteratorError4;
-	                    }
-	                }
-	            }
-
-	            return issues;
-	        }
-
-	        /**
 	         * Gets a list of all issues
 	         */
 
@@ -18678,13 +18746,13 @@
 	        value: function getIssues() {
 	            var issues = [];
 
-	            var _iteratorNormalCompletion5 = true;
-	            var _didIteratorError5 = false;
-	            var _iteratorError5 = undefined;
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
 
 	            try {
-	                for (var _iterator5 = window.resources.issues[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	                    var issue = _step5.value;
+	                for (var _iterator = window.resources.issues[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var issue = _step.value;
 
 	                    if (!issue) {
 	                        continue;
@@ -18695,16 +18763,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError5 = true;
-	                _iteratorError5 = err;
+	                _didIteratorError = true;
+	                _iteratorError = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
-	                        _iterator5.return();
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError5) {
-	                        throw _iteratorError5;
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
 	                    }
 	                }
 	            }
@@ -18719,7 +18787,7 @@
 	module.exports = MilestoneEditor;
 
 /***/ },
-/* 77 */
+/* 78 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18729,15 +18797,9 @@
 
 	    var state = SettingsHelper.get('milestone', this.model.index) || '';
 
-	    if (!state && this.getPercentComplete() >= 100) {
-	        state = 'collapsed';
-	    }
-
-	    return _.div({ class: 'milestone-editor ' + state, 'data-index': this.model.index, 'data-end-date': this.model.endDate }, _.div({ class: 'header' }, _.div({ class: 'progress-bar', style: 'width: ' + this.getPercentComplete() + '%' }), _.div({ class: 'title' }, _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa fa-chevron-right' }), _.h4(this.model.title), _.p(this.model.description)).click(function () {
+	    return _.div({ class: 'milestone-viewer ' + state, 'data-index': this.model.index, 'data-end-date': this.model.endDate }, _.div({ class: 'header' }, _.div({ class: 'title' }, _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa fa-chevron-right' }), _.h4(this.model.title), _.p(this.model.description)).click(function () {
 	        _this.onClickToggle();
-	    })), _.div({ class: 'stats' }, _.span({ class: 'progress-amounts' }, _.span({ class: 'fa fa-exclamation-circle' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })), _.span({ class: 'progress-hours' }, _.span({ class: 'fa fa-clock-o' }), _.span({ class: 'total' }), _.span({ class: 'remaining' })), _.div({ class: 'actions' }, _.button({ class: 'btn-print' }, _.span({ class: 'fa fa-print' })).click(function () {
-	        _this.onClickPrint();
-	    })))), _.div({ class: 'columns' }, _.each(window.resources.issueColumns, function (columnIndex, column) {
+	    }))), _.div({ class: 'columns' }, _.each(window.resources.issueColumns, function (columnIndex, column) {
 	        return _.div({ class: 'column', 'data-index': columnIndex }, _.div({ class: 'header' }, _.h4(column)), _.div({ class: 'body' }, _.each(_this.model.getIssues(), function (issueIndex, issue) {
 	            if (issue.column == columnIndex && issue.milestone == _this.model.index) {
 	                var $issueEditor = new IssueEditor({
@@ -18753,7 +18815,7 @@
 	};
 
 /***/ },
-/* 78 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18774,7 +18836,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ResourceEditor.__proto__ || Object.getPrototypeOf(ResourceEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(79);
+	        _this.template = __webpack_require__(80);
 
 	        _this.fetch();
 	        return _this;
@@ -18848,7 +18910,7 @@
 	module.exports = ResourceEditor;
 
 /***/ },
-/* 79 */
+/* 80 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18884,408 +18946,7 @@
 	};
 
 /***/ },
-/* 80 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var PlanItemEditor = function (_View) {
-	    _inherits(PlanItemEditor, _View);
-
-	    function PlanItemEditor(params) {
-	        _classCallCheck(this, PlanItemEditor);
-
-	        var _this = _possibleConstructorReturn(this, (PlanItemEditor.__proto__ || Object.getPrototypeOf(PlanItemEditor)).call(this, params));
-
-	        _this.template = __webpack_require__(81);
-
-	        _this.fetch();
-	        return _this;
-	    }
-
-	    /**
-	     * Opens this milestone as a dialog
-	     */
-
-
-	    _createClass(PlanItemEditor, [{
-	        key: 'openDialog',
-	        value: function openDialog() {
-	            var _this2 = this;
-
-	            $('.app-container').addClass('disabled');
-
-	            var prev = {
-	                x: this.$element.offset().left,
-	                y: this.$element.offset().top,
-	                w: this.$element.width(),
-	                h: this.$element.height(),
-	                $parent: this.$element.parent()
-	            };
-
-	            this.positionBuffer = prev;
-
-	            $('body').append(this.$element);
-
-	            this.$element.css({
-	                position: 'absolute',
-	                left: prev.x,
-	                top: prev.y,
-	                width: prev.w,
-	                height: prev.h,
-	                transition: 'all 0.5s ease',
-	                overflow: 'hidden'
-	            });
-
-	            this.$element.toggleClass('opening', true);
-
-	            setTimeout(function () {
-	                _this2.$element.removeAttr('style');
-	                _this2.$element.css({
-	                    position: 'absolute',
-	                    left: '50%',
-	                    top: '100px',
-	                    transform: 'translateX(-50%)',
-	                    transition: 'all 0.5s ease'
-	                });
-	            }, 1);
-
-	            setTimeout(function () {
-	                _this2.$element.toggleClass('opening', false);
-	            }, 550);
-	        }
-
-	        /**
-	         * Event: Change
-	         */
-
-	    }, {
-	        key: 'onChange',
-	        value: function onChange() {
-	            var _this3 = this;
-
-	            var dateString = this.$element.parents('.date').attr('data-date');
-	            var unixDate = parseInt(dateString);
-
-	            // Update model data with new information based on DOM location
-	            this.model.title = this.$element.find('.header input').val();
-	            this.model.description = this.$element.find('.body input').val();
-
-	            if (dateString) {
-	                var date = new Date(unixDate);
-
-	                this.model.endDate = date.toISOString();
-	            }
-
-	            // Update DOM elements to match model
-	            this.$element.find('.drag-handle').text(this.model.title);
-
-	            // Start loading
-	            this.$element.toggleClass('loading', true);
-
-	            ResourceHelper.updateResource('milestones', this.model).then(function () {
-	                _this3.$element.toggleClass('loading', false);
-	            });
-	        }
-
-	        /**
-	         * Event: Click delete button
-	         */
-
-	    }, {
-	        key: 'onClickDelete',
-	        value: function onClickDelete() {
-	            if (!confirm('Are you sure you want to delete the milestone "' + this.model.title + '"?')) {
-	                return;
-	            }
-
-	            spinner('Deleting milestone');
-
-	            ResourceHelper.removeResource('milestones', this.model.index).then(function () {
-	                ViewHelper.removeAll('PlanItemEditor');
-	                ViewHelper.get('PlanEditor').render();
-
-	                $('.app-container').removeClass('disabled');
-
-	                spinner(false);
-	            });
-	        }
-
-	        /**
-	         * Event: Click close button
-	         */
-
-	    }, {
-	        key: 'onClickClose',
-	        value: function onClickClose() {
-	            var _this4 = this;
-
-	            var prev = this.positionBuffer;
-
-	            this.$element.removeAttr('style');
-	            this.$element.toggleClass('closing', true);
-	            this.$element.css({
-	                position: 'absolute',
-	                left: prev.x,
-	                top: prev.y,
-	                width: prev.w,
-	                height: prev.h,
-	                transition: 'all 0.5s ease',
-	                overflow: 'hidden'
-	            });
-
-	            setTimeout(function () {
-	                prev.$parent.prepend(_this4.$element);
-	                _this4.$element.removeAttr('style');
-	                _this4.$element.toggleClass('closing', false);
-	            }, 550);
-
-	            $('.app-container').removeClass('disabled');
-	        }
-
-	        /**
-	         * Event: Click OK button
-	         */
-
-	    }, {
-	        key: 'onClickOK',
-	        value: function onClickOK() {
-	            this.onChange();
-
-	            this.onClickClose();
-	        }
-
-	        /**
-	         * Event: Release the dragging handle
-	         */
-
-	    }, {
-	        key: 'onReleaseDragHandle',
-	        value: function onReleaseDragHandle(e) {
-	            // Unregister mouse events
-	            $(document).off('mouseup').off('mousemove');
-
-	            // Unset temporary classes and styling
-	            $('.plan-container').toggleClass('dragging', false);
-	            this.$element.removeAttr('style');
-	            this.$element.find('button, input').removeAttr('style');
-
-	            this.beingDragged = false;
-
-	            // Find new target element
-	            var $target = $('.hovering').first();
-
-	            // Unregister hover mouse events and unset hovering state
-	            this.unsetHoverEvents();
-
-	            // If the dragging event lasted less than 100 ms, open dialog
-	            if (Date.now() - this.prevClick < 100) {
-	                this.openDialog();
-	            } else if ($target.length > 0) {
-	                // If the element was dropped onto a date
-	                if ($target.hasClass('date')) {
-	                    // Place this element into the hovered date container
-	                    var $oldParent = this.$element.parent();
-	                    var $newParent = $target.find('.body');
-
-	                    if ($newParent[0] != $oldParent[0]) {
-	                        $newParent.prepend(this.$element);
-
-	                        // Trigger the change event
-	                        this.onChange();
-	                    }
-
-	                    // Special logic for tabs
-	                } else {
-	                    var endDate = this.model.endDate;
-
-	                    // Init a date from the current tabs if no date is present
-	                    if (!endDate) {
-	                        endDate = new Date('1 ' + $('.tab.month.active').text() + ' ' + $('.tab.year.active').text());
-
-	                        // Make sure the date is not a string 
-	                    } else if (endDate.constructor === String) {
-	                        endDate = new Date(this.model.endDate);
-	                    }
-
-	                    // If the element was dropped onto a month tab
-	                    if ($target.hasClass('month')) {
-	                        endDate = new Date('1 ' + $target.text() + ' ' + endDate.getFullYear());
-
-	                        // If the element was dropped onto a year tab
-	                    } else if ($target.hasClass('year')) {
-	                        endDate = new Date('1 ' + $('.tab.month.active').text() + ' ' + $target.text());
-	                    }
-
-	                    // Convert date to ISO string
-	                    this.model.endDate = endDate.toISOString();
-
-	                    // Hide element
-	                    this.$element.hide();
-
-	                    ResourceHelper.updateResource('milestones', this.model).then(function () {
-	                        // Follow the tab destination
-	                        $target.click();
-	                    });
-	                }
-
-	                // Update the undated box
-	                ViewHelper.get('PlanEditor').updateUndatedBox();
-	            }
-	        }
-
-	        /**
-	         * Event: Click the dragging handle
-	         */
-
-	    }, {
-	        key: 'onClickDragHandle',
-	        value: function onClickDragHandle(e) {
-	            var _this5 = this;
-
-	            // Cache the previous click
-	            this.prevClick = Date.now();
-
-	            // Set class on board container
-	            $('.plan-container').toggleClass('dragging', true);
-
-	            // Find the offset parent
-	            var $offsetParent = this.$element.offsetParent();
-	            var offsetDOM = $offsetParent.offset();
-
-	            if ($offsetParent.length < 1) {
-	                $offsetParent = this.$element.parents('.undated');
-	                offsetDOM = $offsetParent.offset();
-
-	                offsetDOM.top += this.$element.height();
-	            }
-
-	            // Apply temporary CSS properties
-	            var bounds = this.$element[0].getBoundingClientRect();
-
-	            this.$element.css({
-	                top: bounds.top - offsetDOM.top,
-	                left: bounds.left - offsetDOM.left,
-	                width: bounds.width,
-	                height: bounds.height,
-	                'pointer-events': 'none',
-	                'z-index': 999
-	            });
-
-	            this.$element.find('button, input').css({
-	                'pointer-events': 'none'
-	            });
-
-	            this.beingDragged = true;
-
-	            // Buffer the offset between mouse cursor and element position
-	            var offset = {
-	                x: bounds.left - e.pageX - offsetDOM.left,
-	                y: bounds.top - e.pageY - offsetDOM.top
-	            };
-
-	            // Add absolute positioning afterwards to allow getting proper offset
-	            this.$element.css({
-	                position: 'absolute'
-	            });
-
-	            // Buffer previous pointer location
-	            var prev = {
-	                x: e.pageX,
-	                y: e.pageY
-	            };
-
-	            // Document pointer movement logic
-	            $(document).off('mousemove').on('mousemove', function (e) {
-	                // Get current pointer location
-	                var current = {
-	                    x: e.pageX,
-	                    y: e.pageY
-	                };
-
-	                // Apply new CSS positioning values
-	                _this5.$element.css({
-	                    top: current.y + offset.y,
-	                    left: current.x + offset.x
-	                });
-
-	                // Replace previous position buffer data
-	                prev = current;
-	            });
-
-	            // Document pointer release mouse button logic
-	            $(document).off('mouseup').on('mouseup', function (e) {
-	                _this5.onReleaseDragHandle(e);
-	            });
-
-	            // Date mouse hover events
-	            this.setHoverEvents();
-	        }
-
-	        /**
-	         * Sets all hover events
-	         */
-
-	    }, {
-	        key: 'setHoverEvents',
-	        value: function setHoverEvents() {
-	            $('.plan-editor .dates .date, .tab.year, .tab.month').on('mouseenter', function () {
-	                $(this).toggleClass('hovering', true);
-
-	                if ($(this).hasClass('tab') && ($(this).hasClass('month') || $(this).hasClass('year'))) {
-	                    $(this).click();
-	                }
-	            }).on('mouseleave', function () {
-	                $(this).toggleClass('hovering', false);
-	            });
-	        }
-
-	        /**
-	         * Unsets all hover events
-	         */
-
-	    }, {
-	        key: 'unsetHoverEvents',
-	        value: function unsetHoverEvents() {
-	            $('.plan-editor .dates .date, .tab.year, .tab.month').off('mouseenter').off('mouseleave').toggleClass('hovering', false);
-	        }
-	    }]);
-
-	    return PlanItemEditor;
-	}(View);
-
-	module.exports = PlanItemEditor;
-
-/***/ },
 /* 81 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	module.exports = function render() {
-	    var _this = this;
-
-	    return _.div({ class: 'plan-item-editor', 'data-date': this.model.endDate }, _.div({ class: 'drag-handle' }, this.model.title).on('mousedown', function (e) {
-	        _this.onClickDragHandle(e);
-	    }), _.button({ class: 'btn-close btn-transparent' }, _.span({ class: 'fa fa-remove' })).click(function () {
-	        _this.onClickClose();
-	    }), _.div({ class: 'header' }, _.h4('Title'), _.input({ class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title })), _.div({ class: 'body' }, _.h4('Description'), _.input({ class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description })), _.div({ class: 'footer' }, _.button({ class: 'btn btn-remove' }, _.span({ class: 'fa fa-trash' })).click(function () {
-	        _this.onClickDelete();
-	    }), _.button({ class: 'btn' }, 'Apply').click(function () {
-	        _this.onClickOK();
-	    })));
-	};
-
-/***/ },
-/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19298,208 +18959,63 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var PlanEditor = function (_View) {
-	    _inherits(PlanEditor, _View);
+	var MilestonesEditor = function (_View) {
+	    _inherits(MilestonesEditor, _View);
 
-	    function PlanEditor(params) {
-	        _classCallCheck(this, PlanEditor);
+	    function MilestonesEditor(params) {
+	        _classCallCheck(this, MilestonesEditor);
 
-	        var _this = _possibleConstructorReturn(this, (PlanEditor.__proto__ || Object.getPrototypeOf(PlanEditor)).call(this, params));
+	        var _this = _possibleConstructorReturn(this, (MilestonesEditor.__proto__ || Object.getPrototypeOf(MilestonesEditor)).call(this, params));
 
-	        _this.currentYear = new Date().getFullYear();
-	        _this.currentMonth = new Date().getMonth() + 1;
-
-	        if (_this.currentMonth.length == 1) {
-	            _this.currentMonth = '0' + _this.currentMonth;
-	        }
-
-	        _this.template = __webpack_require__(83);
+	        _this.template = __webpack_require__(82);
 
 	        _this.init();
+
+	        // Set click event
+	        _this.$element.on('click', function (e) {
+	            $('.milestone-editor').removeClass('editing');
+
+	            var $milestone = $(e.target);
+
+	            if (!$milestone.hasClass('milestone-editor')) {
+	                $milestone = $milestone.parents('.milestone-editor');
+	            }
+
+	            if ($milestone.length > 0) {
+	                $milestone.addClass('editing');
+	            }
+	        });
 	        return _this;
 	    }
 
 	    /**
-	     * Finds the PlanItemEditor instance being dragged
+	     * Focuses a milestone
 	     *
-	     * @return {PlanItemEditor} Dragged item
+	     * @param {Object} milestone
 	     */
 
 
-	    _createClass(PlanEditor, [{
-	        key: 'findDraggedItem',
-	        value: function findDraggedItem() {
-	            var _iteratorNormalCompletion = true;
-	            var _didIteratorError = false;
-	            var _iteratorError = undefined;
+	    _createClass(MilestonesEditor, [{
+	        key: 'focus',
+	        value: function focus(milestone) {
+	            $('.milestone-editor').each(function (i, element) {
+	                var isFocus = element.dataset.id == milestone.id;
 
-	            try {
-	                for (var _iterator = ViewHelper.getAll('PlanItemEditor')[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                    var item = _step.value;
+	                element.classList.toggle('editing', isFocus);
 
-	                    if (item.beingDragged) {
-	                        return item;
-	                    }
+	                if (isFocus) {
+	                    element.scrollIntoView();
 	                }
-	            } catch (err) {
-	                _didIteratorError = true;
-	                _iteratorError = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion && _iterator.return) {
-	                        _iterator.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError) {
-	                        throw _iteratorError;
-	                    }
-	                }
-	            }
-
-	            return null;
+	            });
 	        }
 
 	        /**
-	         * Event: Click year tab
-	         *
-	         * @param {String} year
+	         * Event: Click add milestone
 	         */
 
-	    }, {
-	        key: 'onClickYear',
-	        value: function onClickYear(year) {
-	            this.currentYear = parseInt(year);
-
-	            var draggedItem = this.findDraggedItem();
-
-	            if (draggedItem) {
-	                $('body').append(draggedItem.$element);
-	            }
-
-	            this.render();
-
-	            if (draggedItem) {
-	                this.$element.find('.dates').append(draggedItem.$element);
-
-	                draggedItem.unsetHoverEvents();
-	                draggedItem.setHoverEvents();
-	            }
-	        }
-
-	        /**
-	         * Event: Click month tab
-	         *
-	         * @param {String} month
-	         */
-
-	    }, {
-	        key: 'onClickMonth',
-	        value: function onClickMonth(month) {
-	            this.currentMonth = parseInt(month);
-
-	            var draggedItem = this.findDraggedItem();
-
-	            if (draggedItem) {
-	                $('body').append(draggedItem.$element);
-	            }
-
-	            this.render();
-
-	            if (draggedItem) {
-	                this.$element.find('.dates').append(draggedItem.$element);
-
-	                draggedItem.unsetHoverEvents();
-	                draggedItem.setHoverEvents();
-	            }
-	        }
-	    }, {
-	        key: 'updateUndatedBox',
-	        value: function updateUndatedBox() {
-	            if (this.getUndatedMilestones().length < 1) {
-	                $('.plan-editor .undated').remove();
-	            }
-	        }
-	    }, {
-	        key: 'getUndatedMilestones',
-	        value: function getUndatedMilestones() {
-	            var milestones = [];
-
-	            var _iteratorNormalCompletion2 = true;
-	            var _didIteratorError2 = false;
-	            var _iteratorError2 = undefined;
-
-	            try {
-	                for (var _iterator2 = resources.milestones[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                    var milestone = _step2.value;
-
-	                    if (!milestone) {
-	                        continue;
-	                    }
-
-	                    if (!milestone.getEndDate()) {
-	                        milestones.push(milestone);
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError2 = true;
-	                _iteratorError2 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                        _iterator2.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError2) {
-	                        throw _iteratorError2;
-	                    }
-	                }
-	            }
-
-	            return milestones;
-	        }
-	    }, {
-	        key: 'getYears',
-	        value: function getYears() {
-	            var years = [];
-
-	            for (var i = new Date().getFullYear() - 2; i < new Date().getFullYear() + 4; i++) {
-	                years.push({
-	                    number: i
-	                });
-	            }
-
-	            return years;
-	        }
-	    }, {
-	        key: 'getMonths',
-	        value: function getMonths() {
-	            var months = [];
-
-	            for (var i = 1; i <= 12; i++) {
-	                var num = i.toString();
-
-	                if (num.length == 1) {
-	                    num = '0' + num;
-	                }
-
-	                months.push({
-	                    name: new Date('2016-' + num + '-01').getMonthName(),
-	                    number: i
-	                });
-	            }
-
-	            return months;
-	        }
-	    }, {
-	        key: 'getWeekDays',
-	        value: function getWeekDays() {
-	            var weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-
-	            return weekdays;
-	        }
 	    }, {
 	        key: 'onClickAddMilestone',
-	        value: function onClickAddMilestone(date) {
+	        value: function onClickAddMilestone() {
 	            var _this2 = this;
 
 	            if (ApiHelper.isSpectating()) {
@@ -19510,215 +19026,68 @@
 
 	            ResourceHelper.addResource('milestones', new Milestone({
 	                title: 'New milestone',
-	                endDate: date.toISOString()
+	                description: '',
+	                endDate: new Date().toISOString()
 	            })).then(function (newMilestone) {
 	                _this2.render();
 
+	                _this2.focus(newMilestone);
+
 	                spinner(false);
-
-	                var _iteratorNormalCompletion3 = true;
-	                var _didIteratorError3 = false;
-	                var _iteratorError3 = undefined;
-
-	                try {
-	                    for (var _iterator3 = ViewHelper.getAll('PlanItemEditor')[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                        var planItemView = _step3.value;
-
-	                        if (planItemView.model && planItemView.model.id == newMilestone.id) {
-	                            planItemView.openDialog();
-	                            break;
-	                        }
-	                    }
-	                } catch (err) {
-	                    _didIteratorError3 = true;
-	                    _iteratorError3 = err;
-	                } finally {
-	                    try {
-	                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	                            _iterator3.return();
-	                        }
-	                    } finally {
-	                        if (_didIteratorError3) {
-	                            throw _iteratorError3;
-	                        }
-	                    }
-	                }
 	            });
-	        }
-	    }, {
-	        key: 'getWeeks',
-	        value: function getWeeks() {
-	            var weeks = [];
-	            var firstDay = new Date(this.currentYear, this.currentMonth, 1);
-	            var firstWeek = firstDay.getWeek();
-
-	            var _iteratorNormalCompletion4 = true;
-	            var _didIteratorError4 = false;
-	            var _iteratorError4 = undefined;
-
-	            try {
-	                for (var _iterator4 = this.getDates()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	                    var date = _step4.value;
-
-	                    if (weeks.indexOf(date.getWeek()) < 0) {
-	                        weeks.push(date.getWeek());
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError4 = true;
-	                _iteratorError4 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-	                        _iterator4.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError4) {
-	                        throw _iteratorError4;
-	                    }
-	                }
-	            }
-
-	            return weeks;
-	        }
-	    }, {
-	        key: 'getDates',
-	        value: function getDates() {
-	            var year = this.currentYear;
-	            var month = this.currentMonth;
-	            var dates = [];
-
-	            for (var i = 1; i <= new Date(year, month, 0).getDate(); i++) {
-	                var day = i;
-	                var date = new Date();
-
-	                date.setYear(year);
-	                date.setMonth(month - 1);
-	                date.setDate(day);
-
-	                dates.push(date);
-	            }
-
-	            return dates;
-	        }
-	    }, {
-	        key: 'getDate',
-	        value: function getDate(week, weekday) {
-	            var _iteratorNormalCompletion5 = true;
-	            var _didIteratorError5 = false;
-	            var _iteratorError5 = undefined;
-
-	            try {
-	                for (var _iterator5 = this.getDates()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	                    var date = _step5.value;
-
-	                    if (date.getWeek() == week && date.getISODay() == weekday) {
-	                        return date;
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError5 = true;
-	                _iteratorError5 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
-	                        _iterator5.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError5) {
-	                        throw _iteratorError5;
-	                    }
-	                }
-	            }
-	        }
-	    }, {
-	        key: 'iterateDates',
-	        value: function iterateDates(renderFunction) {
-	            var weekdays = this.getWeekDays();
-	            var weeks = this.getWeeks();
-
-	            var renders = [];
-
-	            for (var y = 0; y < 6; y++) {
-	                for (var x = 0; x < 7; x++) {
-	                    var weekday = weekdays[x];
-	                    var week = weeks[y];
-
-	                    if (week && weekday) {
-	                        var date = this.getDate(week, x);
-
-	                        renders.push(renderFunction(date));
-	                    } else {
-	                        renders.push(renderFunction());
-	                    }
-	                }
-	            }
-
-	            return renders;
 	        }
 	    }]);
 
-	    return PlanEditor;
+	    return MilestonesEditor;
 	}(View);
 
-	module.exports = PlanEditor;
+	module.exports = MilestonesEditor;
 
 /***/ },
-/* 83 */
+/* 82 */
 /***/ function(module, exports) {
 
 	'use strict';
 
+	var MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
 	module.exports = function render() {
 	    var _this = this;
 
-	    var draggedItem = this.findDraggedItem();
+	    var lastYear = void 0;
+	    var lastMonth = void 0;
 
-	    return _.div({ class: 'plan-editor' }, _.div({ class: 'tabbed-container' }, _.div({ class: 'tabs years' }, _.each(this.getYears(), function (i, year) {
-	        return _.button({ class: 'tab year' + (_this.currentYear == year.number ? ' active' : '') }, year.number).click(function () {
-	            _this.onClickYear(year.number);
-	        });
-	    })), _.div({ class: 'tabs months' }, _.each(this.getMonths(), function (i, month) {
-	        return _.button({ class: 'tab month' + (_this.currentMonth == month.number ? ' active' : '') }, month.name).click(function () {
-	            _this.onClickMonth(month.number);
-	        });
-	    }))), _.div({ class: 'weekdays' }, _.each(this.getWeekDays(), function (i, weekday) {
-	        return _.div({ class: 'weekday' }, weekday);
-	    })), _.div({ class: 'dates' }, this.iterateDates(function (date) {
-	        if (!date) {
-	            return _.div({ class: 'date-placeholder' });
-	        } else {
-	            return _.div({ class: 'date', 'data-date': date.getTime() }, _.div({ class: 'header' }, _.span({ class: 'datenumber' }, date.getDate()), _.span({ class: 'weeknumber' }, 'w ' + date.getWeek())), _.div({ class: 'body' }, _.each(resources.milestones, function (i, milestone) {
-	                if (draggedItem && draggedItem.model == milestone) {
-	                    return;
-	                }
+	    return _.div({ class: 'milestones-editor' }, _.div({ class: 'milestones' }, _.each(resources.milestones, function (i, milestone) {
+	        if (milestone.getEndDate()) {
+	            var dueDate = milestone.getEndDate();
 
-	                if (milestone.getEndDate()) {
-	                    var dueDate = milestone.getEndDate();
+	            var $milestone = new MilestoneEditor({
+	                model: milestone
+	            }).$element;
 
-	                    dueDate.setHours(0);
-	                    dueDate.setMinutes(0);
-	                    dueDate.setSeconds(0);
+	            var elements = [$milestone];
 
-	                    if (dueDate.getFullYear() == date.getFullYear() && dueDate.getMonth() == date.getMonth() && dueDate.getDate() == date.getDate()) {
-	                        return new PlanItemEditor({
-	                            model: milestone
-	                        }).$element;
-	                    }
-	                }
-	            }), _.button({ class: 'btn btn-round' }, 'New milestone', _.span({ class: 'fa fa-plus' })).click(function () {
-	                _this.onClickAddMilestone(date);
-	            })));
+	            if (dueDate.getMonth() != lastMonth) {
+	                lastMonth = dueDate.getMonth();
+
+	                elements.unshift(_.h4({ class: 'month' }, MONTHS[lastMonth]));
+	            }
+
+	            if (dueDate.getFullYear() != lastYear) {
+	                lastYear = dueDate.getFullYear();
+
+	                elements.unshift(_.h2({ class: 'year' }, lastYear));
+	            }
+
+	            return elements;
 	        }
-	    })), _.if(this.getUndatedMilestones().length > 0, _.div({ class: 'undated' }, _.h4('Undated'), _.each(this.getUndatedMilestones(), function (i, milestone) {
-	        return new PlanItemEditor({
-	            model: milestone
-	        }).$element;
+	    })), _.div({ class: 'btn-new-fixer' }, _.div({ class: 'btn-new-container' }, _.button({ class: 'btn btn-new' }, 'New milestone', _.span({ class: 'fa fa-plus' })).click(function () {
+	        _this.onClickAddMilestone();
 	    }))));
 	};
 
 /***/ },
-/* 84 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19739,7 +19108,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (RepositoryEditor.__proto__ || Object.getPrototypeOf(RepositoryEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(85);
+	        _this.template = __webpack_require__(84);
 
 	        _this.fetch();
 	        return _this;
@@ -19769,7 +19138,7 @@
 	module.exports = RepositoryEditor;
 
 /***/ },
-/* 85 */
+/* 84 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19783,7 +19152,7 @@
 	};
 
 /***/ },
-/* 86 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19806,7 +19175,7 @@
 
 	        _this.MAX_FILTERS = 5;
 
-	        _this.template = __webpack_require__(87);
+	        _this.template = __webpack_require__(86);
 
 	        var defaultColumn = '';
 
@@ -20034,7 +19403,7 @@
 	module.exports = FilterEditor;
 
 /***/ },
-/* 87 */
+/* 86 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -20123,7 +19492,7 @@
 	};
 
 /***/ },
-/* 88 */
+/* 87 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20148,7 +19517,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (BurnDownChart.__proto__ || Object.getPrototypeOf(BurnDownChart)).call(this, params));
 
-	        _this.template = __webpack_require__(89);
+	        _this.template = __webpack_require__(88);
 
 	        // Find most relevant milestone
 	        var nearest = void 0;
@@ -20325,7 +19694,7 @@
 	module.exports = BurnDownChart;
 
 /***/ },
-/* 89 */
+/* 88 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -20429,7 +19798,7 @@
 	};
 
 /***/ },
-/* 90 */
+/* 89 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -20453,14 +19822,14 @@
 	    location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/board/kanban';
 	});
 
-	// Plan
-	Router.route('/:user/:repository/plan/', function () {
+	// Milestones
+	Router.route('/:user/:repository/milestones/', function () {
 	    ApiHelper.checkConnection().then(function () {
 	        return ApiHelper.getResources(true);
 	    }).then(function () {
 	        $('.workspace').remove();
 
-	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-content plan-container' }, new PlanEditor().$element)));
+	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-content milestones-container' }, new MilestonesEditor().$element)));
 
 	        navbar.slideIn();
 	        spinner(false);
@@ -20480,29 +19849,13 @@
 
 	        // Append all milestones
 	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-panel' }, new FilterEditor().$element, new CategoryBar().$element), _.div({ class: 'workspace-content board-container ' + Router.params.mode }, _.each(window.resources.milestones, function (i, milestone) {
-	            return new MilestoneEditor({
+	            return new MilestoneViewer({
 	                model: milestone
 	            }).$element;
 	        }))));
 
-	        // Sort milestones by end date
-	        $('.app-container .board-container .milestone-editor').sort(function (a, b) {
-	            var aDate = new Date(a.getAttribute('data-end-date'));
-	            var bDate = new Date(b.getAttribute('data-end-date'));
-
-	            if (aDate < bDate) {
-	                return -1;
-	            }
-
-	            if (aDate > bDate) {
-	                return 1;
-	            }
-
-	            return 0;
-	        }).detach().appendTo('.app-container .board-container');
-
 	        // Append the unassigned items
-	        $('.app-container .board-container').append(new MilestoneEditor({
+	        $('.app-container .board-container').append(new MilestoneViewer({
 	            model: new Milestone({
 	                title: 'Unassigned',
 	                description: 'These issues have yet to be assigned to a milestone'
@@ -20591,6 +19944,31 @@
 	// Navbar
 	var navbar = new Navbar();
 	$('.app-container').html(navbar.$element);
+
+/***/ },
+/* 90 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = function render() {
+	    var _this = this;
+
+	    var date = this.model.getEndDate();
+	    var year = date ? date.getFullYear() : new Date().getFullYear();
+	    var month = date ? date.getMonth() + 1 : new Date().getMonth() + 1;
+	    var day = date ? date.getDate() : new Date().getDate();
+
+	    var remainingData = this.model.getRemainingData();
+
+	    return _.div({ class: 'milestone-editor', 'data-id': this.model.id }, _.button({ class: 'btn btn-print' }, _.span({ class: 'fa fa-print' })).on('click', function () {
+	        _this.onClickPrint();
+	    }), _.h4(_.input({ name: 'title', class: 'selectable edit', placeholder: 'Type milestone title here', type: 'text', value: this.model.title })), _.input({ name: 'description', class: 'selectable', placeholder: 'Type milestone description here', type: 'text', value: this.model.description }), _.div({ class: 'data' }, _.if(remainingData.issues > 0, _.span(remainingData.issues + ' issues left (' + remainingData.hours + ' hours)'))), _.div({ class: 'date-input' }, _.input({ placeholder: 'YYYY', name: 'year', type: 'number', value: year }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'MM', name: 'month', min: 1, max: 12, type: 'number', value: month }), _.span({ class: 'separator' }, '/'), _.input({ placeholder: 'DD', name: 'day', min: 1, max: 31, type: 'number', value: day })), _.div({ class: 'buttons' }, _.button({ class: 'btn btn-primary' }, 'Remove').click(function () {
+	        _this.onClickDelete();
+	    }), _.button({ class: 'btn btn-primary' }, 'Save').click(function () {
+	        _this.onClickSave();
+	    })));
+	};
 
 /***/ }
 /******/ ]);

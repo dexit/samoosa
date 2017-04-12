@@ -39,9 +39,9 @@ class Navbar extends View {
         });
 
         links.push({
-            title: 'Schedule',
-            url: '/plan/',
-            icon: 'calendar'
+            title: 'Milestones',
+            url: '/milestones/',
+            icon: 'map-signs'
         });
         
         links.push({

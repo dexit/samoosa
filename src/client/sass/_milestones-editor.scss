@@ -1,0 +1,45 @@
+.milestones-editor {
+    .milestones {
+        max-width: 900px;
+        margin: 0px auto;
+        position: relative;
+        padding-bottom: 8rem;
+        
+        &:before {
+            content: '';
+            display: block;
+            background-color: $pink-medium;
+            width: 2px;
+            height: 100%;
+            top: 0px;
+            left: 8rem;
+            position: absolute;
+            z-index: 50;
+        }
+    }
+
+    .btn-new-fixer {
+        position: fixed;
+        bottom: 1rem;
+        right: 0rem;
+        width: 100%;
+
+        .btn-new-container {
+            padding: 0rem 1rem;
+            width: 100%;
+            margin: 0px auto;
+            max-width: 900px;
+            text-align: right;
+        }
+    }
+
+    h2.year,
+    h4.month {
+        text-transform: uppercase;
+        color: $pink-medium;
+        padding: 2rem;
+        width: 8rem; 
+        text-align: right;
+        margin: 0px;
+    }
+}

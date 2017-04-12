@@ -1,5 +1,12 @@
 'use strict';
 
+// Display error message
+window.displayError = function displayError(e) {
+    alert(e.mesage);
+
+    throw e;
+}
+
 // Get source
 window.getSource = function getSource() {
     let source = localStorage.getItem('source');

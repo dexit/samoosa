@@ -10614,6 +10614,7 @@
 	      ctx.lineWidth = lineWidth;
 	      ctx.strokeStyle = strokeColor;
 	      ctx.stroke();
+	      ctx.strokeStyle = null;
 	    }
 
 	    /**
@@ -10632,6 +10633,7 @@
 	      ctx.arc(x, y, radius, 0, 2 * Math.PI);
 	      ctx.fillStyle = fillColor;
 	      ctx.fill();
+	      ctx.fillStyle = null;
 	    }
 
 	    /**
@@ -19064,7 +19066,7 @@
 	        return _.option({ value: milestone.index }, milestone.title);
 	    })).val(milestone ? milestone.index : 0).change(function (e) {
 	        _this.onChangeMilestonePicker($(e.target).val());
-	    }))), _.div({ class: 'meta' }, _.h4('Total days'), _.p((totalDays + 1).toString()), _.h4('Total hours'), _.p(totalHours.toString()), _.h4('Milestone start'), _.p(milestoneStart ? milestoneStart.toString() : '(invalid)'), _.h4('Milestone end'), _.p(milestoneEnd ? milestoneEnd.toString() : '(invalid)')), _.h4('Chart'), _.div({ class: 'graph-container' }, _.div({ class: 'graph-y-axis-labels' }, _.label({ style: 'top: 0px' }, Math.round(totalHours) + ' h'), _.label({ style: 'top: 380px' }, '0 h')), _.div({ class: 'graph-canvas' }, $canvas, drawGrid(), drawHours(optimalHours, 'blue'), drawHours(actualHours, 'red'), _.div({ class: 'graph-x-axis-labels' }, _.loop(totalDays, function (i) {
+	    }))), _.div({ class: 'meta' }, _.h4('Total days'), _.p((totalDays + 1).toString()), _.h4('Total hours'), _.p(totalHours.toString()), _.h4('Milestone start'), _.p(milestoneStart ? milestoneStart.toString() : '(invalid)'), _.h4('Milestone end'), _.p(milestoneEnd ? milestoneEnd.toString() : '(invalid)')), _.h4('Chart'), _.div({ class: 'graph-container' }, _.div({ class: 'graph-y-axis-labels' }, _.label({ style: 'top: 0px' }, Math.round(totalHours) + ' h'), _.label({ style: 'top: 380px' }, '0 h')), _.div({ class: 'graph-canvas' }, $canvas, drawGrid(), drawHours(optimalHours, '#21303b'), drawHours(actualHours, '#e70d3b'), _.div({ class: 'graph-x-axis-labels' }, _.loop(totalDays, function (i) {
 	        i++;
 
 	        if (i % 5 !== 0 && i != 1 && i != totalDays + 1) {

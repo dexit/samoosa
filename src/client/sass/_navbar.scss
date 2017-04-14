@@ -5,6 +5,8 @@
     border: 0px;
     background-color: $teal-dark;
     color: $white;
+    
+    @include background('secondary');
 
     &.out {
         &.about-panel {
@@ -173,6 +175,8 @@
         transition-delay: 0s;
         z-index: 1000;
         max-width: 100%;
+    
+        @include background('secondary', -56px);
 
         >.content {
             height: 100%;

@@ -183,7 +183,10 @@ body, html {
   display: flex;
   height: 100%;
   flex-direction: column;
-  background-color: #21303B; }
+  background-color: #21303B;
+  background-image: url("/public/img/bg-secondary.jpg");
+  background-attachment: fixed;
+  background-position: 0px 0px; }
   .app-container.disabled {
     pointer-events: none;
     position: fixed;
@@ -878,7 +881,10 @@ body, html {
   border-radius: 0px;
   border: 0px;
   background-color: #21303B;
-  color: #fff; }
+  color: #fff;
+  background-image: url("/public/img/bg-secondary.jpg");
+  background-attachment: fixed;
+  background-position: 0px 0px; }
   .navbar.out.about-panel .obscure {
     overflow-y: auto; }
     .navbar.out.about-panel .obscure .content {
@@ -979,7 +985,10 @@ body, html {
     transition: width 0.25s ease, max-width 0.25s ease;
     transition-delay: 0s;
     z-index: 1000;
-    max-width: 100%; }
+    max-width: 100%;
+    background-image: url("/public/img/bg-secondary.jpg");
+    background-attachment: fixed;
+    background-position: 0px -56px; }
     .navbar .obscure > .content {
       height: 100%;
       top: 0px;
@@ -1469,7 +1478,10 @@ a {
  */
 .workspace-content.logo {
   background-color: #21303B;
-  position: relative; }
+  position: relative;
+  background-image: url("/public/img/bg-secondary.jpg");
+  background-attachment: fixed;
+  background-position: 0px -56px; }
   .workspace-content.logo img {
     max-width: 200px;
     position: absolute;

@@ -109,8 +109,8 @@ module.exports = function render() {
             _.div({class: 'graph-canvas'},
                 $canvas,
                 drawGrid(),
-                drawHours(optimalHours, 'blue'),
-                drawHours(actualHours, 'red'),
+                drawHours(optimalHours, '#21303b'),
+                drawHours(actualHours, '#e70d3b'),
                 _.div({class: 'graph-x-axis-labels'},
                     _.loop(totalDays, (i) => {
                         i++;

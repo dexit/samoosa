@@ -20,3 +20,8 @@ $black: #000;
 
 $white: #fff;
 
+@mixin background($variant, $top: 0px) {
+    background-image: url('/public/img/bg-#{$variant}.jpg');
+    background-attachment: fixed;
+    background-position: 0px $top;
+}

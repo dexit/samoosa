@@ -80,6 +80,8 @@ body, html {
     flex-direction: column;
     background-color: $teal-dark;
 
+    @include background('secondary');
+
     &.disabled {
         pointer-events: none;
         position: fixed;

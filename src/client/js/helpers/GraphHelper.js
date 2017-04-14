@@ -18,6 +18,7 @@ class GraphHelper {
        ctx.lineWidth = lineWidth;
        ctx.strokeStyle = strokeColor;
        ctx.stroke();
+       ctx.strokeStyle = null;
     }
 
     /**
@@ -30,6 +31,7 @@ class GraphHelper {
         ctx.arc(x, y, radius, 0, 2 * Math.PI);
         ctx.fillStyle = fillColor;
         ctx.fill();
+        ctx.fillStyle = null;
     }
 
     /**

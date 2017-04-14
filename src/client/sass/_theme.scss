@@ -164,6 +164,8 @@ a {
     background-color: $teal-dark;
     position: relative;
 
+    @include background('secondary', -56px);
+
     img {
         max-width: 200px;
         position: absolute;

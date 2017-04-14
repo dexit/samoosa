@@ -18694,36 +18694,23 @@
 	module.exports = function render() {
 	    var _this = this;
 
-	    var issueKeys = Object.keys(new Issue().getBakedValues());
+	    var resourceDictionary = {
+	        assignee: resources.collaborators,
+	        column: resources.issueColumns,
+	        milestone: resources.milestones,
+	        priority: ISSUE_PRIORITIES,
+	        type: ISSUE_TYPES,
+	        version: resources.versions
+	    };
 
 	    return _.div({ class: 'filter-editor' }, _.button({ class: 'btn-toggle', 'data-filter-amount': this.model.length.toString() }, 'Filters', _.span({ class: 'filter-indicator' }, this.model.length.toString())).click(function () {
 	        _this.onClickToggle();
 	    }), _.div({ class: 'filters-container' }, _.div({ class: 'filters' }, _.each(this.model, function (i, filter) {
 	        var resourceKey = filter.key;
-
-	        // Change assignee to collaborator
-	        if (resourceKey == 'assignee') {
-	            resourceKey = 'collaborator';
-	        }
-
-	        // Append 's' for plural
-	        resourceKey += 's';
-
-	        // Correct grammar
-	        resourceKey = resourceKey.replace('ys', 'ies');
-
-	        var resource = resources[resourceKey];
-
-	        // If we didn't find the resource, it's likely that we just need to capitalise it and prepend 'issue'
-	        // For example: 'type' should be 'issueType' when referring to the resource
-	        if (!resource) {
-	            resourceKey = 'issue' + resourceKey.substring(0, 1).toUpperCase() + resourceKey.substring(1);
-
-	            resource = resources[resourceKey];
-	        }
+	        var resource = resourceDictionary[resourceKey];
 
 	        var $valueSelect = void 0;
-	        var $filter = _.div({ class: 'filter' }, _.div({ class: 'select-container key' }, _.select({}, _.each(issueKeys, function (i, key) {
+	        var $filter = _.div({ class: 'filter' }, _.div({ class: 'select-container key' }, _.select({}, _.each(resourceDictionary, function (key) {
 	            return _.option({
 	                value: key,
 	                selected: key == filter.key
@@ -18740,6 +18727,14 @@
 
 	            _this.onChange(i);
 	        })), _.div({ class: 'select-container value', style: 'min-width: ' + ((filter.value || '').length * 10 + 20) + 'px' }, _.select({}, _.each(resource, function (i, value) {
+	            // We are looping an enum, swap the index and value
+	            if (isNaN(i)) {
+	                var idx = value;
+
+	                value = i;
+	                i = idx;
+	            }
+
 	            var valueName = value;
 
 	            if (value.title) {
@@ -19102,7 +19097,7 @@
 
 	// Repository
 	Router.route('/:user/:repository', function () {
-	    location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/board/kanban';
+	    location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/milestones';
 	});
 
 	// Milestones

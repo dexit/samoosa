@@ -5,6 +5,11 @@
     margin-left: 8rem;
     transition: height 0.3s ease, background 0.3s ease;
 
+    @media($mobile) {
+        margin-left: 2rem;
+        padding: 1rem 1rem 1rem 2rem;
+    }
+
     &.overdue {
         .issues .remaining {
             position: relative;
@@ -81,6 +86,11 @@
         position: absolute;
         bottom: 1rem;
         right: 1rem;
+
+        @media($mobile) {
+            position: static;
+            margin-top: 1rem;
+        }
     }
 
     h4 {
@@ -89,7 +99,8 @@
 
     .date-input {
         display: none;
-        width: 23rem;
+        max-width: 23rem;
+        width: 100%;
 
         input {
             width: auto;
@@ -98,6 +109,10 @@
             padding-left: 15px;
             text-align: center;
             margin-bottom: 0px;
+
+            @media($mobile) {
+                padding: 0px;
+            }
         }
 
         .separator {
@@ -150,6 +165,10 @@
 
         label {
             flex-basis: 8rem;
+
+            @media($mobile) {
+                display: none;
+            }
         }
     }
 }

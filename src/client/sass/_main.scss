@@ -113,6 +113,10 @@ body, html {
         .workspace-panel {
             flex-shrink: 0;
             position: relative;
+
+            @media($mobile) {
+                display: none;
+            }
         }
     }
 }
@@ -227,6 +231,7 @@ body, html {
             font-weight: bold;
             text-transform: uppercase;
             margin-left: 0.5rem;
+            white-space: nowrap;
         }
 
         .spinner-icon {

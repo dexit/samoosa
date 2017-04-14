@@ -15,6 +15,10 @@
             left: 8rem;
             position: absolute;
             z-index: 50;
+
+            @media($mobile) {
+                left: 2rem;
+            }
         }
     }
 
@@ -41,5 +45,10 @@
         width: 8rem; 
         text-align: right;
         margin: 0px;
+
+        @media($mobile) {
+            width: 2rem;
+            padding: 0.5rem 0rem 0.5rem 4rem;
+        }
     }
 }

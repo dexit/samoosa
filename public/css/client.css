@@ -208,6 +208,9 @@ body, html {
     .app-container .workspace .workspace-panel {
       flex-shrink: 0;
       position: relative; }
+      @media (max-width: 767px) {
+        .app-container .workspace .workspace-panel {
+          display: none; } }
 
 /**
  * Generic tabs
@@ -291,7 +294,8 @@ body, html {
       line-height: 32px;
       font-weight: bold;
       text-transform: uppercase;
-      margin-left: 0.5rem; }
+      margin-left: 0.5rem;
+      white-space: nowrap; }
     .spinner-backdrop .spinner-container .spinner-icon {
       display: block;
       text-align: center;
@@ -857,7 +861,8 @@ body, html {
   display: block; }
   .board-container.list .milestone-viewer:not(.collapsed) .columns .column {
     border: 0px;
-    width: 600px;
+    width: 100%;
+    max-width: 600px;
     margin-left: auto;
     margin-right: auto; }
     .board-container.list .milestone-viewer:not(.collapsed) .columns .column:last-of-type {
@@ -1003,6 +1008,9 @@ body, html {
     text-align: center;
     position: relative;
     background-color: transparent; }
+    @media (max-width: 767px) {
+      .navbar .buttons button[title="Kanban"], .navbar .buttons button[title="Settings"], .navbar .buttons button[title="Analytics"], .navbar .buttons button.btn-logo {
+        display: none; } }
     .navbar .buttons button.btn-logo {
       background-image: url("/public/svg/logo-light.svg");
       background-size: 25px 25px;
@@ -1107,6 +1115,9 @@ body, html {
     left: 8rem;
     position: absolute;
     z-index: 50; }
+    @media (max-width: 767px) {
+      .milestones-editor .milestones:before {
+        left: 2rem; } }
 
 .milestones-editor .btn-new-fixer {
   position: fixed;
@@ -1130,6 +1141,13 @@ body, html {
   width: 8rem;
   text-align: right;
   margin: 0px; }
+  @media (max-width: 767px) {
+    .milestones-editor h2.year,
+    .milestones-editor h4.month,
+    .milestones-editor .milestone-editor:not(.editing) input.month[name="title"], .milestone-editor:not(.editing)
+    .milestones-editor input.month[name="title"] {
+      width: 2rem;
+      padding: 0.5rem 0rem 0.5rem 4rem; } }
 
 .milestone-editor {
   padding: 2rem 1rem 2rem 2rem;
@@ -1137,6 +1155,10 @@ body, html {
   cursor: pointer;
   margin-left: 8rem;
   transition: height 0.3s ease, background 0.3s ease; }
+  @media (max-width: 767px) {
+    .milestone-editor {
+      margin-left: 2rem;
+      padding: 1rem 1rem 1rem 2rem; } }
   .milestone-editor.overdue .issues .remaining {
     position: relative; }
     .milestone-editor.overdue .issues .remaining:before {
@@ -1185,11 +1207,16 @@ body, html {
     position: absolute;
     bottom: 1rem;
     right: 1rem; }
+    @media (max-width: 767px) {
+      .milestone-editor .buttons {
+        position: static;
+        margin-top: 1rem; } }
   .milestone-editor h4, .milestone-editor:not(.editing) input[name="title"] {
     margin: 0rem; }
   .milestone-editor .date-input {
     display: none;
-    width: 23rem; }
+    max-width: 23rem;
+    width: 100%; }
     .milestone-editor .date-input input {
       width: auto;
       display: inline;
@@ -1197,6 +1224,9 @@ body, html {
       padding-left: 15px;
       text-align: center;
       margin-bottom: 0px; }
+      @media (max-width: 767px) {
+        .milestone-editor .date-input input {
+          padding: 0px; } }
     .milestone-editor .date-input .separator {
       opacity: 0.5;
       margin: 0rem 0.5rem; }
@@ -1225,6 +1255,9 @@ body, html {
       flex-grow: 1; }
     .milestone-editor .input-group label {
       flex-basis: 8rem; }
+      @media (max-width: 767px) {
+        .milestone-editor .input-group label {
+          display: none; } }
 
 .repository-editor {
   padding: 15px;

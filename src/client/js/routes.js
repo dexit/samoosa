@@ -23,7 +23,7 @@ Router.route('/', () => {
 
 // Repository
 Router.route('/:user/:repository', () => {
-    location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/board/kanban';
+    location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/milestones';
 });
 
 // Milestones

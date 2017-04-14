@@ -210,7 +210,16 @@
             text-align: center;
             position: relative;
             background-color: transparent;
-        
+            
+            @media($mobile) {
+                &[title="Kanban"],
+                &[title="Settings"],
+                &[title="Analytics"],
+                &.btn-logo {
+                    display: none;
+                }
+            }
+
             &.btn-logo {
                 background-image: url('/public/svg/logo-light.svg');
                 background-size: 25px 25px;

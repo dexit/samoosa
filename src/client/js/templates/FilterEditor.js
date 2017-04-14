@@ -1,7 +1,14 @@
 'use strict';
 
 module.exports = function render() {
-    let issueKeys = Object.keys(new Issue().getBakedValues());
+    let resourceDictionary = {
+        assignee: resources.collaborators,
+        column: resources.issueColumns,
+        milestone: resources.milestones,
+        priority: ISSUE_PRIORITIES,
+        type: ISSUE_TYPES,
+        version: resources.versions
+    };
 
     return _.div({class: 'filter-editor'},
         _.button({class: 'btn-toggle', 'data-filter-amount': this.model.length.toString()},
@@ -14,33 +21,13 @@ module.exports = function render() {
             _.div({class: 'filters'},
                 _.each(this.model, (i, filter) => {
                     let resourceKey = filter.key;
-                  
-                    // Change assignee to collaborator
-                    if(resourceKey == 'assignee') {
-                        resourceKey = 'collaborator';
-                    }
-
-                    // Append 's' for plural
-                    resourceKey += 's';
-                    
-                    // Correct grammar
-                    resourceKey = resourceKey.replace('ys', 'ies');
-
-                    let resource = resources[resourceKey];
-
-                    // If we didn't find the resource, it's likely that we just need to capitalise it and prepend 'issue'
-                    // For example: 'type' should be 'issueType' when referring to the resource
-                    if(!resource) {
-                        resourceKey = 'issue' + resourceKey.substring(0, 1).toUpperCase() + resourceKey.substring(1);
-
-                        resource = resources[resourceKey];
-                    }
+                    let resource = resourceDictionary[resourceKey];
 
                     let $valueSelect;
                     let $filter = _.div({class: 'filter'},
                         _.div({class: 'select-container key'},
                             _.select({},
-                                _.each(issueKeys, (i, key) => {
+                                _.each(resourceDictionary, (key) => {
                                     return _.option({
                                         value: key,
                                         selected: key == filter.key
@@ -67,6 +54,14 @@ module.exports = function render() {
                         _.div({class: 'select-container value', style: 'min-width: ' + (((filter.value || '').length * 10) + 20) + 'px'},
                             _.select({},
                                 _.each(resource, (i, value) => {
+                                    // We are looping an enum, swap the index and value
+                                    if(isNaN(i)) {
+                                        let idx = value;
+
+                                        value = i;
+                                        i = idx;
+                                    }
+
                                     let valueName = value;
 
                                     if(value.title) {

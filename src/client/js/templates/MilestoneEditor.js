@@ -32,7 +32,7 @@ module.exports = function render() {
         ),
         _.if(remainingIssues.length > 0,
             _.div({class: 'issues'},
-                _.h6({class: 'remaining'}, remainingIssues.length + ' issues left (' + remainingHours + ' hours)'),
+                _.h6({class: 'remaining'}, remainingIssues.length + ' issue' + (remainingIssues.length > 1 ? 's' : '') + ' left (' + remainingHours + ' hours)'),
                 _.ul({class: 'important'},
                     _.each(remainingIssues, (i, issue) => {
                         return _.li(issue.title);

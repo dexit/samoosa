@@ -943,6 +943,23 @@ body, html {
         padding: 15px 15px 0px 15px;
         height: calc(100% - 30px);
         overflow-y: auto; }
+        .navbar.out.repository-list .obscure > .content .repository-list-items > h4, .navbar.out.repository-list .obscure > .content .milestone-editor:not(.editing) .repository-list-items > input[name="title"], .milestone-editor:not(.editing) .navbar.out.repository-list .obscure > .content .repository-list-items > input[name="title"] {
+          text-align: center;
+          text-transform: uppercase;
+          position: relative;
+          margin-bottom: 1rem; }
+          .navbar.out.repository-list .obscure > .content .repository-list-items > h4:before, .navbar.out.repository-list .obscure > .content .milestone-editor:not(.editing) .repository-list-items > input[name="title"]:before, .milestone-editor:not(.editing) .navbar.out.repository-list .obscure > .content .repository-list-items > input[name="title"]:before, .navbar.out.repository-list .obscure > .content .repository-list-items > h4:after, .navbar.out.repository-list .obscure > .content .milestone-editor:not(.editing) .repository-list-items > input[name="title"]:after, .milestone-editor:not(.editing) .navbar.out.repository-list .obscure > .content .repository-list-items > input[name="title"]:after {
+            display: block;
+            content: '';
+            height: 1px;
+            width: 40%;
+            top: calc(50% - 0.5px);
+            background-color: #fff;
+            position: absolute; }
+          .navbar.out.repository-list .obscure > .content .repository-list-items > h4:before, .navbar.out.repository-list .obscure > .content .milestone-editor:not(.editing) .repository-list-items > input[name="title"]:before, .milestone-editor:not(.editing) .navbar.out.repository-list .obscure > .content .repository-list-items > input[name="title"]:before {
+            left: 0px; }
+          .navbar.out.repository-list .obscure > .content .repository-list-items > h4:after, .navbar.out.repository-list .obscure > .content .milestone-editor:not(.editing) .repository-list-items > input[name="title"]:after, .milestone-editor:not(.editing) .navbar.out.repository-list .obscure > .content .repository-list-items > input[name="title"]:after {
+            right: 0px; }
   .navbar.out .backdrop {
     background-color: rgba(255, 255, 255, 0.25);
     display: block;

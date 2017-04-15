@@ -33,6 +33,8 @@ Router.route('/:user/:repository/milestones/', () => {
         return ApiHelper.getResources(true);
     })
     .then(() => {
+        SettingsHelper.addToLatestRepositories(Router.params.user, Router.params.repository);
+
         $('.workspace').remove();
 
         $('.app-container').append(
@@ -60,6 +62,8 @@ Router.route('/:user/:repository/board/:mode/:team', () => {
         return ApiHelper.getResources(true);
     })
     .then(() => {
+        SettingsHelper.addToLatestRepositories(Router.params.user, Router.params.repository);
+
         $('.workspace').remove();
 
         // Append all milestones
@@ -102,6 +106,8 @@ Router.route('/:user/:repository/analytics/', () => {
         return ApiHelper.getResources(true);
     })
     .then(() => {
+        SettingsHelper.addToLatestRepositories(Router.params.user, Router.params.repository);
+
         $('.workspace').remove();
 
         $('.app-container').append(
@@ -150,6 +156,8 @@ Router.route('/:user/:repository/settings/:resource', () => {
         return ApiHelper.getResources(true);
     })
     .then(() => {
+        SettingsHelper.addToLatestRepositories(Router.params.user, Router.params.repository);
+
         $('.workspace').remove();
 
         let canEdit = (name) => {

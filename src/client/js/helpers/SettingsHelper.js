@@ -69,6 +69,48 @@ class SettingsHelper {
 
         return result;
     }
+
+    /**
+     * Adds a repository to the "latest" setting
+     *
+     * @param {String} user
+     * @param {String} repo
+     */
+    static addToLatestRepositories(user, repo) {
+        let latest = SettingsHelper.getLatestRepositories();
+
+        // The repo was already in the "latest" list
+        if(latest.indexOf(user + '/' + repo) > -1) { return; }
+
+        latest.unshift(user + '/' + repo);
+
+        // If there is more than 3 repos in the list, remove the last one
+        if(latest.length > 3) {
+            latest.splice(-1, 1);
+        }
+
+        SettingsHelper.set('repositories', 'latest', latest.join(':'));
+    }
+    
+    /**
+     * Clears the latest repositories
+     */
+    static clearLatestRepositories() {
+        return SettingsHelper.set('repositories', 'latest', '');
+    }
+
+    /**
+     * Gets an array of the latest repositories
+     *
+     * @returns {Array} Latest repositories
+     */
+    static getLatestRepositories() {
+        let latest = (SettingsHelper.get('repositories', 'latest') || '');
+
+        if(!latest) { return []; }
+
+        return latest.split(':');
+    }
 }
 
 module.exports = SettingsHelper;

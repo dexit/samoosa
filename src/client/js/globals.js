@@ -1,5 +1,16 @@
 'use strict';
 
+// Get repository by path
+window.getRepoByPath = function getRepoByPath(path) {
+    for(let repo of resources.repositories) {
+        if(repo.owner + '/' + repo.title === path) {
+            return repo;
+        }
+    }
+
+    return null;
+}
+
 // Get key by value
 window.getKey = function getKey(obj, value) {
     for(let prop in obj) {

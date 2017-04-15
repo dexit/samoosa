@@ -1,6 +1,8 @@
 'use strict';
 
 module.exports = function render() {
+    if(!this.model) { return ''; }
+
     return _.div({class: 'repository-editor'},
         _.div({class: 'content'},
             _.div({class: 'owner'},

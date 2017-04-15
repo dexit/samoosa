@@ -160,6 +160,8 @@ class Navbar extends View {
      * Toggles the repositories list
      */
     toggleRepositoriesList(isActive, overrideUrl) {
+        let latest = SettingsHelper.getLatestRepositories();
+
         this.togglePanel('/repositories/', 'repository-list', ($content) => {
             let filterRepositories = (query) => {
                 $content.find('.repository-editor').each((i, element) => {
@@ -172,21 +174,6 @@ class Navbar extends View {
 
             _.append($content.empty(),
                 _.div({class: 'repository-list-actions'},
-                    /*
-                    _.button({class: 'btn btn-new repository-list-action'},
-                        'New repository',
-                        _.span({class: 'fa fa-plus'})
-                    ).on('click', (e) => {
-                        let name = prompt('Please input the new repository name');
-
-                        if(!name) { return; }
-
-                        ResourceHelper.addResource('repositories', name)
-                        .then((repository) => {
-                            location = '/#/' + repository.owner + '/' + repository.title;
-                        });
-                    }),
-                    */
                     _.div({class: 'repository-list-action search'},
                         _.input({class: 'selectable', type: 'text', placeholder: 'Search in repositories...'})
                             .on('change keyup paste', (e) => {
@@ -198,6 +185,16 @@ class Navbar extends View {
                     )
                 ),
                 _.div({class: 'repository-list-items'},
+                    _.if(latest.length > 0,
+                        _.h4('Latest'),
+                        _.each(latest, (i, repositoryPath) => {
+                            return new RepositoryEditor({
+                                model: getRepoByPath(repositoryPath),
+                                overrideUrl: overrideUrl
+                            }).$element;
+                        }),
+                        _.h4('All')
+                    ),
                     _.each(window.resources.repositories, (i, repository) => {
                         return new RepositoryEditor({
                             model: repository,

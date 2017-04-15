@@ -98,6 +98,31 @@
                         padding: 15px 15px 0px 15px;
                         height: calc(100% - 30px);
                         overflow-y: auto;
+
+                        >h4 {
+                            text-align: center;
+                            text-transform: uppercase;
+                            position: relative;
+                            margin-bottom: 1rem;
+
+                            &:before, &:after {
+                                display: block;
+                                content: '';
+                                height: 1px;
+                                width: 40%;
+                                top: calc(50% - 0.5px);
+                                background-color: $white;
+                                position: absolute;
+                            }
+
+                            &:before {
+                                left: 0px;
+                            }
+                            
+                            &:after {
+                                right: 0px;
+                            }
+                        }
                     }
                 }
             }

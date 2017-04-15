@@ -9616,10 +9616,42 @@
 
 	'use strict';
 
-	// Get key by value
+	// Get repository by path
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+	window.getRepoByPath = function getRepoByPath(path) {
+	    var _iteratorNormalCompletion = true;
+	    var _didIteratorError = false;
+	    var _iteratorError = undefined;
+
+	    try {
+	        for (var _iterator = resources.repositories[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	            var repo = _step.value;
+
+	            if (repo.owner + '/' + repo.title === path) {
+	                return repo;
+	            }
+	        }
+	    } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	    } finally {
+	        try {
+	            if (!_iteratorNormalCompletion && _iterator.return) {
+	                _iterator.return();
+	            }
+	        } finally {
+	            if (_didIteratorError) {
+	                throw _iteratorError;
+	            }
+	        }
+	    }
+
+	    return null;
+	};
+
+	// Get key by value
 	window.getKey = function getKey(obj, value) {
 	    for (var prop in obj) {
 	        if (obj.hasOwnProperty(prop)) {
@@ -9662,13 +9694,13 @@
 	            html = html.replace(/@[a-zA-Z0-9-_]+/g, function (string) {
 	                var typedName = string.replace('@', '');
 
-	                var _iteratorNormalCompletion = true;
-	                var _didIteratorError = false;
-	                var _iteratorError = undefined;
+	                var _iteratorNormalCompletion2 = true;
+	                var _didIteratorError2 = false;
+	                var _iteratorError2 = undefined;
 
 	                try {
-	                    for (var _iterator = (resources.collaborators || [])[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                        var collaborator = _step.value;
+	                    for (var _iterator2 = (resources.collaborators || [])[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                        var collaborator = _step2.value;
 
 	                        if (!collaborator) {
 	                            continue;
@@ -9679,16 +9711,16 @@
 	                        }
 	                    }
 	                } catch (err) {
-	                    _didIteratorError = true;
-	                    _iteratorError = err;
+	                    _didIteratorError2 = true;
+	                    _iteratorError2 = err;
 	                } finally {
 	                    try {
-	                        if (!_iteratorNormalCompletion && _iterator.return) {
-	                            _iterator.return();
+	                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                            _iterator2.return();
 	                        }
 	                    } finally {
-	                        if (_didIteratorError) {
-	                            throw _iteratorError;
+	                        if (_didIteratorError2) {
+	                            throw _iteratorError2;
 	                        }
 	                    }
 	                }
@@ -10281,6 +10313,61 @@
 	            }
 
 	            return result;
+	        }
+
+	        /**
+	         * Adds a repository to the "latest" setting
+	         *
+	         * @param {String} user
+	         * @param {String} repo
+	         */
+
+	    }, {
+	        key: 'addToLatestRepositories',
+	        value: function addToLatestRepositories(user, repo) {
+	            var latest = SettingsHelper.getLatestRepositories();
+
+	            // The repo was already in the "latest" list
+	            if (latest.indexOf(user + '/' + repo) > -1) {
+	                return;
+	            }
+
+	            latest.unshift(user + '/' + repo);
+
+	            // If there is more than 3 repos in the list, remove the last one
+	            if (latest.length > 3) {
+	                latest.splice(-1, 1);
+	            }
+
+	            SettingsHelper.set('repositories', 'latest', latest.join(':'));
+	        }
+
+	        /**
+	         * Clears the latest repositories
+	         */
+
+	    }, {
+	        key: 'clearLatestRepositories',
+	        value: function clearLatestRepositories() {
+	            return SettingsHelper.set('repositories', 'latest', '');
+	        }
+
+	        /**
+	         * Gets an array of the latest repositories
+	         *
+	         * @returns {Array} Latest repositories
+	         */
+
+	    }, {
+	        key: 'getLatestRepositories',
+	        value: function getLatestRepositories() {
+	            var latest = SettingsHelper.get('repositories', 'latest') || '';
+
+	            if (!latest) {
+	                return [];
+	            }
+
+	            return latest.split(':');
 	        }
 	    }]);
 
@@ -16118,6 +16205,8 @@
 	    }, {
 	        key: 'toggleRepositoriesList',
 	        value: function toggleRepositoriesList(isActive, overrideUrl) {
+	            var latest = SettingsHelper.getLatestRepositories();
+
 	            this.togglePanel('/repositories/', 'repository-list', function ($content) {
 	                var filterRepositories = function filterRepositories(query) {
 	                    $content.find('.repository-editor').each(function (i, element) {
@@ -16128,25 +16217,16 @@
 	                    });
 	                };
 
-	                _.append($content.empty(), _.div({ class: 'repository-list-actions' },
-	                /*
-	                _.button({class: 'btn btn-new repository-list-action'},
-	                    'New repository',
-	                    _.span({class: 'fa fa-plus'})
-	                ).on('click', (e) => {
-	                    let name = prompt('Please input the new repository name');
-	                     if(!name) { return; }
-	                     ResourceHelper.addResource('repositories', name)
-	                    .then((repository) => {
-	                        location = '/#/' + repository.owner + '/' + repository.title;
-	                    });
-	                }),
-	                */
-	                _.div({ class: 'repository-list-action search' }, _.input({ class: 'selectable', type: 'text', placeholder: 'Search in repositories...' }).on('change keyup paste', function (e) {
+	                _.append($content.empty(), _.div({ class: 'repository-list-actions' }, _.div({ class: 'repository-list-action search' }, _.input({ class: 'selectable', type: 'text', placeholder: 'Search in repositories...' }).on('change keyup paste', function (e) {
 	                    var query = e.target.value;
 
 	                    filterRepositories(query);
-	                }), _.span({ class: 'fa fa-search' }))), _.div({ class: 'repository-list-items' }, _.each(window.resources.repositories, function (i, repository) {
+	                }), _.span({ class: 'fa fa-search' }))), _.div({ class: 'repository-list-items' }, _.if(latest.length > 0, _.h4('Latest'), _.each(latest, function (i, repositoryPath) {
+	                    return new RepositoryEditor({
+	                        model: getRepoByPath(repositoryPath),
+	                        overrideUrl: overrideUrl
+	                    }).$element;
+	                }), _.h4('All')), _.each(window.resources.repositories, function (i, repository) {
 	                    return new RepositoryEditor({
 	                        model: repository,
 	                        overrideUrl: overrideUrl
@@ -18412,7 +18492,7 @@
 	            } else if (Router.params.repository) {
 	                location = '/#' + location.hash.replace('#', '').replace(Router.params.repository, this.model.title).replace(Router.params.user, this.model.owner);
 	            } else {
-	                location = '/#/' + this.model.owner + '/' + this.model.title + '/board/kanban/';
+	                location = '/#/' + this.model.owner + '/' + this.model.title + '/milestones/';
 	            }
 	        }
 	    }]);
@@ -18430,6 +18510,10 @@
 
 	module.exports = function render() {
 	    var _this = this;
+
+	    if (!this.model) {
+	        return '';
+	    }
 
 	    return _.div({ class: 'repository-editor' }, _.div({ class: 'content' }, _.div({ class: 'owner' }, this.model.owner), _.div({ class: 'header' }, _.h4(this.model.title)), _.div({ class: 'body' }, this.model.description))).click(function () {
 	        _this.onClick();
@@ -19107,6 +19191,8 @@
 	    ApiHelper.checkConnection().then(function () {
 	        return ApiHelper.getResources(true);
 	    }).then(function () {
+	        SettingsHelper.addToLatestRepositories(Router.params.user, Router.params.repository);
+
 	        $('.workspace').remove();
 
 	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-content milestones-container' }, new MilestonesEditor().$element)));
@@ -19125,6 +19211,8 @@
 	    ApiHelper.checkConnection().then(function () {
 	        return ApiHelper.getResources(true);
 	    }).then(function () {
+	        SettingsHelper.addToLatestRepositories(Router.params.user, Router.params.repository);
+
 	        $('.workspace').remove();
 
 	        // Append all milestones
@@ -19152,6 +19240,8 @@
 	    ApiHelper.checkConnection().then(function () {
 	        return ApiHelper.getResources(true);
 	    }).then(function () {
+	        SettingsHelper.addToLatestRepositories(Router.params.user, Router.params.repository);
+
 	        $('.workspace').remove();
 
 	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-content analytics' }, _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.button({ class: 'tab active' }, 'BURN DOWN CHART').click(function () {
@@ -19180,6 +19270,8 @@
 	    ApiHelper.checkConnection().then(function () {
 	        return ApiHelper.getResources(true);
 	    }).then(function () {
+	        SettingsHelper.addToLatestRepositories(Router.params.user, Router.params.repository);
+
 	        $('.workspace').remove();
 
 	        var canEdit = function canEdit(name) {

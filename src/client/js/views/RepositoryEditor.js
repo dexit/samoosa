@@ -22,7 +22,7 @@ class RepositoryEditor extends View {
             location = '/#' + location.hash.replace('#', '').replace(Router.params.repository, this.model.title).replace(Router.params.user, this.model.owner);
         
         } else {
-            location = '/#/' + this.model.owner + '/' + this.model.title + '/board/kanban/';
+            location = '/#/' + this.model.owner + '/' + this.model.title + '/milestones/';
         
         }
     }   

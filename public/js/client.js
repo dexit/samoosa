@@ -19081,15 +19081,14 @@
 
 	    var CANVAS_WIDTH_UNIT = 40;
 
-	    if (CANVAS_WIDTH_UNIT * totalDays < 860) {
-	        CANVAS_WIDTH_UNIT = 860 / totalDays;
-	    }
-
 	    var optimalHours = this.getOptimalHours();
 	    var actualHours = this.getActualHours();
 
 	    var $canvas = _.canvas({ width: CANVAS_WIDTH_UNIT * totalDays, height: CANVAS_HEIGHT_UNIT * totalHours });
 	    var ctx = $canvas[0].getContext('2d');
+
+	    var gridDrawTimer = void 0;
+	    var hoursDrawTimer = void 0;
 
 	    /**
 	     * Draws the grid
@@ -19101,7 +19100,7 @@
 	            GraphHelper.drawLine(ctx, xPos, 0, xPos, CANVAS_HEIGHT_UNIT * totalHours, 1, '#999999');
 
 	            if (x < totalDays) {
-	                setTimeout(function () {
+	                gridDrawTimer = setTimeout(function () {
 	                    drawNext(x + 1);
 	                }, 1);
 	            }
@@ -19137,7 +19136,7 @@
 	            GraphHelper.drawLine(ctx, startX, startY, endX, endY, 2, color);
 
 	            if (i < hours.length - 1) {
-	                setTimeout(function () {
+	                hoursDrawTimer = setTimeout(function () {
 	                    drawNext(i + 1);
 	                }, 1);
 	            }
@@ -19146,19 +19145,53 @@
 	        drawNext(1);
 	    };
 
+	    /**
+	     * Redraws this graph
+	     *
+	     * @param {Boolean} fit
+	     */
+	    var redraw = function redraw(fit) {
+	        if (gridDrawTimer) {
+	            clearTimeout(gridDrawTimer);
+	        }
+	        if (hoursDrawTimer) {
+	            clearTimeout(hoursDrawTimer);
+	        }
+
+	        ctx.clearRect(0, 0, $canvas[0].width, $canvas[0].height);
+
+	        if (fit) {
+	            var targetWidth = _this.$element.find('.graph-container').outerWidth() - 40;
+
+	            CANVAS_WIDTH_UNIT = targetWidth / totalDays;
+
+	            $canvas[0].width = targetWidth;
+
+	            /*this.$element.find('.graph-x-axis-labels').empty().append(
+	                _.loop(totalDays, (i) => {
+	                    i++;
+	                     if(i % 5 !== 0 && i != 1 && i != totalDays + 1) { return; }
+	                     return _.label({style: 'left: ' + (CANVAS_WIDTH_UNIT * (i - 1)) + 'px'},i.toString() + ' d');
+	                })
+	            );*/
+	        }
+
+	        drawGrid();
+	        drawHours(optimalHours, '#21303b');
+	        drawHours(actualHours, '#e70d3b');
+	    };
+
+	    setTimeout(function () {
+	        redraw(true);
+	    }, 50);
+
 	    return _.div({ class: 'burndown-chart analytics-body' }, _.div({ class: 'toolbar' }, _.h4({}, 'Milestone', _.select({ class: 'btn milestone-picker' }, _.each(resources.milestones.concat().sort(this.sortMilestones), function (i, milestone) {
 	        return _.option({ value: milestone.index }, milestone.title);
 	    })).val(milestone ? milestone.index : 0).change(function (e) {
 	        _this.onChangeMilestonePicker($(e.target).val());
-	    }))), _.div({ class: 'meta' }, _.h4('Total days'), _.p((totalDays + 1).toString()), _.h4('Total hours'), _.p(totalHours.toString()), _.h4('Milestone start'), _.p(milestoneStart ? milestoneStart.toString() : '(invalid)'), _.h4('Milestone end'), _.p(milestoneEnd ? milestoneEnd.toString() : '(invalid)')), _.h4('Chart'), _.div({ class: 'graph-container' }, _.div({ class: 'graph-y-axis-labels' }, _.label({ style: 'top: 0px' }, Math.round(totalHours) + ' h'), _.label({ style: 'top: 380px' }, '0 h')), _.div({ class: 'graph-canvas' }, $canvas, drawGrid(), drawHours(optimalHours, '#21303b'), drawHours(actualHours, '#e70d3b'), _.div({ class: 'graph-x-axis-labels' }, _.loop(totalDays, function (i) {
-	        i++;
-
-	        if (i % 5 !== 0 && i != 1 && i != totalDays + 1) {
-	            return;
-	        }
-
-	        return _.label({ style: 'left: ' + CANVAS_WIDTH_UNIT * (i - 1) + 'px' }, i.toString() + ' d');
-	    })))));
+	    }))), _.div({ class: 'meta' }, _.h4('Total days'), _.p((totalDays + 1).toString()), _.h4('Total hours'), _.p(totalHours.toString()), _.h4('Milestone start'), _.p(milestoneStart ? milestoneStart.toString() : '(invalid)'), _.h4('Milestone end'), _.p(milestoneEnd ? milestoneEnd.toString() : '(invalid)')), _.h4('Chart'), _.div({ class: 'graph-container' }, _.div({ class: 'graph-y-axis-labels' }, _.label({ style: 'top: 0px' }, Math.round(totalHours) + ' h'), _.label({ style: 'top: 380px' }, '0 h')), _.div({ class: 'graph-canvas' }, $canvas, _.div({ class: 'graph-x-axis-labels' })).on('mousewheel', function () {
+	        redraw(true);
+	    })));
 	};
 
 /***/ },

@@ -18,15 +18,14 @@ module.exports = function render() {
     
     let CANVAS_WIDTH_UNIT = 40;
 
-    if(CANVAS_WIDTH_UNIT * totalDays < 860) {
-        CANVAS_WIDTH_UNIT = 860 / totalDays;
-    }
-
     let optimalHours = this.getOptimalHours();
     let actualHours = this.getActualHours();
 
     let $canvas = _.canvas({width: CANVAS_WIDTH_UNIT * totalDays, height: CANVAS_HEIGHT_UNIT * totalHours});
     let ctx = $canvas[0].getContext('2d');
+
+    let gridDrawTimer;
+    let hoursDrawTimer;
 
     /**
      * Draws the grid
@@ -38,7 +37,7 @@ module.exports = function render() {
             GraphHelper.drawLine(ctx, xPos, 0, xPos, CANVAS_HEIGHT_UNIT * totalHours, 1, '#999999');
 
             if(x < totalDays) {
-                setTimeout(() => { drawNext(x + 1); }, 1);
+                gridDrawTimer = setTimeout(() => { drawNext(x + 1); }, 1);
             }
         };
 
@@ -72,12 +71,50 @@ module.exports = function render() {
             GraphHelper.drawLine(ctx, startX, startY, endX, endY, 2, color);
 
             if(i < hours.length - 1) {
-                setTimeout(() => { drawNext(i + 1); }, 1);
+                hoursDrawTimer = setTimeout(() => { drawNext(i + 1); }, 1);
             }
         };
 
         drawNext(1);
     };
+
+    /**
+     * Redraws this graph
+     *
+     * @param {Boolean} fit
+     */
+    let redraw = (fit) => {
+        if(gridDrawTimer) { clearTimeout(gridDrawTimer); }
+        if(hoursDrawTimer) { clearTimeout(hoursDrawTimer); }
+
+        ctx.clearRect(0, 0, $canvas[0].width, $canvas[0].height);
+
+        if(fit) {
+            let targetWidth = this.$element.find('.graph-container').outerWidth() - 40;
+
+            CANVAS_WIDTH_UNIT = targetWidth / totalDays;
+    
+            $canvas[0].width = targetWidth;
+
+            /*this.$element.find('.graph-x-axis-labels').empty().append(
+                _.loop(totalDays, (i) => {
+                    i++;
+
+                    if(i % 5 !== 0 && i != 1 && i != totalDays + 1) { return; }
+
+                    return _.label({style: 'left: ' + (CANVAS_WIDTH_UNIT * (i - 1)) + 'px'},i.toString() + ' d');
+                })
+            );*/
+        }
+
+        drawGrid();
+        drawHours(optimalHours, '#21303b');
+        drawHours(actualHours, '#e70d3b');
+    }
+
+    setTimeout(() => {
+        redraw(true);
+    }, 50);
 
     return _.div({class: 'burndown-chart analytics-body'},
         _.div({class: 'toolbar'},
@@ -108,19 +145,10 @@ module.exports = function render() {
             ),
             _.div({class: 'graph-canvas'},
                 $canvas,
-                drawGrid(),
-                drawHours(optimalHours, '#21303b'),
-                drawHours(actualHours, '#e70d3b'),
-                _.div({class: 'graph-x-axis-labels'},
-                    _.loop(totalDays, (i) => {
-                        i++;
-
-                        if(i % 5 !== 0 && i != 1 && i != totalDays + 1) { return; }
-
-                        return _.label({style: 'left: ' + (CANVAS_WIDTH_UNIT * (i - 1)) + 'px'},i.toString() + ' d');
-                    })
-                )
-            )
+                _.div({class: 'graph-x-axis-labels'})
+            ).on('mousewheel', () => {
+                redraw(true);  
+            })
         )
     );
 }

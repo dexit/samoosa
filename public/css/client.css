@@ -452,13 +452,17 @@ body, html {
             left: 0px;
             display: block;
             z-index: 5; }
+          .issue-editor > .header .header-content .header-center .issue-title .rendered {
+            background-color: transparent;
+            color: #fff; }
+          .issue-editor > .header .header-content .header-center .issue-title .edit {
+            border-radius: 5px;
+            border: 1px solid #E70D3B;
+            color: #000;
+            padding: 10px; }
           .issue-editor > .header .header-content .header-center .issue-title .rendered, .issue-editor > .header .header-content .header-center .issue-title .edit {
             font-size: 1em;
             line-height: 1em;
-            background-color: transparent;
-            color: #fff;
-            border: 0px;
-            padding: 0px;
             margin: 0px;
             display: block;
             width: 100%; }
@@ -603,7 +607,7 @@ body, html {
         flex-grow: 1;
         padding: 10px;
         border-radius: 5px;
-        background-color: #f5f5f5; }
+        background-color: #fff; }
   .issue-editor .add-comment textarea {
     text-align: left;
     padding: 10px;
@@ -626,16 +630,16 @@ body, html {
 
 .filter-editor {
   display: flex;
-  width: 100%;
-  background-color: #171e23;
-  position: relative;
-  color: #fff; }
+  position: fixed;
+  color: #fff;
+  top: 0px;
+  right: 0px;
+  z-index: 999; }
   .filter-editor .btn-toggle {
+    background-color: #171e23;
     line-height: 56px;
     height: 56px;
-    width: 100%;
     text-align: left;
-    background-color: transparent;
     padding: 0px 15px;
     display: block;
     color: #fff;
@@ -657,16 +661,13 @@ body, html {
       font-size: 10px;
       font-weight: bold; }
   .filter-editor.active .filters-container {
-    width: 300px; }
+    width: 320px; }
   .filter-editor .filters-container {
-    position: absolute;
-    top: 0px;
-    left: 100%;
     width: 0px;
     transition: width 0.5s ease;
     overflow-x: hidden;
     z-index: 50;
-    background-color: #21303B; }
+    background-color: #171e23; }
   .filter-editor .button-container {
     padding: 0rem 10px 10px 10px;
     width: 300px; }
@@ -677,7 +678,7 @@ body, html {
       height: 36px;
       flex-shrink: 0;
       display: flex;
-      background-color: #171e23;
+      background-color: #21303B;
       margin: 0rem 0rem 10px 0rem;
       position: relative; }
       .filter-editor .filters .filter span, .filter-editor .filters .filter select, .filter-editor .filters .filter button {
@@ -692,7 +693,7 @@ body, html {
       .filter-editor .filters .filter .btn-remove {
         text-align: center;
         position: absolute;
-        right: 10px;
+        right: -20px;
         top: 50%;
         transform: translateY(-50%);
         z-index: 20; }
@@ -708,7 +709,7 @@ body, html {
           color: #fff; }
         .filter-editor .filters .filter .select-container.key {
           padding-left: 5px;
-          border-right: 1px solid #21303B;
+          border-right: 1px solid #171e23;
           flex-grow: 1; }
           .filter-editor .filters .filter .select-container.key select {
             text-align: left; }
@@ -719,7 +720,7 @@ body, html {
             text-align: center; }
         .filter-editor .filters .filter .select-container.value {
           padding-right: 5px;
-          border-left: 1px solid #21303B;
+          border-left: 1px solid #171e23;
           flex-grow: 1; }
           .filter-editor .filters .filter .select-container.value select {
             text-align: left;

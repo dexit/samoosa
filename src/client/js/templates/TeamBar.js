@@ -4,6 +4,8 @@ module.exports = function render() {
     let activeTab = Router.params.team || 'all';
     let basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
 
+    if(resources.teams.length < 1) { return; }
+
     return _.div({class: 'team-bar tabbed-container vertical'},
         _.div({class: 'tabs'},
             _.a({href: '#' + basePath + 'all', class: 'tab' + (activeTab == 'all' ? ' active' : '')}, 'all teams')

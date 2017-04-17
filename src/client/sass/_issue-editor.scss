@@ -198,14 +198,22 @@
                         display: block;
                         z-index: 5;
                     }
-                    
+                   
+                    .rendered {
+                        background-color: transparent;
+                        color: #fff;
+                    }
+
+                    .edit {
+                        border-radius: 5px;
+                        border: 1px solid $pink-medium;
+                        color: $black;
+                        padding: 10px;
+                    }
+
                     .rendered, .edit {
                         font-size: 1em;
                         line-height: 1em;
-                        background-color: transparent;
-                        color: #fff;
-                        border: 0px;
-                        padding: 0px;
                         margin: 0px;
                         display: block;
                         width: 100%; 
@@ -428,7 +436,7 @@
                 flex-grow: 1;
                 padding: 10px;
                 border-radius: 5px;
-                background-color: material-color('grey', '100');
+                background-color: #fff;
             }
         }
     }

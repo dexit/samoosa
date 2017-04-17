@@ -41,7 +41,7 @@ module.exports = function render() {
                         _.span({class: 'rendered'},
                             this.model.title
                         ),
-                        _.input({type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title})
+                        _.input({type: 'text', class: 'selectable edit hidden', 'data-property': 'title', value: this.model.title})
                             .change(() => {
                                 this.onChange();
                                 
@@ -177,7 +177,7 @@ module.exports = function render() {
                 _.span({class: 'fa fa-edit'})
             ).click(this.onClickEdit),
             _.label('Description'),
-            _.div({class: 'rendered'},
+            _.div({class: 'rendered selectable'},
                 markdownToHtml(this.model.description)
             ),
             _.textarea({class: 'selectable edit hidden btn-transparent', 'data-property': 'description'},

@@ -1551,7 +1551,15 @@
 	            this.render();
 	            this.postrender();
 
-	            var element = this.element || this.$element[0];
+	            var element = this.element;
+
+	            if (!element && this.$element && this.$element.length > 0) {
+	                element = this.$element[0];
+	            }
+
+	            if (!element) {
+	                return;
+	            }
 
 	            element.addEventListener('DOMNodeRemovedFromDocument', function () {
 	                // Wait a few cycles before removing, as the element might just have been relocated
@@ -1854,9 +1862,7 @@
 	    _createClass(ContextMenu, [{
 	        key: 'render',
 	        value: function render() {
-	            var view = this;
-
-	            view.$element.html(_.each(view.model, function (label, func) {
+	            this.$element.html(_.each(this.model, function (label, func) {
 	                if (func == '---') {
 	                    return _.li({ class: 'dropdown-header' }, label);
 	                } else {
@@ -1867,13 +1873,21 @@
 	                        if (func) {
 	                            func(e);
 
-	                            view.remove();
+	                            this.remove();
 	                        }
 	                    }));
 	                }
 	            }));
 
-	            $('body').append(view.$element);
+	            $('body').append(this.$element);
+
+	            var rect = this.$element[0].getBoundingClientRect();
+
+	            if (rect.left + rect.width > window.innerWidth) {
+	                this.$element.css('left', rect.left - rect.width + 'px');
+	            } else if (rect.bottom > window.innerHeight) {
+	                this.$element.css('top', rect.top - rect.height + 'px');
+	            }
 	        }
 	    }]);
 
@@ -16608,6 +16622,10 @@
 	    var activeTab = Router.params.team || 'all';
 	    var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
 
+	    if (resources.teams.length < 1) {
+	        return;
+	    }
+
 	    return _.div({ class: 'team-bar tabbed-container vertical' }, _.div({ class: 'tabs' }, _.a({ href: '#' + basePath + 'all', class: 'tab' + (activeTab == 'all' ? ' active' : '') }, 'all teams').click(function (e) {
 	        e.preventDefault();
 	        _this.onClickTeam('all');
@@ -17661,7 +17679,7 @@
 	    // Center section
 	    _.div({ class: 'header-center' },
 	    // Title
-	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden btn-transparent', 'data-property': 'title', value: this.model.title }).change(function () {
+	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden', 'data-property': 'title', value: this.model.title }).change(function () {
 	        _this.onChange();
 
 	        _this.$element.find('.header .rendered').html(_this.model.title);
@@ -17752,7 +17770,7 @@
 	    _.div({ class: 'body' },
 
 	    // Description
-	    _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(this.onClickEdit), _.label('Description'), _.div({ class: 'rendered' }, markdownToHtml(this.model.description)), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
+	    _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(this.onClickEdit), _.label('Description'), _.div({ class: 'rendered selectable' }, markdownToHtml(this.model.description)), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
 	        _this.onChange();
 
 	        _this.$element.find('.body .rendered').html(markdownToHtml(_this.model.description) || '');
@@ -19250,6 +19268,10 @@
 
 	        // Append all milestones
 	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-panel' }, new FilterEditor().$element, new TeamBar().$element), _.div({ class: 'workspace-content board-container ' + Router.params.mode }, _.each(window.resources.milestones, function (i, milestone) {
+	            if (Router.params.mode === 'kanban' && milestone.isClosed()) {
+	                return;
+	            }
+
 	            return new MilestoneViewer({
 	                model: milestone
 	            }).$element;

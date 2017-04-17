@@ -75,6 +75,8 @@ Router.route('/:user/:repository/board/:mode/:team', () => {
                 ),
                 _.div({class: 'workspace-content board-container ' + Router.params.mode},
                     _.each(window.resources.milestones, (i, milestone) => {
+                        if(Router.params.mode === 'kanban' && milestone.isClosed()) { return; }
+                        
                         return new MilestoneViewer({
                             model: milestone,
                         }).$element;

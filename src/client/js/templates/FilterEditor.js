@@ -6,7 +6,6 @@ module.exports = function render() {
         column: resources.issueColumns,
         milestone: resources.milestones,
         priority: ISSUE_PRIORITIES,
-        team: resources.teams,
         type: ISSUE_TYPES,
         version: resources.versions
     };

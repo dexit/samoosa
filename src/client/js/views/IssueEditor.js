@@ -824,7 +824,7 @@ class IssueEditor extends View {
                             _.button({class: 'btn-edit'},
                                 _.span({class: 'fa fa-edit'})
                             ).click(this.onClickEdit),
-                            _.div({class: 'rendered'},
+                            _.div({class: 'rendered selectable'},
                                 text
                             ),
                             _.textarea({class: 'edit selectable hidden text btn-transparent'},

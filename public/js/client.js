@@ -17600,7 +17600,7 @@
 	                    var text = markdownToHtml(comment.text);
 	                    var isUser = collaborator.name == user.name;
 
-	                    var $comment = _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: collaborator.displayName || collaborator.name, src: collaborator.avatar })), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this10.onClickEdit), _.div({ class: 'rendered' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
+	                    var $comment = _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: collaborator.displayName || collaborator.name, src: collaborator.avatar })), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this10.onClickEdit), _.div({ class: 'rendered selectable' }, text), _.textarea({ class: 'edit selectable hidden text btn-transparent' }, comment.text).change(function () {
 	                        _this10.$element.toggleClass('loading', true);
 
 	                        comment.text = $comment.find('textarea').val();
@@ -18803,7 +18803,6 @@
 	        column: resources.issueColumns,
 	        milestone: resources.milestones,
 	        priority: ISSUE_PRIORITIES,
-	        team: resources.teams,
 	        type: ISSUE_TYPES,
 	        version: resources.versions
 	    };

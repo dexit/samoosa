@@ -827,7 +827,7 @@ class IssueEditor extends View {
                             _.div({class: 'rendered selectable'},
                                 text
                             ),
-                            _.textarea({class: 'edit selectable hidden text btn-transparent'},
+                            _.textarea({class: 'edit hidden text btn-transparent'},
                                 comment.text
                             ).change(() => {
                                 this.$element.toggleClass('loading', true);
@@ -854,7 +854,7 @@ class IssueEditor extends View {
                             .blur(this.onBlur)
                         ),
                         _.if(!isUser,
-                            _.div({class: 'text'},
+                            _.div({class: 'text selectable'},
                                 text
                             )
                         )

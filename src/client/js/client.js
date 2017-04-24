@@ -15,10 +15,10 @@ window.ISSUE_ESTIMATES = {
 };
 
 window.ISSUE_TYPES = {
-    'bug': 0,
+    'task': 0,
     'improvement': 1,
     'new feature': 2,
-    'task': 3
+    'bug': 3
 };
 
 window.ISSUE_PRIORITIES = {

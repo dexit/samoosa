@@ -62,10 +62,10 @@
 	};
 
 	window.ISSUE_TYPES = {
-	    'bug': 0,
+	    'task': 0,
 	    'improvement': 1,
 	    'new feature': 2,
-	    'task': 3
+	    'bug': 3
 	};
 
 	window.ISSUE_PRIORITIES = {
@@ -1551,15 +1551,7 @@
 	            this.render();
 	            this.postrender();
 
-	            var element = this.element;
-
-	            if (!element && this.$element && this.$element.length > 0) {
-	                element = this.$element[0];
-	            }
-
-	            if (!element) {
-	                return;
-	            }
+	            var element = this.element || this.$element[0];
 
 	            element.addEventListener('DOMNodeRemovedFromDocument', function () {
 	                // Wait a few cycles before removing, as the element might just have been relocated
@@ -1862,7 +1854,9 @@
 	    _createClass(ContextMenu, [{
 	        key: 'render',
 	        value: function render() {
-	            this.$element.html(_.each(this.model, function (label, func) {
+	            var view = this;
+
+	            view.$element.html(_.each(view.model, function (label, func) {
 	                if (func == '---') {
 	                    return _.li({ class: 'dropdown-header' }, label);
 	                } else {
@@ -1873,21 +1867,13 @@
 	                        if (func) {
 	                            func(e);
 
-	                            this.remove();
+	                            view.remove();
 	                        }
 	                    }));
 	                }
 	            }));
 
-	            $('body').append(this.$element);
-
-	            var rect = this.$element[0].getBoundingClientRect();
-
-	            if (rect.left + rect.width > window.innerWidth) {
-	                this.$element.css('left', rect.left - rect.width + 'px');
-	            } else if (rect.bottom > window.innerHeight) {
-	                this.$element.css('top', rect.top - rect.height + 'px');
-	            }
+	            $('body').append(view.$element);
 	        }
 	    }]);
 
@@ -18088,8 +18074,7 @@
 	            var issue = new Issue({
 	                milestone: this.model.index,
 	                team: Router.params.team == 'all' ? null : ResourceHelper.getTeam(Router.params.team),
-	                reporter: ResourceHelper.getCollaborator(User.getCurrent().name),
-	                assignee: ResourceHelper.getCollaborator(User.getCurrent().name)
+	                reporter: ResourceHelper.getCollaborator(User.getCurrent().name)
 	            });
 
 	            ResourceHelper.addResource('issues', issue).then(function (newIssue) {

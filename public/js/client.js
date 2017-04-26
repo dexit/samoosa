@@ -128,23 +128,22 @@
 	window.User = __webpack_require__(64);
 	window.Repository = __webpack_require__(65);
 	window.Attachment = __webpack_require__(66);
-	window.Organization = __webpack_require__(67);
 
 	// Views
-	window.Navbar = __webpack_require__(68);
-	window.RepositoryBar = __webpack_require__(70);
-	window.TeamBar = __webpack_require__(72);
-	window.IssueEditor = __webpack_require__(74);
-	window.MilestoneEditor = __webpack_require__(76);
-	window.MilestoneViewer = __webpack_require__(78);
-	window.ResourceEditor = __webpack_require__(80);
-	window.MilestonesEditor = __webpack_require__(82);
-	window.RepositoryEditor = __webpack_require__(84);
-	window.FilterEditor = __webpack_require__(86);
-	window.BurnDownChart = __webpack_require__(88);
+	window.Navbar = __webpack_require__(67);
+	window.RepositoryBar = __webpack_require__(69);
+	window.TagBar = __webpack_require__(71);
+	window.IssueEditor = __webpack_require__(73);
+	window.MilestoneEditor = __webpack_require__(75);
+	window.MilestoneViewer = __webpack_require__(77);
+	window.ResourceEditor = __webpack_require__(79);
+	window.MilestonesEditor = __webpack_require__(81);
+	window.RepositoryEditor = __webpack_require__(83);
+	window.FilterEditor = __webpack_require__(85);
+	window.BurnDownChart = __webpack_require__(87);
 
 	// Routes
-	__webpack_require__(90);
+	__webpack_require__(89);
 
 	// Title
 	$('head title').html((Router.params.repository ? Router.params.repository + ' - ' : '') + 'Samoosa');
@@ -863,6 +862,7 @@
 	'use strict';
 
 	var FunctionTemplating = {};
+	var lastCondition = void 0;
 
 	/**
 	 * Appends content to an element
@@ -1060,12 +1060,35 @@
 	 * @param {Boolean} condition
 	 * @param {HTMLElement} contents
 	 *
-	 * @returns {HTMLElement} contents
+	 * @returns {HTMLElement} Contents
 	 */
 	FunctionTemplating.if = function (condition) {
-	    if (condition != false && condition != null && condition != undefined) {
+	    lastCondition = condition || false;
+
+	    if (lastCondition) {
 	        for (var _len3 = arguments.length, contents = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
 	            contents[_key3 - 1] = arguments[_key3];
+	        }
+
+	        return contents;
+	    }
+	};
+
+	/**
+	 * Uses the last provided condition to simulate an "else" statement
+	 *
+	 * @param {HTMLElement} contents
+	 *
+	 * @returns {HTMLElement} Contents
+	 */
+	FunctionTemplating.else = function () {
+	    if (typeof lastCondition === 'undefined') {
+	        throw new Error('No "if" statement was provided before this "else" statement');
+	    }
+
+	    if (!lastCondition) {
+	        for (var _len4 = arguments.length, contents = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+	            contents[_key4] = arguments[_key4];
 	        }
 
 	        return contents;
@@ -1551,12 +1574,24 @@
 	            this.render();
 	            this.postrender();
 
-	            var element = this.element || this.$element[0];
+	            var element = this.element;
+
+	            if (!element && this.$element && this.$element.length > 0) {
+	                element = this.$element[0];
+	            }
+
+	            if (!element) {
+	                return;
+	            }
 
 	            element.addEventListener('DOMNodeRemovedFromDocument', function () {
 	                // Wait a few cycles before removing, as the element might just have been relocated
 	                setTimeout(function () {
-	                    var element = _this.element || _this.$element[0];
+	                    var element = _this.element;
+
+	                    if (!element && _this.$element) {
+	                        element = _this.$element[0];
+	                    }
 
 	                    if (!element || !element.parentNode) {
 	                        _this.remove();
@@ -1854,9 +1889,7 @@
 	    _createClass(ContextMenu, [{
 	        key: 'render',
 	        value: function render() {
-	            var view = this;
-
-	            view.$element.html(_.each(view.model, function (label, func) {
+	            this.$element.html(_.each(this.model, function (label, func) {
 	                if (func == '---') {
 	                    return _.li({ class: 'dropdown-header' }, label);
 	                } else {
@@ -1867,13 +1900,21 @@
 	                        if (func) {
 	                            func(e);
 
-	                            view.remove();
+	                            this.remove();
 	                        }
 	                    }));
 	                }
 	            }));
 
-	            $('body').append(view.$element);
+	            $('body').append(this.$element);
+
+	            var rect = this.$element[0].getBoundingClientRect();
+
+	            if (rect.left + rect.width > window.innerWidth) {
+	                this.$element.css('left', rect.left - rect.width + 'px');
+	            } else if (rect.bottom > window.innerHeight) {
+	                this.$element.css('top', rect.top - rect.height + 'px');
+	            }
 	        }
 	    }]);
 
@@ -10080,17 +10121,6 @@
 	            return 0;
 	        }
 	    }, {
-	        key: 'getTeam',
-	        value: function getTeam(name) {
-	            for (var i in resources.teams) {
-	                var team = resources.teams[i];
-
-	                if (team == name) {
-	                    return i;
-	                }
-	            }
-	        }
-	    }, {
 	        key: 'getVersion',
 	        value: function getVersion(name) {
 	            for (var i in resources.versions) {
@@ -11026,24 +11056,6 @@
 	        // Resource getters
 	        // ----------
 	        /**
-	         * Gets organisations
-	         *
-	         * @returns {Promise} Array of organisations
-	         */
-
-	    }, {
-	        key: 'getOrganizations',
-	        value: function getOrganizations() {
-	            var _this6 = this;
-
-	            return this.get('/user/orgs').then(function (orgs) {
-	                _this6.processOrganizations(orgs);
-
-	                return Promise.resolve();
-	            });
-	        }
-
-	        /**
 	         * Gets a list of deleted issues
 	         *
 	         * @returns {Array} List of deleted issues
@@ -11064,10 +11076,10 @@
 	    }, {
 	        key: 'getRepositories',
 	        value: function getRepositories() {
-	            var _this7 = this;
+	            var _this6 = this;
 
 	            return this.get('/user/repos').then(function (repos) {
-	                _this7.processRepositories(repos);
+	                _this6.processRepositories(repos);
 
 	                return Promise.resolve();
 	            });
@@ -11082,14 +11094,14 @@
 	    }, {
 	        key: 'getCollaborators',
 	        value: function getCollaborators() {
-	            var _this8 = this;
+	            var _this7 = this;
 
 	            if (this.isSpectating()) {
 	                return Promise.resolve([]);
 	            }
 
 	            return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/collaborators').then(function (collaborators) {
-	                _this8.processCollaborators(collaborators);
+	                _this7.processCollaborators(collaborators);
 	            });
 	        }
 
@@ -11102,10 +11114,10 @@
 	    }, {
 	        key: 'getIssues',
 	        value: function getIssues() {
-	            var _this9 = this;
+	            var _this8 = this;
 
 	            return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues', 'state=all', true).then(function (issues) {
-	                _this9.processIssues(issues);
+	                _this8.processIssues(issues);
 
 	                return Promise.resolve();
 	            });
@@ -11168,43 +11180,19 @@
 	    }, {
 	        key: 'getLabels',
 	        value: function getLabels() {
-	            var _this10 = this;
+	            var _this9 = this;
 
 	            if (!labelCache) {
 	                return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels').then(function (labels) {
 	                    labelCache = labels || [];
 
-	                    return _this10.ensureMandatoryLabels();
+	                    return _this9.ensureMandatoryLabels();
 	                }).then(function () {
 	                    return Promise.resolve(labelCache);
 	                });
 	            } else {
 	                return Promise.resolve(labelCache);
 	            }
-	        }
-
-	        /**
-	         * Gets teams
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'getTeams',
-	        value: function getTeams() {
-	            var _this11 = this;
-
-	            return this.get('/orgs/' + this.getRepositoryOwner() + '/teams').then(function (teams) {
-	                _this11.processTeams(teams);
-
-	                return Promise.resolve();
-	            })
-	            // No teams found
-	            .catch(function () {
-	                resources.teams = [];
-
-	                return Promise.resolve();
-	            });
 	        }
 
 	        /**
@@ -11216,10 +11204,10 @@
 	    }, {
 	        key: 'getIssueColumns',
 	        value: function getIssueColumns() {
-	            var _this12 = this;
+	            var _this10 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this12.processIssueColumns(labels);
+	                _this10.processIssueColumns(labels);
 
 	                return Promise.resolve();
 	            });
@@ -11292,10 +11280,10 @@
 	    }, {
 	        key: 'getVersions',
 	        value: function getVersions() {
-	            var _this13 = this;
+	            var _this11 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this13.processVersions(labels);
+	                _this11.processVersions(labels);
 
 	                return Promise.resolve();
 	            });
@@ -11310,10 +11298,10 @@
 	    }, {
 	        key: 'getMilestones',
 	        value: function getMilestones() {
-	            var _this14 = this;
+	            var _this12 = this;
 
 	            return this.get('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/milestones').then(function (milestones) {
-	                _this14.processMilestones(milestones);
+	                _this12.processMilestones(milestones);
 
 	                return Promise.resolve();
 	            });
@@ -11528,7 +11516,7 @@
 	    }, {
 	        key: 'removeIssue',
 	        value: function removeIssue(issue) {
-	            var _this15 = this;
+	            var _this13 = this;
 
 	            issue.deleted = true;
 	            deletedIssuesCache.push(issue);
@@ -11540,7 +11528,7 @@
 
 	            // Get all attachments
 	            .then(function () {
-	                return _this15.getIssueAttachments(issue);
+	                return _this13.getIssueAttachments(issue);
 	            })
 
 	            // Delete attachments one by one
@@ -11549,7 +11537,7 @@
 	                    var attachment = attachments.pop();
 
 	                    if (attachment) {
-	                        return _this15.removeIssueAttachment(issue, attachment).then(function () {
+	                        return _this13.removeIssueAttachment(issue, attachment).then(function () {
 	                            return deleteNextAttachment();
 	                        });
 	                    } else {
@@ -11562,7 +11550,7 @@
 
 	            // Get all comments
 	            .then(function () {
-	                return _this15.getIssueComments(issue);
+	                return _this13.getIssueComments(issue);
 	            })
 
 	            // Delete all comments one by one
@@ -11571,7 +11559,7 @@
 	                    var comment = comments.pop();
 
 	                    if (comment) {
-	                        return _this15.removeIssueComment(issue, comment).then(function () {
+	                        return _this13.removeIssueComment(issue, comment).then(function () {
 	                            return deleteNextComment();
 	                        });
 	                    } else {
@@ -11838,31 +11826,6 @@
 	        }
 
 	        /**
-	         * Process organisations
-	         *
-	         * @param {Array} orgs
-	         */
-
-	    }, {
-	        key: 'processOrganizations',
-	        value: function processOrganizations(orgs) {
-	            resources.organizations = [];
-
-	            for (var i in orgs) {
-	                var index = resources.organizations.length;
-
-	                var organization = new Organization({
-	                    index: index,
-	                    id: orgs[i].id,
-	                    name: orgs[i].login,
-	                    description: orgs[i].description
-	                });
-
-	                resources.organizations[index] = organization;
-	            }
-	        }
-
-	        /**
 	         * Process milestones
 	         *
 	         * @param {Array} milestones
@@ -11980,25 +11943,28 @@
 	        }
 
 	        /**
-	         * Process teams
+	         * Process collaborators
 	         *
-	         * @param {Array} teams
+	         * @param {Array} collaborators
 	         */
 
 	    }, {
-	        key: 'processTeams',
-	        value: function processTeams(teams) {
-	            window.resources.teams = [];
+	        key: 'processCollaborators',
+	        value: function processCollaborators(collaborators) {
+	            window.resources.collaborators = [];
 
 	            var _iteratorNormalCompletion5 = true;
 	            var _didIteratorError5 = false;
 	            var _iteratorError5 = undefined;
 
 	            try {
-	                for (var _iterator5 = teams[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	                    var team = _step5.value;
+	                for (var _iterator5 = collaborators[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                    var collaborator = _step5.value;
 
-	                    window.resources.teams.push(team.name);
+	                    window.resources.collaborators.push({
+	                        name: collaborator.login,
+	                        avatar: collaborator.avatar_url
+	                    });
 	                }
 	            } catch (err) {
 	                _didIteratorError5 = true;
@@ -12017,46 +11983,6 @@
 	        }
 
 	        /**
-	         * Process collaborators
-	         *
-	         * @param {Array} collaborators
-	         */
-
-	    }, {
-	        key: 'processCollaborators',
-	        value: function processCollaborators(collaborators) {
-	            window.resources.collaborators = [];
-
-	            var _iteratorNormalCompletion6 = true;
-	            var _didIteratorError6 = false;
-	            var _iteratorError6 = undefined;
-
-	            try {
-	                for (var _iterator6 = collaborators[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-	                    var collaborator = _step6.value;
-
-	                    window.resources.collaborators.push({
-	                        name: collaborator.login,
-	                        avatar: collaborator.avatar_url
-	                    });
-	                }
-	            } catch (err) {
-	                _didIteratorError6 = true;
-	                _iteratorError6 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
-	                        _iterator6.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError6) {
-	                        throw _iteratorError6;
-	                    }
-	                }
-	            }
-	        }
-
-	        /**
 	         * Process issues
 	         *
 	         * @param {Array} issues
@@ -12067,13 +11993,13 @@
 	        value: function processIssues(issues) {
 	            window.resources.issues = [];
 
-	            var _iteratorNormalCompletion7 = true;
-	            var _didIteratorError7 = false;
-	            var _iteratorError7 = undefined;
+	            var _iteratorNormalCompletion6 = true;
+	            var _didIteratorError6 = false;
+	            var _iteratorError6 = undefined;
 
 	            try {
-	                for (var _iterator7 = issues[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-	                    var gitHubIssue = _step7.value;
+	                for (var _iterator6 = issues[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+	                    var gitHubIssue = _step6.value;
 
 	                    var issue = new Issue();
 
@@ -12090,16 +12016,16 @@
 
 	                    issue.labels = issue.labels || [];
 
-	                    var _iteratorNormalCompletion8 = true;
-	                    var _didIteratorError8 = false;
-	                    var _iteratorError8 = undefined;
+	                    var _iteratorNormalCompletion7 = true;
+	                    var _didIteratorError7 = false;
+	                    var _iteratorError7 = undefined;
 
 	                    try {
-	                        for (var _iterator8 = gitHubIssue.labels[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-	                            var label = _step8.value;
+	                        for (var _iterator7 = gitHubIssue.labels[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+	                            var label = _step7.value;
 
 	                            var typeIndex = label.name.indexOf('type:');
-	                            var teamIndex = label.name.indexOf('team:');
+	                            var tagIndex = label.name.indexOf('tag:');
 	                            var priorityIndex = label.name.indexOf('priority:');
 	                            var estimateIndex = label.name.indexOf('estimate:');
 	                            var versionIndex = label.name.indexOf('version:');
@@ -12111,10 +12037,10 @@
 	                                var name = label.name.replace('type:', '');
 
 	                                issue.type = ISSUE_TYPES[name];
-	                            } else if (teamIndex > -1) {
-	                                var _name = label.name.replace('team:', '');
+	                            } else if (tagIndex > -1) {
+	                                var _name = label.name.replace('tag:', '');
 
-	                                issue.team = ResourceHelper.getTeam(_name);
+	                                issue.tags.push(_name);
 	                            } else if (versionIndex > -1) {
 	                                var _name2 = label.name.replace('version:', '');
 
@@ -12136,16 +12062,16 @@
 	                            }
 	                        }
 	                    } catch (err) {
-	                        _didIteratorError8 = true;
-	                        _iteratorError8 = err;
+	                        _didIteratorError7 = true;
+	                        _iteratorError7 = err;
 	                    } finally {
 	                        try {
-	                            if (!_iteratorNormalCompletion8 && _iterator8.return) {
-	                                _iterator8.return();
+	                            if (!_iteratorNormalCompletion7 && _iterator7.return) {
+	                                _iterator7.return();
 	                            }
 	                        } finally {
-	                            if (_didIteratorError8) {
-	                                throw _iteratorError8;
+	                            if (_didIteratorError7) {
+	                                throw _iteratorError7;
 	                            }
 	                        }
 	                    }
@@ -12167,16 +12093,16 @@
 	                    }
 	                }
 	            } catch (err) {
-	                _didIteratorError7 = true;
-	                _iteratorError7 = err;
+	                _didIteratorError6 = true;
+	                _iteratorError6 = err;
 	            } finally {
 	                try {
-	                    if (!_iteratorNormalCompletion7 && _iterator7.return) {
-	                        _iterator7.return();
+	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
+	                        _iterator6.return();
 	                    }
 	                } finally {
-	                    if (_didIteratorError7) {
-	                        throw _iteratorError7;
+	                    if (_didIteratorError6) {
+	                        throw _iteratorError6;
 	                    }
 	                }
 	            }
@@ -12257,14 +12183,34 @@
 	                gitHubIssue.milestone = null;
 	            }
 
-	            // Team
-	            var team = resources.teams[issue.team];
+	            // Tags
+	            var _iteratorNormalCompletion8 = true;
+	            var _didIteratorError8 = false;
+	            var _iteratorError8 = undefined;
 
-	            if (team) {
-	                gitHubIssue.labels.push('team:' + team);
+	            try {
+	                for (var _iterator8 = issue.tags[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+	                    var tag = _step8.value;
+
+	                    gitHubIssue.labels.push('tag:' + tag);
+	                }
+
+	                // Type
+	            } catch (err) {
+	                _didIteratorError8 = true;
+	                _iteratorError8 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
+	                        _iterator8.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError8) {
+	                        throw _iteratorError8;
+	                    }
+	                }
 	            }
 
-	            // Type
 	            if (issue.getType()) {
 	                gitHubIssue.labels.push('type:' + issue.getType());
 	            }
@@ -12610,20 +12556,6 @@
 	        // Resource getters
 	        // ----------
 	        /**
-	         * Gets organisations
-	         *
-	         * @returns {Promise} Array of team names
-	         */
-
-	    }, {
-	        key: 'getOrganizations',
-	        value: function getOrganizations() {
-	            window.resources.organization = [];
-
-	            return Promise.resolve();
-	        }
-
-	        /**
 	         * Gets issues
 	         *
 	         * @returns {Promise} promise
@@ -12652,15 +12584,66 @@
 	        }
 
 	        /**
-	         * Gets teams
+	         * Gets tags
 	         *
 	         * @returns {Promise} promise
 	         */
 
 	    }, {
-	        key: 'getTeams',
-	        value: function getTeams() {
-	            window.resources.teams = [];
+	        key: 'getTags',
+	        value: function getTags() {
+	            window.resources.tags = [];
+
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = resources.issues[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var issue = _step.value;
+	                    var _iteratorNormalCompletion2 = true;
+	                    var _didIteratorError2 = false;
+	                    var _iteratorError2 = undefined;
+
+	                    try {
+	                        for (var _iterator2 = issue.tags[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                            var tag = _step2.value;
+
+	                            if (resources.tags.indexOf(tag) > -1 || !tag) {
+	                                continue;
+	                            }
+
+	                            resources.tags.push(tag);
+	                        }
+	                    } catch (err) {
+	                        _didIteratorError2 = true;
+	                        _iteratorError2 = err;
+	                    } finally {
+	                        try {
+	                            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                                _iterator2.return();
+	                            }
+	                        } finally {
+	                            if (_didIteratorError2) {
+	                                throw _iteratorError2;
+	                            }
+	                        }
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
 
 	            return Promise.resolve();
 	        }
@@ -13217,14 +13200,11 @@
 	            spinner('Getting ' + resource);
 
 	            switch (resource) {
-	                case 'organizations':
-	                    return this.getOrganizations();
-
 	                case 'collaborators':
 	                    return this.getCollaborators();
 
-	                case 'teams':
-	                    return this.getTeams();
+	                case 'tags':
+	                    return this.getTags();
 
 	                case 'issueColumns':
 	                    return this.getIssueColumns();
@@ -13276,18 +13256,16 @@
 	                }
 	            };
 
-	            return get('teams').then(function () {
-	                return get('issueColumns');
-	            }).then(function () {
+	            return get('issueColumns').then(function () {
 	                return get('collaborators');
 	            }).then(function () {
 	                return get('milestones');
 	            }).then(function () {
 	                return get('versions');
 	            }).then(function () {
-	                return get('organizations');
-	            }).then(function () {
 	                return get('issues');
+	            }).then(function () {
+	                return get('tags');
 	            });
 	        }
 	    }]);
@@ -13701,24 +13679,6 @@
 	        // Resource getters
 	        // ----------
 	        /**
-	         * Gets organisations
-	         *
-	         * @returns {Promise} Array of organisations
-	         */
-
-	    }, {
-	        key: 'getOrganizations',
-	        value: function getOrganizations() {
-	            var _this6 = this;
-
-	            return this.get('2.0/teams', 'values', false, 'role=member').then(function (teams) {
-	                _this6.processOrganizations(teams);
-
-	                return Promise.resolve();
-	            });
-	        }
-
-	        /**
 	         * Gets repos
 	         *
 	         * @returns {Promise} promise
@@ -13727,11 +13687,11 @@
 	    }, {
 	        key: 'getRepositories',
 	        value: function getRepositories() {
-	            var _this7 = this;
+	            var _this6 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                _this7.get('1.0/user/repositories').then(function (repositories) {
-	                    _this7.processRepositories(repositories);
+	                _this6.get('1.0/user/repositories').then(function (repositories) {
+	                    _this6.processRepositories(repositories);
 
 	                    resolve();
 	                }).catch(reject);
@@ -13747,7 +13707,7 @@
 	    }, {
 	        key: 'getCollaborators',
 	        value: function getCollaborators() {
-	            var _this8 = this;
+	            var _this7 = this;
 
 	            if (this.isSpectating()) {
 	                return Promise.resolve([]);
@@ -13758,7 +13718,7 @@
 	                    res = res[0];
 	                }
 
-	                _this8.processMembers(res.values);
+	                _this7.processMembers(res.values);
 
 	                return Promise.resolve();
 	            }).catch(function (e) {
@@ -13783,10 +13743,10 @@
 	    }, {
 	        key: 'getIssues',
 	        value: function getIssues() {
-	            var _this9 = this;
+	            var _this8 = this;
 
 	            return this.get('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues', 'issues', false).then(function (res) {
-	                _this9.processIssues(res);
+	                _this8.processIssues(res);
 
 	                return Promise.resolve();
 	            });
@@ -13817,7 +13777,7 @@
 	    }, {
 	        key: 'getIssueAttachments',
 	        value: function getIssueAttachments(issue) {
-	            var _this10 = this;
+	            var _this9 = this;
 
 	            return this.get('2.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/attachments', 'values').then(function (response) {
 	                if (!Array.isArray(response)) {
@@ -13838,12 +13798,12 @@
 	                            continue;
 	                        }
 
-	                        var apiUrl = 'https://api.bitbucket.org/2.0/repositories/' + _this10.getRepositoryOwner() + '/' + _this10.getRepositoryName() + '/issues/' + issue.id + '/attachments/' + obj.name;
+	                        var apiUrl = 'https://api.bitbucket.org/2.0/repositories/' + _this9.getRepositoryOwner() + '/' + _this9.getRepositoryName() + '/issues/' + issue.id + '/attachments/' + obj.name;
 
 	                        var attachment = new Attachment({
 	                            name: obj.name,
 	                            isRedirect: true,
-	                            url: apiUrl + '?access_token=' + _this10.getApiToken()
+	                            url: apiUrl + '?access_token=' + _this9.getApiToken()
 	                        });
 
 	                        attachments[attachments.length] = attachment;
@@ -13880,10 +13840,10 @@
 	    }, {
 	        key: 'getVersions',
 	        value: function getVersions() {
-	            var _this11 = this;
+	            var _this10 = this;
 
 	            return this.get('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/versions').then(function (versions) {
-	                _this11.processVersions(versions);
+	                _this10.processVersions(versions);
 
 	                return Promise.resolve();
 	            });
@@ -13898,10 +13858,10 @@
 	    }, {
 	        key: 'getMilestones',
 	        value: function getMilestones() {
-	            var _this12 = this;
+	            var _this11 = this;
 
 	            return this.get('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/milestones').then(function (milestones) {
-	                _this12.processMilestones(milestones);
+	                _this11.processMilestones(milestones);
 
 	                return Promise.resolve();
 	            });
@@ -13939,10 +13899,10 @@
 	    }, {
 	        key: 'addCollaborator',
 	        value: function addCollaborator(collaborator) {
-	            var _this13 = this;
+	            var _this12 = this;
 
 	            return new Promise(function (callback) {
-	                _this13.put('1.0/repositories/' + _this13.getRepositoryOwner() + '/' + _this13.getRepositoryName() + '/collaborators/' + collaborator).then(function () {
+	                _this12.put('1.0/repositories/' + _this12.getRepositoryOwner() + '/' + _this12.getRepositoryName() + '/collaborators/' + collaborator).then(function () {
 	                    callback();
 	                });
 	            });
@@ -13959,10 +13919,10 @@
 	    }, {
 	        key: 'addIssueEstimate',
 	        value: function addIssueEstimate(estimate) {
-	            var _this14 = this;
+	            var _this13 = this;
 
 	            return new Promise(function (callback) {
-	                _this14.post('1.0/repositories/' + _this14.getRepositoryOwner() + '/' + _this14.getRepositoryName() + '/labels', {
+	                _this13.post('1.0/repositories/' + _this13.getRepositoryOwner() + '/' + _this13.getRepositoryName() + '/labels', {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -13982,10 +13942,10 @@
 	    }, {
 	        key: 'addIssueColumn',
 	        value: function addIssueColumn(column) {
-	            var _this15 = this;
+	            var _this14 = this;
 
 	            return new Promise(function (callback) {
-	                _this15.post('1.0/repositories/' + _this15.getRepositoryOwner() + '/' + _this15.getRepositoryName() + '/labels', {
+	                _this14.post('1.0/repositories/' + _this14.getRepositoryOwner() + '/' + _this14.getRepositoryName() + '/labels', {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -14120,12 +14080,12 @@
 	    }, {
 	        key: 'removeMilestone',
 	        value: function removeMilestone(index) {
-	            var _this16 = this;
+	            var _this15 = this;
 
 	            var milestone = resources.milestones[index];
 
 	            return new Promise(function (callback) {
-	                _this16.delete('1.0/repositories/' + _this16.getRepositoryOwner() + '/' + _this16.getRepositoryName() + '/issues/milestones/' + milestone.id).then(function () {
+	                _this15.delete('1.0/repositories/' + _this15.getRepositoryOwner() + '/' + _this15.getRepositoryName() + '/issues/milestones/' + milestone.id).then(function () {
 	                    callback();
 	                });
 	            });
@@ -14189,10 +14149,10 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            var _this17 = this;
+	            var _this16 = this;
 
 	            return new Promise(function (callback) {
-	                _this17.put('1.0/repositories/' + _this17.getRepositoryOwner() + '/' + _this17.getRepositoryName() + '/issues/milestones/' + milestone.id, _this17.convertMilestone(milestone)).then(function () {
+	                _this16.put('1.0/repositories/' + _this16.getRepositoryOwner() + '/' + _this16.getRepositoryName() + '/issues/milestones/' + milestone.id, _this16.convertMilestone(milestone)).then(function () {
 	                    callback();
 	                });
 	            });
@@ -14210,10 +14170,10 @@
 	    }, {
 	        key: 'updateIssueEstimate',
 	        value: function updateIssueEstimate(estimate, previousName) {
-	            var _this18 = this;
+	            var _this17 = this;
 
 	            return new Promise(function (callback) {
-	                _this18.patch('1.0/repositories/' + _this18.getRepositoryOwner() + '/' + _this18.getRepositoryName() + '/labels/estimate:' + previousName, {
+	                _this17.patch('1.0/repositories/' + _this17.getRepositoryOwner() + '/' + _this17.getRepositoryName() + '/labels/estimate:' + previousName, {
 	                    name: 'estimate:' + estimate,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -14234,10 +14194,10 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            var _this19 = this;
+	            var _this18 = this;
 
 	            return new Promise(function (callback) {
-	                _this19.patch('1.0/repositories/' + _this19.getRepositoryOwner() + '/' + _this19.getRepositoryName() + '/labels/column:' + previousName, {
+	                _this18.patch('1.0/repositories/' + _this18.getRepositoryOwner() + '/' + _this18.getRepositoryName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -14291,31 +14251,6 @@
 	                });
 
 	                resources.repositories[i] = repository;
-	            }
-	        }
-
-	        /**
-	         * Process organisations
-	         *
-	         * @param {Array} teams
-	         */
-
-	    }, {
-	        key: 'processOrganizations',
-	        value: function processOrganizations(teams) {
-	            resources.organizations = [];
-
-	            for (var i in teams) {
-	                var index = resources.organizations.length;
-
-	                var organization = new Organization({
-	                    index: index,
-	                    id: teams[i].uuid,
-	                    name: teams[i].username,
-	                    description: teams[i].display_name
-	                });
-
-	                resources.organizations[index] = organization;
 	            }
 	        }
 
@@ -14424,14 +14359,14 @@
 	        }
 
 	        /**
-	         * Process team members
+	         * Process collaborators
 	         *
-	         * @param {Array} members
+	         * @param {Array} collaborators
 	         */
 
 	    }, {
 	        key: 'processMembers',
-	        value: function processMembers(members) {
+	        value: function processMembers(collaborators) {
 	            resources.collaborators = [];
 
 	            var _iteratorNormalCompletion3 = true;
@@ -14439,14 +14374,14 @@
 	            var _iteratorError3 = undefined;
 
 	            try {
-	                for (var _iterator3 = (members || [])[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                    var member = _step3.value;
+	                for (var _iterator3 = (collaborators || [])[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                    var collaborator = _step3.value;
 
 	                    resources.collaborators.push({
-	                        id: member.username,
-	                        name: member.username,
-	                        displayName: member.display_name,
-	                        avatar: member.links.avatar.href
+	                        id: collaborator.username,
+	                        name: collaborator.username,
+	                        displayName: collaborator.display_name,
+	                        avatar: collaborator.links.avatar.href
 	                    });
 	                }
 	            } catch (err) {
@@ -14811,7 +14746,7 @@
 	        // Optional properties
 	        this.column = properties.column || 0;
 	        this.type = properties.type || 0;
-	        this.team = properties.team;
+	        this.tags = properties.tags || [];
 	        this.priority = properties.priority || 0;
 	        this.estimate = properties.estimate || 0;
 	        this.version = properties.version;
@@ -14855,8 +14790,8 @@
 	                            this.type = ISSUE_TYPES[value];
 	                            break;
 
-	                        case 'team':
-	                            this.team = ResourceHelper.getTeam(value);
+	                        case 'tags':
+	                            this.tags = value.split(',');
 	                            break;
 
 	                        case 'priority':
@@ -14929,18 +14864,6 @@
 	        key: 'getColumn',
 	        value: function getColumn() {
 	            return resources.issueColumns[this.column || 0];
-	        }
-
-	        /**
-	         * Gets team
-	         *
-	         * @returns {String} Team name
-	         */
-
-	    }, {
-	        key: 'getTeam',
-	        value: function getTeam() {
-	            return resources.teams[this.team];
 	        }
 
 	        /**
@@ -15099,7 +15022,7 @@
 	            return {
 	                column: this.getColumn(),
 	                type: this.getType(),
-	                team: this.getTeam(),
+	                tags: this.tags,
 	                priority: this.getPriority(),
 	                version: this.getVersion(),
 	                milestone: this.getMilestone() ? this.getMilestone().title : null,
@@ -15995,27 +15918,6 @@
 
 /***/ },
 /* 67 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var Organization = function Organization(properties) {
-	    _classCallCheck(this, Organization);
-
-	    properties = properties || {};
-
-	    this.id = properties.id;
-	    this.index = properties.index;
-	    this.name = properties.name;
-	    this.description = properties.description;
-	};
-
-	module.exports = Organization;
-
-/***/ },
-/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -16042,7 +15944,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (Navbar.__proto__ || Object.getPrototypeOf(Navbar)).call(this, params));
 
-	        _this.template = __webpack_require__(69);
+	        _this.template = __webpack_require__(68);
 
 	        _this.fetch();
 	        return _this;
@@ -16323,7 +16225,7 @@
 	module.exports = Navbar;
 
 /***/ },
-/* 69 */
+/* 68 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -16357,7 +16259,7 @@
 	};
 
 /***/ },
-/* 70 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -16384,7 +16286,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (RepositoryBar.__proto__ || Object.getPrototypeOf(RepositoryBar)).call(this, params));
 
-	        _this.template = __webpack_require__(71);
+	        _this.template = __webpack_require__(70);
 
 	        _this.fetch();
 	        return _this;
@@ -16470,7 +16372,7 @@
 	module.exports = RepositoryBar;
 
 /***/ },
-/* 71 */
+/* 70 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -16506,7 +16408,7 @@
 	};
 
 /***/ },
-/* 72 */
+/* 71 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -16519,35 +16421,35 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var TeamBar = function (_View) {
-	    _inherits(TeamBar, _View);
+	var TagBar = function (_View) {
+	    _inherits(TagBar, _View);
 
-	    function TeamBar(params) {
-	        _classCallCheck(this, TeamBar);
+	    function TagBar(params) {
+	        _classCallCheck(this, TagBar);
 
-	        var _this = _possibleConstructorReturn(this, (TeamBar.__proto__ || Object.getPrototypeOf(TeamBar)).call(this, params));
+	        var _this = _possibleConstructorReturn(this, (TagBar.__proto__ || Object.getPrototypeOf(TagBar)).call(this, params));
 
-	        _this.template = __webpack_require__(73);
+	        _this.template = __webpack_require__(72);
 
 	        _this.fetch();
 	        return _this;
 	    }
 
 	    /**
-	     * Event: Click team
+	     * Event: Click tag
 	     *
 	     * @param {String} name
 	     */
 
 
-	    _createClass(TeamBar, [{
-	        key: 'onClickTeam',
-	        value: function onClickTeam(name) {
+	    _createClass(TagBar, [{
+	        key: 'onClickTag',
+	        value: function onClickTag(name) {
 	            var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
 
 	            Router.go(basePath + name, true);
 
-	            this.applyTeam();
+	            this.applyTag();
 
 	            this.render();
 	        }
@@ -16557,10 +16459,10 @@
 	         */
 
 	    }, {
-	        key: 'applyTeam',
-	        value: function applyTeam() {
+	        key: 'applyTag',
+	        value: function applyTag() {
 	            var issueViews = ViewHelper.getAll('IssueEditor');
-	            var team = Router.params.team;
+	            var tag = Router.params.tag;
 
 	            var _iteratorNormalCompletion = true;
 	            var _didIteratorError = false;
@@ -16570,7 +16472,7 @@
 	                for (var _iterator = issueViews[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	                    var issueView = _step.value;
 
-	                    var isValid = team == 'all' || issueView.model.getTeam() == team;
+	                    var isValid = tag == 'all' || issueView.model.tags.indexOf(tag) > -1;
 
 	                    issueView.$element.toggle(isValid);
 	                }
@@ -16591,13 +16493,13 @@
 	        }
 	    }]);
 
-	    return TeamBar;
+	    return TagBar;
 	}(View);
 
-	module.exports = TeamBar;
+	module.exports = TagBar;
 
 /***/ },
-/* 73 */
+/* 72 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -16605,26 +16507,26 @@
 	module.exports = function render() {
 	    var _this = this;
 
-	    var activeTab = Router.params.team || 'all';
+	    var activeTab = Router.params.tag || 'all';
 	    var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
 
-	    if (resources.teams.length < 1) {
+	    if (resources.tags.length < 1) {
 	        return;
 	    }
 
-	    return _.div({ class: 'team-bar tabbed-container vertical' }, _.div({ class: 'tabs' }, _.a({ href: '#' + basePath + 'all', class: 'tab' + (activeTab == 'all' ? ' active' : '') }, 'all teams').click(function (e) {
+	    return _.div({ class: 'tag-bar tabbed-container vertical' }, _.div({ class: 'tabs' }, _.a({ href: '#' + basePath + 'all', class: 'tab' + (activeTab == 'all' ? ' active' : '') }, 'all tags').click(function (e) {
 	        e.preventDefault();
-	        _this.onClickTeam('all');
-	    }), _.each(resources.teams || [], function (i, team) {
-	        return _.a({ href: '#' + basePath + team, class: 'tab' + (activeTab == team ? ' active' : '') }, team).click(function (e) {
+	        _this.onClickTag('all');
+	    }), _.each(resources.tags || [], function (i, tag) {
+	        return _.a({ href: '#' + basePath + tag, class: 'tab' + (activeTab == tag ? ' active' : '') }, tag).click(function (e) {
 	            e.preventDefault();
-	            _this.onClickTeam(team);
+	            _this.onClickTag(tag);
 	        });
 	    })));
 	};
 
 /***/ },
-/* 74 */
+/* 73 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -16645,7 +16547,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (IssueEditor.__proto__ || Object.getPrototypeOf(IssueEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(75);
+	        _this.template = __webpack_require__(74);
 
 	        _this.fetch();
 	        return _this;
@@ -16784,7 +16686,7 @@
 	        value: function updateModel() {
 	            this.model.title = this.getProperty('title');
 	            this.model.type = this.getProperty('type');
-	            this.model.team = this.getProperty('team');
+	            this.model.tags = this.getProperty('tags').split(',');
 	            this.model.priority = this.getProperty('priority');
 	            this.model.assignee = this.getProperty('assignee');
 	            this.model.reporter = this.getProperty('reporter');
@@ -16803,7 +16705,7 @@
 	            // Update all fields
 	            this.setProperty('title', this.model.title);
 	            this.setProperty('type', this.model.type);
-	            this.setProperty('team', this.model.team);
+	            this.setProperty('tags', this.model.tags.join(','));
 	            this.setProperty('priority', this.model.priority);
 	            this.setProperty('assignee', this.model.assignee);
 	            this.setProperty('version', this.model.version);
@@ -17074,6 +16976,10 @@
 	                            view.model.assignee = this.getProperty('assignee', true) || view.model.assignee;
 	                            view.model.version = this.getProperty('version', true) || view.model.version;
 	                            view.model.estimate = this.getProperty('estimate', true) || view.model.estimate;
+
+	                            if (this.getProperty('tags', true)) {
+	                                view.model.tags = this.getProperty('tags', true).split(',');
+	                            }
 
 	                            view.updateDOM();
 	                            view.sync();
@@ -17626,7 +17532,7 @@
 	module.exports = IssueEditor;
 
 /***/ },
-/* 75 */
+/* 74 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -17709,15 +17615,6 @@
 	        _this.onChange();
 	    }).val(this.model.type)),
 
-	    // Team
-	    _.div({ class: 'meta-field team' + (window.resources.teams.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
-	        _this.onChangeCheckbox(e);
-	    }), _.label('Team'), _.select({ 'data-property': 'team', disabled: ApiHelper.isSpectating() }, _.each(window.resources.teams, function (i, type) {
-	        return _.option({ value: i }, type);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.team)),
-
 	    // Priority
 	    _.div({ class: 'meta-field priority' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
@@ -17744,6 +17641,13 @@
 	    })).change(function () {
 	        _this.onChange();
 	    }).val(this.model.estimate)),
+
+	    // Tags
+	    _.div({ class: 'meta-field tags' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
+	        _this.onChangeCheckbox(e);
+	    }), _.label('Tags'), _.input({ type: 'text', 'data-property': 'tags', disabled: ApiHelper.isSpectating() }).change(function () {
+	        _this.onChange();
+	    }).val(this.model.tags.join(','))),
 
 	    // Multi edit actions
 	    _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {
@@ -17787,7 +17691,7 @@
 	};
 
 /***/ },
-/* 76 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -17808,7 +17712,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (PlanItemEditor.__proto__ || Object.getPrototypeOf(PlanItemEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(77);
+	        _this.template = __webpack_require__(76);
 
 	        _this.fetch();
 	        return _this;
@@ -18000,7 +17904,7 @@
 	module.exports = PlanItemEditor;
 
 /***/ },
-/* 77 */
+/* 76 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18028,7 +17932,7 @@
 	};
 
 /***/ },
-/* 78 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18053,7 +17957,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (MilestoneEditor.__proto__ || Object.getPrototypeOf(MilestoneEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(79);
+	        _this.template = __webpack_require__(78);
 
 	        _this.fetch();
 	        return _this;
@@ -18073,7 +17977,7 @@
 
 	            var issue = new Issue({
 	                milestone: this.model.index,
-	                team: Router.params.team == 'all' ? null : ResourceHelper.getTeam(Router.params.team),
+	                tags: Router.params.tag == 'all' ? [] : [Router.params.tag],
 	                reporter: ResourceHelper.getCollaborator(User.getCurrent().name)
 	            });
 
@@ -18161,7 +18065,7 @@
 	module.exports = MilestoneEditor;
 
 /***/ },
-/* 79 */
+/* 78 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18189,7 +18093,7 @@
 	};
 
 /***/ },
-/* 80 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18210,7 +18114,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (ResourceEditor.__proto__ || Object.getPrototypeOf(ResourceEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(81);
+	        _this.template = __webpack_require__(80);
 
 	        _this.fetch();
 	        return _this;
@@ -18284,7 +18188,7 @@
 	module.exports = ResourceEditor;
 
 /***/ },
-/* 81 */
+/* 80 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18314,7 +18218,7 @@
 	};
 
 /***/ },
-/* 82 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18335,7 +18239,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (MilestonesEditor.__proto__ || Object.getPrototypeOf(MilestonesEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(83);
+	        _this.template = __webpack_require__(82);
 
 	        _this.init();
 
@@ -18412,7 +18316,7 @@
 	module.exports = MilestonesEditor;
 
 /***/ },
-/* 83 */
+/* 82 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18455,7 +18359,7 @@
 	};
 
 /***/ },
-/* 84 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18476,7 +18380,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (RepositoryEditor.__proto__ || Object.getPrototypeOf(RepositoryEditor)).call(this, params));
 
-	        _this.template = __webpack_require__(85);
+	        _this.template = __webpack_require__(84);
 
 	        _this.fetch();
 	        return _this;
@@ -18506,7 +18410,7 @@
 	module.exports = RepositoryEditor;
 
 /***/ },
-/* 85 */
+/* 84 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18524,7 +18428,7 @@
 	};
 
 /***/ },
-/* 86 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18547,7 +18451,7 @@
 
 	        _this.MAX_FILTERS = 5;
 
-	        _this.template = __webpack_require__(87);
+	        _this.template = __webpack_require__(86);
 
 	        var defaultColumn = '';
 
@@ -18706,9 +18610,9 @@
 	                    var issueView = _step2.value;
 
 	                    var issue = issueView.model.getBakedValues();
-	                    var isTeamMatch = Router.params.team == 'all' || Router.params.team == issue.team;
+	                    var isTagMatch = Router.params.tag == 'all' || issue.tags.indexOf(Router.params.tag) > -1;
 
-	                    issueView.$element.toggle(isTeamMatch);
+	                    issueView.$element.toggle(isTagMatch);
 
 	                    var _iteratorNormalCompletion3 = true;
 	                    var _didIteratorError3 = false;
@@ -18775,7 +18679,7 @@
 	module.exports = FilterEditor;
 
 /***/ },
-/* 87 */
+/* 86 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -18859,7 +18763,7 @@
 	};
 
 /***/ },
-/* 88 */
+/* 87 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18884,7 +18788,7 @@
 
 	        var _this = _possibleConstructorReturn(this, (BurnDownChart.__proto__ || Object.getPrototypeOf(BurnDownChart)).call(this, params));
 
-	        _this.template = __webpack_require__(89);
+	        _this.template = __webpack_require__(88);
 
 	        // Find most relevant milestone
 	        var nearest = void 0;
@@ -19061,7 +18965,7 @@
 	module.exports = BurnDownChart;
 
 /***/ },
-/* 89 */
+/* 88 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19198,7 +19102,7 @@
 	};
 
 /***/ },
-/* 90 */
+/* 89 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -19243,7 +19147,7 @@
 	    location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/all';
 	});
 
-	Router.route('/:user/:repository/board/:mode/:team', function () {
+	Router.route('/:user/:repository/board/:mode/:tag', function () {
 	    ApiHelper.checkConnection().then(function () {
 	        return ApiHelper.getResources(true);
 	    }).then(function () {
@@ -19252,7 +19156,7 @@
 	        $('.workspace').remove();
 
 	        // Append all milestones
-	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-panel' }, new FilterEditor().$element, new TeamBar().$element), _.div({ class: 'workspace-content board-container ' + Router.params.mode }, _.each(window.resources.milestones, function (i, milestone) {
+	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-panel' }, new FilterEditor().$element, new TagBar().$element), _.div({ class: 'workspace-content board-container ' + Router.params.mode }, _.each(window.resources.milestones, function (i, milestone) {
 	            if (Router.params.mode === 'kanban' && milestone.isClosed()) {
 	                return;
 	            }
@@ -19315,7 +19219,7 @@
 	        $('.workspace').remove();
 
 	        var canEdit = function canEdit(name) {
-	            return name !== 'organizations' && name !== 'teams' && name !== 'milestones' && name !== 'issues' && name !== 'repositories' && name !== 'collaborators';
+	            return name !== 'organizations' && name !== 'tags' && name !== 'milestones' && name !== 'issues' && name !== 'repositories' && name !== 'collaborators';
 	        };
 
 	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-content settings-container' }, _.div({ class: 'tabbed-container vertical' }, _.div({ class: 'tabs' }, _.each(window.resources, function (name, resource) {

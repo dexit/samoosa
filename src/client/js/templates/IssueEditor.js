@@ -110,18 +110,6 @@ module.exports = function render() {
                 ).change(() => { this.onChange(); }).val(this.model.type)
             ),
             
-            // Team
-            _.div({class: 'meta-field team' + (window.resources.teams.length < 1 ? ' hidden' : '')},
-                _.input({class: 'multi-edit-toggle', type: 'checkbox'})
-                    .change((e) => { this.onChangeCheckbox(e); }),
-                _.label('Team'),
-                _.select({'data-property': 'team', disabled: ApiHelper.isSpectating()},
-                    _.each(window.resources.teams, (i, type) => {
-                        return _.option({value: i}, type);
-                    })
-                ).change(() => { this.onChange(); }).val(this.model.team)
-            ),
-
             // Priority
             _.div({class: 'meta-field priority'},
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
@@ -158,6 +146,15 @@ module.exports = function render() {
                 ).change(() => { this.onChange(); }).val(this.model.estimate)
             ),
             
+            // Tags
+            _.div({class: 'meta-field tags'},
+                _.input({class: 'multi-edit-toggle', type: 'checkbox'})
+                    .change((e) => { this.onChangeCheckbox(e); }),
+                _.label('Tags'),
+                _.input({type: 'text', 'data-property': 'tags', disabled: ApiHelper.isSpectating()})
+                    .change(() => { this.onChange(); }).val(this.model.tags.join(','))
+            ),
+
             // Multi edit actions
             _.div({class: 'multi-edit-actions'}, 
                 _.button({class: 'btn'},

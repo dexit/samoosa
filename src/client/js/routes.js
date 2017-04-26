@@ -56,7 +56,7 @@ Router.route('/:user/:repository/board/:mode/', () => {
     location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/all';
 });
 
-Router.route('/:user/:repository/board/:mode/:team', () => {
+Router.route('/:user/:repository/board/:mode/:tag', () => {
     ApiHelper.checkConnection()
     .then(() => {
         return ApiHelper.getResources(true);
@@ -71,7 +71,7 @@ Router.route('/:user/:repository/board/:mode/:team', () => {
             _.div({class: 'workspace'},
                 _.div({class: 'workspace-panel'},
                     new FilterEditor().$element,
-                    new TeamBar().$element
+                    new TagBar().$element
                 ),
                 _.div({class: 'workspace-content board-container ' + Router.params.mode},
                     _.each(window.resources.milestones, (i, milestone) => {
@@ -164,7 +164,7 @@ Router.route('/:user/:repository/settings/:resource', () => {
 
         let canEdit = (name) => {
             return name !== 'organizations' &&
-            name !== 'teams' &&
+            name !== 'tags' &&
             name !== 'milestones' &&
             name !== 'issues' &&
             name !== 'repositories' &&

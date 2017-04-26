@@ -302,6 +302,19 @@
                 display: inline-block;
             }
 
+            input[type="text"] {
+                border-radius: 5px;
+                border: 0px;
+                margin: 0.25rem -0.5rem;
+                padding: 0rem 0.5rem;
+                border: 2px solid transparent;
+
+                &:focus {
+                    outline: none;
+                    border: 2px solid $pink-medium;
+                }
+            }
+
             select {
                 display: inline-block;
 

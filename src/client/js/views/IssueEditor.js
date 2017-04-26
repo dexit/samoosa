@@ -132,7 +132,7 @@ class IssueEditor extends View {
     updateModel() {
         this.model.title = this.getProperty('title'); 
         this.model.type = this.getProperty('type'); 
-        this.model.team = this.getProperty('team'); 
+        this.model.tags = this.getProperty('tags').split(','); 
         this.model.priority = this.getProperty('priority');
         this.model.assignee = this.getProperty('assignee');
         this.model.reporter = this.getProperty('reporter');
@@ -148,7 +148,7 @@ class IssueEditor extends View {
         // Update all fields
         this.setProperty('title', this.model.title);
         this.setProperty('type', this.model.type);
-        this.setProperty('team', this.model.team);
+        this.setProperty('tags', this.model.tags.join(','));
         this.setProperty('priority', this.model.priority);
         this.setProperty('assignee', this.model.assignee);
         this.setProperty('version', this.model.version);
@@ -375,6 +375,10 @@ class IssueEditor extends View {
                     view.model.assignee = this.getProperty('assignee', true) || view.model.assignee;
                     view.model.version = this.getProperty('version', true) || view.model.version;
                     view.model.estimate = this.getProperty('estimate', true) || view.model.estimate;
+
+                    if(this.getProperty('tags', true)) {
+                        view.model.tags = this.getProperty('tags', true).split(',');
+                    }
                 
                     view.updateDOM();
                     view.sync();

@@ -81,12 +81,11 @@ window.Milestone = require('./models/Milestone');
 window.User = require('./models/User');
 window.Repository = require('./models/Repository');
 window.Attachment = require('./models/Attachment');
-window.Organization = require('./models/Organization');
 
 // Views
 window.Navbar = require('./views/Navbar');
 window.RepositoryBar = require('./views/RepositoryBar');
-window.TeamBar = require('./views/TeamBar');
+window.TagBar = require('./views/TagBar');
 window.IssueEditor = require('./views/IssueEditor');
 window.MilestoneEditor = require('./views/MilestoneEditor');
 window.MilestoneViewer = require('./views/MilestoneViewer');

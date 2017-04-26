@@ -161,17 +161,6 @@ class ApiHelper {
     // Resource getters
     // ----------
     /**
-     * Gets organisations
-     *
-     * @returns {Promise} Array of team names
-     */
-    getOrganizations() {
-        window.resources.organization = [];
-
-        return Promise.resolve();
-    }
-
-    /**
      * Gets issues
      *
      * @returns {Promise} promise
@@ -194,13 +183,21 @@ class ApiHelper {
     }
     
     /**
-     * Gets teams
+     * Gets tags
      *
      * @returns {Promise} promise
      */
-    getTeams() {
-        window.resources.teams = [];
-            
+    getTags() {
+        window.resources.tags = [];
+   
+        for(let issue of resources.issues) {
+            for(let tag of issue.tags) {
+                if(resources.tags.indexOf(tag) > -1 || !tag) { continue; }
+
+                resources.tags.push(tag);
+            }
+        }
+
         return Promise.resolve();
     }
     
@@ -662,14 +659,11 @@ class ApiHelper {
         spinner('Getting ' + resource);
 
         switch(resource) {
-            case 'organizations':
-                return this.getOrganizations();
-
             case 'collaborators':
                 return this.getCollaborators();
             
-            case 'teams':
-                return this.getTeams();
+            case 'tags':
+                return this.getTags();
 
             case 'issueColumns':
                 return this.getIssueColumns();
@@ -718,10 +712,7 @@ class ApiHelper {
             }
         }
 
-        return get('teams')
-        .then(() => {
-            return get('issueColumns');
-        })
+        return get('issueColumns')
         .then(() => {
             return get('collaborators');
         })
@@ -732,10 +723,10 @@ class ApiHelper {
             return get('versions');
         })
         .then(() => {
-            return get('organizations');
+            return get('issues');
         })
         .then(() => {
-            return get('issues');
+            return get('tags');
         });
     }
 }

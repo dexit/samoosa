@@ -16,7 +16,7 @@ class Issue {
         // Optional properties
         this.column = properties.column || 0;
         this.type = properties.type || 0;
-        this.team = properties.team;
+        this.tags = properties.tags || [];
         this.priority = properties.priority || 0;
         this.estimate = properties.estimate || 0;
         this.version = properties.version;
@@ -54,8 +54,8 @@ class Issue {
                         this.type = ISSUE_TYPES[value];
                         break;
                     
-                    case 'team':
-                        this.team = ResourceHelper.getTeam(value);
+                    case 'tags':
+                        this.tags = value.split(',');
                         break;
                     
                     case 'priority':
@@ -116,15 +116,6 @@ class Issue {
      */
     getColumn() {
         return resources.issueColumns[this.column || 0];
-    }
-    
-    /**
-     * Gets team
-     *
-     * @returns {String} Team name
-     */
-    getTeam() {
-        return resources.teams[this.team];
     }
     
     /**
@@ -251,7 +242,7 @@ class Issue {
         return {
             column: this.getColumn(),
             type: this.getType(),
-            team: this.getTeam(),
+            tags: this.tags,
             priority: this.getPriority(),
             version: this.getVersion(),
             milestone: this.getMilestone() ? this.getMilestone().title : null,

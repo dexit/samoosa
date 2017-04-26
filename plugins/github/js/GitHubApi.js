@@ -231,20 +231,6 @@ class GitHubApi extends ApiHelper {
     // Resource getters
     // ----------
     /**
-     * Gets organisations
-     *
-     * @returns {Promise} Array of organisations
-     */
-    getOrganizations() {
-        return this.get('/user/orgs')
-        .then((orgs) => {
-            this.processOrganizations(orgs);
-
-            return Promise.resolve();
-        });
-    }
-    
-    /**
      * Gets a list of deleted issues
      *
      * @returns {Array} List of deleted issues
@@ -346,26 +332,6 @@ class GitHubApi extends ApiHelper {
         }
     }
     
-    /**
-     * Gets teams
-     *
-     * @returns {Promise} promise
-     */
-    getTeams() {
-        return this.get('/orgs/' + this.getRepositoryOwner() + '/teams')
-        .then((teams) => {
-            this.processTeams(teams);
-
-            return Promise.resolve();
-        })
-        // No teams found
-        .catch(() => {
-            resources.teams = [];
-
-            return Promise.resolve();
-        });
-    }
-
     /**
      * Gets issue columns
      *
@@ -901,28 +867,6 @@ class GitHubApi extends ApiHelper {
     }
     
     /**
-     * Process organisations
-     *
-     * @param {Array} orgs
-     */
-    processOrganizations(orgs) {
-        resources.organizations = [];
-
-        for(let i in orgs) {
-            let index = resources.organizations.length;
-
-            let organization = new Organization({
-                index: index,
-                id: orgs[i].id,
-                name: orgs[i].login,
-                description: orgs[i].description 
-            });
-
-            resources.organizations[index] = organization;
-        }
-    }
-
-    /**
      * Process milestones
      *
      * @param {Array} milestones
@@ -989,19 +933,6 @@ class GitHubApi extends ApiHelper {
     }
     
     /**
-     * Process teams
-     *
-     * @param {Array} teams
-     */
-    processTeams(teams) {
-        window.resources.teams = [];
-        
-        for(let team of teams) {
-            window.resources.teams.push(team.name);
-        }
-    }
-
-    /**
      * Process collaborators
      *
      * @param {Array} collaborators
@@ -1043,7 +974,7 @@ class GitHubApi extends ApiHelper {
 
             for(let label of gitHubIssue.labels) {
                 let typeIndex = label.name.indexOf('type:');
-                let teamIndex = label.name.indexOf('team:');
+                let tagIndex = label.name.indexOf('tag:');
                 let priorityIndex = label.name.indexOf('priority:');
                 let estimateIndex = label.name.indexOf('estimate:');
                 let versionIndex = label.name.indexOf('version:');
@@ -1057,10 +988,10 @@ class GitHubApi extends ApiHelper {
                     
                     issue.type = ISSUE_TYPES[name];
 
-                } else if(teamIndex > -1) {
-                    let name = label.name.replace('team:', '');
+                } else if(tagIndex > -1) {
+                    let name = label.name.replace('tag:', '');
                     
-                    issue.team = ResourceHelper.getTeam(name);
+                    issue.tags.push(name);
 
                 } else if(versionIndex > -1) {
                     let name = label.name.replace('version:', '');
@@ -1174,13 +1105,11 @@ class GitHubApi extends ApiHelper {
             gitHubIssue.milestone = null;
         }
         
-        // Team
-        let team = resources.teams[issue.team];
-
-        if(team) {
-            gitHubIssue.labels.push('team:' + team);
+        // Tags
+        for(var tag of issue.tags) {
+            gitHubIssue.labels.push('tag:' + tag);
         }
-
+        
         // Type
         if(issue.getType()) {
             gitHubIssue.labels.push('type:' + issue.getType());

@@ -1,25 +1,25 @@
 'use strict';
 
-class TeamBar extends View {
+class TagBar extends View {
     constructor(params) {
         super(params);
 
-        this.template = require('../templates/TeamBar');
+        this.template = require('../templates/TagBar');
 
         this.fetch();
     }
     
     /**
-     * Event: Click team
+     * Event: Click tag
      *
      * @param {String} name
      */
-    onClickTeam(name) {
+    onClickTag(name) {
         let basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
         
         Router.go(basePath + name, true);  
 
-        this.applyTeam();
+        this.applyTag();
 
         this.render();
     }
@@ -27,16 +27,16 @@ class TeamBar extends View {
     /**
      * Applies selected filters
      */
-    applyTeam() {
+    applyTag() {
         let issueViews = ViewHelper.getAll('IssueEditor');
-        let team = Router.params.team;
+        let tag = Router.params.tag;
 
         for(let issueView of issueViews) {
-            let isValid = team == 'all' || issueView.model.getTeam() == team;
+            let isValid = tag == 'all' || issueView.model.tags.indexOf(tag) > -1;
 
             issueView.$element.toggle(isValid);
         }
     }
 }
 
-module.exports = TeamBar;
+module.exports = TagBar;

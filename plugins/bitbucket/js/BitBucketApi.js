@@ -374,20 +374,6 @@ class BitBucketApi extends ApiHelper {
     // Resource getters
     // ----------
     /**
-     * Gets organisations
-     *
-     * @returns {Promise} Array of organisations
-     */
-    getOrganizations() {
-        return this.get('2.0/teams', 'values', false, 'role=member')
-        .then((teams) => {
-            this.processOrganizations(teams);
-
-            return Promise.resolve();
-        });
-    }
-    
-    /**
      * Gets repos
      *
      * @returns {Promise} promise
@@ -861,28 +847,6 @@ class BitBucketApi extends ApiHelper {
     }
     
     /**
-     * Process organisations
-     *
-     * @param {Array} teams
-     */
-    processOrganizations(teams) {
-        resources.organizations = [];
-
-        for(let i in teams) {
-            let index = resources.organizations.length;
-
-            let organization = new Organization({
-                index: index,
-                id: teams[i].uuid,
-                name: teams[i].username,
-                description: teams[i].display_name 
-            });
-
-            resources.organizations[index] = organization;
-        }
-    }
-    
-    /**
      * Process milestones
      *
      * @param {Array} milestones
@@ -957,19 +921,19 @@ class BitBucketApi extends ApiHelper {
     }
 
     /**
-     * Process team members
+     * Process collaborators
      *
-     * @param {Array} members
+     * @param {Array} collaborators
      */
-    processMembers(members) {
+    processMembers(collaborators) {
         resources.collaborators = [];
 
-        for(let member of members || []) {
+        for(let collaborator of collaborators || []) {
             resources.collaborators.push({
-                id: member.username,
-                name: member.username,
-                displayName: member.display_name,
-                avatar: member.links.avatar.href
+                id: collaborator.username,
+                name: collaborator.username,
+                displayName: collaborator.display_name,
+                avatar: collaborator.links.avatar.href
             });
         }
     }

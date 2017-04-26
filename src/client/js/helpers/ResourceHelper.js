@@ -37,16 +37,6 @@ class ResourceHelper {
         return 0;
     }
     
-    static getTeam(name) {
-        for(let i in resources.teams) {
-            let team = resources.teams[i];
-            
-            if(team == name) {
-                return i;
-            }
-        }
-    }
-    
     static getVersion(name) {
         for(let i in resources.versions) {
             let version = resources.versions[i];

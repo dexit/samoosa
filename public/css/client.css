@@ -517,6 +517,15 @@ body, html {
       .issue-editor .meta .meta-field label {
         min-width: 100px;
         display: inline-block; }
+      .issue-editor .meta .meta-field input[type="text"] {
+        border-radius: 5px;
+        border: 0px;
+        margin: 0.25rem -0.5rem;
+        padding: 0rem 0.5rem;
+        border: 2px solid transparent; }
+        .issue-editor .meta .meta-field input[type="text"]:focus {
+          outline: none;
+          border: 2px solid #E70D3B; }
       .issue-editor .meta .meta-field select {
         display: inline-block; }
         .issue-editor .meta .meta-field select[disabled] {

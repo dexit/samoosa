@@ -13915,29 +13915,6 @@
 	        }
 
 	        /**
-	         * Adds issue estimate
-	         *
-	         * @param {String} estimate
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'addIssueEstimate',
-	        value: function addIssueEstimate(estimate) {
-	            var _this13 = this;
-
-	            return new Promise(function (callback) {
-	                _this13.post('1.0/repositories/' + _this13.getRepositoryOwner() + '/' + _this13.getRepositoryName() + '/labels', {
-	                    name: 'estimate:' + estimate,
-	                    color: 'ffffff'
-	                }).then(function () {
-	                    callback();
-	                });
-	            });
-	        }
-
-	        /**
 	         * Adds issue column
 	         *
 	         * @param {String} column
@@ -13948,10 +13925,10 @@
 	    }, {
 	        key: 'addIssueColumn',
 	        value: function addIssueColumn(column) {
-	            var _this14 = this;
+	            var _this13 = this;
 
 	            return new Promise(function (callback) {
-	                _this14.post('1.0/repositories/' + _this14.getRepositoryOwner() + '/' + _this14.getRepositoryName() + '/labels', {
+	                _this13.post('1.0/repositories/' + _this13.getRepositoryOwner() + '/' + _this13.getRepositoryName() + '/labels', {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -14086,12 +14063,12 @@
 	    }, {
 	        key: 'removeMilestone',
 	        value: function removeMilestone(index) {
-	            var _this15 = this;
+	            var _this14 = this;
 
 	            var milestone = resources.milestones[index];
 
 	            return new Promise(function (callback) {
-	                _this15.delete('1.0/repositories/' + _this15.getRepositoryOwner() + '/' + _this15.getRepositoryName() + '/issues/milestones/' + milestone.id).then(function () {
+	                _this14.delete('1.0/repositories/' + _this14.getRepositoryOwner() + '/' + _this14.getRepositoryName() + '/issues/milestones/' + milestone.id).then(function () {
 	                    callback();
 	                });
 	            });
@@ -14155,34 +14132,10 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            var _this16 = this;
+	            var _this15 = this;
 
 	            return new Promise(function (callback) {
-	                _this16.put('1.0/repositories/' + _this16.getRepositoryOwner() + '/' + _this16.getRepositoryName() + '/issues/milestones/' + milestone.id, _this16.convertMilestone(milestone)).then(function () {
-	                    callback();
-	                });
-	            });
-	        }
-
-	        /**
-	         * Updates issue estimate
-	         *
-	         * @param {String} estimate
-	         * @param {String} previousName
-	         *
-	         * @returns {Promise} promise
-	         */
-
-	    }, {
-	        key: 'updateIssueEstimate',
-	        value: function updateIssueEstimate(estimate, previousName) {
-	            var _this17 = this;
-
-	            return new Promise(function (callback) {
-	                _this17.patch('1.0/repositories/' + _this17.getRepositoryOwner() + '/' + _this17.getRepositoryName() + '/labels/estimate:' + previousName, {
-	                    name: 'estimate:' + estimate,
-	                    color: 'ffffff'
-	                }).then(function () {
+	                _this15.put('1.0/repositories/' + _this15.getRepositoryOwner() + '/' + _this15.getRepositoryName() + '/issues/milestones/' + milestone.id, _this15.convertMilestone(milestone)).then(function () {
 	                    callback();
 	                });
 	            });
@@ -14200,10 +14153,10 @@
 	    }, {
 	        key: 'updateIssueColumn',
 	        value: function updateIssueColumn(column, previousName) {
-	            var _this18 = this;
+	            var _this16 = this;
 
 	            return new Promise(function (callback) {
-	                _this18.patch('1.0/repositories/' + _this18.getRepositoryOwner() + '/' + _this18.getRepositoryName() + '/labels/column:' + previousName, {
+	                _this16.patch('1.0/repositories/' + _this16.getRepositoryOwner() + '/' + _this16.getRepositoryName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -14609,6 +14562,9 @@
 	            var version = issue.getVersion();
 
 	            bitBucketIssue.version = version;
+
+	            // Tags
+	            bitBucketIssue.content += '{% tags:' + issue.tags.join(',') + ' %}';
 
 	            // Estimate
 	            var issueEstimate = issue.getEstimate();

@@ -554,25 +554,6 @@ class BitBucketApi extends ApiHelper {
     }
     
     /**
-     * Adds issue estimate
-     *
-     * @param {String} estimate
-     *
-     * @returns {Promise} promise
-     */
-    addIssueEstimate(estimate) {
-        return new Promise((callback) => {
-            this.post('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
-                name: 'estimate:' + estimate,
-                color: 'ffffff'
-            })
-            .then(() => {
-                callback();
-            });
-        });
-    }
-    
-    /**
      * Adds issue column
      *
      * @param {String} column
@@ -758,26 +739,6 @@ class BitBucketApi extends ApiHelper {
     updateMilestone(milestone) {
         return new Promise((callback) => {
             this.put('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/milestones/' + milestone.id, this.convertMilestone(milestone))
-            .then(() => {
-                callback();
-            });
-        });
-    }
-    
-    /**
-     * Updates issue estimate
-     *
-     * @param {String} estimate
-     * @param {String} previousName
-     *
-     * @returns {Promise} promise
-     */
-    updateIssueEstimate(estimate, previousName) {
-        return new Promise((callback) => {
-            this.patch('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/estimate:' + previousName, {
-                name: 'estimate:' + estimate,
-                color: 'ffffff'
-            })
             .then(() => {
                 callback();
             });
@@ -1110,7 +1071,10 @@ class BitBucketApi extends ApiHelper {
         let version = issue.getVersion();
 
         bitBucketIssue.version = version;
-       
+      
+        // Tags
+        bitBucketIssue.content += '{% tags:' + issue.tags.join(',') + ' %}';
+
         // Estimate
         let issueEstimate = issue.getEstimate();
         let estimateString = '{% estimate:' + issueEstimate + ' %}';

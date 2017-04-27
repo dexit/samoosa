@@ -151,8 +151,37 @@ module.exports = function render() {
                 _.input({class: 'multi-edit-toggle', type: 'checkbox'})
                     .change((e) => { this.onChangeCheckbox(e); }),
                 _.label('Tags'),
-                _.input({type: 'text', 'data-property': 'tags', disabled: ApiHelper.isSpectating()})
-                    .change(() => { this.onChange(); }).val(this.model.tags.join(','))
+                _.div({class: 'input', 'data-property': 'tags', 'data-value': this.model.tags.join(',')},
+                    // All tags
+                    _.each(this.model.tags, (i, tag) => {
+                        if(!tag) { return; }
+
+                        return _.span({class: 'tag'},
+                            tag,
+                            _.button({class: 'btn-remove-tag'}, 
+                                _.span({class: 'fa fa-remove'})
+                            ).click((e) => {
+                                let $input = $(e.currentTarget).parents('.input');
+                                let val = $input.data('value').split(',');
+                                val.splice(val.indexOf(tag), 1);
+                                val = val.join(',');
+
+                                $input.data('value', val);
+
+                                this.onChange();
+                            })
+                        );
+                    }),
+
+                    // Add tag
+                    _.span({class: 'add-tag'},
+                        _.button({class: 'btn-add-tag'},
+                            _.span({class: 'fa fa-plus'})
+                        ).click((e) => {
+                            this.onClickAddTag(e);
+                        })
+                    )
+                )
             ),
 
             // Multi edit actions

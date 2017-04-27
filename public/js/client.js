@@ -9794,26 +9794,30 @@
 
 	    if (!wasExpanded) {
 	        $element.css('height', collapsedHeight + 'px');
+	        $element.toggleClass('collapsing', true);
 
 	        setTimeout(function () {
 	            $element.css('height', expandedHeight + 'px');
 
 	            setTimeout(function () {
 	                $element.removeAttr('style');
-	                $element.toggleClass('expanded', !wasExpanded);
-	                $element.toggleClass('collapsed', wasExpanded);
+	                $element.toggleClass('expanded', true);
+	                $element.toggleClass('collapsed', false);
+	                $element.toggleClass('collapsing', false);
 	            }, 500);
 	        }, 50);
 	    } else {
 	        $element.css('height', expandedHeight + 'px');
+	        $element.toggleClass('expanding', true);
 
 	        setTimeout(function () {
 	            $element.css('height', collapsedHeight + 'px');
 
 	            setTimeout(function () {
 	                $element.removeAttr('style');
-	                $element.toggleClass('expanded', !wasExpanded);
-	                $element.toggleClass('collapsed', wasExpanded);
+	                $element.toggleClass('expanded', false);
+	                $element.toggleClass('collapsed', true);
+	                $element.toggleClass('expanding', false);
 	            }, 500);
 	        }, 50);
 	    }
@@ -12040,7 +12044,9 @@
 	                            } else if (tagIndex > -1) {
 	                                var _name = label.name.replace('tag:', '');
 
-	                                issue.tags.push(_name);
+	                                if (_name) {
+	                                    issue.tags.push(_name);
+	                                }
 	                            } else if (versionIndex > -1) {
 	                                var _name2 = label.name.replace('version:', '');
 
@@ -16491,6 +16497,28 @@
 	                }
 	            }
 	        }
+
+	        /**
+	         * Reload
+	         */
+
+	    }], [{
+	        key: 'reload',
+	        value: function reload() {
+	            return ApiHelper.getTags().then(function () {
+	                var view = ViewHelper.get('TagBar');
+
+	                if (view) {
+	                    view.render();
+	                } else {
+	                    view = new TagBar();
+	                }
+
+	                if (!view.$element.parent().hasClass('workspace-panel')) {
+	                    _.find('.workspace-panel').append(view.$element);
+	                }
+	            });
+	        }
 	    }]);
 
 	    return TagBar;
@@ -16510,11 +16538,7 @@
 	    var activeTab = Router.params.tag || 'all';
 	    var basePath = '/' + Router.params.user + '/' + Router.params.repository + '/board/' + Router.params.mode + '/';
 
-	    if (resources.tags.length < 1) {
-	        return;
-	    }
-
-	    return _.div({ class: 'tag-bar tabbed-container vertical' }, _.div({ class: 'tabs' }, _.a({ href: '#' + basePath + 'all', class: 'tab' + (activeTab == 'all' ? ' active' : '') }, 'all tags').click(function (e) {
+	    return _.div({ class: 'tag-bar tabbed-container vertical' }, _.if(resources.tags.length > 0, _.div({ class: 'tabs' }, _.a({ href: '#' + basePath + 'all', class: 'tab' + (activeTab == 'all' ? ' active' : '') }, 'all tags').click(function (e) {
 	        e.preventDefault();
 	        _this.onClickTag('all');
 	    }), _.each(resources.tags || [], function (i, tag) {
@@ -16522,7 +16546,7 @@
 	            e.preventDefault();
 	            _this.onClickTag(tag);
 	        });
-	    })));
+	    }))));
 	};
 
 /***/ },
@@ -16646,7 +16670,7 @@
 	        key: 'getProperty',
 	        value: function getProperty(key, useCheckboxes) {
 	            var $property = this.$element.find('*[data-property="' + key + '"]');
-	            var value = $property.val();
+	            var value = $property.val() || $property.data('value');
 
 	            if (useCheckboxes) {
 	                var $checkbox = this.$element.find('*[data-property="' + key + '"]').siblings('.multi-edit-toggle');
@@ -16658,6 +16682,10 @@
 
 	            if (value && !isNaN(value)) {
 	                value = parseFloat(value);
+	            }
+
+	            if (value == null || typeof value === 'undefined') {
+	                value = '';
 	            }
 
 	            return value;
@@ -16702,6 +16730,9 @@
 	    }, {
 	        key: 'updateDOM',
 	        value: function updateDOM() {
+	            this.render();
+
+	            /*
 	            // Update all fields
 	            this.setProperty('title', this.model.title);
 	            this.setProperty('type', this.model.type);
@@ -16711,18 +16742,18 @@
 	            this.setProperty('version', this.model.version);
 	            this.setProperty('description', this.model.description);
 	            this.setProperty('estimate', this.model.estimate);
-
-	            // Update data type attribute
+	             // Update data type attribute
 	            this.$element.attr('data-type', ISSUE_TYPES[this.model.type]);
-
-	            // Update avatar image
-	            this.$element.find('.header .assignee-avatar').html(this.getAssigneeAvatar());
-
+	             // Update avatar image
+	            this.$element.find('.header .assignee-avatar').html(
+	                this.getAssigneeAvatar()
+	            );
+	            
 	            // Update type indicator
 	            this.$element.find('.type-indicator').replaceWith(this.getTypeIndicator());
-
-	            // Update priority indicator
+	             // Update priority indicator
 	            this.$element.find('.priority-indicator').replaceWith(this.getPriorityIndicator());
+	            */
 	        }
 
 	        /**
@@ -16751,8 +16782,58 @@
 
 	            // Update the issue though the API
 	            ApiHelper.updateIssue(this.model).then(function () {
+	                TagBar.reload();
+
 	                _this3.$element.toggleClass('loading', false);
 	            });
+	        }
+
+	        /**
+	         * Event: Click add tag
+	         */
+
+	    }, {
+	        key: 'onClickAddTag',
+	        value: function onClickAddTag(e) {
+	            var _this4 = this;
+
+	            var $btn = $(e.currentTarget);
+
+	            $('.add-tag-dialog').each(function (i, element) {
+	                var $dialog = $(element);
+
+	                $dialog.siblings('.btn-add-tag').show();
+	                $dialog.remove();
+	            });
+
+	            // Add tag dialog
+	            var $dialog = _.div({ class: 'add-tag-dialog' }, _.input({ type: 'text', class: 'add-tag-name' }), _.button({ class: 'btn-add-tag-confirm' }, _.span({ class: 'fa fa-check' })).click(function (e) {
+	                var val = $(e.currentTarget).siblings('.add-tag-name').val();
+	                var $input = $(e.currentTarget).parents('.input');
+
+	                $input.data('value', _this4.model.tags.concat([val]).join(','));
+
+	                _this4.onChange();
+	            }), _.button({ class: 'btn-add-tag-cancel' }, _.span({ class: 'fa fa-remove' })).click(function (e) {
+	                $dialog.remove();
+	                $btn.show();
+	            }), _.div({ class: 'add-tag-suggestions' }, _.each(resources.tags, function (i, tag) {
+	                if (_this4.model.tags.indexOf(tag) > -1) {
+	                    return;
+	                }
+
+	                return _.button({ class: 'btn-add-tag-suggestion' }, tag).click(function () {
+	                    var $input = $(e.currentTarget).parents('.input');
+
+	                    $input.data('value', _this4.model.tags.concat([tag]).join(','));
+
+	                    _this4.onChange();
+	                });
+	            })));
+
+	            $btn.hide();
+
+	            $btn.after($dialog);
 	        }
 
 	        /**
@@ -16762,7 +16843,7 @@
 	    }, {
 	        key: 'onClickDragHandle',
 	        value: function onClickDragHandle(e) {
-	            var _this4 = this;
+	            var _this5 = this;
 
 	            if (ApiHelper.isSpectating()) {
 	                return;
@@ -16784,10 +16865,10 @@
 	                // Apply temporary CSS properties
 	                $element.each(function (i, element) {
 	                    $(element).css({
-	                        top: _this4.$element.offset().top,
-	                        left: _this4.$element.offset().left,
-	                        width: _this4.$element.outerWidth(),
-	                        height: _this4.$element.outerHeight(),
+	                        top: _this5.$element.offset().top,
+	                        left: _this5.$element.offset().left,
+	                        width: _this5.$element.outerWidth(),
+	                        height: _this5.$element.outerHeight(),
 	                        'pointer-events': 'none',
 	                        'z-index': 999,
 	                        'margin-top': i * 15 + 'px'
@@ -16846,7 +16927,7 @@
 
 	                // Document pointer release mouse button logic
 	                $(document).off('mouseup').on('mouseup', function (e) {
-	                    _this4.onReleaseDragHandle(e);
+	                    _this5.onReleaseDragHandle(e);
 	                });
 	            }
 	        }
@@ -16976,10 +17057,7 @@
 	                            view.model.assignee = this.getProperty('assignee', true) || view.model.assignee;
 	                            view.model.version = this.getProperty('version', true) || view.model.version;
 	                            view.model.estimate = this.getProperty('estimate', true) || view.model.estimate;
-
-	                            if (this.getProperty('tags', true)) {
-	                                view.model.tags = this.getProperty('tags', true).split(',');
-	                            }
+	                            view.model.tags = this.getProperty('tags', true).split(',');
 
 	                            view.updateDOM();
 	                            view.sync();
@@ -17068,7 +17146,7 @@
 	    }, {
 	        key: 'onSubmitComment',
 	        value: function onSubmitComment() {
-	            var _this5 = this;
+	            var _this6 = this;
 
 	            if (ApiHelper.isSpectating()) {
 	                return;
@@ -17085,7 +17163,7 @@
 	            this.$element.find('.add-comment textarea').val('');
 
 	            ApiHelper.addIssueComment(this.model, text).then(function () {
-	                _this5.getComments();
+	                _this6.getComments();
 	            });
 	        }
 
@@ -17210,7 +17288,7 @@
 	    }, {
 	        key: 'onClickRemoveAttachment',
 	        value: function onClickRemoveAttachment(attachment) {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            if (!confirm('Are you sure you want to remove the attachment "' + attachment.name + '"?')) {
 	                return;
@@ -17218,7 +17296,7 @@
 
 	            ApiHelper.removeIssueAttachment(this.model, attachment).then(function () {
 	                modal(false);
-	                _this6.getAttachments();
+	                _this7.getAttachments();
 	            });
 	        }
 
@@ -17231,10 +17309,10 @@
 	    }, {
 	        key: 'onClickAttachment',
 	        value: function onClickAttachment(attachment) {
-	            var _this7 = this;
+	            var _this8 = this;
 
 	            modal(_.div({ class: 'modal-attachment' }, _.img({ src: attachment.getURL() }), _.div({ class: 'modal-attachment-toolbar' }, _.button({ class: 'btn-remove-attachment' }, _.span({ class: 'fa fa-trash' })).click(function () {
-	                _this7.onClickRemoveAttachment(attachment);
+	                _this8.onClickRemoveAttachment(attachment);
 	            }))));
 	        }
 
@@ -17290,7 +17368,7 @@
 	    }, {
 	        key: 'attachFiles',
 	        value: function attachFiles(files) {
-	            var _this8 = this;
+	            var _this9 = this;
 
 	            if (files instanceof FileList) {
 	                var fileList = files;
@@ -17348,14 +17426,14 @@
 	                var nextFile = files.pop();
 
 	                if (!nextFile) {
-	                    _this8.getAttachments();
+	                    _this9.getAttachments();
 
 	                    spinner(false);
 	                    return Promise.resolve();
 	                }
 
 	                return uploadFile(nextFile).then(function (attachment) {
-	                    return ApiHelper.addIssueAttachment(_this8.model, attachment);
+	                    return ApiHelper.addIssueAttachment(_this9.model, attachment);
 	                }).then(function () {
 	                    return uploadNextFile();
 	                }).catch(function (e) {
@@ -17449,20 +17527,20 @@
 	    }, {
 	        key: 'getAttachments',
 	        value: function getAttachments() {
-	            var _this9 = this;
+	            var _this10 = this;
 
 	            this.$element.toggleClass('loading', true);
 
 	            var $attachments = this.$element.find('.attachments');
 
 	            ApiHelper.getIssueAttachments(this.model).then(function (attachments) {
-	                _this9.$element.toggleClass('loading', false);
+	                _this10.$element.toggleClass('loading', false);
 
 	                $attachments.children('.attachment').remove();
 
 	                _.append($attachments, _.each(attachments, function (i, attachment) {
 	                    return _.div({ class: 'attachment' }, _.label({}, _.if(!attachment.isRedirect && attachment.isImage(), _.img({ src: attachment.getURL() })), attachment.name), _.a({ class: 'btn-download-attachment fa fa-download', href: attachment.getURL(), target: '_blank' }), _.button({ class: 'btn-remove-attachment' }, _.span({ class: 'fa fa-trash' })).click(function () {
-	                        _this9.onClickRemoveAttachment(attachment);
+	                        _this10.onClickRemoveAttachment(attachment);
 	                    }));
 	                }));
 	            });
@@ -17475,7 +17553,7 @@
 	    }, {
 	        key: 'getComments',
 	        value: function getComments() {
-	            var _this10 = this;
+	            var _this11 = this;
 
 	            this.$element.toggleClass('loading', true);
 
@@ -17483,7 +17561,7 @@
 	            var user = User.getCurrent();
 
 	            ApiHelper.getIssueComments(this.model).then(function (comments) {
-	                _this10.$element.toggleClass('loading', false);
+	                _this11.$element.toggleClass('loading', false);
 
 	                $comments.children('.comment').remove();
 
@@ -17492,24 +17570,24 @@
 	                    var text = markdownToHtml(comment.text);
 	                    var isUser = collaborator.name == user.name;
 
-	                    var $comment = _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: collaborator.displayName || collaborator.name, src: collaborator.avatar })), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this10.onClickEdit), _.div({ class: 'rendered selectable' }, text), _.textarea({ class: 'edit hidden text btn-transparent' }, comment.text).change(function () {
-	                        _this10.$element.toggleClass('loading', true);
+	                    var $comment = _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: collaborator.displayName || collaborator.name, src: collaborator.avatar })), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this11.onClickEdit), _.div({ class: 'rendered selectable' }, text), _.textarea({ class: 'edit hidden text btn-transparent' }, comment.text).change(function () {
+	                        _this11.$element.toggleClass('loading', true);
 
 	                        comment.text = $comment.find('textarea').val();
 
 	                        $comment.find('.rendered').html(markdownToHtml(comment.text) || '');
 
-	                        ApiHelper.updateIssueComment(_this10.model, comment).then(function () {
-	                            _this10.$element.toggleClass('loading', false);
+	                        ApiHelper.updateIssueComment(_this11.model, comment).then(function () {
+	                            _this11.$element.toggleClass('loading', false);
 
 	                            if (!comment.text) {
 	                                $comment.remove();
 	                            }
 	                        }).catch(function (e) {
-	                            _this10.$element.toggleClass('loading', false);
+	                            _this11.$element.toggleClass('loading', false);
 	                            displayError(e);
 	                        });
-	                    }).blur(_this10.onBlur)), _.if(!isUser, _.div({ class: 'text selectable' }, text)));
+	                    }).blur(_this11.onBlur)), _.if(!isUser, _.div({ class: 'text selectable' }, text)));
 
 	                    return $comment;
 	                }));
@@ -17645,9 +17723,29 @@
 	    // Tags
 	    _.div({ class: 'meta-field tags' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
-	    }), _.label('Tags'), _.input({ type: 'text', 'data-property': 'tags', disabled: ApiHelper.isSpectating() }).change(function () {
-	        _this.onChange();
-	    }).val(this.model.tags.join(','))),
+	    }), _.label('Tags'), _.div({ class: 'input', 'data-property': 'tags', 'data-value': this.model.tags.join(',') },
+	    // All tags
+	    _.each(this.model.tags, function (i, tag) {
+	        if (!tag) {
+	            return;
+	        }
+
+	        return _.span({ class: 'tag' }, tag, _.button({ class: 'btn-remove-tag' }, _.span({ class: 'fa fa-remove' })).click(function (e) {
+	            var $input = $(e.currentTarget).parents('.input');
+	            var val = $input.data('value').split(',');
+	            val.splice(val.indexOf(tag), 1);
+	            val = val.join(',');
+
+	            $input.data('value', val);
+
+	            _this.onChange();
+	        }));
+	    }),
+
+	    // Add tag
+	    _.span({ class: 'add-tag' }, _.button({ class: 'btn-add-tag' }, _.span({ class: 'fa fa-plus' })).click(function (e) {
+	        _this.onClickAddTag(e);
+	    })))),
 
 	    // Multi edit actions
 	    _.div({ class: 'multi-edit-actions' }, _.button({ class: 'btn' }, 'Cancel').click(function () {

@@ -37,6 +37,28 @@ class TagBar extends View {
             issueView.$element.toggle(isValid);
         }
     }
+
+    /**
+     * Reload
+     */
+    static reload() {
+        return ApiHelper.getTags()
+        .then(() => {
+            let view = ViewHelper.get('TagBar');
+
+            if(view) {
+                view.render();
+            } else {
+                view = new TagBar();
+            }
+
+            if(!view.$element.parent().hasClass('workspace-panel')) {
+                _.find('.workspace-panel').append(
+                    view.$element
+                );
+            }
+        });
+    }
 }
 
 module.exports = TagBar;

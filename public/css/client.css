@@ -341,13 +341,15 @@ body, html {
 
 .issue-editor {
   border: 1px solid #bdbdbd;
-  transition: height 0.5s ease;
-  overflow-y: hidden; }
+  transition: height 0.5s ease; }
   .issue-editor.selected {
     outline: 2px solid #2196f3; }
   .issue-editor.loading {
     pointer-events: none;
     opacity: 0.5; }
+  .issue-editor.collapsing, .issue-editor.expanding {
+    overflow-y: hidden;
+    overflow-x: visible; }
   .issue-editor.expanded .header > button span.icon-close {
     display: inline; }
   .issue-editor.expanded .header > button span.icon-open {
@@ -526,9 +528,10 @@ body, html {
         .issue-editor .meta .meta-field input[type="text"]:focus {
           outline: none;
           border: 2px solid #E70D3B; }
-      .issue-editor .meta .meta-field select {
-        display: inline-block; }
-        .issue-editor .meta .meta-field select[disabled] {
+      .issue-editor .meta .meta-field select, .issue-editor .meta .meta-field .input {
+        display: inline-block;
+        margin: 0.25rem -0.5rem; }
+        .issue-editor .meta .meta-field select[disabled], .issue-editor .meta .meta-field .input[disabled] {
           background-color: transparent;
           border: 0px;
           appearance: none;
@@ -537,6 +540,45 @@ body, html {
           clip-path: inset(0px 20px 0px 0px);
           -webkit-clip-path: inset(0px 20px 0px 0px);
           -moz-clip-path: inset(0px 20px 0px 0px); }
+        .issue-editor .meta .meta-field select button, .issue-editor .meta .meta-field .input button {
+          border-radius: 5px;
+          margin-left: 0.5rem;
+          color: #fff;
+          background-color: #E70D3B;
+          padding: 0rem 0.5rem;
+          line-height: 1.5rem; }
+        .issue-editor .meta .meta-field select .tag, .issue-editor .meta .meta-field .input .tag {
+          border-radius: 5px;
+          background-color: #171e23;
+          padding: 0rem 0.5rem;
+          color: #fff;
+          line-height: 1.5rem;
+          display: inline-block;
+          margin-right: 0.5rem; }
+          .issue-editor .meta .meta-field select .tag .btn-remove-tag, .issue-editor .meta .meta-field .input .tag .btn-remove-tag {
+            background-color: transparent;
+            padding: 0px; }
+            .issue-editor .meta .meta-field select .tag .btn-remove-tag .fa, .issue-editor .meta .meta-field .input .tag .btn-remove-tag .fa {
+              margin-left: 0.5rem;
+              color: #E70D3B; }
+        .issue-editor .meta .meta-field select .add-tag, .issue-editor .meta .meta-field .input .add-tag {
+          position: relative; }
+          .issue-editor .meta .meta-field select .add-tag .btn-add-tag, .issue-editor .meta .meta-field .input .add-tag .btn-add-tag {
+            margin-left: 0px; }
+          .issue-editor .meta .meta-field select .add-tag .add-tag-dialog, .issue-editor .meta .meta-field .input .add-tag .add-tag-dialog {
+            width: 190px;
+            padding: 0.5rem;
+            background-color: #171e23;
+            border-radius: 5px;
+            position: absolute;
+            left: 0.5rem;
+            top: 0px;
+            z-index: 999; }
+            .issue-editor .meta .meta-field select .add-tag .add-tag-dialog input, .issue-editor .meta .meta-field .input .add-tag .add-tag-dialog input {
+              margin: 0px;
+              width: 100px; }
+            .issue-editor .meta .meta-field select .add-tag .add-tag-dialog .add-tag-suggestions button, .issue-editor .meta .meta-field .input .add-tag .add-tag-dialog .add-tag-suggestions button {
+              margin: 0.5rem 0.5rem 0rem 0rem; }
   .issue-editor .collaborator-reference {
     font-weight: bold;
     margin-left: 4px; }

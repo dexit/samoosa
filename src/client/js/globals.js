@@ -92,27 +92,31 @@ window.toggleExpand = function($element) {
 
     if(!wasExpanded) {
         $element.css('height', collapsedHeight + 'px');
+        $element.toggleClass('collapsing', true);
         
         setTimeout(() => {
             $element.css('height', expandedHeight + 'px');
             
             setTimeout(() => {
                 $element.removeAttr('style');
-                $element.toggleClass('expanded', !wasExpanded);
-                $element.toggleClass('collapsed', wasExpanded);
+                $element.toggleClass('expanded', true);
+                $element.toggleClass('collapsed', false);
+                $element.toggleClass('collapsing', false);
             }, 500);
         }, 50);
     
     } else {
         $element.css('height', expandedHeight + 'px');
+        $element.toggleClass('expanding', true);
         
         setTimeout(() => {
             $element.css('height', collapsedHeight + 'px');
             
             setTimeout(() => {
                 $element.removeAttr('style');
-                $element.toggleClass('expanded', !wasExpanded);
-                $element.toggleClass('collapsed', wasExpanded);
+                $element.toggleClass('expanded', false);
+                $element.toggleClass('collapsed', true);
+                $element.toggleClass('expanding', false);
             }, 500);
         }, 50);
 

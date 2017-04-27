@@ -98,7 +98,7 @@ class IssueEditor extends View {
      */
     getProperty(key, useCheckboxes) {
         let $property = this.$element.find('*[data-property="' + key + '"]');
-        let value = $property.val();
+        let value = $property.val() || $property.data('value');
    
         if(useCheckboxes) {
             let $checkbox = this.$element.find('*[data-property="' + key + '"]').siblings('.multi-edit-toggle');
@@ -110,6 +110,10 @@ class IssueEditor extends View {
 
         if(value && !isNaN(value)) {
             value = parseFloat(value);
+        }
+
+        if(value == null || typeof value === 'undefined') {
+            value = '';
         }
 
         return value;
@@ -145,6 +149,9 @@ class IssueEditor extends View {
      * Updates the DOM with properties from the model
      */
     updateDOM() {
+        this.render();
+
+        /*
         // Update all fields
         this.setProperty('title', this.model.title);
         this.setProperty('type', this.model.type);
@@ -168,6 +175,7 @@ class IssueEditor extends View {
 
         // Update priority indicator
         this.$element.find('.priority-indicator').replaceWith(this.getPriorityIndicator());
+        */
     }
 
     /**
@@ -189,8 +197,64 @@ class IssueEditor extends View {
         // Update the issue though the API
         ApiHelper.updateIssue(this.model)
         .then(() => {
+            TagBar.reload();
+
             this.$element.toggleClass('loading', false);
         });
+    }
+
+    /**
+     * Event: Click add tag
+     */
+    onClickAddTag(e) {
+        let $btn = $(e.currentTarget);
+        
+        $('.add-tag-dialog').each((i, element) => {
+            let $dialog = $(element);
+
+            $dialog.siblings('.btn-add-tag').show();
+            $dialog.remove();
+        });
+
+        // Add tag dialog
+        let $dialog = _.div({class: 'add-tag-dialog'},
+            _.input({type: 'text', class: 'add-tag-name'}),
+            _.button({class: 'btn-add-tag-confirm'},
+                _.span({class: 'fa fa-check'})
+            ).click((e) => {
+                let val = $(e.currentTarget).siblings('.add-tag-name').val();
+                let $input = $(e.currentTarget).parents('.input');
+                
+                $input.data('value', this.model.tags.concat([val]).join(','));
+                
+                this.onChange();         
+            }),
+            _.button({class: 'btn-add-tag-cancel'},
+                _.span({class: 'fa fa-remove'})
+            ).click((e) => {
+                $dialog.remove();
+                $btn.show();
+            }),
+            _.div({class: 'add-tag-suggestions'},
+                _.each(resources.tags, (i, tag) => {
+                    if(this.model.tags.indexOf(tag) > -1) { return; }
+
+                    return _.button({class: 'btn-add-tag-suggestion'},
+                        tag
+                    ).click(() => {
+                        let $input = $(e.currentTarget).parents('.input')
+                            
+                        $input.data('value', this.model.tags.concat([tag]).join(','));
+                        
+                        this.onChange();         
+                    });
+                })
+            )
+        );
+
+        $btn.hide();
+
+        $btn.after($dialog);
     }
 
     /**
@@ -375,10 +439,7 @@ class IssueEditor extends View {
                     view.model.assignee = this.getProperty('assignee', true) || view.model.assignee;
                     view.model.version = this.getProperty('version', true) || view.model.version;
                     view.model.estimate = this.getProperty('estimate', true) || view.model.estimate;
-
-                    if(this.getProperty('tags', true)) {
-                        view.model.tags = this.getProperty('tags', true).split(',');
-                    }
+                    view.model.tags = this.getProperty('tags', true).split(',');
                 
                     view.updateDOM();
                     view.sync();

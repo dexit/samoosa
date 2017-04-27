@@ -990,8 +990,10 @@ class GitHubApi extends ApiHelper {
 
                 } else if(tagIndex > -1) {
                     let name = label.name.replace('tag:', '');
-                    
-                    issue.tags.push(name);
+                   
+                    if(name) {
+                        issue.tags.push(name);
+                    }
 
                 } else if(versionIndex > -1) {
                     let name = label.name.replace('version:', '');

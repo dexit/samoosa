@@ -76,10 +76,10 @@ module.exports = function render() {
             ),
                 
             // Reporter
-            _.if(resources.collaborators.length > 0,
+            _.if(this.model.getReporter(),
                 _.div({class: 'meta-field reporter readonly'},
                     _.label('Reporter'),
-                    _.p(this.model.getReporter() ? (this.model.getReporter().displayName || this.model.getReporter().name) : '(unknown)')
+                    _.p(this.model.getReporter().displayName || this.model.getReporter().name)
                 )
             ),
             
@@ -90,11 +90,13 @@ module.exports = function render() {
                         .change((e) => { this.onChangeCheckbox(e); }),
                     _.label('Assignee'),
                     _.select({'data-property': 'assignee', disabled: ApiHelper.isSpectating()},
-                        _.option({value: null}, '(unassigned)'),
+                        _.option({value: null, selected: !this.model.assignee}, '(unassigned)'),
                         _.each(resources.collaborators, (i, collaborator) => {
-                            return _.option({value: i}, collaborator.displayName || collaborator.name);
+                            return _.option({value: collaborator.name, selected: collaborator.name == this.model.assignee},
+                                collaborator.displayName || collaborator.name
+                            );
                         })
-                    ).change(() => { this.onChange(); }).val(this.model.assignee)
+                    ).change(() => { this.onChange(); })
                 )
             ),
 
@@ -105,7 +107,7 @@ module.exports = function render() {
                 _.label('Type'),
                 _.select({'data-property': 'type', disabled: ApiHelper.isSpectating()},
                     _.each(ISSUE_TYPES, (type, i) => {
-                        return _.option({value: i}, type);
+                        return _.option({value: type}, type);
                     })
                 ).change(() => { this.onChange(); }).val(this.model.type)
             ),
@@ -117,7 +119,7 @@ module.exports = function render() {
                 _.label('Priority'),
                 _.select({'data-property': 'priority', disabled: ApiHelper.isSpectating()},
                     _.each(ISSUE_PRIORITIES, (priority, i) => {
-                        return _.option({value: i}, priority);
+                        return _.option({value: priority}, priority);
                     })
                 ).change(() => { this.onChange(); }).val(this.model.priority)
             ),
@@ -129,7 +131,7 @@ module.exports = function render() {
                 _.label('Version'),
                 _.select({'data-property': 'version', disabled: ApiHelper.isSpectating()},
                     _.each(window.resources.versions, (i, version) => {
-                        return _.option({value: i}, version);
+                        return _.option({value: version}, version);
                     })
                 ).change(() => { this.onChange(); }).val(this.model.version)
             ),
@@ -141,7 +143,7 @@ module.exports = function render() {
                 _.label('Estimate'),
                 _.select({'data-property': 'estimate', disabled: ApiHelper.isSpectating()},
                     _.each(ISSUE_ESTIMATES, (estimate, i) => {
-                        return _.option({value: i}, estimate);
+                        return _.option({value: estimate}, estimate);
                     })
                 ).change(() => { this.onChange(); }).val(this.model.estimate)
             ),

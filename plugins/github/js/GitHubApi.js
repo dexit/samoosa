@@ -337,10 +337,10 @@ class GitHubApi extends ApiHelper {
      *
      * @returns {Promise} promise
      */
-    getIssueColumns() {
+    getColumns() {
         return this.getLabels()
         .then((labels) => {
-            this.processIssueColumns(labels);
+            this.processColumns(labels);
 
             return Promise.resolve();
         });
@@ -508,7 +508,7 @@ class GitHubApi extends ApiHelper {
      *
      * @returns {Promise} promise
      */
-    addIssueColumn(column) {
+    addColumn(column) {
         return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
             name: 'column:' + column,
             color: 'ffffff'
@@ -697,8 +697,8 @@ class GitHubApi extends ApiHelper {
      *
      * @returns {Promise} promise
      */
-    removeIssueColumn(index) {
-        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/column:' + window.resources.issueColumns[index]);
+    removeColumn(index) {
+        return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/column:' + window.resources.columns[index]);
     }
     
     /**
@@ -820,7 +820,7 @@ class GitHubApi extends ApiHelper {
      *
      * @returns {Promise} promise
      */
-    updateIssueColumn(column, previousName) {
+    updateColumn(column, previousName) {
         return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/column:' + previousName, {
             name: 'column:' + column,
             color: 'ffffff'
@@ -914,10 +914,10 @@ class GitHubApi extends ApiHelper {
      *
      * @param {Array} labels
      */
-    processIssueColumns(labels) {
-        window.resources.issueColumns = [];
+    processColumns(labels) {
+        window.resources.columns = [];
         
-        window.resources.issueColumns.push('to do');
+        window.resources.columns.push('to do');
         
         for(let label of labels) {
             let index = label.name.indexOf('column:');
@@ -925,11 +925,11 @@ class GitHubApi extends ApiHelper {
             if(index > -1) {
                 let name = label.name.replace('column:', '');
 
-                window.resources.issueColumns.push(name);
+                window.resources.columns.push(name);
             }
         }
         
-        window.resources.issueColumns.push('done');
+        window.resources.columns.push('done');
     }
     
     /**
@@ -962,12 +962,12 @@ class GitHubApi extends ApiHelper {
             issue.title = gitHubIssue.title;
             issue.description = gitHubIssue.body;
             issue.id = gitHubIssue.number; 
-            issue.reporter =  ResourceHelper.getCollaborator(gitHubIssue.user.login);
+            issue.reporter = gitHubIssue.user.login;
             issue.createdAt = gitHubIssue.created_at;
             issue.closedAt = gitHubIssue.closed_at;
 
             if(gitHubIssue.assignee) {
-                issue.assignee = ResourceHelper.getCollaborator(gitHubIssue.assignee.login);
+                issue.assignee = gitHubIssue.assignee.login;
             }
 
             issue.labels = issue.labels || [];
@@ -986,7 +986,7 @@ class GitHubApi extends ApiHelper {
                 } else if(typeIndex > -1) {
                     let name = label.name.replace('type:', '');
                     
-                    issue.type = ISSUE_TYPES[name];
+                    issue.type = name;
 
                 } else if(tagIndex > -1) {
                     let name = label.name.replace('tag:', '');
@@ -998,35 +998,32 @@ class GitHubApi extends ApiHelper {
                 } else if(versionIndex > -1) {
                     let name = label.name.replace('version:', '');
                     
-                    issue.version = ResourceHelper.getVersion(name);
+                    issue.version = name;
                 
                 } else if(estimateIndex > -1) {
                     let name = label.name.replace('estimate:', '');
                    
-                    issue.estimate = ISSUE_ESTIMATES[name];
+                    issue.estimate = name;
 
                 } else if(priorityIndex > -1) {
                     let name = label.name.replace('priority:', '');
                     
-                    issue.priority = ISSUE_PRIORITIES[name];
+                    issue.priority = name;
         
                 } else if(columnIndex > -1) {
                     let name = label.name.replace('column:', '');
                     
-                    issue.column = ResourceHelper.getIssueColumn(name);
-
-                } else {
-                    issue.labels.push(label);
+                    issue.column = name;
 
                 }
             }
 
             if(gitHubIssue.state == 'closed') {
-                issue.column = resources.issueColumns.length - 1;
+                issue.column = 'done';
             }
 
             if(gitHubIssue.milestone) {
-                issue.milestone = ResourceHelper.getMilestone(gitHubIssue.milestone.title);
+                issue.milestone = gitHubIssue.milestone.title;
             }
 
             issue.index = parseInt(gitHubIssue.number) - 1;
@@ -1085,7 +1082,7 @@ class GitHubApi extends ApiHelper {
         };
 
         // Assignee
-        let assignee = resources.collaborators[issue.assignee];
+        let assignee = issue.getAssignee();
 
         if(assignee) {
             gitHubIssue.assignee = assignee.name;
@@ -1096,9 +1093,7 @@ class GitHubApi extends ApiHelper {
         }
         
         // State
-        let issueColumn = resources.issueColumns[issue.column];
-
-        gitHubIssue.state = issueColumn == 'done' ? 'closed' : 'open';
+        gitHubIssue.state = issue.column == 'done' ? 'closed' : 'open';
 
         // Milestone
         if(issue.getMilestone()) {
@@ -1135,8 +1130,8 @@ class GitHubApi extends ApiHelper {
         }
 
         // Column
-        if(issueColumn && issueColumn != 'to do' && issueColumn != 'done') {
-            gitHubIssue.labels.push('column:' + issueColumn);
+        if(issue.column && issue.column != 'to do' && issue.column != 'done') {
+            gitHubIssue.labels.push('column:' + issue.column);
         }
 
         // Deleted
@@ -1205,7 +1200,7 @@ class GitHubApi extends ApiHelper {
 
             for(let gitHubComment of gitHubComments) {
                 let comment = {
-                    collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
+                    collaborator: gitHubComment.user.login,
                     text: gitHubComment.body,
                     index: gitHubComment.id
                 };

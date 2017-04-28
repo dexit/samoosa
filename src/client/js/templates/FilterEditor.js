@@ -3,7 +3,7 @@
 module.exports = function render() {
     let resourceDictionary = {
         assignee: resources.collaborators,
-        column: resources.issueColumns,
+        column: resources.columns,
         milestone: resources.milestones,
         priority: ISSUE_PRIORITIES,
         type: ISSUE_TYPES,

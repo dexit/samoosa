@@ -8,7 +8,7 @@ module.exports = function render() {
         _.div({class: 'body'},
             _.each(this.model, (i, item) => {
                 // Do not handle issue columns "to do" and "done"
-                if(this.name == 'issueColumns' && (item == 'to do' || item == 'done')) { return; }
+                if(this.name == 'columns' && (item == 'to do' || item == 'done')) { return; }
 
                 return _.div({class: 'item'},
                     _.if(typeof item === 'string',

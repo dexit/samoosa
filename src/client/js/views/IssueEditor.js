@@ -77,7 +77,7 @@ class IssueEditor extends View {
      * @returns {Object} img
      */
     getAssigneeAvatar() {
-        let assignee = window.resources.collaborators[this.model.assignee];
+        let assignee = this.model.getAssignee();
 
         if(assignee) {
             return _.img({src: assignee.avatar});
@@ -108,11 +108,7 @@ class IssueEditor extends View {
             }
         }
 
-        if(value && !isNaN(value)) {
-            value = parseFloat(value);
-        }
-
-        if(value == null || typeof value === 'undefined') {
+        if(!isNaN(value) || value == null || typeof value === 'undefined') {
             value = '';
         }
 
@@ -139,7 +135,6 @@ class IssueEditor extends View {
         this.model.tags = this.getProperty('tags').split(','); 
         this.model.priority = this.getProperty('priority');
         this.model.assignee = this.getProperty('assignee');
-        this.model.reporter = this.getProperty('reporter');
         this.model.version = this.getProperty('version'); 
         this.model.description = this.getProperty('description');
         this.model.estimate = this.getProperty('estimate');
@@ -387,8 +382,8 @@ class IssueEditor extends View {
         $element.each(function(i) {
             for(let view of ViewHelper.getAll('IssueEditor')) {
                 if(this == view.$element[0]) {
-                    view.model.milestone = view.$element.parents('.milestone-viewer').attr('data-index');
-                    view.model.column = view.$element.parents('.column').attr('data-index');
+                    view.model.milestone = view.$element.parents('.milestone-viewer').attr('data-title');
+                    view.model.column = view.$element.parents('.column').attr('data-name');
                 
                     // Trigger the sync event
                     view.sync();
@@ -877,7 +872,7 @@ class IssueEditor extends View {
 
             _.append($comments,
                 _.each(comments, (i, comment) => {
-                    let collaborator = resources.collaborators[comment.collaborator];
+                    let collaborator = ResourceHelper.get(comment.collaborator, 'collaborators', 'name');
                     let text = markdownToHtml(comment.text);
                     let isUser = collaborator.name == user.name;
                     

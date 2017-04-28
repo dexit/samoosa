@@ -3,28 +3,20 @@
 window.resources = {};
 
 class ResourceHelper {
-    static getCollaborator(name) {
-        for(let i in resources.collaborators) {
-            let collaborator = resources.collaborators[i];
-            
-            if(collaborator.name == name) {
-                return i;
+    static get(name, resource, key) {
+        for(let resource of resources[resource]) {
+            if((key && resource[key] === name) || (!key && resource === name)) {
+                return resource;
             }
         }
     }
-    
-    static getIssueColumn(name) {
-        for(let i in resources.issueColumns) {
-            let type = resources.issueColumns[i];
-            
-            if(type == name) {
-                return i;
-            }
-        }
 
-        return 0;
+    static getConstant(name, constant) {
+        if(!constant[name]) { return; }
+
+        return name;
     }
-    
+
     static getIssueAttachment(name) {
         for(let i in resources.issueAttachments) {
             let type = resources.issueAttachments[i];
@@ -37,26 +29,6 @@ class ResourceHelper {
         return 0;
     }
     
-    static getVersion(name) {
-        for(let i in resources.versions) {
-            let version = resources.versions[i];
-            
-            if(version == name) {
-                return i;
-            }
-        }
-    }
-    
-    static getMilestone(name) {
-        for(let i in resources.milestones) {
-            let milestone = resources.milestones[i];
-            
-            if(milestone.title == name) {
-                return i;
-            }
-        }
-    }
-
     /**
      * Updates the indices of every resource item
      *

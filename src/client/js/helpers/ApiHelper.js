@@ -206,8 +206,8 @@ class ApiHelper {
      *
      * @returns {Promise} promise
      */
-    getIssueColumns() {
-        window.resources.issueColumns = [];
+    getColumns() {
+        window.resources.columns = [];
         
         return Promise.resolve();
     }
@@ -277,7 +277,7 @@ class ApiHelper {
      *
      * @returns {Promise} promise
      */
-    addIssueColumn(column) {
+    addColumn(column) {
         return Promise.resolve();
     }
     
@@ -335,7 +335,7 @@ class ApiHelper {
      *
      * @returns {Promise} promise
      */
-    removeIssueColumn(index) {
+    removeColumn(index) {
         return Promise.resolve();
     }
     
@@ -407,7 +407,7 @@ class ApiHelper {
      *
      * @returns {Promise} promise
      */
-    updateIssueColumn(index, column) {
+    updateColumn(index, column) {
         return Promise.resolve();
     }
     
@@ -555,8 +555,8 @@ class ApiHelper {
             case 'collaborators':
                 return this.removeCollaborator(index);
 
-            case 'issueColumns':
-                return this.removeIssueColumn(index);
+            case 'columns':
+                return this.removeColumn(index);
             
             case 'milestones':
                 return this.removeMilestone(index);
@@ -590,8 +590,8 @@ class ApiHelper {
             case 'collaborators':
                 return this.addCollaborator(item);
 
-            case 'issueColumns':
-                return this.addIssueColumn(item);
+            case 'columns':
+                return this.addColumn(item);
 
             case 'milestones':
                 return this.addMilestone(item);
@@ -623,8 +623,8 @@ class ApiHelper {
         debug.log('Updating item for ' + resource + '...', this);
 
         switch(resource) {
-            case 'issueColumns':
-                return this.updateIssueColumn(item, identifier);
+            case 'columns':
+                return this.updateColumn(item, identifier);
             
             case 'versions':
                 return this.updateVersion(item, identifier);
@@ -665,8 +665,8 @@ class ApiHelper {
             case 'tags':
                 return this.getTags();
 
-            case 'issueColumns':
-                return this.getIssueColumns();
+            case 'columns':
+                return this.getColumns();
 
             case 'milestones':
                 return this.getMilestones()
@@ -712,7 +712,7 @@ class ApiHelper {
             }
         }
 
-        return get('issueColumns')
+        return get('columns')
         .then(() => {
             return get('collaborators');
         })

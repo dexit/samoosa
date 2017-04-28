@@ -10,7 +10,7 @@ class FilterEditor extends View {
 
         let defaultColumn = '';
 
-        for(let column of resources.issueColumns) {
+        for(let column of resources.columns) {
             if(column == 'done') {
                 defaultColumn = 'done';
                 break;
@@ -117,7 +117,7 @@ class FilterEditor extends View {
         let issueViews = ViewHelper.getAll('IssueEditor');
 
         for(let issueView of issueViews) {
-            let issue = issueView.model.getBakedValues();
+            let issue = issueView.model;
             let isTagMatch = Router.params.tag == 'all' || issue.tags.indexOf(Router.params.tag) > -1;
 
             issueView.$element.toggle(isTagMatch);

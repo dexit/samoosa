@@ -7,6 +7,17 @@ class Issue {
     constructor(properties) {
         properties = properties || {};
         
+        // Sanity check (no properties should be a number)
+        for(let key in properties) {
+            if(!isNaN(properties[key])) {
+                properties[key] = null;
+            }
+
+            if(typeof properties[key] === 'undefined') {
+                properties[key] = null;
+            }
+        }
+
         // Essential properties
         this.title = properties.title || 'New issue';
         this.description = properties.description || '';
@@ -14,11 +25,11 @@ class Issue {
         this.reporter = properties.reporter;
 
         // Optional properties
-        this.column = properties.column || 0;
-        this.type = properties.type || 0;
+        this.column = properties.column || 'to do';
+        this.type = properties.type || 'task';
         this.tags = properties.tags || [];
-        this.priority = properties.priority || 0;
-        this.estimate = properties.estimate || 0;
+        this.priority = properties.priority || 'low';
+        this.estimate = properties.estimate || '15m';
         this.version = properties.version;
         this.milestone = properties.milestone;
         this.comments = properties.comments || [];
@@ -37,7 +48,7 @@ class Issue {
     setDescriptionWithMetaData(description) {
         if(!description) { return; }
 
-        let tagRegex = /{% (\w+):(.+) %}/g;
+        let tagRegex = /{% (\w+):([^%]+) %}/g;
         let nextMatch = tagRegex.exec(description);
 
         while(nextMatch != null) {
@@ -47,11 +58,11 @@ class Issue {
             if(key && value) {
                 switch(key) {
                     case 'column':
-                        this.column = ResourceHelper.getIssueColumn(value);
+                        this.column = value;
                         break;
                     
                     case 'type':
-                        this.type = ISSUE_TYPES[value];
+                        this.type = value;
                         break;
                     
                     case 'tags':
@@ -59,15 +70,15 @@ class Issue {
                         break;
                     
                     case 'priority':
-                        this.priority = ISSUE_PRIORITIES[value];
+                        this.priority = value;
                         break;
                     
                     case 'estimate':
-                        this.estimate = ISSUE_ESTIMATES[value];
+                        this.estimate = value;
                         break;
                     
                     case 'version':
-                        this.version = ResourceHelper.getVersion(value);
+                        this.version = value;
                         break;
                 
                     default:
@@ -115,7 +126,7 @@ class Issue {
      * @returns {String} Column name
      */
     getColumn() {
-        return resources.issueColumns[this.column || 0];
+        return ResourceHelper.get(this.column, 'columns');
     }
     
     /**
@@ -124,7 +135,7 @@ class Issue {
      * @returns {String} Type name
      */
     getType() {
-        return getKey(ISSUE_TYPES, this.type || 0);
+        return ResourceHelper.getConstant(this.type, ISSUE_TYPES);
     }
 
     /**
@@ -133,7 +144,7 @@ class Issue {
      * @returns {String} Priority name
      */
     getPriority() {
-        return getKey(ISSUE_PRIORITIES, this.priority || 0);
+        return ResourceHelper.getConstant(this.priority, ISSUE_PRIORITIES);
     }
 
     /**
@@ -142,7 +153,7 @@ class Issue {
      * @returns {String} Version name
      */
     getVersion() {
-        return resources.versions[this.version];
+        return ResourceHelper.get(this.version, 'versions');
     }
 
     /**
@@ -151,7 +162,7 @@ class Issue {
      * @returns {Milestone} Milestone object
      */
     getMilestone() {
-        return resources.milestones[this.milestone];
+        return ResourceHelper.get(this.milestone, 'milestones', 'title');
     }
 
     /**
@@ -169,7 +180,7 @@ class Issue {
      * @returns {Collaborator} Collaborator object
      */
     getAssignee() {
-        return resources.collaborators[this.assignee];
+        return ResourceHelper.get(this.assignee, 'collaborators', 'name');
     }
     
     /**
@@ -178,7 +189,7 @@ class Issue {
      * @returns {Collaborator} Collaborator object
      */
     getReporter() {
-        return resources.collaborators[this.reporter];
+        return ResourceHelper.get(this.reporter, 'collaborators', 'name');
     }
 
     /**
@@ -221,7 +232,7 @@ class Issue {
      * @returns {String} Estimate
      */
     getEstimate() {
-        return getKey(ISSUE_ESTIMATES, this.estimate || 0);
+        return ResourceHelper.getConstant(this.estimate, ISSUE_ESTIMATES);
     }
 
     /**
@@ -234,30 +245,12 @@ class Issue {
     }
 
     /**
-     * Gets an object with all the baked values
-     *
-     * @returns {Object} Baked values
-     */
-    getBakedValues() {
-        return {
-            column: this.getColumn(),
-            type: this.getType(),
-            tags: this.tags,
-            priority: this.getPriority(),
-            version: this.getVersion(),
-            milestone: this.getMilestone() ? this.getMilestone().title : null,
-            assignee: this.getAssignee() ? this.getAssignee().name : null,
-            estimate: ISSUE_ESTIMATES[this.estimate || -1]
-        };
-    }
-
-    /**
      * Check if issue is closed
      *
      * @returns {Boolean} closed
      */
     isClosed() {
-        return this.column == window.resources.issueColumns.length - 1;
+        return this.column == 'done'; 
     }
 }
 

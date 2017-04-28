@@ -105,7 +105,7 @@ class Milestone {
         let log = '';
 
         for(let issue of this.getIssues()) {
-            log += '- [' + issue.getType() + '] ' + issue.title + '  \n';
+            log += '- [' + issue.type + '] ' + issue.title + '  \n';
         }
 
         return log;
@@ -122,7 +122,7 @@ class Milestone {
         for(let issue of resources.issues || []) {
             if(!issue) { continue; }
             
-            if(issue.getMilestone() == this || (typeof this.index === 'undefined' && typeof issue.milestone === 'undefined')) {
+            if(issue.milestone === this.title || (this.title === 'Unassigned' && !issue.milestone)) {
                 issues[issues.length] = issue;
             }
         }
@@ -210,7 +210,11 @@ class Milestone {
      * @returns {Boolean} Is closed
      */
     isClosed() {
-        for(let issue of this.getIssues()) {
+        let issues = this.getIssues();
+
+        if(issues.length < 1) { return false; }
+
+        for(let issue of issues) {
             if(!issue.isClosed()) {
                 return false;
             }            

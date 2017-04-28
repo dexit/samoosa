@@ -3,7 +3,7 @@
 module.exports = function render() {
     let state = SettingsHelper.get('milestone', this.model.index) || 'collapsed';
     
-    return _.div({class: 'milestone-viewer ' + state, 'data-index': this.model.index, 'data-end-date': this.model.endDate},
+    return _.div({class: 'milestone-viewer ' + state, 'data-title': this.model.title, 'data-index': this.model.index, 'data-end-date': this.model.endDate},
         _.div({class: 'header'},
             _.div({class: 'title'}, 
                 _.button({class: 'btn-toggle btn-transparent'},
@@ -14,14 +14,14 @@ module.exports = function render() {
             )
         ),
         _.div({class: 'columns'},
-            _.each(window.resources.issueColumns, (columnIndex, column) => {
-                return _.div({class: 'column', 'data-index': columnIndex},
+            _.each(window.resources.columns, (columnIndex, column) => {
+                return _.div({class: 'column', 'data-name': column, 'data-index': columnIndex},
                     _.div({class: 'header'},
                         _.h4(column)
                     ),
                     _.div({class: 'body'},
                         _.each(this.model.getIssues(), (issueIndex, issue) => {
-                            if(issue.column == columnIndex && issue.milestone == this.model.index) {
+                            if(issue.column === column) {
                                 let $issueEditor = new IssueEditor({
                                     model: issue
                                 }).$element;      

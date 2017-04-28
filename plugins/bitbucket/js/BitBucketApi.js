@@ -9,7 +9,7 @@ class BitBucketApi extends ApiHelper {
     getConfig() {
         return {
             readonlyResources: [
-                'issueColumns'
+                'columns'
             ]
         };
     }
@@ -396,10 +396,6 @@ class BitBucketApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getCollaborators() {
-        if(this.isSpectating()) {
-            return Promise.resolve([]);
-        }
-
         return this.get('2.0/teams/' + this.getRepositoryOwner() + '/members')
         .then((res) => {
             if(Array.isArray(res)) {
@@ -411,8 +407,6 @@ class BitBucketApi extends ApiHelper {
             return Promise.resolve();
         })
         .catch((e) => {
-            // TODO try something else to retrieve collaborators
-
             displayError(e);
         })
         .finally(() => {
@@ -443,11 +437,11 @@ class BitBucketApi extends ApiHelper {
      *
      * @returns {Promise} promise
      */
-    getIssueColumns() {
-        resources.issueColumns = [
-            'new',
-            'open',
-            'closed'
+    getColumns() {
+        resources.columns = [
+            'to do',
+            'in progress',
+            'done'
         ];
             
         return Promise.resolve();
@@ -560,7 +554,7 @@ class BitBucketApi extends ApiHelper {
      *
      * @returns {Promise} promise
      */
-    addIssueColumn(column) {
+    addColumn(column) {
         return new Promise((callback) => {
             this.post('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
                 name: 'column:' + column,
@@ -753,7 +747,7 @@ class BitBucketApi extends ApiHelper {
      *
      * @returns {Promise} promise
      */
-    updateIssueColumn(column, previousName) {
+    updateColumn(column, previousName) {
         return new Promise((callback) => {
             this.patch('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/column:' + previousName, {
                 name: 'column:' + column,
@@ -863,10 +857,10 @@ class BitBucketApi extends ApiHelper {
      *
      * @param {Array} labels
      */
-    processIssueColumns(labels) {
-        window.resources.issueColumns = [];
+    processColumns(labels) {
+        window.resources.columns = [];
         
-        window.resources.issueColumns.push('to do');
+        window.resources.columns.push('to do');
         
         for(let label of labels) {
             let index = label.name.indexOf('column:');
@@ -874,11 +868,11 @@ class BitBucketApi extends ApiHelper {
             if(index > -1) {
                 let name = label.name.replace('column:', '');
 
-                window.resources.issueColumns.push(name);
+                window.resources.columns.push(name);
             }
         }
         
-        window.resources.issueColumns.push('done');
+        window.resources.columns.push('done');
     }
 
     /**
@@ -921,10 +915,10 @@ class BitBucketApi extends ApiHelper {
                 issue.closedAt = bitBucketIssue.utc_last_updated;
             }
             
-            issue.reporter = ResourceHelper.getCollaborator(bitBucketIssue.reported_by.username);
+            issue.reporter = bitBucketIssue.reported_by.username;
 
             if(bitBucketIssue.responsible) {
-                issue.assignee = ResourceHelper.getCollaborator(bitBucketIssue.responsible.username);
+                issue.assignee = bitBucketIssue.responsible.username;
             }
 
             // Remap issue type names
@@ -938,6 +932,21 @@ class BitBucketApi extends ApiHelper {
                     break;
             }
             
+            // Remep issue status names
+            switch(bitBucketIssue.status) {
+                case 'new':
+                    bitBucketIssue.status = 'to do';
+                    break;
+                
+                case 'open':
+                    bitBucketIssue.status = 'in progress';
+                    break;
+                
+                case 'closed':
+                    bitBucketIssue.status = 'done';
+                    break;
+            }
+
             // Remap issue priority names
             switch(bitBucketIssue.priority) {
                 case 'trivial':
@@ -962,11 +971,11 @@ class BitBucketApi extends ApiHelper {
 
             bitBucketIssue.metadata.milestone = (bitBucketIssue.metadata.milestone || '').replace(milestoneDateRegex, '');
 
-            issue.priority = ISSUE_PRIORITIES[bitBucketIssue.priority];
-            issue.milestone = ResourceHelper.getMilestone(bitBucketIssue.metadata.milestone);
-            issue.type = ISSUE_TYPES[bitBucketIssue.metadata.kind];
-            issue.version = ResourceHelper.getVersion(bitBucketIssue.metadata.version);
-            issue.column = ResourceHelper.getIssueColumn(bitBucketIssue.status);
+            issue.priority = bitBucketIssue.priority;
+            issue.milestone = bitBucketIssue.metadata.milestone;
+            issue.type = bitBucketIssue.metadata.kind;
+            issue.version = bitBucketIssue.metadata.version;
+            issue.column = bitBucketIssue.status;
             
             issue.index = indexCounter;
 
@@ -1038,10 +1047,24 @@ class BitBucketApi extends ApiHelper {
 
         }
 
-        // State
-        let issueColumn = issue.getColumn();
+        // Column
+        let column = issue.column;
 
-        bitBucketIssue.status = issueColumn;
+        switch(column) {
+            case 'to do':
+                column = 'new';
+                break;
+            
+            case 'in progress':
+                column = 'open';
+                break;
+            
+            case 'done':
+                column = 'closed';
+                break;
+        }
+
+        bitBucketIssue.status = column;
 
         // Milestone
         let milestone = issue.getMilestone();
@@ -1073,7 +1096,9 @@ class BitBucketApi extends ApiHelper {
         bitBucketIssue.version = version;
       
         // Tags
-        bitBucketIssue.content += '{% tags:' + issue.tags.join(',') + ' %}';
+        if(issue.tags.length > 0) {
+            bitBucketIssue.content += '{% tags:' + issue.tags.join(',') + ' %}';
+        }
 
         // Estimate
         let issueEstimate = issue.getEstimate();
@@ -1141,7 +1166,7 @@ class BitBucketApi extends ApiHelper {
 
             for(let bitBucketComment of bitBucketComments) {
                 let comment = {
-                    collaborator: ResourceHelper.getCollaborator(bitBucketComment.author_info.username),
+                    collaborator: bitBucketComment.author_info.username,
                     text: bitBucketComment.content,
                     index: bitBucketComment.comment_id
                 };

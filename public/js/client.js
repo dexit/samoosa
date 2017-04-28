@@ -10088,28 +10088,43 @@
 	    }
 
 	    _createClass(ResourceHelper, null, [{
-	        key: 'getCollaborator',
-	        value: function getCollaborator(name) {
-	            for (var i in resources.collaborators) {
-	                var collaborator = resources.collaborators[i];
+	        key: 'get',
+	        value: function get(name, resource, key) {
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
 
-	                if (collaborator.name == name) {
-	                    return i;
+	            try {
+	                for (var _iterator = resources[resource][Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var _resource = _step.value;
+
+	                    if (key && _resource[key] === name || !key && _resource === name) {
+	                        return _resource;
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
 	                }
 	            }
 	        }
 	    }, {
-	        key: 'getIssueColumn',
-	        value: function getIssueColumn(name) {
-	            for (var i in resources.issueColumns) {
-	                var type = resources.issueColumns[i];
-
-	                if (type == name) {
-	                    return i;
-	                }
+	        key: 'getConstant',
+	        value: function getConstant(name, constant) {
+	            if (!constant[name]) {
+	                return;
 	            }
 
-	            return 0;
+	            return name;
 	        }
 	    }, {
 	        key: 'getIssueAttachment',
@@ -10123,28 +10138,6 @@
 	            }
 
 	            return 0;
-	        }
-	    }, {
-	        key: 'getVersion',
-	        value: function getVersion(name) {
-	            for (var i in resources.versions) {
-	                var version = resources.versions[i];
-
-	                if (version == name) {
-	                    return i;
-	                }
-	            }
-	        }
-	    }, {
-	        key: 'getMilestone',
-	        value: function getMilestone(name) {
-	            for (var i in resources.milestones) {
-	                var milestone = resources.milestones[i];
-
-	                if (milestone.title == name) {
-	                    return i;
-	                }
-	            }
 	        }
 
 	        /**
@@ -11206,12 +11199,12 @@
 	         */
 
 	    }, {
-	        key: 'getIssueColumns',
-	        value: function getIssueColumns() {
+	        key: 'getColumns',
+	        value: function getColumns() {
 	            var _this10 = this;
 
 	            return this.getLabels().then(function (labels) {
-	                _this10.processIssueColumns(labels);
+	                _this10.processColumns(labels);
 
 	                return Promise.resolve();
 	            });
@@ -11421,8 +11414,8 @@
 	         */
 
 	    }, {
-	        key: 'addIssueColumn',
-	        value: function addIssueColumn(column) {
+	        key: 'addColumn',
+	        value: function addColumn(column) {
 	            return this.post('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels', {
 	                name: 'column:' + column,
 	                color: 'ffffff'
@@ -11626,9 +11619,9 @@
 	         */
 
 	    }, {
-	        key: 'removeIssueColumn',
-	        value: function removeIssueColumn(index) {
-	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/column:' + window.resources.issueColumns[index]);
+	        key: 'removeColumn',
+	        value: function removeColumn(index) {
+	            return this.delete('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/column:' + window.resources.columns[index]);
 	        }
 
 	        /**
@@ -11776,8 +11769,8 @@
 	         */
 
 	    }, {
-	        key: 'updateIssueColumn',
-	        value: function updateIssueColumn(column, previousName) {
+	        key: 'updateColumn',
+	        value: function updateColumn(column, previousName) {
 	            return this.patch('/repos/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/labels/column:' + previousName, {
 	                name: 'column:' + column,
 	                color: 'ffffff'
@@ -11906,11 +11899,11 @@
 	         */
 
 	    }, {
-	        key: 'processIssueColumns',
-	        value: function processIssueColumns(labels) {
-	            window.resources.issueColumns = [];
+	        key: 'processColumns',
+	        value: function processColumns(labels) {
+	            window.resources.columns = [];
 
-	            window.resources.issueColumns.push('to do');
+	            window.resources.columns.push('to do');
 
 	            var _iteratorNormalCompletion4 = true;
 	            var _didIteratorError4 = false;
@@ -11925,7 +11918,7 @@
 	                    if (index > -1) {
 	                        var name = label.name.replace('column:', '');
 
-	                        window.resources.issueColumns.push(name);
+	                        window.resources.columns.push(name);
 	                    }
 	                }
 	            } catch (err) {
@@ -11943,7 +11936,7 @@
 	                }
 	            }
 
-	            window.resources.issueColumns.push('done');
+	            window.resources.columns.push('done');
 	        }
 
 	        /**
@@ -12010,12 +12003,12 @@
 	                    issue.title = gitHubIssue.title;
 	                    issue.description = gitHubIssue.body;
 	                    issue.id = gitHubIssue.number;
-	                    issue.reporter = ResourceHelper.getCollaborator(gitHubIssue.user.login);
+	                    issue.reporter = gitHubIssue.user.login;
 	                    issue.createdAt = gitHubIssue.created_at;
 	                    issue.closedAt = gitHubIssue.closed_at;
 
 	                    if (gitHubIssue.assignee) {
-	                        issue.assignee = ResourceHelper.getCollaborator(gitHubIssue.assignee.login);
+	                        issue.assignee = gitHubIssue.assignee.login;
 	                    }
 
 	                    issue.labels = issue.labels || [];
@@ -12040,7 +12033,7 @@
 	                            } else if (typeIndex > -1) {
 	                                var name = label.name.replace('type:', '');
 
-	                                issue.type = ISSUE_TYPES[name];
+	                                issue.type = name;
 	                            } else if (tagIndex > -1) {
 	                                var _name = label.name.replace('tag:', '');
 
@@ -12050,21 +12043,19 @@
 	                            } else if (versionIndex > -1) {
 	                                var _name2 = label.name.replace('version:', '');
 
-	                                issue.version = ResourceHelper.getVersion(_name2);
+	                                issue.version = _name2;
 	                            } else if (estimateIndex > -1) {
 	                                var _name3 = label.name.replace('estimate:', '');
 
-	                                issue.estimate = ISSUE_ESTIMATES[_name3];
+	                                issue.estimate = _name3;
 	                            } else if (priorityIndex > -1) {
 	                                var _name4 = label.name.replace('priority:', '');
 
-	                                issue.priority = ISSUE_PRIORITIES[_name4];
+	                                issue.priority = _name4;
 	                            } else if (columnIndex > -1) {
 	                                var _name5 = label.name.replace('column:', '');
 
-	                                issue.column = ResourceHelper.getIssueColumn(_name5);
-	                            } else {
-	                                issue.labels.push(label);
+	                                issue.column = _name5;
 	                            }
 	                        }
 	                    } catch (err) {
@@ -12083,11 +12074,11 @@
 	                    }
 
 	                    if (gitHubIssue.state == 'closed') {
-	                        issue.column = resources.issueColumns.length - 1;
+	                        issue.column = 'done';
 	                    }
 
 	                    if (gitHubIssue.milestone) {
-	                        issue.milestone = ResourceHelper.getMilestone(gitHubIssue.milestone.title);
+	                        issue.milestone = gitHubIssue.milestone.title;
 	                    }
 
 	                    issue.index = parseInt(gitHubIssue.number) - 1;
@@ -12169,7 +12160,7 @@
 	            };
 
 	            // Assignee
-	            var assignee = resources.collaborators[issue.assignee];
+	            var assignee = issue.getAssignee();
 
 	            if (assignee) {
 	                gitHubIssue.assignee = assignee.name;
@@ -12178,9 +12169,7 @@
 	            }
 
 	            // State
-	            var issueColumn = resources.issueColumns[issue.column];
-
-	            gitHubIssue.state = issueColumn == 'done' ? 'closed' : 'open';
+	            gitHubIssue.state = issue.column == 'done' ? 'closed' : 'open';
 
 	            // Milestone
 	            if (issue.getMilestone()) {
@@ -12239,8 +12228,8 @@
 	            }
 
 	            // Column
-	            if (issueColumn && issueColumn != 'to do' && issueColumn != 'done') {
-	                gitHubIssue.labels.push('column:' + issueColumn);
+	            if (issue.column && issue.column != 'to do' && issue.column != 'done') {
+	                gitHubIssue.labels.push('column:' + issue.column);
 	            }
 
 	            // Deleted
@@ -12327,7 +12316,7 @@
 	                        var gitHubComment = _step9.value;
 
 	                        var comment = {
-	                            collaborator: ResourceHelper.getCollaborator(gitHubComment.user.login),
+	                            collaborator: gitHubComment.user.login,
 	                            text: gitHubComment.body,
 	                            index: gitHubComment.id
 	                        };
@@ -12661,9 +12650,9 @@
 	         */
 
 	    }, {
-	        key: 'getIssueColumns',
-	        value: function getIssueColumns() {
-	            window.resources.issueColumns = [];
+	        key: 'getColumns',
+	        value: function getColumns() {
+	            window.resources.columns = [];
 
 	            return Promise.resolve();
 	        }
@@ -12750,8 +12739,8 @@
 	         */
 
 	    }, {
-	        key: 'addIssueColumn',
-	        value: function addIssueColumn(column) {
+	        key: 'addColumn',
+	        value: function addColumn(column) {
 	            return Promise.resolve();
 	        }
 
@@ -12823,8 +12812,8 @@
 	         */
 
 	    }, {
-	        key: 'removeIssueColumn',
-	        value: function removeIssueColumn(index) {
+	        key: 'removeColumn',
+	        value: function removeColumn(index) {
 	            return Promise.resolve();
 	        }
 
@@ -12913,8 +12902,8 @@
 	         */
 
 	    }, {
-	        key: 'updateIssueColumn',
-	        value: function updateIssueColumn(index, column) {
+	        key: 'updateColumn',
+	        value: function updateColumn(index, column) {
 	            return Promise.resolve();
 	        }
 
@@ -13093,8 +13082,8 @@
 	                case 'collaborators':
 	                    return this.removeCollaborator(index);
 
-	                case 'issueColumns':
-	                    return this.removeIssueColumn(index);
+	                case 'columns':
+	                    return this.removeColumn(index);
 
 	                case 'milestones':
 	                    return this.removeMilestone(index);
@@ -13131,8 +13120,8 @@
 	                case 'collaborators':
 	                    return this.addCollaborator(item);
 
-	                case 'issueColumns':
-	                    return this.addIssueColumn(item);
+	                case 'columns':
+	                    return this.addColumn(item);
 
 	                case 'milestones':
 	                    return this.addMilestone(item);
@@ -13167,8 +13156,8 @@
 	            debug.log('Updating item for ' + resource + '...', this);
 
 	            switch (resource) {
-	                case 'issueColumns':
-	                    return this.updateIssueColumn(item, identifier);
+	                case 'columns':
+	                    return this.updateColumn(item, identifier);
 
 	                case 'versions':
 	                    return this.updateVersion(item, identifier);
@@ -13212,8 +13201,8 @@
 	                case 'tags':
 	                    return this.getTags();
 
-	                case 'issueColumns':
-	                    return this.getIssueColumns();
+	                case 'columns':
+	                    return this.getColumns();
 
 	                case 'milestones':
 	                    return this.getMilestones().then(function () {
@@ -13262,7 +13251,7 @@
 	                }
 	            };
 
-	            return get('issueColumns').then(function () {
+	            return get('columns').then(function () {
 	                return get('collaborators');
 	            }).then(function () {
 	                return get('milestones');
@@ -13314,7 +13303,7 @@
 	         */
 	        value: function getConfig() {
 	            return {
-	                readonlyResources: ['issueColumns']
+	                readonlyResources: ['columns']
 	            };
 	        }
 
@@ -13715,10 +13704,6 @@
 	        value: function getCollaborators() {
 	            var _this7 = this;
 
-	            if (this.isSpectating()) {
-	                return Promise.resolve([]);
-	            }
-
 	            return this.get('2.0/teams/' + this.getRepositoryOwner() + '/members').then(function (res) {
 	                if (Array.isArray(res)) {
 	                    res = res[0];
@@ -13728,8 +13713,6 @@
 
 	                return Promise.resolve();
 	            }).catch(function (e) {
-	                // TODO try something else to retrieve collaborators
-
 	                displayError(e);
 	            }).finally(function () {
 	                if (resources.collaborators.length < 1) {
@@ -13765,9 +13748,9 @@
 	         */
 
 	    }, {
-	        key: 'getIssueColumns',
-	        value: function getIssueColumns() {
-	            resources.issueColumns = ['new', 'open', 'closed'];
+	        key: 'getColumns',
+	        value: function getColumns() {
+	            resources.columns = ['to do', 'in progress', 'done'];
 
 	            return Promise.resolve();
 	        }
@@ -13923,8 +13906,8 @@
 	         */
 
 	    }, {
-	        key: 'addIssueColumn',
-	        value: function addIssueColumn(column) {
+	        key: 'addColumn',
+	        value: function addColumn(column) {
 	            var _this13 = this;
 
 	            return new Promise(function (callback) {
@@ -14151,8 +14134,8 @@
 	         */
 
 	    }, {
-	        key: 'updateIssueColumn',
-	        value: function updateIssueColumn(column, previousName) {
+	        key: 'updateColumn',
+	        value: function updateColumn(column, previousName) {
 	            var _this16 = this;
 
 	            return new Promise(function (callback) {
@@ -14277,11 +14260,11 @@
 	         */
 
 	    }, {
-	        key: 'processIssueColumns',
-	        value: function processIssueColumns(labels) {
-	            window.resources.issueColumns = [];
+	        key: 'processColumns',
+	        value: function processColumns(labels) {
+	            window.resources.columns = [];
 
-	            window.resources.issueColumns.push('to do');
+	            window.resources.columns.push('to do');
 
 	            var _iteratorNormalCompletion2 = true;
 	            var _didIteratorError2 = false;
@@ -14296,7 +14279,7 @@
 	                    if (index > -1) {
 	                        var name = label.name.replace('column:', '');
 
-	                        window.resources.issueColumns.push(name);
+	                        window.resources.columns.push(name);
 	                    }
 	                }
 	            } catch (err) {
@@ -14314,7 +14297,7 @@
 	                }
 	            }
 
-	            window.resources.issueColumns.push('done');
+	            window.resources.columns.push('done');
 	        }
 
 	        /**
@@ -14391,10 +14374,10 @@
 	                        issue.closedAt = bitBucketIssue.utc_last_updated;
 	                    }
 
-	                    issue.reporter = ResourceHelper.getCollaborator(bitBucketIssue.reported_by.username);
+	                    issue.reporter = bitBucketIssue.reported_by.username;
 
 	                    if (bitBucketIssue.responsible) {
-	                        issue.assignee = ResourceHelper.getCollaborator(bitBucketIssue.responsible.username);
+	                        issue.assignee = bitBucketIssue.responsible.username;
 	                    }
 
 	                    // Remap issue type names
@@ -14405,6 +14388,21 @@
 
 	                        case 'proposal':
 	                            bitBucketIssue.metadata.kind = 'new feature';
+	                            break;
+	                    }
+
+	                    // Remep issue status names
+	                    switch (bitBucketIssue.status) {
+	                        case 'new':
+	                            bitBucketIssue.status = 'to do';
+	                            break;
+
+	                        case 'open':
+	                            bitBucketIssue.status = 'in progress';
+	                            break;
+
+	                        case 'closed':
+	                            bitBucketIssue.status = 'done';
 	                            break;
 	                    }
 
@@ -14432,11 +14430,11 @@
 
 	                    bitBucketIssue.metadata.milestone = (bitBucketIssue.metadata.milestone || '').replace(milestoneDateRegex, '');
 
-	                    issue.priority = ISSUE_PRIORITIES[bitBucketIssue.priority];
-	                    issue.milestone = ResourceHelper.getMilestone(bitBucketIssue.metadata.milestone);
-	                    issue.type = ISSUE_TYPES[bitBucketIssue.metadata.kind];
-	                    issue.version = ResourceHelper.getVersion(bitBucketIssue.metadata.version);
-	                    issue.column = ResourceHelper.getIssueColumn(bitBucketIssue.status);
+	                    issue.priority = bitBucketIssue.priority;
+	                    issue.milestone = bitBucketIssue.metadata.milestone;
+	                    issue.type = bitBucketIssue.metadata.kind;
+	                    issue.version = bitBucketIssue.metadata.version;
+	                    issue.column = bitBucketIssue.status;
 
 	                    issue.index = indexCounter;
 
@@ -14529,10 +14527,24 @@
 	                bitBucketIssue.responsible = '';
 	            }
 
-	            // State
-	            var issueColumn = issue.getColumn();
+	            // Column
+	            var column = issue.column;
 
-	            bitBucketIssue.status = issueColumn;
+	            switch (column) {
+	                case 'to do':
+	                    column = 'new';
+	                    break;
+
+	                case 'in progress':
+	                    column = 'open';
+	                    break;
+
+	                case 'done':
+	                    column = 'closed';
+	                    break;
+	            }
+
+	            bitBucketIssue.status = column;
 
 	            // Milestone
 	            var milestone = issue.getMilestone();
@@ -14564,7 +14576,9 @@
 	            bitBucketIssue.version = version;
 
 	            // Tags
-	            bitBucketIssue.content += '{% tags:' + issue.tags.join(',') + ' %}';
+	            if (issue.tags.length > 0) {
+	                bitBucketIssue.content += '{% tags:' + issue.tags.join(',') + ' %}';
+	            }
 
 	            // Estimate
 	            var issueEstimate = issue.getEstimate();
@@ -14647,7 +14661,7 @@
 	                        var bitBucketComment = _step5.value;
 
 	                        var comment = {
-	                            collaborator: ResourceHelper.getCollaborator(bitBucketComment.author_info.username),
+	                            collaborator: bitBucketComment.author_info.username,
 	                            text: bitBucketComment.content,
 	                            index: bitBucketComment.comment_id
 	                        };
@@ -14699,6 +14713,17 @@
 
 	        properties = properties || {};
 
+	        // Sanity check (no properties should be a number)
+	        for (var key in properties) {
+	            if (!isNaN(properties[key])) {
+	                properties[key] = null;
+	            }
+
+	            if (typeof properties[key] === 'undefined') {
+	                properties[key] = null;
+	            }
+	        }
+
 	        // Essential properties
 	        this.title = properties.title || 'New issue';
 	        this.description = properties.description || '';
@@ -14706,11 +14731,11 @@
 	        this.reporter = properties.reporter;
 
 	        // Optional properties
-	        this.column = properties.column || 0;
-	        this.type = properties.type || 0;
+	        this.column = properties.column || 'to do';
+	        this.type = properties.type || 'task';
 	        this.tags = properties.tags || [];
-	        this.priority = properties.priority || 0;
-	        this.estimate = properties.estimate || 0;
+	        this.priority = properties.priority || 'low';
+	        this.estimate = properties.estimate || '15m';
 	        this.version = properties.version;
 	        this.milestone = properties.milestone;
 	        this.comments = properties.comments || [];
@@ -14735,7 +14760,7 @@
 	                return;
 	            }
 
-	            var tagRegex = /{% (\w+):(.+) %}/g;
+	            var tagRegex = /{% (\w+):([^%]+) %}/g;
 	            var nextMatch = tagRegex.exec(description);
 
 	            while (nextMatch != null) {
@@ -14745,11 +14770,11 @@
 	                if (key && value) {
 	                    switch (key) {
 	                        case 'column':
-	                            this.column = ResourceHelper.getIssueColumn(value);
+	                            this.column = value;
 	                            break;
 
 	                        case 'type':
-	                            this.type = ISSUE_TYPES[value];
+	                            this.type = value;
 	                            break;
 
 	                        case 'tags':
@@ -14757,15 +14782,15 @@
 	                            break;
 
 	                        case 'priority':
-	                            this.priority = ISSUE_PRIORITIES[value];
+	                            this.priority = value;
 	                            break;
 
 	                        case 'estimate':
-	                            this.estimate = ISSUE_ESTIMATES[value];
+	                            this.estimate = value;
 	                            break;
 
 	                        case 'version':
-	                            this.version = ResourceHelper.getVersion(value);
+	                            this.version = value;
 	                            break;
 
 	                        default:
@@ -14825,7 +14850,7 @@
 	    }, {
 	        key: 'getColumn',
 	        value: function getColumn() {
-	            return resources.issueColumns[this.column || 0];
+	            return ResourceHelper.get(this.column, 'columns');
 	        }
 
 	        /**
@@ -14837,7 +14862,7 @@
 	    }, {
 	        key: 'getType',
 	        value: function getType() {
-	            return getKey(ISSUE_TYPES, this.type || 0);
+	            return ResourceHelper.getConstant(this.type, ISSUE_TYPES);
 	        }
 
 	        /**
@@ -14849,7 +14874,7 @@
 	    }, {
 	        key: 'getPriority',
 	        value: function getPriority() {
-	            return getKey(ISSUE_PRIORITIES, this.priority || 0);
+	            return ResourceHelper.getConstant(this.priority, ISSUE_PRIORITIES);
 	        }
 
 	        /**
@@ -14861,7 +14886,7 @@
 	    }, {
 	        key: 'getVersion',
 	        value: function getVersion() {
-	            return resources.versions[this.version];
+	            return ResourceHelper.get(this.version, 'versions');
 	        }
 
 	        /**
@@ -14873,7 +14898,7 @@
 	    }, {
 	        key: 'getMilestone',
 	        value: function getMilestone() {
-	            return resources.milestones[this.milestone];
+	            return ResourceHelper.get(this.milestone, 'milestones', 'title');
 	        }
 
 	        /**
@@ -14897,7 +14922,7 @@
 	    }, {
 	        key: 'getAssignee',
 	        value: function getAssignee() {
-	            return resources.collaborators[this.assignee];
+	            return ResourceHelper.get(this.assignee, 'collaborators', 'name');
 	        }
 
 	        /**
@@ -14909,7 +14934,7 @@
 	    }, {
 	        key: 'getReporter',
 	        value: function getReporter() {
-	            return resources.collaborators[this.reporter];
+	            return ResourceHelper.get(this.reporter, 'collaborators', 'name');
 	        }
 
 	        /**
@@ -14957,7 +14982,7 @@
 	    }, {
 	        key: 'getEstimate',
 	        value: function getEstimate() {
-	            return getKey(ISSUE_ESTIMATES, this.estimate || 0);
+	            return ResourceHelper.getConstant(this.estimate, ISSUE_ESTIMATES);
 	        }
 
 	        /**
@@ -14973,27 +14998,6 @@
 	        }
 
 	        /**
-	         * Gets an object with all the baked values
-	         *
-	         * @returns {Object} Baked values
-	         */
-
-	    }, {
-	        key: 'getBakedValues',
-	        value: function getBakedValues() {
-	            return {
-	                column: this.getColumn(),
-	                type: this.getType(),
-	                tags: this.tags,
-	                priority: this.getPriority(),
-	                version: this.getVersion(),
-	                milestone: this.getMilestone() ? this.getMilestone().title : null,
-	                assignee: this.getAssignee() ? this.getAssignee().name : null,
-	                estimate: ISSUE_ESTIMATES[this.estimate || -1]
-	            };
-	        }
-
-	        /**
 	         * Check if issue is closed
 	         *
 	         * @returns {Boolean} closed
@@ -15002,7 +15006,7 @@
 	    }, {
 	        key: 'isClosed',
 	        value: function isClosed() {
-	            return this.column == window.resources.issueColumns.length - 1;
+	            return this.column == 'done';
 	        }
 	    }]);
 
@@ -15164,7 +15168,7 @@
 	                for (var _iterator2 = this.getIssues()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 	                    var issue = _step2.value;
 
-	                    log += '- [' + issue.getType() + '] ' + issue.title + '  \n';
+	                    log += '- [' + issue.type + '] ' + issue.title + '  \n';
 	                }
 	            } catch (err) {
 	                _didIteratorError2 = true;
@@ -15207,7 +15211,7 @@
 	                        continue;
 	                    }
 
-	                    if (issue.getMilestone() == this || typeof this.index === 'undefined' && typeof issue.milestone === 'undefined') {
+	                    if (issue.milestone === this.title || this.title === 'Unassigned' && !issue.milestone) {
 	                        issues[issues.length] = issue;
 	                    }
 	                }
@@ -15372,12 +15376,18 @@
 	    }, {
 	        key: 'isClosed',
 	        value: function isClosed() {
+	            var issues = this.getIssues();
+
+	            if (issues.length < 1) {
+	                return false;
+	            }
+
 	            var _iteratorNormalCompletion6 = true;
 	            var _didIteratorError6 = false;
 	            var _iteratorError6 = undefined;
 
 	            try {
-	                for (var _iterator6 = this.getIssues()[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+	                for (var _iterator6 = issues[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
 	                    var issue = _step6.value;
 
 	                    if (!issue.isClosed()) {
@@ -16604,7 +16614,7 @@
 	    }, {
 	        key: 'getAssigneeAvatar',
 	        value: function getAssigneeAvatar() {
-	            var assignee = window.resources.collaborators[this.model.assignee];
+	            var assignee = this.model.getAssignee();
 
 	            if (assignee) {
 	                return _.img({ src: assignee.avatar });
@@ -16636,11 +16646,7 @@
 	                }
 	            }
 
-	            if (value && !isNaN(value)) {
-	                value = parseFloat(value);
-	            }
-
-	            if (value == null || typeof value === 'undefined') {
+	            if (!isNaN(value) || value == null || typeof value === 'undefined') {
 	                value = '';
 	            }
 
@@ -16673,7 +16679,6 @@
 	            this.model.tags = this.getProperty('tags').split(',');
 	            this.model.priority = this.getProperty('priority');
 	            this.model.assignee = this.getProperty('assignee');
-	            this.model.reporter = this.getProperty('reporter');
 	            this.model.version = this.getProperty('version');
 	            this.model.description = this.getProperty('description');
 	            this.model.estimate = this.getProperty('estimate');
@@ -16930,8 +16935,8 @@
 	                        var view = _step.value;
 
 	                        if (this == view.$element[0]) {
-	                            view.model.milestone = view.$element.parents('.milestone-viewer').attr('data-index');
-	                            view.model.column = view.$element.parents('.column').attr('data-index');
+	                            view.model.milestone = view.$element.parents('.milestone-viewer').attr('data-title');
+	                            view.model.column = view.$element.parents('.column').attr('data-name');
 
 	                            // Trigger the sync event
 	                            view.sync();
@@ -17522,7 +17527,7 @@
 	                $comments.children('.comment').remove();
 
 	                _.append($comments, _.each(comments, function (i, comment) {
-	                    var collaborator = resources.collaborators[comment.collaborator];
+	                    var collaborator = ResourceHelper.get(comment.collaborator, 'collaborators', 'name');
 	                    var text = markdownToHtml(comment.text);
 	                    var isUser = collaborator.name == user.name;
 
@@ -17629,22 +17634,22 @@
 	    _.div({ class: 'multi-edit-notification' }, 'Now editing multiple issues'),
 
 	    // Reporter
-	    _.if(resources.collaborators.length > 0, _.div({ class: 'meta-field reporter readonly' }, _.label('Reporter'), _.p(this.model.getReporter() ? this.model.getReporter().displayName || this.model.getReporter().name : '(unknown)'))),
+	    _.if(this.model.getReporter(), _.div({ class: 'meta-field reporter readonly' }, _.label('Reporter'), _.p(this.model.getReporter().displayName || this.model.getReporter().name))),
 
 	    // Assignee
 	    _.if(resources.collaborators.length > 0, _.div({ class: 'meta-field assignee' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
-	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null }, '(unassigned)'), _.each(resources.collaborators, function (i, collaborator) {
-	        return _.option({ value: i }, collaborator.displayName || collaborator.name);
+	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null, selected: !this.model.assignee }, '(unassigned)'), _.each(resources.collaborators, function (i, collaborator) {
+	        return _.option({ value: collaborator.name, selected: collaborator.name == _this.model.assignee }, collaborator.displayName || collaborator.name);
 	    })).change(function () {
 	        _this.onChange();
-	    }).val(this.model.assignee))),
+	    }))),
 
 	    // Type
 	    _.div({ class: 'meta-field type' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(ISSUE_TYPES, function (type, i) {
-	        return _.option({ value: i }, type);
+	        return _.option({ value: type }, type);
 	    })).change(function () {
 	        _this.onChange();
 	    }).val(this.model.type)),
@@ -17653,7 +17658,7 @@
 	    _.div({ class: 'meta-field priority' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(ISSUE_PRIORITIES, function (priority, i) {
-	        return _.option({ value: i }, priority);
+	        return _.option({ value: priority }, priority);
 	    })).change(function () {
 	        _this.onChange();
 	    }).val(this.model.priority)),
@@ -17662,7 +17667,7 @@
 	    _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
-	        return _.option({ value: i }, version);
+	        return _.option({ value: version }, version);
 	    })).change(function () {
 	        _this.onChange();
 	    }).val(this.model.version)),
@@ -17671,7 +17676,7 @@
 	    _.div({ class: 'meta-field estimate' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(ISSUE_ESTIMATES, function (estimate, i) {
-	        return _.option({ value: i }, estimate);
+	        return _.option({ value: estimate }, estimate);
 	    })).change(function () {
 	        _this.onChange();
 	    }).val(this.model.estimate)),
@@ -18032,7 +18037,7 @@
 	            var issue = new Issue({
 	                milestone: this.model.index,
 	                tags: Router.params.tag == 'all' ? [] : [Router.params.tag],
-	                reporter: ResourceHelper.getCollaborator(User.getCurrent().name)
+	                reporter: User.getCurrent().name
 	            });
 
 	            ResourceHelper.addResource('issues', issue).then(function (newIssue) {
@@ -18129,11 +18134,11 @@
 
 	    var state = SettingsHelper.get('milestone', this.model.index) || 'collapsed';
 
-	    return _.div({ class: 'milestone-viewer ' + state, 'data-index': this.model.index, 'data-end-date': this.model.endDate }, _.div({ class: 'header' }, _.div({ class: 'title' }, _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa fa-chevron-right' }), _.h4(this.model.title), _.p(this.model.description)).click(function () {
+	    return _.div({ class: 'milestone-viewer ' + state, 'data-title': this.model.title, 'data-index': this.model.index, 'data-end-date': this.model.endDate }, _.div({ class: 'header' }, _.div({ class: 'title' }, _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa fa-chevron-right' }), _.h4(this.model.title), _.p(this.model.description)).click(function () {
 	        _this.onClickToggle();
-	    }))), _.div({ class: 'columns' }, _.each(window.resources.issueColumns, function (columnIndex, column) {
-	        return _.div({ class: 'column', 'data-index': columnIndex }, _.div({ class: 'header' }, _.h4(column)), _.div({ class: 'body' }, _.each(_this.model.getIssues(), function (issueIndex, issue) {
-	            if (issue.column == columnIndex && issue.milestone == _this.model.index) {
+	    }))), _.div({ class: 'columns' }, _.each(window.resources.columns, function (columnIndex, column) {
+	        return _.div({ class: 'column', 'data-name': column, 'data-index': columnIndex }, _.div({ class: 'header' }, _.h4(column)), _.div({ class: 'body' }, _.each(_this.model.getIssues(), function (issueIndex, issue) {
+	            if (issue.column === column) {
 	                var $issueEditor = new IssueEditor({
 	                    model: issue
 	                }).$element;
@@ -18255,7 +18260,7 @@
 
 	    return _.div({ class: 'resource-editor' }, _.div({ class: 'body' }, _.each(this.model, function (i, item) {
 	        // Do not handle issue columns "to do" and "done"
-	        if (_this.name == 'issueColumns' && (item == 'to do' || item == 'done')) {
+	        if (_this.name == 'columns' && (item == 'to do' || item == 'done')) {
 	            return;
 	        }
 
@@ -18514,7 +18519,7 @@
 	        var _iteratorError = undefined;
 
 	        try {
-	            for (var _iterator = resources.issueColumns[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	            for (var _iterator = resources.columns[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	                var column = _step.value;
 
 	                if (column == 'done') {
@@ -18663,7 +18668,7 @@
 	                for (var _iterator2 = issueViews[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 	                    var issueView = _step2.value;
 
-	                    var issue = issueView.model.getBakedValues();
+	                    var issue = issueView.model;
 	                    var isTagMatch = Router.params.tag == 'all' || issue.tags.indexOf(Router.params.tag) > -1;
 
 	                    issueView.$element.toggle(isTagMatch);
@@ -18743,7 +18748,7 @@
 
 	    var resourceDictionary = {
 	        assignee: resources.collaborators,
-	        column: resources.issueColumns,
+	        column: resources.columns,
 	        milestone: resources.milestones,
 	        priority: ISSUE_PRIORITIES,
 	        type: ISSUE_TYPES,

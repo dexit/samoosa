@@ -21,7 +21,7 @@ class MilestoneEditor extends View {
         let issue = new Issue({
             milestone: this.model.index,
             tags: Router.params.tag == 'all' ? [] : [Router.params.tag],
-            reporter: ResourceHelper.getCollaborator(User.getCurrent().name)
+            reporter: User.getCurrent().name
         });
 
         ResourceHelper.addResource('issues', issue)

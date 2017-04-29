@@ -210,7 +210,7 @@
 
                     .edit {
                         border-radius: 5px;
-                        border: 1px solid $pink-medium;
+                        border: 1px solid $primary;
                         color: $black;
                         padding: 10px;
                     }
@@ -315,7 +315,7 @@
 
                 &:focus {
                     outline: none;
-                    border: 2px solid $pink-medium;
+                    border: 2px solid $primary;
                 }
             }
 
@@ -338,14 +338,14 @@
                     border-radius: 5px;
                     margin-left: 0.5rem;
                     color: $white;
-                    background-color: $pink-medium;
+                    background-color: $primary;
                     padding: 0rem 0.5rem;
                     line-height: 1.5rem;
                 }
 
                 .tag {
                     border-radius: 5px;
-                    background-color: $teal-darker;
+                    background-color: $secondary-dark;
                     padding: 0rem 0.5rem;
                     color: $white;
                     line-height: 1.5rem;
@@ -358,7 +358,7 @@
 
                         .fa {
                             margin-left: 0.5rem;
-                            color: $pink-medium;
+                            color: $primary;
                         }
                     }
                 }
@@ -373,7 +373,7 @@
                     .add-tag-dialog {
                         width: 190px;
                         padding: 0.5rem;
-                        background-color: $teal-darker;
+                        background-color: $secondary-dark;
                         border-radius: 5px;
                         position: absolute;
                         left: 0.5rem;

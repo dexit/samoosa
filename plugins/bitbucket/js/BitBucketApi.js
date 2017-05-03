@@ -1177,7 +1177,12 @@ class BitBucketApi extends ApiHelper {
 
             for(let bitBucketComment of bitBucketComments) {
                 let comment = {
-                    collaborator: bitBucketComment.author_info.username,
+                    collaborator: new User({
+                        id: bitBucketComment.author_info.username,
+                        name: bitBucketComment.author_info.username,
+                        displayName: bitBucketComment.author_info.first_name + ' ' + bitBucketComment.author_info.last_name,
+                        avatar: bitBucketComment.author_info.avatar
+                    }),
                     text: bitBucketComment.content,
                     index: bitBucketComment.comment_id
                 };

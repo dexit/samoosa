@@ -84,8 +84,8 @@ Router.route('/:user/:repository/board/:mode/:tag', () => {
                 )
             )
         );
-        
-        // Append the unassigned items
+       
+        // Append the unassigned items, if there are any
         $('.app-container .board-container').append(
             new MilestoneViewer({
                 model: new Milestone({

@@ -862,6 +862,7 @@
 	'use strict';
 
 	var FunctionTemplating = {};
+	var lastCondition = void 0;
 
 	/**
 	 * Appends content to an element
@@ -1059,12 +1060,35 @@
 	 * @param {Boolean} condition
 	 * @param {HTMLElement} contents
 	 *
-	 * @returns {HTMLElement} contents
+	 * @returns {HTMLElement} Contents
 	 */
 	FunctionTemplating.if = function (condition) {
-	    if (condition != false && condition != null && condition != undefined) {
+	    lastCondition = condition || false;
+
+	    if (lastCondition) {
 	        for (var _len3 = arguments.length, contents = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
 	            contents[_key3 - 1] = arguments[_key3];
+	        }
+
+	        return contents;
+	    }
+	};
+
+	/**
+	 * Uses the last provided condition to simulate an "else" statement
+	 *
+	 * @param {HTMLElement} contents
+	 *
+	 * @returns {HTMLElement} Contents
+	 */
+	FunctionTemplating.else = function () {
+	    if (typeof lastCondition === 'undefined') {
+	        throw new Error('No "if" statement was provided before this "else" statement');
+	    }
+
+	    if (!lastCondition) {
+	        for (var _len4 = arguments.length, contents = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+	            contents[_key4] = arguments[_key4];
 	        }
 
 	        return contents;
@@ -1563,7 +1587,11 @@
 	            element.addEventListener('DOMNodeRemovedFromDocument', function () {
 	                // Wait a few cycles before removing, as the element might just have been relocated
 	                setTimeout(function () {
-	                    var element = _this.element || _this.$element[0];
+	                    var element = _this.element;
+
+	                    if (!element && _this.$element) {
+	                        element = _this.$element[0];
+	                    }
 
 	                    if (!element || !element.parentNode) {
 	                        _this.remove();
@@ -10496,6 +10524,8 @@
 	 * A tool for performing Issue related operations
 	 */
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -10511,25 +10541,67 @@
 	        /**
 	         * Find an issue by a query
 	         *
-	         * @param {String} query
+	         * @param {Stringi|Object} query
 	         * @param {Number} max
 	         *
 	         * @returns {Array(Issue)}
 	         */
 	        value: function search(query, max) {
+	            max = max || 999999;
+
 	            var results = [];
 	            var found = 0;
 
 	            for (var i = 0; i < resources.issues.length; i++) {
-	                var string = JSON.stringify(resources.issues[i]).toLowerCase();
+	                // String based search
+	                if (typeof query === 'string') {
+	                    var string = JSON.stringify(resources.issues[i]).toLowerCase();
 
-	                if (string.search(query.toLowerCase()) > -1) {
-	                    results[results.length] = resources.issues[i];
-	                    found++;
-
-	                    if (found >= max) {
-	                        break;
+	                    if (string.search(query.toLowerCase()) > -1) {
+	                        results[results.length] = resources.issues[i];
+	                        found++;
 	                    }
+
+	                    // Object based search
+	                } else if ((typeof query === 'undefined' ? 'undefined' : _typeof(query)) === 'object') {
+	                    var isMatch = true;
+
+	                    var _iteratorNormalCompletion = true;
+	                    var _didIteratorError = false;
+	                    var _iteratorError = undefined;
+
+	                    try {
+	                        for (var _iterator = Object.keys(query)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                            var key = _step.value;
+
+	                            if (resources.issues[i][key] !== query[key]) {
+	                                isMatch = false;
+	                                break;
+	                            }
+	                        }
+	                    } catch (err) {
+	                        _didIteratorError = true;
+	                        _iteratorError = err;
+	                    } finally {
+	                        try {
+	                            if (!_iteratorNormalCompletion && _iterator.return) {
+	                                _iterator.return();
+	                            }
+	                        } finally {
+	                            if (_didIteratorError) {
+	                                throw _iteratorError;
+	                            }
+	                        }
+	                    }
+
+	                    if (isMatch) {
+	                        results[results.length] = resources.issues[i];
+	                        found++;
+	                    }
+	                }
+
+	                if (found >= max) {
+	                    break;
 	                }
 	            }
 
@@ -12288,7 +12360,11 @@
 	                        var gitHubComment = _step9.value;
 
 	                        var comment = {
-	                            collaborator: gitHubComment.user.login,
+	                            collaborator: new User({
+	                                id: gitHubComment.user.id,
+	                                name: gitHubComment.user.login,
+	                                avatar: gitHubComment.user.avatar_url
+	                            }),
 	                            text: gitHubComment.body,
 	                            index: gitHubComment.id
 	                        };
@@ -14651,7 +14727,12 @@
 	                        var bitBucketComment = _step5.value;
 
 	                        var comment = {
-	                            collaborator: bitBucketComment.author_info.username,
+	                            collaborator: new User({
+	                                id: bitBucketComment.author_info.username,
+	                                name: bitBucketComment.author_info.username,
+	                                displayName: bitBucketComment.author_info.first_name + ' ' + bitBucketComment.author_info.last_name,
+	                                avatar: bitBucketComment.author_info.avatar
+	                            }),
 	                            text: bitBucketComment.content,
 	                            index: bitBucketComment.comment_id
 	                        };
@@ -14912,13 +14993,7 @@
 	    }, {
 	        key: 'getAssignee',
 	        value: function getAssignee() {
-	            var assignee = ResourceHelper.get(this.assignee, 'collaborators', 'name');
-
-	            if (!assignee) {
-	                return {};
-	            }
-
-	            return assignee;
+	            return ResourceHelper.get(this.assignee, 'collaborators', 'name');
 	        }
 
 	        /**
@@ -14930,15 +15005,7 @@
 	    }, {
 	        key: 'getReporter',
 	        value: function getReporter() {
-	            var reporter = ResourceHelper.get(this.reporter, 'collaborators', 'name') || {};
-
-	            if (!reporter) {
-	                debug.warning('Reporter "' + this.reporter + '" not found for issue "' + this.id + '"', this);
-
-	                return {};
-	            }
-
-	            return reporter;
+	            return ResourceHelper.get(this.reporter, 'collaborators', 'name') || { name: this.reporter };
 	        }
 
 	        /**
@@ -17531,11 +17598,10 @@
 	                $comments.children('.comment').remove();
 
 	                _.append($comments, _.each(comments, function (i, comment) {
-	                    var collaborator = ResourceHelper.get(comment.collaborator, 'collaborators', 'name');
 	                    var text = markdownToHtml(comment.text);
-	                    var isUser = collaborator.name == user.name;
+	                    var isUser = comment.collaborator.name == user.name;
 
-	                    var $comment = _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: collaborator.displayName || collaborator.name, src: collaborator.avatar })), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this11.onClickEdit), _.div({ class: 'rendered selectable' }, text), _.textarea({ class: 'edit hidden text btn-transparent' }, comment.text).change(function () {
+	                    var $comment = _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: comment.collaborator.displayName || comment.collaborator.name, src: comment.collaborator.avatar })), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this11.onClickEdit), _.div({ class: 'rendered selectable' }, text), _.textarea({ class: 'edit hidden text btn-transparent' }, comment.text).change(function () {
 	                        _this11.$element.toggleClass('loading', true);
 
 	                        comment.text = $comment.find('textarea').val();
@@ -19233,7 +19299,7 @@
 	            }).$element;
 	        }))));
 
-	        // Append the unassigned items
+	        // Append the unassigned items, if there are any
 	        $('.app-container .board-container').append(new MilestoneViewer({
 	            model: new Milestone({
 	                title: 'Unassigned',

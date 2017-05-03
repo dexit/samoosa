@@ -872,13 +872,12 @@ class IssueEditor extends View {
 
             _.append($comments,
                 _.each(comments, (i, comment) => {
-                    let collaborator = ResourceHelper.get(comment.collaborator, 'collaborators', 'name');
                     let text = markdownToHtml(comment.text);
-                    let isUser = collaborator.name == user.name;
+                    let isUser = comment.collaborator.name == user.name;
                     
                     let $comment = _.div({class: 'comment', 'data-index': comment.index},
                         _.div({class: 'collaborator'},
-                            _.img({title: collaborator.displayName || collaborator.name, src: collaborator.avatar}),
+                            _.img({title: comment.collaborator.displayName || comment.collaborator.name, src: comment.collaborator.avatar}),
                         ),
                         _.if(isUser, 
                             _.button({class: 'btn-edit'},

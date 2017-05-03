@@ -1200,7 +1200,11 @@ class GitHubApi extends ApiHelper {
 
             for(let gitHubComment of gitHubComments) {
                 let comment = {
-                    collaborator: gitHubComment.user.login,
+                    collaborator: new User({
+                        id: gitHubComment.user.id,
+                        name: gitHubComment.user.login,
+                        avatar: gitHubComment.user.avatar_url
+                    }),
                     text: gitHubComment.body,
                     index: gitHubComment.id
                 };

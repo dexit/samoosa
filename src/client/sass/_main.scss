@@ -78,7 +78,7 @@ body, html {
     display: flex;
     height: 100%;
     flex-direction: column;
-    background-color: $teal-dark;
+    background-color: $secondary;
 
     @include background('secondary');
 
@@ -224,7 +224,7 @@ body, html {
         display: flex;
         padding: 0.5rem 1rem 0.5rem 0.5rem;
         border-radius: 5px;
-        background-color: $pink-medium;
+        background-color: $primary;
 
         .spinner-text {
             display: block;

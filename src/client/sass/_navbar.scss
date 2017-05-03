@@ -3,7 +3,7 @@
     margin: 0px;
     border-radius: 0px;
     border: 0px;
-    background-color: $teal-dark;
+    background-color: $secondary;
     color: $white;
     
     @include background('secondary');
@@ -152,12 +152,12 @@
                 }
                     
                 .repository-editor {
-                    background-color: $teal-darker;
+                    background-color: $secondary-dark;
                     border: 0px;
                     box-shadow: none;
 
                     &:hover {
-                        outline-color: $pink-medium;
+                        outline-color: $primary;
                     }
 
                     .content {
@@ -168,7 +168,7 @@
                         }
 
                         .owner {
-                            color: $teal-light;
+                            color: $secondary-light;
                         }
                     }
                 }
@@ -195,7 +195,7 @@
         left: 0px;
         width: 0px;
         height: calc(100% - 56px);
-        background-color: $teal-dark;
+        background-color: $secondary;
         transition: width 0.25s ease, max-width 0.25s ease;
         transition-delay: 0s;
         z-index: 1000;
@@ -218,7 +218,7 @@
             &:after {
                 font-family: 'FontAwesome';
                 content: '\f054';
-                color: $teal-medium;
+                color: $secondary-light;
             }
 
             text-align: center;
@@ -258,7 +258,7 @@
 
             &.active {
                 .fa {
-                    color: $pink-medium;
+                    color: $primary;
                 }
             }
 

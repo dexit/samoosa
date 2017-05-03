@@ -55,14 +55,14 @@ ol {
 }
 
 a {
-    color: $pink-medium;
+    color: $primary;
 }
 
 /**
  * Document prints
  */
 .document-page {
-    background-color: $teal-dark;
+    background-color: $secondary;
     color: $white;
     font-size: 14px;
 
@@ -78,7 +78,7 @@ a {
     pre {
         margin: 5px 0px;
         padding: 5px 10px;
-        background-color: $teal-darker;
+        background-color: $secondary-dark;
         color: $white;
         font-family: monospace;
     }
@@ -115,7 +115,7 @@ a {
                     position: absolute;
                     left: 0px;
                     top: -0.4rem;
-                    color: $teal-dark;
+                    color: $secondary;
                     font-family: 'Bree Serif';
                     font-size: 1.4em;
                     content: counter(item);
@@ -143,7 +143,7 @@ a {
         margin: 0px 5px 5px 0px;
 
         &:hover {
-            outline: 2px solid $pink-medium;
+            outline: 2px solid $primary;
         }
 
         &.active {
@@ -161,7 +161,7 @@ a {
  * Main layout elements
  */
 .workspace-content.logo {
-    background-color: $teal-dark;
+    background-color: $secondary;
     position: relative;
 
     @include background('secondary', -56px);
@@ -176,18 +176,18 @@ a {
 }
 
 .repository-bar {
-    background-color: $teal-dark;
+    background-color: $secondary;
     color: $white;
 
     .btn-edit {
         &:hover {
-            color: $pink-medium;
+            color: $primary;
         }
     }
 }
 
 .login-container {
-    background-color: $teal-dark;
+    background-color: $secondary;
 }
 
 .login-form {
@@ -219,7 +219,7 @@ a {
             .columns {
                 .column {
                     &.hovering {
-                        outline-color: $pink-medium;
+                        outline-color: $primary;
                     }
                 }
             }
@@ -247,7 +247,7 @@ a {
         .stats {
             .actions {
                 button {
-                    background-color: $pink-medium;
+                    background-color: $primary;
                 }
             }
 
@@ -264,11 +264,11 @@ a {
 
 .issue-editor {
     border: 0px;
-    background-color: $teal-dark;
+    background-color: $secondary;
     margin-bottom: 0.5rem;
 
     &.selected {
-        outline-color: $pink-medium;
+        outline-color: $primary;
     }
 
     textarea, .rendered {
@@ -276,7 +276,7 @@ a {
         
         &:focus {
             outline: none;
-            border: 2px solid $pink-medium;
+            border: 2px solid $primary;
         }
     }
 
@@ -285,7 +285,7 @@ a {
 
         &:hover {
             .fa {
-                color: $pink-medium;
+                color: $primary;
             }
         }
     }
@@ -306,32 +306,32 @@ a {
             line-height: 1em;
             border-radius: 0px;
             background-color: transparent;
-            color: $teal-light;
+            color: $secondary-light;
         }
 
         .btn-remove {
-            background-color: $teal-darker;
+            background-color: $secondary-dark;
         }
 
         .btn-toggle {
             &:hover {
-                color: $pink-medium;
+                color: $primary;
             }
         }
     }
 
     .meta, .body {
-        color: $teal-light;
+        color: $secondary-light;
     }
 
     label {
         line-height: 2rem;
         height: 2rem;
-        color: $teal-light;
+        color: $secondary-light;
     }
 
     .body {
-        background-color: $teal-dark;
+        background-color: $secondary;
 
         textarea, .rendered {
             padding: 10px;
@@ -339,8 +339,8 @@ a {
         }
 
         .rendered {
-            background-color: $teal-darker;
-            color: $teal-light;
+            background-color: $secondary-dark;
+            color: $secondary-light;
         }
 
         textarea {
@@ -353,7 +353,7 @@ a {
         }
 
         a {
-            color: $pink-medium;
+            color: $primary;
         }
 
         .rendered, p, textarea {
@@ -379,30 +379,30 @@ a {
     }
     
     .multi-edit-notification {
-        color: $pink-medium !important;
+        color: $primary !important;
     }
 
     .attachments {
         background-color: transparent;
         
         div.attachment {
-            background-color: $teal-darker;
+            background-color: $secondary-dark;
             color: $white;
 
             .btn-download-attachment, .btn-remove-attachment {
                 color: $white;
 
                 &:hover {
-                    color: $pink-medium;
+                    color: $primary;
                 }
             }
         }
 
         button.attachment {
-            background-color: $teal-darker;
+            background-color: $secondary-dark;
 
             &:hover {
-                outline: 2px solid $pink-medium;
+                outline: 2px solid $primary;
             }
         }
     }
@@ -412,7 +412,7 @@ a {
  
         .comment {   
             .rendered, .text {
-                background-color: $teal-darker;
+                background-color: $secondary-dark;
                 color: $white;
             }
 
@@ -426,7 +426,7 @@ a {
             }
 
             a {
-                color: $pink-medium
+                color: $primary
             }
         }
     }
@@ -444,7 +444,7 @@ select {
     line-height: 1.5rem;
     border: 0px;
     height: 1.5rem;
-    background-color: $teal-darker;
+    background-color: $secondary-dark;
     border-radius: 5px;
     padding: 0rem 0.5rem;
     margin: 0.25rem -0.5rem;
@@ -455,7 +455,7 @@ select {
 
     option {
         padding: 0.5em;
-        background-color: $teal-darker;
+        background-color: $secondary-dark;
         font-weight: bold;
     }
 }
@@ -470,12 +470,12 @@ button.btn, input[type="submit"].btn, select.btn, a.btn {
     text-transform: uppercase;
     color: $white;
     font-family: 'Bree Serif';
-    background-color: $pink-medium;
+    background-color: $primary;
     margin: 0px;
     border-radius: 0px;
 
     option {
-        background-color: $pink-medium;
+        background-color: $primary;
         font-size: 1em;
         font-family: 'Bree Serif';
         text-transform: uppercase;
@@ -497,7 +497,7 @@ button.btn-remove {
     color: $white;
     
     &:hover {
-        color: $pink-medium;
+        color: $primary;
     }
 }
 
@@ -549,7 +549,7 @@ button.btn-remove {
     .tabs {
         padding-top: 0px;
         background-image: none;
-        background-color: $teal-dark;
+        background-color: $secondary;
    
         &:nth-child(2) {
             padding-top: 0rem;
@@ -559,7 +559,7 @@ button.btn-remove {
             font-family: 'Bree Serif';
             text-transform: uppercase;
             border-radius: 0px;
-            color: $teal-light; 
+            color: $secondary-light; 
             height: 2rem;
             line-height: 2rem;
             max-width: 300px;
@@ -568,7 +568,7 @@ button.btn-remove {
                 
             &.active {
                 background-color: transparent;
-                color: $pink-medium;
+                color: $primary;
                 position: relative;
 
                 &:after {
@@ -579,7 +579,7 @@ button.btn-remove {
                     left: 0px;
                     height: 4px;
                     width: 100%;
-                    background-color: $pink-medium;
+                    background-color: $primary;
                 }
             }
 

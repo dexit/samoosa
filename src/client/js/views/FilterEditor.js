@@ -117,6 +117,8 @@ class FilterEditor extends View {
         let issueViews = ViewHelper.getAll('IssueEditor');
 
         for(let issueView of issueViews) {
+            if(!issueView.$element) { continue; }
+
             let issue = issueView.model;
             let isTagMatch = Router.params.tag == 'all' || issue.tags.indexOf(Router.params.tag) > -1;
 

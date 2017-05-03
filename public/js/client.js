@@ -13278,6 +13278,8 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -13319,6 +13321,8 @@
 	    }, {
 	        key: 'refresh',
 	        value: function refresh() {
+	            var _this2 = this;
+
 	            spinner('Refreshing token');
 
 	            return new Promise(function (resolve, reject) {
@@ -13335,11 +13339,25 @@
 
 	                            spinner(false);
 	                        } else {
+	                            _this2.logOut();
+
 	                            reject(new Error(result));
 	                        }
 	                    }
 	                });
 	            });
+	        }
+
+	        /**
+	         * Logs out the currently logged in user and reloads
+	         */
+
+	    }, {
+	        key: 'logOut',
+	        value: function logOut() {
+	            _get(BitBucketApi.prototype.__proto__ || Object.getPrototypeOf(BitBucketApi.prototype), 'logOut', this).call(this);
+
+	            localStorage.setItem('refresh', '');
 	        }
 
 	        /**
@@ -13448,7 +13466,7 @@
 	    }, {
 	        key: 'delete',
 	        value: function _delete(url, param) {
-	            var _this2 = this;
+	            var _this3 = this;
 
 	            var self = this;
 
@@ -13464,9 +13482,9 @@
 	                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                    },
 	                    error: function error(e) {
-	                        if (_this2.shouldRefresh(e)) {
-	                            _this2.refresh().then(function () {
-	                                return _this2.delete(url, param);
+	                        if (_this3.shouldRefresh(e)) {
+	                            _this3.refresh().then(function () {
+	                                return _this3.delete(url, param);
 	                            }).then(function (result) {
 	                                resolve(result);
 	                            });
@@ -13490,7 +13508,7 @@
 	    }, {
 	        key: 'patch',
 	        value: function patch(url, data) {
-	            var _this3 = this;
+	            var _this4 = this;
 
 	            var self = this;
 
@@ -13507,9 +13525,9 @@
 	                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                    },
 	                    error: function error(e) {
-	                        if (_this3.shouldRefresh(e)) {
-	                            _this3.refresh().then(function () {
-	                                return _this3.patch(url, data);
+	                        if (_this4.shouldRefresh(e)) {
+	                            _this4.refresh().then(function () {
+	                                return _this4.patch(url, data);
 	                            }).then(function (result) {
 	                                resolve(result);
 	                            });
@@ -13533,7 +13551,7 @@
 	    }, {
 	        key: 'post',
 	        value: function post(url, data) {
-	            var _this4 = this;
+	            var _this5 = this;
 
 	            var self = this;
 
@@ -13552,9 +13570,9 @@
 	                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                    },
 	                    error: function error(e) {
-	                        if (_this4.shouldRefresh(e)) {
-	                            _this4.refresh().then(function () {
-	                                return _this4.post(url, data);
+	                        if (_this5.shouldRefresh(e)) {
+	                            _this5.refresh().then(function () {
+	                                return _this5.post(url, data);
 	                            }).then(function (result) {
 	                                resolve(result);
 	                            });
@@ -13578,7 +13596,7 @@
 	    }, {
 	        key: 'put',
 	        value: function put(url, data) {
-	            var _this5 = this;
+	            var _this6 = this;
 
 	            var self = this;
 
@@ -13595,9 +13613,9 @@
 	                        xhr.setRequestHeader('Authorization', 'Bearer ' + self.getApiToken());
 	                    },
 	                    error: function error(e) {
-	                        if (_this5.shouldRefresh(e)) {
-	                            _this5.refresh().then(function () {
-	                                return _this5.put(url, data);
+	                        if (_this6.shouldRefresh(e)) {
+	                            _this6.refresh().then(function () {
+	                                return _this6.put(url, data);
 	                            }).then(function (result) {
 	                                resolve(result);
 	                            });
@@ -13682,11 +13700,11 @@
 	    }, {
 	        key: 'getRepositories',
 	        value: function getRepositories() {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            return new Promise(function (resolve, reject) {
-	                _this6.get('1.0/user/repositories').then(function (repositories) {
-	                    _this6.processRepositories(repositories);
+	                _this7.get('1.0/user/repositories').then(function (repositories) {
+	                    _this7.processRepositories(repositories);
 
 	                    resolve();
 	                }).catch(reject);
@@ -13702,14 +13720,14 @@
 	    }, {
 	        key: 'getCollaborators',
 	        value: function getCollaborators() {
-	            var _this7 = this;
+	            var _this8 = this;
 
 	            return this.get('2.0/teams/' + this.getRepositoryOwner() + '/members').then(function (res) {
 	                if (Array.isArray(res)) {
 	                    res = res[0];
 	                }
 
-	                _this7.processMembers(res.values);
+	                _this8.processMembers(res.values);
 
 	                return Promise.resolve();
 	            }).catch(function (e) {
@@ -13732,10 +13750,10 @@
 	    }, {
 	        key: 'getIssues',
 	        value: function getIssues() {
-	            var _this8 = this;
+	            var _this9 = this;
 
 	            return this.get('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues', 'issues', false).then(function (res) {
-	                _this8.processIssues(res);
+	                _this9.processIssues(res);
 
 	                return Promise.resolve();
 	            });
@@ -13766,7 +13784,7 @@
 	    }, {
 	        key: 'getIssueAttachments',
 	        value: function getIssueAttachments(issue) {
-	            var _this9 = this;
+	            var _this10 = this;
 
 	            return this.get('2.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/' + issue.id + '/attachments', 'values').then(function (response) {
 	                if (!Array.isArray(response)) {
@@ -13787,12 +13805,12 @@
 	                            continue;
 	                        }
 
-	                        var apiUrl = 'https://api.bitbucket.org/2.0/repositories/' + _this9.getRepositoryOwner() + '/' + _this9.getRepositoryName() + '/issues/' + issue.id + '/attachments/' + obj.name;
+	                        var apiUrl = 'https://api.bitbucket.org/2.0/repositories/' + _this10.getRepositoryOwner() + '/' + _this10.getRepositoryName() + '/issues/' + issue.id + '/attachments/' + obj.name;
 
 	                        var attachment = new Attachment({
 	                            name: obj.name,
 	                            isRedirect: true,
-	                            url: apiUrl + '?access_token=' + _this9.getApiToken()
+	                            url: apiUrl + '?access_token=' + _this10.getApiToken()
 	                        });
 
 	                        attachments[attachments.length] = attachment;
@@ -13829,10 +13847,10 @@
 	    }, {
 	        key: 'getVersions',
 	        value: function getVersions() {
-	            var _this10 = this;
+	            var _this11 = this;
 
 	            return this.get('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/versions').then(function (versions) {
-	                _this10.processVersions(versions);
+	                _this11.processVersions(versions);
 
 	                return Promise.resolve();
 	            });
@@ -13847,10 +13865,10 @@
 	    }, {
 	        key: 'getMilestones',
 	        value: function getMilestones() {
-	            var _this11 = this;
+	            var _this12 = this;
 
 	            return this.get('1.0/repositories/' + this.getRepositoryOwner() + '/' + this.getRepositoryName() + '/issues/milestones').then(function (milestones) {
-	                _this11.processMilestones(milestones);
+	                _this12.processMilestones(milestones);
 
 	                return Promise.resolve();
 	            });
@@ -13888,10 +13906,10 @@
 	    }, {
 	        key: 'addCollaborator',
 	        value: function addCollaborator(collaborator) {
-	            var _this12 = this;
+	            var _this13 = this;
 
 	            return new Promise(function (callback) {
-	                _this12.put('1.0/repositories/' + _this12.getRepositoryOwner() + '/' + _this12.getRepositoryName() + '/collaborators/' + collaborator).then(function () {
+	                _this13.put('1.0/repositories/' + _this13.getRepositoryOwner() + '/' + _this13.getRepositoryName() + '/collaborators/' + collaborator).then(function () {
 	                    callback();
 	                });
 	            });
@@ -13908,10 +13926,10 @@
 	    }, {
 	        key: 'addColumn',
 	        value: function addColumn(column) {
-	            var _this13 = this;
+	            var _this14 = this;
 
 	            return new Promise(function (callback) {
-	                _this13.post('1.0/repositories/' + _this13.getRepositoryOwner() + '/' + _this13.getRepositoryName() + '/labels', {
+	                _this14.post('1.0/repositories/' + _this14.getRepositoryOwner() + '/' + _this14.getRepositoryName() + '/labels', {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -14046,12 +14064,12 @@
 	    }, {
 	        key: 'removeMilestone',
 	        value: function removeMilestone(index) {
-	            var _this14 = this;
+	            var _this15 = this;
 
 	            var milestone = resources.milestones[index];
 
 	            return new Promise(function (callback) {
-	                _this14.delete('1.0/repositories/' + _this14.getRepositoryOwner() + '/' + _this14.getRepositoryName() + '/issues/milestones/' + milestone.id).then(function () {
+	                _this15.delete('1.0/repositories/' + _this15.getRepositoryOwner() + '/' + _this15.getRepositoryName() + '/issues/milestones/' + milestone.id).then(function () {
 	                    callback();
 	                });
 	            });
@@ -14115,10 +14133,10 @@
 	    }, {
 	        key: 'updateMilestone',
 	        value: function updateMilestone(milestone) {
-	            var _this15 = this;
+	            var _this16 = this;
 
 	            return new Promise(function (callback) {
-	                _this15.put('1.0/repositories/' + _this15.getRepositoryOwner() + '/' + _this15.getRepositoryName() + '/issues/milestones/' + milestone.id, _this15.convertMilestone(milestone)).then(function () {
+	                _this16.put('1.0/repositories/' + _this16.getRepositoryOwner() + '/' + _this16.getRepositoryName() + '/issues/milestones/' + milestone.id, _this16.convertMilestone(milestone)).then(function () {
 	                    callback();
 	                });
 	            });
@@ -14136,10 +14154,10 @@
 	    }, {
 	        key: 'updateColumn',
 	        value: function updateColumn(column, previousName) {
-	            var _this16 = this;
+	            var _this17 = this;
 
 	            return new Promise(function (callback) {
-	                _this16.patch('1.0/repositories/' + _this16.getRepositoryOwner() + '/' + _this16.getRepositoryName() + '/labels/column:' + previousName, {
+	                _this17.patch('1.0/repositories/' + _this17.getRepositoryOwner() + '/' + _this17.getRepositoryName() + '/labels/column:' + previousName, {
 	                    name: 'column:' + column,
 	                    color: 'ffffff'
 	                }).then(function () {
@@ -14922,7 +14940,13 @@
 	    }, {
 	        key: 'getAssignee',
 	        value: function getAssignee() {
-	            return ResourceHelper.get(this.assignee, 'collaborators', 'name');
+	            var assignee = ResourceHelper.get(this.assignee, 'collaborators', 'name');
+
+	            if (!assignee) {
+	                return {};
+	            }
+
+	            return assignee;
 	        }
 
 	        /**
@@ -14934,7 +14958,15 @@
 	    }, {
 	        key: 'getReporter',
 	        value: function getReporter() {
-	            return ResourceHelper.get(this.reporter, 'collaborators', 'name');
+	            var reporter = ResourceHelper.get(this.reporter, 'collaborators', 'name') || {};
+
+	            if (!reporter) {
+	                debug.warning('Reporter "' + this.reporter + '" not found for issue "' + this.id + '"', this);
+
+	                return {};
+	            }
+
+	            return reporter;
 	        }
 
 	        /**
@@ -18667,6 +18699,10 @@
 	            try {
 	                for (var _iterator2 = issueViews[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 	                    var issueView = _step2.value;
+
+	                    if (!issueView.$element) {
+	                        continue;
+	                    }
 
 	                    var issue = issueView.model;
 	                    var isTagMatch = Router.params.tag == 'all' || issue.tags.indexOf(Router.params.tag) > -1;

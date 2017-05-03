@@ -180,7 +180,13 @@ class Issue {
      * @returns {Collaborator} Collaborator object
      */
     getAssignee() {
-        return ResourceHelper.get(this.assignee, 'collaborators', 'name');
+        let assignee = ResourceHelper.get(this.assignee, 'collaborators', 'name');
+
+        if(!assignee) {
+            return {};
+        }
+    
+        return assignee;
     }
     
     /**
@@ -189,7 +195,15 @@ class Issue {
      * @returns {Collaborator} Collaborator object
      */
     getReporter() {
-        return ResourceHelper.get(this.reporter, 'collaborators', 'name');
+        let reporter = ResourceHelper.get(this.reporter, 'collaborators', 'name') || {};
+        
+        if(!reporter) {
+            debug.warning('Reporter "' + this.reporter + '" not found for issue "' + this.id + '"', this);
+
+            return {};
+        }
+
+        return reporter;
     }
 
     /**

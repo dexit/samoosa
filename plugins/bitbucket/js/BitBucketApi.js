@@ -39,12 +39,23 @@ class BitBucketApi extends ApiHelper {
         
 						spinner(false);
                     } else {
+                        this.logOut();
+                        
                         reject(new Error(result));
 
                     }
                 }
             });
         });
+    }
+
+    /**
+     * Logs out the currently logged in user and reloads
+     */
+    logOut() {
+        super.logOut();
+
+        localStorage.setItem('refresh', '');
     }
 
     /**

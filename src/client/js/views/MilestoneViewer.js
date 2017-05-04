@@ -19,7 +19,7 @@ class MilestoneEditor extends View {
         spinner('Creating issue');
 
         let issue = new Issue({
-            milestone: this.model.index,
+            milestone: this.model.title,
             tags: Router.params.tag == 'all' ? [] : [Router.params.tag],
             reporter: User.getCurrent().name
         });

@@ -191,6 +191,8 @@ class ApiHelper {
         window.resources.tags = [];
    
         for(let issue of resources.issues) {
+            if(!issue) { continue; }
+
             for(let tag of issue.tags) {
                 if(resources.tags.indexOf(tag) > -1 || !tag) { continue; }
 

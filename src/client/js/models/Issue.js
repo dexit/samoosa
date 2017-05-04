@@ -135,7 +135,7 @@ class Issue {
      * @returns {String} Type name
      */
     getType() {
-        return ResourceHelper.getConstant(this.type, ISSUE_TYPES);
+        return this.type;
     }
 
     /**
@@ -144,7 +144,7 @@ class Issue {
      * @returns {String} Priority name
      */
     getPriority() {
-        return ResourceHelper.getConstant(this.priority, ISSUE_PRIORITIES);
+        return this.priority;
     }
 
     /**
@@ -232,7 +232,7 @@ class Issue {
      * @returns {String} Estimate
      */
     getEstimate() {
-        return ResourceHelper.getConstant(this.estimate, ISSUE_ESTIMATES);
+        return this.estimate;
     }
 
     /**

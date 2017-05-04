@@ -14962,7 +14962,7 @@
 	    }, {
 	        key: 'getType',
 	        value: function getType() {
-	            return ResourceHelper.getConstant(this.type, ISSUE_TYPES);
+	            return this.type;
 	        }
 
 	        /**
@@ -14974,7 +14974,7 @@
 	    }, {
 	        key: 'getPriority',
 	        value: function getPriority() {
-	            return ResourceHelper.getConstant(this.priority, ISSUE_PRIORITIES);
+	            return this.priority;
 	        }
 
 	        /**
@@ -15082,7 +15082,7 @@
 	    }, {
 	        key: 'getEstimate',
 	        value: function getEstimate() {
-	            return ResourceHelper.getConstant(this.estimate, ISSUE_ESTIMATES);
+	            return this.estimate;
 	        }
 
 	        /**

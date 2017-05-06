@@ -14671,15 +14671,16 @@
 	            bitBucketIssue.version = version;
 
 	            // Tags
-	            if (issue.tags.length > 0) {
-	                bitBucketIssue.content += '{% tags:' + issue.tags.join(',') + ' %}';
+	            var tagsString = issue.tags.join(',');
+
+	            if (tagsString) {
+	                bitBucketIssue.content += '{% tags:' + tagsString + ' %}';
 	            }
 
 	            // Estimate
-	            var issueEstimate = issue.getEstimate();
-	            var estimateString = '{% estimate:' + issueEstimate + ' %}';
-
-	            bitBucketIssue.content += estimateString;
+	            if (issue.estimate) {
+	                bitBucketIssue.content += '{% estimate:' + issue.estimate + ' %}';
+	            }
 
 	            // Priority
 	            var issuePriority = issue.getPriority();

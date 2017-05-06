@@ -1107,15 +1107,16 @@ class BitBucketApi extends ApiHelper {
         bitBucketIssue.version = version;
       
         // Tags
-        if(issue.tags.length > 0) {
-            bitBucketIssue.content += '{% tags:' + issue.tags.join(',') + ' %}';
+        let tagsString = issue.tags.join(',');
+
+        if(tagsString) {
+            bitBucketIssue.content += '{% tags:' + tagsString + ' %}';
         }
 
         // Estimate
-        let issueEstimate = issue.getEstimate();
-        let estimateString = '{% estimate:' + issueEstimate + ' %}';
-
-        bitBucketIssue.content += estimateString;
+        if(issue.estimate) {
+            bitBucketIssue.content += '{% estimate:' + issue.estimate + ' %}';
+        }
 
         // Priority
         let issuePriority = issue.getPriority();

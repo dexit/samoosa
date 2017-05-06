@@ -263,14 +263,6 @@ a {
 }
 
 .issue-editor {
-    border: 0px;
-    background-color: $secondary;
-    margin-bottom: 0.5rem;
-
-    &.selected {
-        outline-color: $primary;
-    }
-
     textarea, .rendered {
         border: 2px solid transparent;
         

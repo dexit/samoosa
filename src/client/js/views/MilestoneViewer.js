@@ -16,32 +16,27 @@ class MilestoneEditor extends View {
      * Event: Click new issue button
      */
     onClickNewIssue() {
-        spinner('Creating issue');
+        let editor = new IssueEditor({
+            model: new Issue({
+                milestone: this.model.title,
+                tags: Router.params.tag == 'all' ? [] : [Router.params.tag],
+                reporter: User.getCurrent().name
+            }),
+            isCreating: true
+        }); 
 
-        let issue = new Issue({
-            milestone: this.model.title,
-            tags: Router.params.tag == 'all' ? [] : [Router.params.tag],
-            reporter: User.getCurrent().name
+        let $issue = editor.$element;
+
+        this.$element.find('.column[data-name="to do"] .btn-new-issue').before($issue);
+       
+        editor.onClickToggle();
+
+        editor.on('created', (newIssue) => {
+            ResourceHelper.addResource('issues', newIssue)
+            .then((newIssue) => {
+                this.render();
+            });
         });
-
-        ResourceHelper.addResource('issues', issue)
-        .then((newIssue) => {
-            let editor = new IssueEditor({
-                model: newIssue
-            }); 
-
-            let $issue = editor.$element;
-
-            this.$element.find('.column[data-index="' + newIssue.column + '"] .btn-new-issue').before($issue);
-           
-            editor.onClickToggle();
-
-            spinner(false);
-        });
-
-        if(this.$element.hasClass('collapsed')) {
-            this.onClickToggle();
-        }
     }
 
     /**

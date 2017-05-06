@@ -41,21 +41,7 @@ module.exports = function render() {
                         _.span({class: 'rendered'},
                             this.model.title
                         ),
-                        _.input({type: 'text', class: 'selectable edit hidden', 'data-property': 'title', value: this.model.title})
-                            .change(() => {
-                                this.onChange();
-                                
-                                this.$element.find('.header .rendered').html(
-                                    this.model.title
-                                );
-                            })
-                            .blur(this.onBlur)
-                            .keyup((e) => {
-                                if(e.which == 13) {
-                                    this.onBlur(e);
-                                }
-                            }),
-                        _.button({class: 'btn-edit'}).click(this.onClickEdit)
+                        _.input({type: 'text', class: 'selectable edit', 'data-property': 'title', value: this.model.title})
                     ),
                 )
             ),
@@ -96,7 +82,7 @@ module.exports = function render() {
                                 collaborator.displayName || collaborator.name
                             );
                         })
-                    ).change(() => { this.onChange(); })
+                    )
                 )
             ),
 
@@ -109,7 +95,7 @@ module.exports = function render() {
                     _.each(ISSUE_TYPES, (type, i) => {
                         return _.option({value: type}, type);
                     })
-                ).change(() => { this.onChange(); }).val(this.model.type)
+                ).val(this.model.type)
             ),
             
             // Priority
@@ -121,7 +107,7 @@ module.exports = function render() {
                     _.each(ISSUE_PRIORITIES, (priority, i) => {
                         return _.option({value: priority}, priority);
                     })
-                ).change(() => { this.onChange(); }).val(this.model.priority)
+                ).val(this.model.priority)
             ),
             
             // Version
@@ -133,7 +119,7 @@ module.exports = function render() {
                     _.each(window.resources.versions, (i, version) => {
                         return _.option({value: version}, version);
                     })
-                ).change(() => { this.onChange(); }).val(this.model.version)
+                ).val(this.model.version)
             ),
 
             // Estimate
@@ -145,7 +131,7 @@ module.exports = function render() {
                     _.each(ISSUE_ESTIMATES, (estimate, i) => {
                         return _.option({value: estimate}, estimate);
                     })
-                ).change(() => { this.onChange(); }).val(this.model.estimate)
+                ).val(this.model.estimate)
             ),
             
             // Tags
@@ -169,8 +155,6 @@ module.exports = function render() {
                                 val = val.join(',');
 
                                 $input.data('value', val);
-
-                                this.onChange();
                             })
                         );
                     }),
@@ -197,33 +181,6 @@ module.exports = function render() {
             )
         ),
 
-        // Body
-        _.div({class: 'body'},
-            
-            // Description
-            _.button({class: 'btn-edit'},
-                _.span({class: 'fa fa-edit'})
-            ).click(this.onClickEdit),
-            _.label('Description'),
-            _.div({class: 'rendered selectable'},
-                markdownToHtml(this.model.description)
-            ),
-            _.textarea({class: 'selectable edit hidden btn-transparent', 'data-property': 'description'},
-                this.model.description
-            ).change(() => {
-                this.onChange();
-                
-                this.$element.find('.body .rendered').html(
-                    markdownToHtml(this.model.description) || ''
-                );
-            })
-            .blur(this.onBlur)
-            .keyup(this.onKeyUp)
-            .on('paste', (e) => {
-                this.onPaste(e);
-            })
-        ),
-        
         // Attachments
         _.div({class: 'attachments'},
             _.label('Attachments'),
@@ -231,6 +188,42 @@ module.exports = function render() {
                 .change((e) => { this.onAttachmentFileInputChange(e); }),
             _.label({for: 'input-upload-attachment-' + this.model.id, class: 'btn-upload-attachment'},
                 _.span({class: 'fa fa-upload'})
+            )
+        ),
+
+        // Body
+        _.div({class: 'body'},
+            
+            // Description
+            _.label('Description'),
+            _.textarea({class: 'selectable edit btn-transparent', 'data-property': 'description'},
+                this.model.description
+            )
+        ),
+        
+        // Actions
+        _.if(!ApiHelper.isSpectating(),
+            _.div({class: 'actions'},
+                // Remove button
+                _.if(!this.isCreating,
+                    _.button({class: 'btn btn-small btn-remove-issue'},
+                        _.span({class: 'fa fa-trash'})
+                    ).click(() => { this.onClickRemove(); })
+                ),
+
+                // Create button
+                _.if(this.isCreating,
+                    _.button({class: 'btn btn-create-issue'},
+                        'Create',
+                    ).click(() => { this.onClickCreate(); })
+                ),
+                
+                // Save button
+                _.if(!this.isCreating,
+                    _.button({class: 'btn btn-save-issue'},
+                        'Save',
+                    ).click(() => { this.onChange(); })
+                )
             )
         ),
 
@@ -251,18 +244,6 @@ module.exports = function render() {
                         .keyup(this.onKeyUp)
                         .blur(() => { this.onSubmitComment(); })
                         .on('paste', (e) => { this.onPaste(e); })
-                )
-            )
-        ),
-
-        _.if(!ApiHelper.isSpectating(),
-            _.div({class: 'actions'},
-                // Remove button
-                _.if(!ApiHelper.isSpectating(),
-                    _.button({class: 'btn'},
-                        'Remove issue',
-                        _.span({class: 'fa fa-trash'})
-                    ).click(() => { this.onClickRemove(); })
                 )
             )
         )

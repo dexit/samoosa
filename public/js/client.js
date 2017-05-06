@@ -16644,11 +16644,42 @@
 	    }
 
 	    /**
-	     * Cancels multi select
+	     * Event: Click create
 	     */
 
 
 	    _createClass(IssueEditor, [{
+	        key: 'onClickCreate',
+	        value: function onClickCreate() {
+	            var _this2 = this;
+
+	            // Start loading
+	            this.spinner(true);
+
+	            this.updateModel();
+
+	            // Update the issue though the API
+	            ApiHelper.addIssue(this.model).then(function (issue) {
+	                _this2.model = issue;
+
+	                return ResourceHelper.reloadResource('issues');
+	            }).then(function () {
+	                _this2.isCreating = false;
+
+	                TagBar.reload();
+
+	                spinner(false);
+	                _this2.spinner(false);
+
+	                _this2.fetch();
+	            });
+	        }
+
+	        /**
+	         * Cancels multi select
+	         */
+
+	    }, {
 	        key: 'onClickRemove',
 
 
@@ -16656,17 +16687,19 @@
 	         * Event: Click remove button
 	         */
 	        value: function onClickRemove() {
-	            var _this2 = this;
+	            var _this3 = this;
 
 	            if (confirm('Are you sure you want to delete "' + this.model.title + '"?')) {
-	                spinner('Deleting issue');
+	                this.spinner(true);
 
 	                ApiHelper.removeIssue(this.model).then(function () {
-	                    _this2.$element.remove();
+	                    return ResourceHelper.reloadResource('issues');
+	                }).then(function () {
+	                    _this3.$element.remove();
 	                    spinner(false);
 	                }).catch(function (e) {
 	                    displayError(e);
-	                    spinner(false);
+	                    _this3.spinner(false);
 	                });
 	            }
 	        }
@@ -16683,6 +16716,8 @@
 	                e.stopPropagation();
 	            }
 
+	            this.fetch();
+
 	            if (!this.usingMultiEdit()) {
 	                IssueEditor.cancelMultiSelect();
 	            }
@@ -16690,6 +16725,10 @@
 	            var wasExpanded = this.$element.hasClass('expanded');
 
 	            toggleExpand(this.$element);
+
+	            if (this.isCreating) {
+	                return;
+	            }
 
 	            if (this.usingMultiEdit()) {
 	                $('.issue-editor .multi-edit-toggle').each(function () {
@@ -16830,22 +16869,34 @@
 	        }
 
 	        /**
+	         * Set spinner state
+	         *
+	         * @param {Boolean} isActive
+	         */
+
+	    }, {
+	        key: 'spinner',
+	        value: function spinner(isActive) {
+	            this.$element.toggleClass('loading', isActive);
+	        }
+
+	        /**
 	         * Synchronises the model data with the remote backend
 	         */
 
 	    }, {
 	        key: 'sync',
 	        value: function sync() {
-	            var _this3 = this;
+	            var _this4 = this;
 
 	            // Start loading
-	            this.$element.toggleClass('loading', true);
+	            this.spinner(true);
 
 	            // Update the issue though the API
 	            ApiHelper.updateIssue(this.model).then(function () {
 	                TagBar.reload();
 
-	                _this3.$element.toggleClass('loading', false);
+	                _this4.spinner(false);
 	            });
 	        }
 
@@ -16856,7 +16907,7 @@
 	    }, {
 	        key: 'onClickAddTag',
 	        value: function onClickAddTag(e) {
-	            var _this4 = this;
+	            var _this5 = this;
 
 	            var $btn = $(e.currentTarget);
 
@@ -16872,23 +16923,23 @@
 	                var val = $(e.currentTarget).siblings('.add-tag-name').val();
 	                var $input = $(e.currentTarget).parents('.input');
 
-	                $input.data('value', _this4.model.tags.concat([val]).join(','));
+	                $input.data('value', _this5.model.tags.concat([val]).join(','));
 
-	                _this4.onChange();
+	                _this5.onChange();
 	            }), _.button({ class: 'btn-add-tag-cancel' }, _.span({ class: 'fa fa-remove' })).click(function (e) {
 	                $dialog.remove();
 	                $btn.show();
 	            }), _.div({ class: 'add-tag-suggestions' }, _.each(resources.tags, function (i, tag) {
-	                if (_this4.model.tags.indexOf(tag) > -1) {
+	                if (_this5.model.tags.indexOf(tag) > -1) {
 	                    return;
 	                }
 
 	                return _.button({ class: 'btn-add-tag-suggestion' }, tag).click(function () {
 	                    var $input = $(e.currentTarget).parents('.input');
 
-	                    $input.data('value', _this4.model.tags.concat([tag]).join(','));
+	                    $input.data('value', _this5.model.tags.concat([tag]).join(','));
 
-	                    _this4.onChange();
+	                    _this5.onChange();
 	                });
 	            })));
 
@@ -16904,7 +16955,7 @@
 	    }, {
 	        key: 'onClickDragHandle',
 	        value: function onClickDragHandle(e) {
-	            var _this5 = this;
+	            var _this6 = this;
 
 	            if (ApiHelper.isSpectating()) {
 	                return;
@@ -16926,10 +16977,10 @@
 	                // Apply temporary CSS properties
 	                $element.each(function (i, element) {
 	                    $(element).css({
-	                        top: _this5.$element.offset().top,
-	                        left: _this5.$element.offset().left,
-	                        width: _this5.$element.outerWidth(),
-	                        height: _this5.$element.outerHeight(),
+	                        top: _this6.$element.offset().top,
+	                        left: _this6.$element.offset().left,
+	                        width: _this6.$element.outerWidth(),
+	                        height: _this6.$element.outerHeight(),
 	                        'pointer-events': 'none',
 	                        'z-index': 999,
 	                        'margin-top': i * 15 + 'px'
@@ -16988,7 +17039,7 @@
 
 	                // Document pointer release mouse button logic
 	                $(document).off('mouseup').on('mouseup', function (e) {
-	                    _this5.onReleaseDragHandle(e);
+	                    _this6.onReleaseDragHandle(e);
 	                });
 	            }
 	        }
@@ -17080,6 +17131,11 @@
 	            if (!this.usingMultiEdit()) {
 	                this.updateModel();
 	                this.updateDOM();
+
+	                if (this.isCreating) {
+	                    return;
+	                }
+
 	                this.sync();
 
 	                // Update filters
@@ -17207,7 +17263,7 @@
 	    }, {
 	        key: 'onSubmitComment',
 	        value: function onSubmitComment() {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            if (ApiHelper.isSpectating()) {
 	                return;
@@ -17224,7 +17280,7 @@
 	            this.$element.find('.add-comment textarea').val('');
 
 	            ApiHelper.addIssueComment(this.model, text).then(function () {
-	                _this6.getComments();
+	                _this7.getComments();
 	            });
 	        }
 
@@ -17349,7 +17405,7 @@
 	    }, {
 	        key: 'onClickRemoveAttachment',
 	        value: function onClickRemoveAttachment(attachment) {
-	            var _this7 = this;
+	            var _this8 = this;
 
 	            if (!confirm('Are you sure you want to remove the attachment "' + attachment.name + '"?')) {
 	                return;
@@ -17357,7 +17413,7 @@
 
 	            ApiHelper.removeIssueAttachment(this.model, attachment).then(function () {
 	                modal(false);
-	                _this7.getAttachments();
+	                _this8.getAttachments();
 	            });
 	        }
 
@@ -17370,10 +17426,10 @@
 	    }, {
 	        key: 'onClickAttachment',
 	        value: function onClickAttachment(attachment) {
-	            var _this8 = this;
+	            var _this9 = this;
 
 	            modal(_.div({ class: 'modal-attachment' }, _.img({ src: attachment.getURL() }), _.div({ class: 'modal-attachment-toolbar' }, _.button({ class: 'btn-remove-attachment' }, _.span({ class: 'fa fa-trash' })).click(function () {
-	                _this8.onClickRemoveAttachment(attachment);
+	                _this9.onClickRemoveAttachment(attachment);
 	            }))));
 	        }
 
@@ -17429,7 +17485,7 @@
 	    }, {
 	        key: 'attachFiles',
 	        value: function attachFiles(files) {
-	            var _this9 = this;
+	            var _this10 = this;
 
 	            if (files instanceof FileList) {
 	                var fileList = files;
@@ -17487,14 +17543,14 @@
 	                var nextFile = files.pop();
 
 	                if (!nextFile) {
-	                    _this9.getAttachments();
+	                    _this10.getAttachments();
 
 	                    spinner(false);
 	                    return Promise.resolve();
 	                }
 
 	                return uploadFile(nextFile).then(function (attachment) {
-	                    return ApiHelper.addIssueAttachment(_this9.model, attachment);
+	                    return ApiHelper.addIssueAttachment(_this10.model, attachment);
 	                }).then(function () {
 	                    return uploadNextFile();
 	                }).catch(function (e) {
@@ -17588,20 +17644,20 @@
 	    }, {
 	        key: 'getAttachments',
 	        value: function getAttachments() {
-	            var _this10 = this;
+	            var _this11 = this;
 
 	            this.$element.toggleClass('loading', true);
 
 	            var $attachments = this.$element.find('.attachments');
 
 	            ApiHelper.getIssueAttachments(this.model).then(function (attachments) {
-	                _this10.$element.toggleClass('loading', false);
+	                _this11.$element.toggleClass('loading', false);
 
 	                $attachments.children('.attachment').remove();
 
 	                _.append($attachments, _.each(attachments, function (i, attachment) {
 	                    return _.div({ class: 'attachment' }, _.label({}, _.if(!attachment.isRedirect && attachment.isImage(), _.img({ src: attachment.getURL() })), attachment.name), _.a({ class: 'btn-download-attachment fa fa-download', href: attachment.getURL(), target: '_blank' }), _.button({ class: 'btn-remove-attachment' }, _.span({ class: 'fa fa-trash' })).click(function () {
-	                        _this10.onClickRemoveAttachment(attachment);
+	                        _this11.onClickRemoveAttachment(attachment);
 	                    }));
 	                }));
 	            });
@@ -17614,7 +17670,7 @@
 	    }, {
 	        key: 'getComments',
 	        value: function getComments() {
-	            var _this11 = this;
+	            var _this12 = this;
 
 	            this.$element.toggleClass('loading', true);
 
@@ -17622,7 +17678,7 @@
 	            var user = User.getCurrent();
 
 	            ApiHelper.getIssueComments(this.model).then(function (comments) {
-	                _this11.$element.toggleClass('loading', false);
+	                _this12.$element.toggleClass('loading', false);
 
 	                $comments.children('.comment').remove();
 
@@ -17630,24 +17686,24 @@
 	                    var text = markdownToHtml(comment.text);
 	                    var isUser = comment.collaborator.name == user.name;
 
-	                    var $comment = _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: comment.collaborator.displayName || comment.collaborator.name, src: comment.collaborator.avatar })), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this11.onClickEdit), _.div({ class: 'rendered selectable' }, text), _.textarea({ class: 'edit hidden text btn-transparent' }, comment.text).change(function () {
-	                        _this11.$element.toggleClass('loading', true);
+	                    var $comment = _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: comment.collaborator.displayName || comment.collaborator.name, src: comment.collaborator.avatar })), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this12.onClickEdit), _.div({ class: 'rendered selectable' }, text), _.textarea({ class: 'edit hidden text btn-transparent' }, comment.text).change(function () {
+	                        _this12.$element.toggleClass('loading', true);
 
 	                        comment.text = $comment.find('textarea').val();
 
 	                        $comment.find('.rendered').html(markdownToHtml(comment.text) || '');
 
-	                        ApiHelper.updateIssueComment(_this11.model, comment).then(function () {
-	                            _this11.$element.toggleClass('loading', false);
+	                        ApiHelper.updateIssueComment(_this12.model, comment).then(function () {
+	                            _this12.$element.toggleClass('loading', false);
 
 	                            if (!comment.text) {
 	                                $comment.remove();
 	                            }
 	                        }).catch(function (e) {
-	                            _this11.$element.toggleClass('loading', false);
+	                            _this12.$element.toggleClass('loading', false);
 	                            displayError(e);
 	                        });
-	                    }).blur(_this11.onBlur)), _.if(!isUser, _.div({ class: 'text selectable' }, text)));
+	                    }).blur(_this12.onBlur)), _.if(!isUser, _.div({ class: 'text selectable' }, text)));
 
 	                    return $comment;
 	                }));
@@ -17709,15 +17765,7 @@
 	    // Center section
 	    _.div({ class: 'header-center' },
 	    // Title
-	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit hidden', 'data-property': 'title', value: this.model.title }).change(function () {
-	        _this.onChange();
-
-	        _this.$element.find('.header .rendered').html(_this.model.title);
-	    }).blur(this.onBlur).keyup(function (e) {
-	        if (e.which == 13) {
-	            _this.onBlur(e);
-	        }
-	    }), _.button({ class: 'btn-edit' }).click(this.onClickEdit)))),
+	    _.h4({ class: 'issue-title' }, _.span({ class: 'rendered' }, this.model.title), _.input({ type: 'text', class: 'selectable edit', 'data-property': 'title', value: this.model.title })))),
 
 	    // Expand/collapse button
 	    _.button({ class: 'btn-toggle btn-transparent' }, _.span({ class: 'fa icon-close fa-chevron-up' }), _.span({ class: 'fa icon-open fa-chevron-down' })).click(function (e) {
@@ -17740,45 +17788,35 @@
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Assignee'), _.select({ 'data-property': 'assignee', disabled: ApiHelper.isSpectating() }, _.option({ value: null, selected: !this.model.assignee }, '(unassigned)'), _.each(resources.collaborators, function (i, collaborator) {
 	        return _.option({ value: collaborator.name, selected: collaborator.name == _this.model.assignee }, collaborator.displayName || collaborator.name);
-	    })).change(function () {
-	        _this.onChange();
-	    }))),
+	    })))),
 
 	    // Type
 	    _.div({ class: 'meta-field type' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Type'), _.select({ 'data-property': 'type', disabled: ApiHelper.isSpectating() }, _.each(ISSUE_TYPES, function (type, i) {
 	        return _.option({ value: type }, type);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.type)),
+	    })).val(this.model.type)),
 
 	    // Priority
 	    _.div({ class: 'meta-field priority' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Priority'), _.select({ 'data-property': 'priority', disabled: ApiHelper.isSpectating() }, _.each(ISSUE_PRIORITIES, function (priority, i) {
 	        return _.option({ value: priority }, priority);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.priority)),
+	    })).val(this.model.priority)),
 
 	    // Version
 	    _.div({ class: 'meta-field version' + (window.resources.versions.length < 1 ? ' hidden' : '') }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Version'), _.select({ 'data-property': 'version', disabled: ApiHelper.isSpectating() }, _.each(window.resources.versions, function (i, version) {
 	        return _.option({ value: version }, version);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.version)),
+	    })).val(this.model.version)),
 
 	    // Estimate
 	    _.div({ class: 'meta-field estimate' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
 	        _this.onChangeCheckbox(e);
 	    }), _.label('Estimate'), _.select({ 'data-property': 'estimate', disabled: ApiHelper.isSpectating() }, _.each(ISSUE_ESTIMATES, function (estimate, i) {
 	        return _.option({ value: estimate }, estimate);
-	    })).change(function () {
-	        _this.onChange();
-	    }).val(this.model.estimate)),
+	    })).val(this.model.estimate)),
 
 	    // Tags
 	    _.div({ class: 'meta-field tags' }, _.input({ class: 'multi-edit-toggle', type: 'checkbox' }).change(function (e) {
@@ -17797,8 +17835,6 @@
 	            val = val.join(',');
 
 	            $input.data('value', val);
-
-	            _this.onChange();
 	        }));
 	    }),
 
@@ -17814,22 +17850,33 @@
 	        _this.onClickMultiEditApply();
 	    }))),
 
-	    // Body
-	    _.div({ class: 'body' },
-
-	    // Description
-	    _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(this.onClickEdit), _.label('Description'), _.div({ class: 'rendered selectable' }, markdownToHtml(this.model.description)), _.textarea({ class: 'selectable edit hidden btn-transparent', 'data-property': 'description' }, this.model.description).change(function () {
-	        _this.onChange();
-
-	        _this.$element.find('.body .rendered').html(markdownToHtml(_this.model.description) || '');
-	    }).blur(this.onBlur).keyup(this.onKeyUp).on('paste', function (e) {
-	        _this.onPaste(e);
-	    })),
-
 	    // Attachments
 	    _.div({ class: 'attachments' }, _.label('Attachments'), _.input({ name: 'file', id: 'input-upload-attachment-' + this.model.id, type: 'file', multiple: true }).change(function (e) {
 	        _this.onAttachmentFileInputChange(e);
 	    }), _.label({ for: 'input-upload-attachment-' + this.model.id, class: 'btn-upload-attachment' }, _.span({ class: 'fa fa-upload' }))),
+
+	    // Body
+	    _.div({ class: 'body' },
+
+	    // Description
+	    _.label('Description'), _.textarea({ class: 'selectable edit btn-transparent', 'data-property': 'description' }, this.model.description)),
+
+	    // Actions
+	    _.if(!ApiHelper.isSpectating(), _.div({ class: 'actions' },
+	    // Remove button
+	    _.if(!this.isCreating, _.button({ class: 'btn btn-small btn-remove-issue' }, _.span({ class: 'fa fa-trash' })).click(function () {
+	        _this.onClickRemove();
+	    })),
+
+	    // Create button
+	    _.if(this.isCreating, _.button({ class: 'btn btn-create-issue' }, 'Create').click(function () {
+	        _this.onClickCreate();
+	    })),
+
+	    // Save button
+	    _.if(!this.isCreating, _.button({ class: 'btn btn-save-issue' }, 'Save').click(function () {
+	        _this.onChange();
+	    })))),
 
 	    // Comments
 	    _.div({ class: 'comments' }, _.label('Comments')),
@@ -17841,10 +17888,6 @@
 	        _this.onSubmitComment();
 	    }).on('paste', function (e) {
 	        _this.onPaste(e);
-	    })))), _.if(!ApiHelper.isSpectating(), _.div({ class: 'actions' },
-	    // Remove button
-	    _.if(!ApiHelper.isSpectating(), _.button({ class: 'btn' }, 'Remove issue', _.span({ class: 'fa fa-trash' })).click(function () {
-	        _this.onClickRemove();
 	    })))));
 	};
 
@@ -18131,31 +18174,26 @@
 	        value: function onClickNewIssue() {
 	            var _this2 = this;
 
-	            spinner('Creating issue');
-
-	            var issue = new Issue({
-	                milestone: this.model.title,
-	                tags: Router.params.tag == 'all' ? [] : [Router.params.tag],
-	                reporter: User.getCurrent().name
+	            var editor = new IssueEditor({
+	                model: new Issue({
+	                    milestone: this.model.title,
+	                    tags: Router.params.tag == 'all' ? [] : [Router.params.tag],
+	                    reporter: User.getCurrent().name
+	                }),
+	                isCreating: true
 	            });
 
-	            ResourceHelper.addResource('issues', issue).then(function (newIssue) {
-	                var editor = new IssueEditor({
-	                    model: newIssue
+	            var $issue = editor.$element;
+
+	            this.$element.find('.column[data-name="to do"] .btn-new-issue').before($issue);
+
+	            editor.onClickToggle();
+
+	            editor.on('created', function (newIssue) {
+	                ResourceHelper.addResource('issues', newIssue).then(function (newIssue) {
+	                    _this2.render();
 	                });
-
-	                var $issue = editor.$element;
-
-	                _this2.$element.find('.column[data-index="' + newIssue.column + '"] .btn-new-issue').before($issue);
-
-	                editor.onClickToggle();
-
-	                spinner(false);
 	            });
-
-	            if (this.$element.hasClass('collapsed')) {
-	                this.onClickToggle();
-	            }
 	        }
 
 	        /**

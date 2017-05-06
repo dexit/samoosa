@@ -10,6 +10,34 @@ class IssueEditor extends View {
     }
 
     /**
+     * Event: Click create
+     */
+    onClickCreate() {
+        // Start loading
+        this.spinner(true);
+
+        this.updateModel();
+
+        // Update the issue though the API
+        ApiHelper.addIssue(this.model)
+        .then((issue) => {
+            this.model = issue;
+
+            return ResourceHelper.reloadResource('issues');
+        })
+        .then(() => {
+            this.isCreating = false;
+            
+            TagBar.reload();
+
+            spinner(false);
+            this.spinner(false);
+        
+            this.fetch();
+        });
+    }
+
+    /**
      * Cancels multi select
      */
     static cancelMultiSelect() {
@@ -25,16 +53,20 @@ class IssueEditor extends View {
      */
     onClickRemove() {
         if(confirm('Are you sure you want to delete "' + this.model.title + '"?')) {
-            spinner('Deleting issue');
+            this.spinner(true);
 
             ApiHelper.removeIssue(this.model)
+            .then(() => {
+                return ResourceHelper.reloadResource('issues');
+            })
             .then(() => {
                 this.$element.remove();
                 spinner(false);
             })
             .catch((e) => {
                 displayError(e);
-                spinner(false);  
+                this.spinner(false); 
+
             });
         }
     }
@@ -48,6 +80,8 @@ class IssueEditor extends View {
             e.stopPropagation();
         }
 
+        this.fetch();
+
         if(!this.usingMultiEdit()) {
             IssueEditor.cancelMultiSelect();
         }
@@ -55,6 +89,8 @@ class IssueEditor extends View {
         let wasExpanded = this.$element.hasClass('expanded');
 
         toggleExpand(this.$element);
+
+        if(this.isCreating) { return; }
 
         if(this.usingMultiEdit()) {
             $('.issue-editor .multi-edit-toggle').each(function() {
@@ -183,18 +219,27 @@ class IssueEditor extends View {
     }
 
     /**
+     * Set spinner state
+     *
+     * @param {Boolean} isActive
+     */
+    spinner(isActive) {
+        this.$element.toggleClass('loading', isActive);
+    }
+
+    /**
      * Synchronises the model data with the remote backend
      */
     sync() {
         // Start loading
-        this.$element.toggleClass('loading', true);
+        this.spinner(true);
 
         // Update the issue though the API
         ApiHelper.updateIssue(this.model)
         .then(() => {
             TagBar.reload();
 
-            this.$element.toggleClass('loading', false);
+            this.spinner(false);
         });
     }
 
@@ -408,6 +453,9 @@ class IssueEditor extends View {
         if(!this.usingMultiEdit()) {
             this.updateModel();
             this.updateDOM();
+        
+            if(this.isCreating) { return; }
+            
             this.sync();
         
             // Update filters

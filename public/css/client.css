@@ -340,22 +340,36 @@ body, html {
   opacity: 0.5; }
 
 .issue-editor {
-  border: 1px solid #bdbdbd;
-  transition: height 0.5s ease; }
+  transition: height 0.5s ease;
+  background-color: #21303B;
+  margin-bottom: 0.5rem; }
   .issue-editor.selected {
-    outline: 2px solid #2196f3; }
+    outline: 2px solid #E70D3B; }
   .issue-editor.loading {
     pointer-events: none;
     opacity: 0.5; }
   .issue-editor.collapsing, .issue-editor.expanding {
     overflow-y: hidden;
     overflow-x: visible; }
+  .issue-editor.expanded .edit {
+    display: block; }
+  .issue-editor.expanded .rendered {
+    display: none; }
   .issue-editor.expanded .header > button span.icon-close {
     display: inline; }
   .issue-editor.expanded .header > button span.icon-open {
     display: none; }
   .issue-editor.expanded .attachments, .issue-editor.expanded .meta, .issue-editor.expanded .body, .issue-editor.expanded .operations, .issue-editor.expanded .actions, .issue-editor.expanded .comments, .issue-editor.expanded .add-comment {
     display: block; }
+  .issue-editor.expanded .actions {
+    text-align: right; }
+    .issue-editor.expanded .actions .btn {
+      min-width: 6rem; }
+      .issue-editor.expanded .actions .btn.btn-small {
+        min-width: auto;
+        float: left; }
+      .issue-editor.expanded .actions .btn .fa {
+        margin: 0px; }
   .issue-editor.expanded.selected .multi-edit-notification {
     display: block;
     width: 100%;
@@ -381,6 +395,10 @@ body, html {
     display: none; }
   .issue-editor .multi-edit-toggle, .issue-editor .multi-edit-notification, .issue-editor .multi-edit-actions {
     display: none; }
+  .issue-editor .edit {
+    display: none; }
+  .issue-editor .rendered {
+    display: block; }
   .issue-editor > .header {
     background-color: #424242;
     color: #eeeeee;
@@ -445,15 +463,6 @@ body, html {
         .issue-editor > .header .header-content .header-center .issue-title {
           margin: 0px;
           position: relative; }
-          .issue-editor > .header .header-content .header-center .issue-title .btn-edit {
-            cursor: text;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0px;
-            left: 0px;
-            display: block;
-            z-index: 5; }
           .issue-editor > .header .header-content .header-center .issue-title .rendered {
             background-color: transparent;
             color: #fff; }
@@ -466,7 +475,6 @@ body, html {
             font-size: 1em;
             line-height: 1em;
             margin: 0px;
-            display: block;
             width: 100%; }
             .issue-editor > .header .header-content .header-center .issue-title .rendered, .issue-editor > .header .header-content .header-center .issue-title .rendered:focus, .issue-editor > .header .header-content .header-center .issue-title .rendered:hover, .issue-editor > .header .header-content .header-center .issue-title .rendered:active, .issue-editor > .header .header-content .header-center .issue-title .edit, .issue-editor > .header .header-content .header-center .issue-title .edit:focus, .issue-editor > .header .header-content .header-center .issue-title .edit:hover, .issue-editor > .header .header-content .header-center .issue-title .edit:active {
               outline: 0px; }
@@ -635,7 +643,7 @@ body, html {
         margin-left: 15px;
         line-height: 2rem; }
   .issue-editor .add-comment, .issue-editor .comments {
-    padding: 0px 15px 0px 15px; }
+    padding: 0px 15px 5px 15px; }
     .issue-editor .add-comment .comment, .issue-editor .comments .comment {
       display: flex;
       margin-bottom: 15px;
@@ -1597,94 +1605,97 @@ a {
   .milestone-viewer > .header .progress-bar {
     background-color: #e8e8e8; }
 
-.issue-editor {
-  border: 0px;
-  background-color: #21303B;
-  margin-bottom: 0.5rem; }
-  .issue-editor.selected {
-    outline-color: #E70D3B; }
-  .issue-editor textarea, .issue-editor .rendered {
-    border: 2px solid transparent; }
-    .issue-editor textarea:focus, .issue-editor .rendered:focus {
-      outline: none;
-      border: 2px solid #E70D3B; }
-  .issue-editor .btn-edit, .issue-editor .btn-upload-attachment {
+.issue-editor textarea, .issue-editor .rendered {
+  border: 2px solid transparent; }
+  .issue-editor textarea:focus, .issue-editor .rendered:focus {
+    outline: none;
+    border: 2px solid #E70D3B; }
+
+.issue-editor .btn-edit, .issue-editor .btn-upload-attachment {
+  color: #fff; }
+  .issue-editor .btn-edit:hover .fa, .issue-editor .btn-upload-attachment:hover .fa {
+    color: #E70D3B; }
+
+.issue-editor > .header {
+  background-color: transparent; }
+  .issue-editor > .header h4, .issue-editor > .header .milestone-editor:not(.editing) input[name="title"], .milestone-editor:not(.editing) .issue-editor > .header input[name="title"], .issue-editor > .header h4 input, .issue-editor > .header .milestone-editor:not(.editing) input[name="title"] input, .milestone-editor:not(.editing) .issue-editor > .header input[name="title"] input {
     color: #fff; }
-    .issue-editor .btn-edit:hover .fa, .issue-editor .btn-upload-attachment:hover .fa {
-      color: #E70D3B; }
-  .issue-editor > .header {
-    background-color: transparent; }
-    .issue-editor > .header h4, .issue-editor > .header .milestone-editor:not(.editing) input[name="title"], .milestone-editor:not(.editing) .issue-editor > .header input[name="title"], .issue-editor > .header h4 input, .issue-editor > .header .milestone-editor:not(.editing) input[name="title"] input, .milestone-editor:not(.editing) .issue-editor > .header input[name="title"] input {
-      color: #fff; }
-    .issue-editor > .header .issue-id {
-      font-family: 'Bree Serif';
-      padding: 4px 8px;
-      font-size: 11px;
-      line-height: 1em;
-      border-radius: 0px;
-      background-color: transparent;
-      color: #5b84a2; }
-    .issue-editor > .header .btn-remove {
-      background-color: #171e23; }
-    .issue-editor > .header .btn-toggle:hover {
-      color: #E70D3B; }
-  .issue-editor .meta, .issue-editor .body {
+  .issue-editor > .header .issue-id {
+    font-family: 'Bree Serif';
+    padding: 4px 8px;
+    font-size: 11px;
+    line-height: 1em;
+    border-radius: 0px;
+    background-color: transparent;
     color: #5b84a2; }
-  .issue-editor label {
-    line-height: 2rem;
-    height: 2rem;
+  .issue-editor > .header .btn-remove {
+    background-color: #171e23; }
+  .issue-editor > .header .btn-toggle:hover {
+    color: #E70D3B; }
+
+.issue-editor .meta, .issue-editor .body {
+  color: #5b84a2; }
+
+.issue-editor label {
+  line-height: 2rem;
+  height: 2rem;
+  color: #5b84a2; }
+
+.issue-editor .body {
+  background-color: #21303B; }
+  .issue-editor .body textarea, .issue-editor .body .rendered {
+    padding: 10px;
+    border-radius: 5px; }
+  .issue-editor .body .rendered {
+    background-color: #171e23;
     color: #5b84a2; }
-  .issue-editor .body {
-    background-color: #21303B; }
-    .issue-editor .body textarea, .issue-editor .body .rendered {
-      padding: 10px;
-      border-radius: 5px; }
-    .issue-editor .body .rendered {
-      background-color: #171e23;
-      color: #5b84a2; }
-    .issue-editor .body textarea {
-      background-color: #fff;
-      color: #000; }
-    .issue-editor .body .rendered, .issue-editor .body p, .issue-editor .body span {
+  .issue-editor .body textarea {
+    background-color: #fff;
+    color: #000; }
+  .issue-editor .body .rendered, .issue-editor .body p, .issue-editor .body span {
+    color: #fff; }
+  .issue-editor .body a {
+    color: #E70D3B; }
+  .issue-editor .body .rendered, .issue-editor .body p, .issue-editor .body textarea {
+    line-height: 1.5em; }
+
+.issue-editor .meta {
+  background-color: transparent; }
+  .issue-editor .meta .meta-field.readonly p {
+    color: #fff;
+    font-weight: bold; }
+  .issue-editor .meta .meta-field select {
+    font-weight: bold; }
+
+.issue-editor .multi-edit-notification {
+  color: #E70D3B !important; }
+
+.issue-editor .attachments {
+  background-color: transparent; }
+  .issue-editor .attachments div.attachment {
+    background-color: #171e23;
+    color: #fff; }
+    .issue-editor .attachments div.attachment .btn-download-attachment, .issue-editor .attachments div.attachment .btn-remove-attachment {
       color: #fff; }
-    .issue-editor .body a {
-      color: #E70D3B; }
-    .issue-editor .body .rendered, .issue-editor .body p, .issue-editor .body textarea {
-      line-height: 1.5em; }
-  .issue-editor .meta {
-    background-color: transparent; }
-    .issue-editor .meta .meta-field.readonly p {
-      color: #fff;
-      font-weight: bold; }
-    .issue-editor .meta .meta-field select {
-      font-weight: bold; }
-  .issue-editor .multi-edit-notification {
-    color: #E70D3B !important; }
-  .issue-editor .attachments {
-    background-color: transparent; }
-    .issue-editor .attachments div.attachment {
-      background-color: #171e23;
-      color: #fff; }
-      .issue-editor .attachments div.attachment .btn-download-attachment, .issue-editor .attachments div.attachment .btn-remove-attachment {
-        color: #fff; }
-        .issue-editor .attachments div.attachment .btn-download-attachment:hover, .issue-editor .attachments div.attachment .btn-remove-attachment:hover {
-          color: #E70D3B; }
-    .issue-editor .attachments button.attachment {
-      background-color: #171e23; }
-      .issue-editor .attachments button.attachment:hover {
-        outline: 2px solid #E70D3B; }
-  .issue-editor .comments, .issue-editor .add-comment {
-    background-color: transparent; }
-    .issue-editor .comments .comment .rendered, .issue-editor .comments .comment .text, .issue-editor .add-comment .comment .rendered, .issue-editor .add-comment .comment .text {
-      background-color: #171e23;
-      color: #fff; }
-    .issue-editor .comments .comment textarea, .issue-editor .add-comment .comment textarea {
-      background-color: #fff;
-      color: #000; }
-    .issue-editor .comments .comment .collaborator, .issue-editor .add-comment .comment .collaborator {
-      color: #fff; }
-    .issue-editor .comments .comment a, .issue-editor .add-comment .comment a {
-      color: #E70D3B; }
+      .issue-editor .attachments div.attachment .btn-download-attachment:hover, .issue-editor .attachments div.attachment .btn-remove-attachment:hover {
+        color: #E70D3B; }
+  .issue-editor .attachments button.attachment {
+    background-color: #171e23; }
+    .issue-editor .attachments button.attachment:hover {
+      outline: 2px solid #E70D3B; }
+
+.issue-editor .comments, .issue-editor .add-comment {
+  background-color: transparent; }
+  .issue-editor .comments .comment .rendered, .issue-editor .comments .comment .text, .issue-editor .add-comment .comment .rendered, .issue-editor .add-comment .comment .text {
+    background-color: #171e23;
+    color: #fff; }
+  .issue-editor .comments .comment textarea, .issue-editor .add-comment .comment textarea {
+    background-color: #fff;
+    color: #000; }
+  .issue-editor .comments .comment .collaborator, .issue-editor .add-comment .comment .collaborator {
+    color: #fff; }
+  .issue-editor .comments .comment a, .issue-editor .add-comment .comment a {
+    color: #E70D3B; }
 
 /**
  * Widgets

@@ -245,13 +245,7 @@ class GitHubApi extends ApiHelper {
      * @returns {Promise} promise
      */
     getRepositories() {
-        let path = '/user/repos';
-
-        if(Router.params.user) {
-            path = '/users/' + Router.params.user + '/repos';
-        }
-
-        return this.get(path, '', true)
+        return this.get('/user/repos', '', true)
         .then((repos) => {
             this.processRepositories(repos);
             

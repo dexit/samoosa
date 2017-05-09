@@ -11143,13 +11143,7 @@
 	        value: function getRepositories() {
 	            var _this6 = this;
 
-	            var path = '/user/repos';
-
-	            if (Router.params.user) {
-	                path = '/users/' + Router.params.user + '/repos';
-	            }
-
-	            return this.get(path, '', true).then(function (repos) {
+	            return this.get('/user/repos', '', true).then(function (repos) {
 	                _this6.processRepositories(repos);
 
 	                return Promise.resolve();

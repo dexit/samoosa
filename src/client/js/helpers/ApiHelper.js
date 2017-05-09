@@ -9,6 +9,17 @@ class ApiHelper {
     }
 
     /**
+     * Checks if owner has changed
+     */
+    hasOwnerChanged() {
+        let hasOwnerChanged = this.prevOwner === Router.params.user;
+
+        this.prevOwner = Router.params.user;
+
+        return hasOwnerChanged;
+    }
+
+    /**
      * Get config
      */
     getConfig() {
@@ -29,8 +40,10 @@ class ApiHelper {
     
     /**
      * Check whether the connection to the source has been made
+     *
+     * @param {Boolean} reloadRepos
      */
-    checkConnection() {
+    checkConnection(reloadRepos) {
         let userPromise;
         
         // Make sure user is logged in
@@ -60,11 +73,7 @@ class ApiHelper {
         // Make sure repositories are loaded
         return userPromise
         .then(() => {
-            if(!resources.repositories || resources.repositories.length < 1) {
-                return this.getRepositories();
-            } else {
-                return Promise.resolve()
-            }
+            return this.getRepositories();
         });
     }
 
@@ -701,6 +710,11 @@ class ApiHelper {
      */
     getResources(dontOverwrite) {
         spinner('Getting resources');
+
+        // Override this option if we changed owners
+        if(this.hasOwnerChanged()) {
+            dontOverwrite = false;
+        }
 
         let get = (resource) => {
             // If "don't overwrite" is in effect, check if resource is already loaded

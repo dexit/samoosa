@@ -21,6 +21,27 @@ Router.route('/', () => {
     .catch(displayError);
 });
 
+// User
+Router.route('/:user', () => {
+    ApiHelper.checkConnection()
+    .then(() => {
+        navbar.toggleRepositoriesList(true);
+        
+        $('.workspace').remove();
+
+        $('.app-container').append(
+            _.div({class: 'workspace'},
+                _.div({class: 'workspace-content logo'},
+                    _.img({src: '/public/svg/logo-medium.svg'})
+                )
+            )
+        );
+        
+        spinner(false);
+    })
+    .catch(displayError);
+});
+
 // Repository
 Router.route('/:user/:repository', () => {
     location.hash = '/' + Router.params.user + '/' + Router.params.repository + '/milestones';

@@ -11143,7 +11143,13 @@
 	        value: function getRepositories() {
 	            var _this6 = this;
 
-	            return this.get('/user/repos').then(function (repos) {
+	            var path = '/user/repos';
+
+	            if (Router.params.user) {
+	                path = '/users/' + Router.params.user + '/repos';
+	            }
+
+	            return this.get(path, '', true).then(function (repos) {
 	                _this6.processRepositories(repos);
 
 	                return Promise.resolve();
@@ -12444,6 +12450,20 @@
 	        value: function clear() {}
 
 	        /**
+	         * Checks if owner has changed
+	         */
+
+	    }, {
+	        key: 'hasOwnerChanged',
+	        value: function hasOwnerChanged() {
+	            var hasOwnerChanged = this.prevOwner === Router.params.user;
+
+	            this.prevOwner = Router.params.user;
+
+	            return hasOwnerChanged;
+	        }
+
+	        /**
 	         * Get config
 	         */
 
@@ -12470,11 +12490,13 @@
 
 	        /**
 	         * Check whether the connection to the source has been made
+	         *
+	         * @param {Boolean} reloadRepos
 	         */
 
 	    }, {
 	        key: 'checkConnection',
-	        value: function checkConnection() {
+	        value: function checkConnection(reloadRepos) {
 	            var _this = this;
 
 	            var userPromise = void 0;
@@ -12502,11 +12524,7 @@
 
 	            // Make sure repositories are loaded
 	            return userPromise.then(function () {
-	                if (!resources.repositories || resources.repositories.length < 1) {
-	                    return _this.getRepositories();
-	                } else {
-	                    return Promise.resolve();
-	                }
+	                return _this.getRepositories();
 	            });
 	        }
 
@@ -13316,6 +13334,11 @@
 	            var _this2 = this;
 
 	            spinner('Getting resources');
+
+	            // Override this option if we changed owners
+	            if (this.hasOwnerChanged()) {
+	                dontOverwrite = false;
+	            }
 
 	            var get = function get(resource) {
 	                // If "don't overwrite" is in effect, check if resource is already loaded
@@ -19311,6 +19334,19 @@
 	// Root
 
 	Router.route('/', function () {
+	    ApiHelper.checkConnection().then(function () {
+	        navbar.toggleRepositoriesList(true);
+
+	        $('.workspace').remove();
+
+	        $('.app-container').append(_.div({ class: 'workspace' }, _.div({ class: 'workspace-content logo' }, _.img({ src: '/public/svg/logo-medium.svg' }))));
+
+	        spinner(false);
+	    }).catch(displayError);
+	});
+
+	// User
+	Router.route('/:user', function () {
 	    ApiHelper.checkConnection().then(function () {
 	        navbar.toggleRepositoriesList(true);
 

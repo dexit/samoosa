@@ -144,6 +144,10 @@ class ApiHelper {
      * @returns {String} Repository name
      */    
     getRepositoryName() {
+        if(Router.params.repository) {
+            return Router.params.repository;
+        }
+
         let repository = Repository.getCurrent();
         
         if(!repository) { return ''; }

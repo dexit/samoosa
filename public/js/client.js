@@ -12608,6 +12608,10 @@
 	    }, {
 	        key: 'getRepositoryName',
 	        value: function getRepositoryName() {
+	            if (Router.params.repository) {
+	                return Router.params.repository;
+	            }
+
 	            var repository = Repository.getCurrent();
 
 	            if (!repository) {

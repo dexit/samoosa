@@ -12586,6 +12586,10 @@
 	    }, {
 	        key: 'getRepositoryOwner',
 	        value: function getRepositoryOwner() {
+	            if (Router.params.user) {
+	                return Router.params.user;
+	            }
+
 	            var repository = Repository.getCurrent();
 
 	            if (!repository) {

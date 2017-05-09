@@ -127,6 +127,10 @@ class ApiHelper {
      * @returns {String} Owner
      */    
     getRepositoryOwner() {
+        if(Router.params.user) {
+            return Router.params.user;
+        }
+        
         let repository = Repository.getCurrent();
         
         if(!repository) { return ''; }

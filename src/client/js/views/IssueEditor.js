@@ -263,11 +263,10 @@ class IssueEditor extends View {
                 _.span({class: 'fa fa-check'})
             ).click((e) => {
                 let val = $(e.currentTarget).siblings('.add-tag-name').val();
-                let $input = $(e.currentTarget).parents('.input');
-                
-                $input.data('value', this.model.tags.concat([val]).join(','));
-                
-                this.onChange();         
+
+                this.model.tags.push(val);
+
+                this.render();
             }),
             _.button({class: 'btn-add-tag-cancel'},
                 _.span({class: 'fa fa-remove'})
@@ -282,11 +281,9 @@ class IssueEditor extends View {
                     return _.button({class: 'btn-add-tag-suggestion'},
                         tag
                     ).click(() => {
-                        let $input = $(e.currentTarget).parents('.input')
-                            
-                        $input.data('value', this.model.tags.concat([tag]).join(','));
-                        
-                        this.onChange();         
+                        this.model.tags.push(tag);
+
+                        this.render();
                     });
                 })
             )
@@ -922,28 +919,18 @@ class IssueEditor extends View {
                 _.each(comments, (i, comment) => {
                     let text = markdownToHtml(comment.text);
                     let isUser = comment.collaborator.name == user.name;
-                    
+                   
                     let $comment = _.div({class: 'comment', 'data-index': comment.index},
                         _.div({class: 'collaborator'},
                             _.img({title: comment.collaborator.displayName || comment.collaborator.name, src: comment.collaborator.avatar}),
                         ),
                         _.if(isUser, 
-                            _.button({class: 'btn-edit'},
-                                _.span({class: 'fa fa-edit'})
-                            ).click(this.onClickEdit),
-                            _.div({class: 'rendered selectable'},
-                                text
-                            ),
-                            _.textarea({class: 'edit hidden text btn-transparent'},
+                            _.textarea({class: 'edit'},
                                 comment.text
-                            ).change(() => {
+                            ).change((e) => {
                                 this.$element.toggleClass('loading', true);
                                 
-                                comment.text = $comment.find('textarea').val();
-
-                                $comment.find('.rendered').html(
-                                    markdownToHtml(comment.text) || ''
-                                );
+                                comment.text = $(e.currentTarget).val();
 
                                 ApiHelper.updateIssueComment(this.model, comment)
                                 .then(() => {
@@ -958,7 +945,6 @@ class IssueEditor extends View {
                                     displayError(e);
                                 });
                             })
-                            .blur(this.onBlur)
                         ),
                         _.if(!isUser,
                             _.div({class: 'text selectable'},

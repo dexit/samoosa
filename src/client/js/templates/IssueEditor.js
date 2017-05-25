@@ -149,12 +149,13 @@ module.exports = function render() {
                             _.button({class: 'btn-remove-tag'}, 
                                 _.span({class: 'fa fa-remove'})
                             ).click((e) => {
-                                let $input = $(e.currentTarget).parents('.input');
-                                let val = $input.data('value').split(',');
-                                val.splice(val.indexOf(tag), 1);
-                                val = val.join(',');
+                                let tagIndex = this.model.tags.indexOf(tag);
 
-                                $input.data('value', val);
+                                if(tagIndex < 0) { return; }
+
+                                this.model.tags.splice(tagIndex, 1);
+
+                                this.render();
                             })
                         );
                     }),

@@ -160,7 +160,7 @@
 
 	module.exports = {
 		"name": "samoosa",
-		"version": "0.5.0",
+		"version": "0.5.2",
 		"description": "",
 		"main": "index.html",
 		"scripts": {
@@ -1041,18 +1041,6 @@
 	}
 
 	/**
-	 * Defines a new component
-	 *
-	 * @param {String} tag
-	 * @param {Function} template
-	 */
-	FunctionTemplating.component = function (tag, template) {
-	    FunctionTemplating[tag] = function (model) {
-	        return create('div', { 'data-component': tag }, template(model));
-	    };
-	};
-
-	/**
 	 * Appends content using the function templating rules
 	 *
 	 * @params {HTMLElement} parentElement
@@ -1877,32 +1865,22 @@
 	    function ContextMenu(params) {
 	        _classCallCheck(this, ContextMenu);
 
+	        // Recycle other context menus
 	        var _this = _possibleConstructorReturn(this, (ContextMenu.__proto__ || Object.getPrototypeOf(ContextMenu)).call(this, params));
 
-	        _this.element = _.ul({ class: 'context-menu dropdown-menu', role: 'menu' });
-
-	        var existingMenu = _.find('.context-menu');
-
-	        if (typeof jQuery !== 'undefined') {
-	            if (existingMenu && existingMenu.length > 0) {
-	                _this.element = existingMenu;
-	            }
+	        if ($('.context-menu').length > 0) {
+	            _this.$element = $('.context-menu');
 	        } else {
-	            if (existingMenu) {
-	                _this.element = existingMenu;
-	            }
+	            _this.$element = _.ul({ class: 'context-menu dropdown-menu', role: 'menu' });
 	        }
 
-	        if (typeof jQuery !== 'undefined') {
-	            _this.$element = _this.element;
-	            _this.element = _this.$element[0];
-	        }
-
-	        _this.element.style.position = 'absolute';
-	        _this.element.style.zIndex = 1200;
-	        _this.element.style.top = _this.pos.y;
-	        _this.element.style.left = _this.pos.x;
-	        _this.element.style.display = 'block';
+	        _this.$element.css({
+	            position: 'absolute',
+	            'z-index': 1200,
+	            top: _this.pos.y,
+	            left: _this.pos.x,
+	            display: 'block'
+	        });
 
 	        _this.fetch();
 	        return _this;
@@ -1911,9 +1889,7 @@
 	    _createClass(ContextMenu, [{
 	        key: 'render',
 	        value: function render() {
-	            var _this2 = this;
-
-	            _.append(this.element, _.each(this.model, function (label, func) {
+	            this.$element.html(_.each(this.model, function (label, func) {
 	                if (func == '---') {
 	                    return _.li({ class: 'dropdown-header' }, label);
 	                } else {
@@ -1924,20 +1900,20 @@
 	                        if (func) {
 	                            func(e);
 
-	                            _this2.remove();
+	                            this.remove();
 	                        }
 	                    }));
 	                }
 	            }));
 
-	            _.append(_.find('body'), this.element);
+	            $('body').append(this.$element);
 
-	            var rect = this.element.getBoundingClientRect();
+	            var rect = this.$element[0].getBoundingClientRect();
 
 	            if (rect.left + rect.width > window.innerWidth) {
-	                this.element.style.left = rect.left - rect.width + 'px';
+	                this.$element.css('left', rect.left - rect.width + 'px');
 	            } else if (rect.bottom > window.innerHeight) {
-	                this.element.style.top = rect.top - rect.height + 'px';
+	                this.$element.css('top', rect.top - rect.height + 'px');
 	            }
 	        }
 	    }]);
@@ -16947,11 +16923,10 @@
 	            // Add tag dialog
 	            var $dialog = _.div({ class: 'add-tag-dialog' }, _.input({ type: 'text', class: 'add-tag-name' }), _.button({ class: 'btn-add-tag-confirm' }, _.span({ class: 'fa fa-check' })).click(function (e) {
 	                var val = $(e.currentTarget).siblings('.add-tag-name').val();
-	                var $input = $(e.currentTarget).parents('.input');
 
-	                $input.data('value', _this5.model.tags.concat([val]).join(','));
+	                _this5.model.tags.push(val);
 
-	                _this5.onChange();
+	                _this5.render();
 	            }), _.button({ class: 'btn-add-tag-cancel' }, _.span({ class: 'fa fa-remove' })).click(function (e) {
 	                $dialog.remove();
 	                $btn.show();
@@ -16961,11 +16936,9 @@
 	                }
 
 	                return _.button({ class: 'btn-add-tag-suggestion' }, tag).click(function () {
-	                    var $input = $(e.currentTarget).parents('.input');
+	                    _this5.model.tags.push(tag);
 
-	                    $input.data('value', _this5.model.tags.concat([tag]).join(','));
-
-	                    _this5.onChange();
+	                    _this5.render();
 	                });
 	            })));
 
@@ -17712,12 +17685,10 @@
 	                    var text = markdownToHtml(comment.text);
 	                    var isUser = comment.collaborator.name == user.name;
 
-	                    var $comment = _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: comment.collaborator.displayName || comment.collaborator.name, src: comment.collaborator.avatar })), _.if(isUser, _.button({ class: 'btn-edit' }, _.span({ class: 'fa fa-edit' })).click(_this12.onClickEdit), _.div({ class: 'rendered selectable' }, text), _.textarea({ class: 'edit hidden text btn-transparent' }, comment.text).change(function () {
+	                    var $comment = _.div({ class: 'comment', 'data-index': comment.index }, _.div({ class: 'collaborator' }, _.img({ title: comment.collaborator.displayName || comment.collaborator.name, src: comment.collaborator.avatar })), _.if(isUser, _.textarea({ class: 'edit' }, comment.text).change(function (e) {
 	                        _this12.$element.toggleClass('loading', true);
 
-	                        comment.text = $comment.find('textarea').val();
-
-	                        $comment.find('.rendered').html(markdownToHtml(comment.text) || '');
+	                        comment.text = $(e.currentTarget).val();
 
 	                        ApiHelper.updateIssueComment(_this12.model, comment).then(function () {
 	                            _this12.$element.toggleClass('loading', false);
@@ -17729,7 +17700,7 @@
 	                            _this12.$element.toggleClass('loading', false);
 	                            displayError(e);
 	                        });
-	                    }).blur(_this12.onBlur)), _.if(!isUser, _.div({ class: 'text selectable' }, text)));
+	                    })), _.if(!isUser, _.div({ class: 'text selectable' }, text)));
 
 	                    return $comment;
 	                }));
@@ -17855,12 +17826,15 @@
 	        }
 
 	        return _.span({ class: 'tag' }, tag, _.button({ class: 'btn-remove-tag' }, _.span({ class: 'fa fa-remove' })).click(function (e) {
-	            var $input = $(e.currentTarget).parents('.input');
-	            var val = $input.data('value').split(',');
-	            val.splice(val.indexOf(tag), 1);
-	            val = val.join(',');
+	            var tagIndex = _this.model.tags.indexOf(tag);
 
-	            $input.data('value', val);
+	            if (tagIndex < 0) {
+	                return;
+	            }
+
+	            _this.model.tags.splice(tagIndex, 1);
+
+	            _this.render();
 	        }));
 	    }),
 
